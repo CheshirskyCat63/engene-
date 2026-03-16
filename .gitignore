@@ -2,3 +2,6 @@ target/
 Cargo.lock  
 .idea/  
 .vscode/ 
+Sky/Sky/starmap/NightSkyHDRI001_16K_HDR.exr  
+Sky/Sky/starmap/NightSkyHDRI001_16K_TONEMAPPED.jpg 
+target/ 
