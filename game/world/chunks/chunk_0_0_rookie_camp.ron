@@ -1,0 +1,17 @@
+(
+    coord: (x: 0, z: 0),
+    spawns: [
+        (prefab_name: "trader_camp", position: (500.0, 0.0, 500.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Rookie Camp Trader"}),
+        (prefab_name: "campfire", position: (510.0, 0.0, 510.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "guard_npc", position: (490.0, 0.0, 490.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Camp Guard", "role": "guard"}),
+        (prefab_name: "resident_npc", position: (505.0, 0.0, 515.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Old Timer", "role": "resident"}),
+        (prefab_name: "stash_container", position: (520.0, 0.0, 490.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+    ],
+    terrain_layer: Some("plains_grass"),
+    biome: Some("plains"),
+    nav_hints: [
+        Waypoint(position: (500.0, 0.0, 500.0), tags: ["camp_center", "safe_zone"]),
+        Waypoint(position: (490.0, 0.0, 490.0), tags: ["guard_post"]),
+        CoverPoint(position: (515.0, 0.0, 505.0), direction: (1.0, 0.0)),
+    ],
+)

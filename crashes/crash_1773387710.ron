@@ -1,0 +1,11 @@
+(
+    timestamp: "1773387710",
+    panic_message: "wgpu error: Validation Error\n\nCaused by:\n  In Device::create_texture, label = \'cloud_coverage_map\'\n    Texture usages TextureUsages(STORAGE_BINDING) are not allowed on a texture of type R8Unorm\n\n",
+    location: Some("C:\\Users\\nchernova\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-27.0.1\\src\\backend\\wgpu_core.rs:1588:26"),
+    entity_count: Some(0),
+    active_system: None,
+    engine_version: "0.1.0",
+    profile: "shipping",
+    recent_events: [],
+    loaded_chunks: [],
+)

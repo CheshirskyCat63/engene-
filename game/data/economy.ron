@@ -1,0 +1,12 @@
+(
+    schema_version: 1,
+    data: (
+        monthly_required: 50.0,
+        desperation_bandit_threshold: 0.7,
+        desperation_force_bandit: 0.9,
+        desperation_increase_rate: 0.3,
+        desperation_decrease_on_pay: 0.1,
+        initial_money_min: 20.0,
+        initial_money_max: 60.0,
+    ),
+)

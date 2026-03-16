@@ -1,0 +1,9 @@
+(
+    schema_version: 1,
+    data: {
+        "Spring": (food_regen_mult: 1.5, hunger_drain_mult: 1.0, breeding_mult: 1.5, danger_mult: 1.0),
+        "Summer": (food_regen_mult: 1.2, hunger_drain_mult: 1.0, breeding_mult: 1.0, danger_mult: 1.0),
+        "Autumn": (food_regen_mult: 0.8, hunger_drain_mult: 1.1, breeding_mult: 0.5, danger_mult: 1.1),
+        "Winter": (food_regen_mult: 0.3, hunger_drain_mult: 1.4, breeding_mult: 0.0, danger_mult: 1.5),
+    },
+)

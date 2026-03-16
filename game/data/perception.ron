@@ -1,0 +1,10 @@
+(
+    schema_version: 1,
+    data: (
+        hunt_radius: 120.0,
+        fear_radius: 150.0,
+        ally_radius: 80.0,
+        social_radius: 100.0,
+        nearby_count_radius: 80.0,
+    ),
+)

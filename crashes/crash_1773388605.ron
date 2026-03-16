@@ -1,0 +1,11 @@
+(
+    timestamp: "1773388605",
+    panic_message: "wgpu error: Validation Error\n\nCaused by:\n  In Queue::write_texture\n    Copy of 0..1065418752 would end up overrunning the bounds of the Source buffer of size 8388608\n\n",
+    location: Some("C:\\Users\\nchernova\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-27.0.1\\src\\backend\\wgpu_core.rs:1970:22"),
+    entity_count: Some(0),
+    active_system: None,
+    engine_version: "0.1.0",
+    profile: "shipping",
+    recent_events: [],
+    loaded_chunks: [],
+)

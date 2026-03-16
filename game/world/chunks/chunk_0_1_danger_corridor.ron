@@ -1,0 +1,18 @@
+(
+    coord: (x: 0, z: 1),
+    spawns: [
+        (prefab_name: "wolf_habitat", position: (400.0, 0.0, 800.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"pack_size": "4"}),
+        (prefab_name: "ruin_set", position: (450.0, 0.0, 750.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "anomaly_site", position: (350.0, 0.0, 850.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"type": "gravity", "danger": "medium"}),
+        (prefab_name: "stash_container", position: (460.0, 0.0, 770.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"hidden": "true"}),
+        (prefab_name: "destructible_prop", position: (430.0, 0.0, 790.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"type": "wall_section"}),
+    ],
+    terrain_layer: Some("forest_dark"),
+    biome: Some("forest"),
+    nav_hints: [
+        BlockedRect(min: (440.0, 740.0), max: (460.0, 760.0)),
+        Waypoint(position: (400.0, 0.0, 800.0), tags: ["wolf_den", "danger"]),
+        Waypoint(position: (350.0, 0.0, 850.0), tags: ["anomaly", "hazard"]),
+        CoverPoint(position: (455.0, 0.0, 755.0), direction: (0.0, 1.0)),
+    ],
+)

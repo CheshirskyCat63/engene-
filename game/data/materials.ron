@@ -1,0 +1,21 @@
+(
+    schema_version: 1,
+    data: {
+        "Wood":     (flammability: 0.6, fuel: 5.0, hardness: 0.3,  penetration_resistance: 0.4,  density: 0.6),
+        "Cloth":    (flammability: 0.9, fuel: 2.0, hardness: 0.05, penetration_resistance: 0.1,  density: 0.2),
+        "Thatch":   (flammability: 0.8, fuel: 3.0, hardness: 0.1,  penetration_resistance: 0.15, density: 0.3),
+        "Stone":    (flammability: 0.0, fuel: 0.0, hardness: 0.9,  penetration_resistance: 0.95, density: 2.5),
+        "Metal":    (flammability: 0.0, fuel: 0.0, hardness: 0.95, penetration_resistance: 1.0,  density: 7.8),
+        "Flesh":    (flammability: 0.1, fuel: 0.5, hardness: 0.05, penetration_resistance: 0.2,  density: 1.0),
+        "Earth":    (flammability: 0.0, fuel: 0.0, hardness: 0.4,  penetration_resistance: 0.5,  density: 1.6),
+        "Tile":     (flammability: 0.0, fuel: 0.0, hardness: 0.7,  penetration_resistance: 0.6,  density: 2.0),
+        "Concrete": (flammability: 0.0, fuel: 0.0, hardness: 0.85, penetration_resistance: 0.9,  density: 2.4),
+        "Brick":    (flammability: 0.0, fuel: 0.0, hardness: 0.75, penetration_resistance: 0.8,  density: 1.9),
+        "Glass":    (flammability: 0.0, fuel: 0.0, hardness: 0.6,  penetration_resistance: 0.05, density: 2.5),
+        "Steel":    (flammability: 0.0, fuel: 0.0, hardness: 0.98, penetration_resistance: 1.0,  density: 7.9),
+        "Sand":     (flammability: 0.0, fuel: 0.0, hardness: 0.2,  penetration_resistance: 0.35, density: 1.5),
+        "Gravel":   (flammability: 0.0, fuel: 0.0, hardness: 0.35, penetration_resistance: 0.45, density: 1.7),
+        "Rubber":   (flammability: 0.3, fuel: 4.0, hardness: 0.15, penetration_resistance: 0.3,  density: 1.1),
+        "Plastic":  (flammability: 0.4, fuel: 3.5, hardness: 0.25, penetration_resistance: 0.25, density: 1.2),
+    },
+)

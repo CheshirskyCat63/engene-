@@ -1,0 +1,23 @@
+// ENGENE Destruction Sandbox 50x50 — authored test-scene layout.
+// Zones: A(tile wall) B(ground/grenades) C(basement) D(material targets) E(stress)
+
+(
+    name: "Destruction Sandbox 50x50",
+    grid_size: 1,
+    chunk_size_m: 50,
+    total_size_m: 50,
+    chunks: [
+        (coord: (0, 0), label: "Sandbox Main", biome: "sandbox", danger: "test"),
+    ],
+    zones: [
+        (id: "zone_a", label: "Tile Wall",        bounds: (min: (0.0, 0.0),  max: (15.0, 50.0))),
+        (id: "zone_b", label: "Ground / Grenades", bounds: (min: (15.0, 0.0), max: (30.0, 25.0))),
+        (id: "zone_c", label: "Basement",          bounds: (min: (30.0, 0.0), max: (50.0, 25.0))),
+        (id: "zone_d", label: "Material Targets",  bounds: (min: (15.0, 25.0), max: (30.0, 50.0))),
+        (id: "zone_e", label: "Stress Zone",       bounds: (min: (30.0, 25.0), max: (50.0, 50.0))),
+    ],
+    player_spawn: (25.0, 2.0, 25.0),
+    weapons: ["makarov", "ak_rifle", "shotgun", "grenade"],
+    audio_mandatory: true,
+    dynamic_shadows_only: true,
+)

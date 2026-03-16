@@ -1,0 +1,28 @@
+(
+    schema_version: 1,
+    data: (
+        max_npcs: 30,
+        max_wolves: 40,
+        max_boars: 40,
+        max_bloodsuckers: 25,
+        min_wolves: 5,
+        min_boars: 5,
+        min_bloodsuckers: 2,
+        respawn_interval: 300.0,
+        npc_names: [
+            "Viktor", "Elena", "Sasha", "Dmitri", "Irina",
+            "Andrei", "Natasha", "Boris", "Yuri", "Olga",
+            "Maxim", "Tatiana", "Sergei", "Anya", "Pavel",
+            "Ilya", "Marina", "Roman", "Vera", "Artem",
+        ],
+        child_names: [
+            "Alyosha", "Misha", "Katya", "Dasha", "Pasha",
+            "Kolya", "Vanya", "Sveta", "Zhenya", "Borya",
+            "Lena", "Grisha", "Tonya", "Nikita", "Oleg",
+        ],
+        npc_age_min: 80.0,
+        npc_age_max: 200.0,
+        npc_max_age_min: 350.0,
+        npc_max_age_max: 450.0,
+    ),
+)

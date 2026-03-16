@@ -1,0 +1,147 @@
+// ENGENE Prefab Library — authored content building blocks.
+// Each prefab defines a reusable entity template that can be placed via chunk authoring.
+
+(
+    prefabs: {
+        "trader_camp": (
+            description: "Safe trading post with merchant services",
+            category: "structure",
+            components: ["transform", "name", "trader_flag", "safe_zone"],
+            children: ["campfire", "stash_container"],
+        ),
+        "campfire": (
+            description: "Warm campfire area — resting point",
+            category: "prop",
+            components: ["transform", "light_source", "particle_emitter"],
+            children: [],
+        ),
+        "ruin_set": (
+            description: "Abandoned building ruins with lootable interiors",
+            category: "structure",
+            components: ["transform", "destructible", "cover_provider", "loot_container"],
+            children: [],
+        ),
+        "anomaly_site": (
+            description: "Dangerous anomaly zone with artifacts",
+            category: "hazard",
+            components: ["transform", "anomaly_field", "particle_emitter", "damage_zone"],
+            children: [],
+        ),
+        "road_checkpoint": (
+            description: "Road checkpoint — safe passage marker",
+            category: "prop",
+            components: ["transform", "waypoint", "safe_zone_boundary"],
+            children: [],
+        ),
+        "stash_container": (
+            description: "Hidden container for item storage",
+            category: "interactive",
+            components: ["transform", "inventory", "owner", "persistence"],
+            children: [],
+        ),
+        "destructible_prop": (
+            description: "Destructible environment piece (wall, fence, etc.)",
+            category: "prop",
+            components: ["transform", "destructible", "physics_body"],
+            children: [],
+        ),
+        "wolf_habitat": (
+            description: "Wolf pack territory marker with spawn zones",
+            category: "ecology",
+            components: ["transform", "habitat_marker", "spawn_zone"],
+            children: [],
+        ),
+        "boar_field": (
+            description: "Boar grazing area",
+            category: "ecology",
+            components: ["transform", "habitat_marker", "spawn_zone"],
+            children: [],
+        ),
+        "bloodsucker_nest": (
+            description: "Bloodsucker underground nest — extreme danger",
+            category: "ecology",
+            components: ["transform", "habitat_marker", "spawn_zone", "danger_zone"],
+            children: [],
+        ),
+        "guard_npc": (
+            description: "NPC guard with patrol behavior",
+            category: "npc",
+            components: ["transform", "name", "kind_npc", "ai", "faction", "equipment"],
+            children: [],
+        ),
+        "trader_npc": (
+            description: "NPC trader with buy/sell/repair services",
+            category: "npc",
+            components: ["transform", "name", "kind_npc", "ai", "trader_inventory", "faction"],
+            children: [],
+        ),
+        "resident_npc": (
+            description: "Camp resident NPC — idle/social behavior",
+            category: "npc",
+            components: ["transform", "name", "kind_npc", "ai", "faction"],
+            children: [],
+        ),
+        "patrol_waypoint_set": (
+            description: "Ordered set of patrol waypoints",
+            category: "navigation",
+            components: ["patrol_route", "waypoints"],
+            children: [],
+        ),
+
+        // === Sandbox destructible prefabs ===
+        "tiled_wall": (
+            description: "Tiled wall section — 3-layer: tile/adhesive/support",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag", "fracture_topology"],
+            children: [],
+        ),
+        "destructible_table": (
+            description: "Destructible wooden table",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag"],
+            children: [],
+        ),
+        "destructible_chair": (
+            description: "Destructible wooden chair",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag"],
+            children: [],
+        ),
+        "destructible_crate": (
+            description: "Destructible wooden crate with potential contents",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag", "inventory"],
+            children: [],
+        ),
+        "metal_cabinet": (
+            description: "Metal storage cabinet — heavy, dents on impact",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag"],
+            children: [],
+        ),
+        "barrel": (
+            description: "Metal or plastic barrel — can be destroyed and rolled",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag"],
+            children: [],
+        ),
+        "sandbag": (
+            description: "Sandbag — cover provider, absorbs shots",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag", "cover_provider"],
+            children: [],
+        ),
+        "basement_light": (
+            description: "Ceiling-mounted light source for interior zones",
+            category: "prop",
+            components: ["transform", "light_source", "destructible"],
+            children: [],
+        ),
+        "material_target": (
+            description: "Material test target block — configurable material via overrides",
+            category: "destructible",
+            components: ["transform", "destructible", "physics_body", "material_tag"],
+            children: [],
+        ),
+    },
+)

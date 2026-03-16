@@ -1,0 +1,23 @@
+(
+    schema_version: 1,
+    data: (
+        systems: [
+            (name: "Simulation", frequency: EveryFrame, order: 0),
+            (name: "WorldTick",  frequency: EveryFrame, order: 1),
+            (name: "AI",         frequency: EveryFrame, order: 2),
+            (name: "Physics",    frequency: EveryFrame, order: 3),
+            (name: "Economy",    frequency: EveryFrame, order: 4),
+        ],
+        simulation_radii: (
+            l0: 300.0, l1: 5000.0, l2: 50000.0,
+            l0_tick: 1, l1_tick: 12, l2_tick: 60,
+        ),
+        replicated_events: [
+            "ShotFired",
+            "Impact",
+            "EntityDied",
+            "NewDay",
+            "NewMonth",
+        ],
+    ),
+)

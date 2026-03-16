@@ -1,0 +1,50 @@
+// ENGENE World Slice Layout — 2x2 km skeleton.
+// Grid: 8x8 chunks, each 256m x 256m = 2048m x 2048m total.
+
+(
+    name: "Zone Alpha",
+    grid_size: 8,
+    chunk_size_m: 256,
+    total_size_m: 2048,
+    chunks: [
+        // Row 0 (south)
+        (coord: (0, 0), label: "Rookie Camp",           biome: "plains",  danger: "safe"),
+        (coord: (1, 0), label: "Trader Hub",             biome: "plains",  danger: "safe"),
+        (coord: (2, 0), label: "Safe Road East",         biome: "plains",  danger: "low"),
+        (coord: (3, 0), label: "Boar Field",             biome: "plains",  danger: "low"),
+        (coord: (4, 0), label: "Forest Edge",            biome: "forest",  danger: "medium"),
+        (coord: (5, 0), label: "Stash Zone",             biome: "forest",  danger: "medium"),
+        (coord: (6, 0), label: "Ruins West",             biome: "forest",  danger: "medium"),
+        (coord: (7, 0), label: "Old Highway",            biome: "plains",  danger: "low"),
+
+        // Row 1
+        (coord: (0, 1), label: "Danger Corridor",        biome: "forest",  danger: "high"),
+        (coord: (1, 1), label: "Wolf Territory",          biome: "forest",  danger: "high"),
+        (coord: (2, 1), label: "Hunter's Lodge",          biome: "forest",  danger: "medium"),
+        (coord: (3, 1), label: "Open Meadow",             biome: "plains",  danger: "low"),
+        (coord: (4, 1), label: "Anomaly Cluster",         biome: "swamp",   danger: "extreme"),
+        (coord: (5, 1), label: "Destruction Proving",     biome: "ruins",   danger: "high"),
+        (coord: (6, 1), label: "Ruins Interior",          biome: "ruins",   danger: "high"),
+        (coord: (7, 1), label: "Scavenger Road",          biome: "plains",  danger: "medium"),
+
+        // Row 2
+        (coord: (0, 2), label: "Swamp North",             biome: "swamp",   danger: "high"),
+        (coord: (1, 2), label: "Bloodsucker Nest",        biome: "swamp",   danger: "extreme"),
+        (coord: (2, 2), label: "Fog Valley",              biome: "swamp",   danger: "high"),
+        (coord: (3, 2), label: "Weather Zone",            biome: "hills",   danger: "medium"),
+        (coord: (4, 2), label: "Audio Test Zone",         biome: "forest",  danger: "low"),
+        (coord: (5, 2), label: "Hill Overlook",           biome: "hills",   danger: "low"),
+        (coord: (6, 2), label: "Bandit Camp",             biome: "ruins",   danger: "high"),
+        (coord: (7, 2), label: "East Ridge",              biome: "hills",   danger: "medium"),
+
+        // Rows 3-7: remaining skeleton
+        (coord: (0, 3), label: "North Plains",            biome: "plains",  danger: "low"),
+        (coord: (1, 3), label: "Courier Route",           biome: "plains",  danger: "medium"),
+        (coord: (2, 3), label: "Deep Forest",             biome: "forest",  danger: "high"),
+        (coord: (3, 3), label: "Central Hub",             biome: "plains",  danger: "safe"),
+        (coord: (4, 3), label: "Anomaly Field",           biome: "swamp",   danger: "extreme"),
+        (coord: (5, 3), label: "Rocky Pass",              biome: "hills",   danger: "medium"),
+        (coord: (6, 3), label: "Watchtower",              biome: "hills",   danger: "low"),
+        (coord: (7, 3), label: "East Gate",               biome: "plains",  danger: "medium"),
+    ],
+)

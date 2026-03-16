@@ -1,0 +1,14 @@
+(
+    schema_version: 1,
+    data: (
+        predator_prey: [
+            ("Wolf", "Boar"),
+            ("Bloodsucker", "Wolf"),
+        ],
+        food_chain_rank: {
+            "Boar": 1,
+            "Wolf": 2,
+            "Bloodsucker": 3,
+        },
+    ),
+)

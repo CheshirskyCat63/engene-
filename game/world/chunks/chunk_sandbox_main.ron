@@ -1,0 +1,73 @@
+// ENGENE Sandbox chunk — Destruction Sandbox 50x50 main (single-chunk scene).
+// All 5 zones authored here. Prefabs referenced from prefabs.ron.
+
+(
+    coord: (x: 0, z: 0),
+    spawns: [
+        // === ZONE A — Tile Wall (0,0)-(15,50) ===
+        (prefab_name: "tiled_wall",       position: (7.5,  0.0, 10.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Tile", "label": "Tile Wall Section A1"}),
+        (prefab_name: "tiled_wall",       position: (7.5,  0.0, 20.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Concrete", "label": "Concrete Wall Section"}),
+        (prefab_name: "tiled_wall",       position: (7.5,  0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Brick", "label": "Brick Wall Section"}),
+        (prefab_name: "material_target",  position: (5.0,  0.0, 40.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Glass", "label": "Glass Panel"}),
+        (prefab_name: "material_target",  position: (10.0, 0.0, 40.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Steel", "label": "Steel Fixture"}),
+
+        // === ZONE B — Ground / Grenades (15,0)-(30,25) ===
+        (prefab_name: "material_target",  position: (20.0, 0.0, 5.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Earth", "label": "Dry Soil Patch"}),
+        (prefab_name: "material_target",  position: (25.0, 0.0, 5.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Sand",  "label": "Sand Patch"}),
+        (prefab_name: "material_target",  position: (20.0, 0.0, 15.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Gravel", "label": "Gravel Patch"}),
+        (prefab_name: "sandbag",          position: (25.0, 0.0, 15.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"label": "Sandbag Cover"}),
+
+        // === ZONE C — Basement (30,0)-(50,25) ===
+        (prefab_name: "basement_light",   position: (35.0, 2.8, 5.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"label": "Ceiling Lamp A"}),
+        (prefab_name: "basement_light",   position: (45.0, 2.8, 5.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"label": "Ceiling Lamp B"}),
+        (prefab_name: "basement_light",   position: (40.0, 2.8, 15.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"label": "Ceiling Lamp C"}),
+        (prefab_name: "destructible_table",   position: (33.0, 0.0, 8.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_table",   position: (38.0, 0.0, 8.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (34.0, 0.0, 9.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (35.0, 0.0, 9.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (39.0, 0.0, 9.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (40.0, 0.0, 9.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (43.0, 0.0, 3.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (44.0, 0.0, 3.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (43.5, 1.0, 3.0),  rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "metal_cabinet",        position: (47.0, 0.0, 10.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "metal_cabinet",        position: (47.0, 0.0, 15.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "barrel",               position: (35.0, 0.0, 20.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "barrel",               position: (36.0, 0.0, 20.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+
+        // === ZONE D — Material Targets (15,25)-(30,50) ===
+        (prefab_name: "material_target",  position: (17.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Wood",     "label": "Wood Target"}),
+        (prefab_name: "material_target",  position: (20.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Metal",    "label": "Metal Target"}),
+        (prefab_name: "material_target",  position: (23.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Concrete", "label": "Concrete Target"}),
+        (prefab_name: "material_target",  position: (26.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Tile",     "label": "Tile Target"}),
+        (prefab_name: "material_target",  position: (17.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Glass",    "label": "Glass Target"}),
+        (prefab_name: "material_target",  position: (20.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Earth",    "label": "Soil Target"}),
+        (prefab_name: "material_target",  position: (23.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Cloth",    "label": "Cloth Target"}),
+        (prefab_name: "destructible_crate", position: (26.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"label": "Crate Target"}),
+
+        // === ZONE E — Stress Zone (30,25)-(50,50) ===
+        (prefab_name: "destructible_crate",   position: (35.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (36.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (37.0, 0.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (35.5, 1.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_crate",   position: (36.5, 1.0, 30.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_table",   position: (40.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_table",   position: (42.0, 0.0, 35.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (41.0, 0.0, 36.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "destructible_chair",   position: (43.0, 0.0, 36.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "barrel",               position: (45.0, 0.0, 40.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "barrel",               position: (46.0, 0.0, 40.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "barrel",               position: (47.0, 0.0, 40.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "sandbag",              position: (38.0, 0.0, 45.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "sandbag",              position: (39.0, 0.0, 45.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+        (prefab_name: "tiled_wall",           position: (43.0, 0.0, 45.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"material": "Tile", "label": "Stress Wall"}),
+        (prefab_name: "metal_cabinet",        position: (48.0, 0.0, 45.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+    ],
+    terrain_layer: Some("sandbox_flat"),
+    biome: Some("sandbox"),
+    nav_hints: [
+        Waypoint(position: (25.0, 0.0, 25.0), tags: ["spawn_center"]),
+        CoverPoint(position: (7.5, 0.0, 10.0), direction: (1.0, 0.0)),
+        CoverPoint(position: (25.0, 0.0, 15.0), direction: (0.0, 1.0)),
+    ],
+)

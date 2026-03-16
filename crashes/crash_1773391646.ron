@@ -1,0 +1,11 @@
+(
+    timestamp: "1773391646",
+    panic_message: "Trying to destroy a SurfaceAcquireSemaphores that is still in use by a SurfaceTexture",
+    location: Some("C:\\Users\\nchernova\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-hal-27.0.4\\src\\vulkan\\instance.rs:194:58"),
+    entity_count: Some(0),
+    active_system: None,
+    engine_version: "0.1.0",
+    profile: "shipping",
+    recent_events: [],
+    loaded_chunks: [],
+)

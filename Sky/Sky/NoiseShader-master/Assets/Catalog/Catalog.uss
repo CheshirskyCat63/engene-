@@ -1,0 +1,30 @@
+.image-rect {
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    background-color: rgba(99, 99, 99, 0.79);
+    flex-grow: 1;
+    margin-top: 4px;
+    margin-left: 4px;
+}
+
+.image-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    text-shadow: 0.5px 0 3px rgb(0, 0, 0);
+}
+
+.panel {
+    margin-top: 4px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    margin-left: 4px;
+    padding-top: 8px;
+    padding-right: 8px;
+    padding-bottom: 8px;
+    padding-left: 8px;
+}

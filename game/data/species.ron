@@ -1,0 +1,64 @@
+(
+    schema_version: 1,
+    data: {
+        "Wolf": (
+            base_power: 3.0,
+            food_value: 0.4,
+            max_age: 200.0,
+            mate_cooldown_days: 30,
+            ecosystem_needs: (
+                hunting: 0.6, predator_avoidance: 0.2, food_chain_position: 0.7,
+                territory_control: 0.5, migration_urge: 0.1, resource_competition: 0.3,
+                pack_following: 0.8, shelter_seeking: 0.2, world_event_reaction: 0.1,
+                prey_selection: 0.5,
+            ),
+            base_traits: (
+                aggressiveness: 0.6, caution: 0.4, territoriality: 0.5,
+                bravery: 0.5, pack_mentality: 0.8, energy_level: 0.7,
+                hoarding: 0.2, curiosity: 0.3, adaptability: 0.5, stress_tolerance: 0.5,
+            ),
+        ),
+        "Boar": (
+            base_power: 7.0,
+            food_value: 0.6,
+            max_age: 180.0,
+            mate_cooldown_days: 45,
+            ecosystem_needs: (
+                hunting: 0.0, predator_avoidance: 0.7, food_chain_position: 0.3,
+                territory_control: 0.3, migration_urge: 0.4, resource_competition: 0.5,
+                pack_following: 0.4, shelter_seeking: 0.5, world_event_reaction: 0.3,
+                prey_selection: 0.0,
+            ),
+            base_traits: (
+                aggressiveness: 0.3, caution: 0.6, territoriality: 0.3,
+                bravery: 0.3, pack_mentality: 0.4, energy_level: 0.6,
+                hoarding: 0.3, curiosity: 0.2, adaptability: 0.5, stress_tolerance: 0.5,
+            ),
+        ),
+        "Bloodsucker": (
+            base_power: 10.0,
+            food_value: 0.8,
+            max_age: 500.0,
+            mate_cooldown_days: 90,
+            ecosystem_needs: (
+                hunting: 0.8, predator_avoidance: 0.1, food_chain_position: 0.9,
+                territory_control: 0.7, migration_urge: 0.2, resource_competition: 0.2,
+                pack_following: 0.1, shelter_seeking: 0.6, world_event_reaction: 0.2,
+                prey_selection: 0.7,
+            ),
+            base_traits: (
+                aggressiveness: 0.9, caution: 0.2, territoriality: 0.8,
+                bravery: 0.7, pack_mentality: 0.1, energy_level: 0.8,
+                hoarding: 0.3, curiosity: 0.3, adaptability: 0.5, stress_tolerance: 0.5,
+            ),
+        ),
+        "Npc": (
+            base_power: 5.0,
+            food_value: 0.5,
+            max_age: 400.0,
+            mate_cooldown_days: 60,
+            ecosystem_needs: (),
+            base_traits: (),
+        ),
+    },
+)

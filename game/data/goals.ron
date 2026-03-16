@@ -1,0 +1,21 @@
+(
+    schema_version: 1,
+    data: {
+        "SeekFood":         (max_duration: 120.0, target_radius: 20.0),
+        "SeekWater":        (max_duration: 120.0, target_radius: 20.0),
+        "Hunt":             (max_duration: 90.0, target_radius: 20.0),
+        "Flee":             (max_duration: 40.0, target_radius: 20.0),
+        "Explore":          (max_duration: 180.0, target_radius: 20.0),
+        "Socialize":        (max_duration: 100.0, target_radius: 20.0),
+        "Work":             (max_duration: 150.0, target_radius: 20.0),
+        "Trade":            (max_duration: 150.0, target_radius: 20.0),
+        "Rest":             (max_duration: 200.0, target_radius: 20.0),
+        "Migrate":          (max_duration: 300.0, target_radius: 20.0),
+        "DefendTerritory":  (max_duration: 80.0, target_radius: 20.0),
+        "FollowPack":       (max_duration: 120.0, target_radius: 20.0),
+        "StealOrRob":       (max_duration: 60.0, target_radius: 20.0),
+        "Mate":             (max_duration: 80.0, target_radius: 20.0),
+        "SeekShelter":      (max_duration: 100.0, target_radius: 20.0),
+        "Sleep":            (max_duration: 250.0, target_radius: 20.0),
+    },
+)

@@ -1,0 +1,11 @@
+(
+    timestamp: "1773389503",
+    panic_message: "wgpu error: Validation Error\n\nCaused by:\n  In Device::create_shader_module, label = \'cloud_render_shader\'\n    \nShader \'cloud_render_shader\' parsing error: redefinition of `layer_factor`\n   ┌─ wgsl:49:9\n   │\n49 │     let layer_factor = sin(height_norm * 3.14159265);\n   │         ^^^^^^^^^^^^ previous definition of `layer_factor`\n50 │     let layer_factor = layer_factor * layer_factor;\n   │         ^^^^^^^^^^^^ redefinition of `layer_factor`\n\n\n\n",
+    location: Some("C:\\Users\\nchernova\\.cargo\\registry\\src\\index.crates.io-1949cf8c6b5b557f\\wgpu-27.0.1\\src\\backend\\wgpu_core.rs:1058:30"),
+    entity_count: Some(0),
+    active_system: None,
+    engine_version: "0.1.0",
+    profile: "shipping",
+    recent_events: [],
+    loaded_chunks: [],
+)

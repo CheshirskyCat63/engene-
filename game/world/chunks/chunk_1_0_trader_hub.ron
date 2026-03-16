@@ -1,0 +1,16 @@
+(
+    coord: (x: 1, z: 0),
+    spawns: [
+        (prefab_name: "trader_camp", position: (756.0, 0.0, 500.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Main Trader Hub"}),
+        (prefab_name: "trader_npc", position: (760.0, 0.0, 505.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Merchant Yuri", "role": "trader"}),
+        (prefab_name: "trader_npc", position: (750.0, 0.0, 510.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Mechanic Oleg", "role": "trader"}),
+        (prefab_name: "guard_npc", position: (740.0, 0.0, 495.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {"name": "Hub Guard", "role": "guard"}),
+        (prefab_name: "road_checkpoint", position: (720.0, 0.0, 500.0), rotation: (0.0, 0.0, 0.0, 1.0), scale: 1.0, overrides: {}),
+    ],
+    terrain_layer: Some("plains_grass"),
+    biome: Some("plains"),
+    nav_hints: [
+        Waypoint(position: (756.0, 0.0, 500.0), tags: ["trade_hub", "safe_zone"]),
+        Waypoint(position: (720.0, 0.0, 500.0), tags: ["road", "checkpoint"]),
+    ],
+)

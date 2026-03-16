@@ -1,0 +1,10 @@
+(
+    schema_version: 1,
+    data: {
+        "Guard":          (daily_income: 0.8, danger: 0.1, energy_cost: 0.3),
+        "Trader":         (daily_income: 1.0, danger: 0.05, energy_cost: 0.2),
+        "ArtifactHunter": (daily_income: 1.5, danger: 0.4, energy_cost: 0.5),
+        "Bandit":         (daily_income: 1.8, danger: 0.6, energy_cost: 0.4),
+        "Unemployed":     (daily_income: 0.0, danger: 0.0, energy_cost: 0.0),
+    },
+)

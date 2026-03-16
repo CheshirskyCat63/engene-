@@ -1,0 +1,14 @@
+(
+    schema_version: 1,
+    data: (
+        seconds_per_day: 120.0,
+        days_per_month: 30,
+        sim_tick_rate: 20.0,
+        l0_radius: 300.0,
+        l1_radius: 5000.0,
+        l2_radius: 50000.0,
+        l0_tick_interval: 1,
+        l1_tick_interval: 12,
+        l2_tick_interval: 60,
+    ),
+)
