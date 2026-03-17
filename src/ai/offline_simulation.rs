@@ -1,4 +1,4 @@
-use rand::Rng;
+﻿use rand::Rng;
 
 use crate::core::ecs::{Ecs, Entity};
 use crate::world::components::*;
@@ -15,18 +15,12 @@ pub fn offline_combat(ecs: &mut Ecs, attacker: Entity, defender: Entity) -> bool
 }
 
 fn combat_power(ecs: &Ecs, entity: Entity) -> f32 {
-    let hp = ecs
-        .personal_needs
-        .get(&entity)
-        .map_or(1.0, |pn| pn.health);
-    let energy = ecs
-        .personal_needs
-        .get(&entity)
-        .map_or(0.5, |pn| pn.energy);
+    let hp = ecs.get_needs(entity).map_or(1.0, |pn| pn.health);
+    let energy = ecs.get_needs(entity).map_or(0.5, |pn| pn.energy);
 
-    let trait_bonus = if let Some(t) = ecs.npc_traits.get(&entity) {
+    let trait_bonus = if let Some(t) = ecs.get_npc_traits(entity) {
         t.bravery * 0.3 + t.aggressiveness * 0.4
-    } else if let Some(t) = ecs.monster_traits.get(&entity) {
+    } else if let Some(t) = ecs.get_monster_traits(entity) {
         t.bravery * 0.3 + t.aggressiveness * 0.4
     } else {
         0.3
@@ -37,7 +31,7 @@ fn combat_power(ecs: &Ecs, entity: Entity) -> f32 {
 
 pub fn offline_npc_work(ecs: &mut Ecs, entity: Entity, elapsed: f32) {
     let income = {
-        let econ = match ecs.npc_economies.get(&entity) {
+        let econ = match ecs.get_npc_economy(entity) {
             Some(e) => e,
             None => return,
         };
@@ -55,7 +49,7 @@ pub fn offline_npc_work(ecs: &mut Ecs, entity: Entity, elapsed: f32) {
         elapsed * rate
     };
 
-    if let Some(econ) = ecs.npc_economies.get_mut(&entity) {
+    if let Some(econ) = ecs.get_npc_economy_mut(entity) {
         econ.money += income;
     }
 }

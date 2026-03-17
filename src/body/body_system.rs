@@ -302,18 +302,17 @@ impl EngineSystem for BodySystem {
         // 4. Sync PersonalNeeds <-> BodyState, apply pain->fear, compute modifiers
         let entities: Vec<Entity> = ctx.ecs.alive.clone();
         for entity in entities {
-            let (transform_x, transform_y) = ctx
-                .ecs
-                .transforms
-                .get(&entity)
-                .map(|t| (t.x, t.y))
+let (transform_x, transform_y) = ctx
+ .ecs
+ .get_transform(entity)
+ .map(|t| (t.x, t.y))
                 .unwrap_or((0.0, 0.0));
 
             let obs_pos = ObserverPosition { x: obs.0, y: obs.1, z: obs.2 };
             let dist = Self::distance_to_observer(transform_x, transform_y, &obs_pos);
             let in_range = dist <= FULL_RESPONSE_RADIUS;
 
-            let has_personal = ctx.ecs.personal_needs.contains_key(&entity);
+            let has_personal = ctx.ecs.get_needs(entity).is_some();
 
             if !has_personal {
                 continue;
@@ -328,14 +327,14 @@ impl EngineSystem for BodySystem {
             if let Some(sid) = store_id {
                 if let Some(body) = store.get_mut(sid) {
                     // Read PersonalNeeds.health changes: propagate healing to BodyState
-                    if let Some(pn) = ctx.ecs.personal_needs.get(&entity) {
+                    if let Some(pn) = ctx.ecs.get_needs(entity) {
                         if pn.health > body.aggregate_health() + HEAL_EPSILON {
                             apply_healing_to_body(body, pn.health);
                         }
                     }
                     // Sync aggregate health -> PersonalNeeds
                     let agg = body.aggregate_health();
-                    if let Some(pn) = ctx.ecs.personal_needs.get_mut(&entity) {
+                    if let Some(pn) = ctx.ecs.get_needs_mut(entity) {
                         pn.health = agg;
                         // Pain > 0.7 -> increase fear for flee (Contract 6: NPC AI)
                         if body.pain > PAIN_FLEE_THRESHOLD {
@@ -352,7 +351,7 @@ impl EngineSystem for BodySystem {
                     );
                     let move_mult = move_mult.min(health_response.movement_speed_mult);
                     let combat_mult = combat_mult.min(health_response.combat_power_mult);
-                    let sim_level = ctx.ecs.sim_levels.get(&entity);
+                    let sim_level = ctx.ecs.get_sim_level(entity);
                     let response_level = Self::compute_response_level(sim_level, in_range);
 
                     cache.responses.insert(
@@ -369,7 +368,7 @@ impl EngineSystem for BodySystem {
             } else if in_range {
                 let body = BodyState::new_humanoid(entity);
                 let agg = body.aggregate_health();
-                if let Some(pn) = ctx.ecs.personal_needs.get_mut(&entity) {
+                if let Some(pn) = ctx.ecs.get_needs_mut(entity) {
                     pn.health = agg;
                 }
                 let _ = store.allocate(body);
@@ -379,19 +378,17 @@ impl EngineSystem for BodySystem {
         // 5. Detect deaths (health <= 0) and register corpses
         let mut dead_entities = Vec::new();
         for &entity in &ctx.ecs.alive {
-            if let Some(pn) = ctx.ecs.personal_needs.get(&entity) {
+            if let Some(pn) = ctx.ecs.get_needs(entity) {
                 if pn.health <= 0.0 {
-                    let pos = ctx
-                        .ecs
-                        .transforms
-                        .get(&entity)
-                        .map(|t| [t.x, t.y])
+let pos = ctx
+ .ecs
+ .get_transform(entity)
+ .map(|t| [t.x, t.y])
                         .unwrap_or([0.0, 0.0]);
-                    let items: Vec<String> = ctx
-                        .ecs
-                        .inventories
-                        .get(&entity)
-                        .map(|inv| inv.items.iter().map(|it| it.name.clone()).collect())
+let items: Vec<String> = ctx
+ .ecs
+ .get_inventory(entity)
+ .map(|inv| inv.items.iter().map(|it| it.name.clone()).collect())
                         .unwrap_or_default();
                     dead_entities.push((entity, pos, items));
                 }

@@ -16,6 +16,8 @@ pub enum InteractionResult {
 }
 
 /// Player interaction system - handles all player-initiated actions.
+/// 
+/// Uses helper methods instead of direct storage access.
 pub struct PlayerInteractionSystem {
     /// Currently targeted entity (if any)
     pub target_entity: Option<u64>,
@@ -70,7 +72,7 @@ impl PlayerInteractionSystem {
         }
 
         // Get target position
-        let target_pos = match ecs.transforms.get(&target) {
+        let target_pos = match ecs.get_transform(target) {
             Some(t) => (t.x, t.y),
             None => return InteractionResult::NotFound,
         };
@@ -81,7 +83,7 @@ impl PlayerInteractionSystem {
         }
 
         // Determine interaction type based on entity kind
-        match ecs.kinds.get(&target) {
+        match ecs.get_kind(target) {
             Some(EntityKind::Npc) => self.interact_with_npc(ecs, target),
             Some(EntityKind::Monster(species)) => self.interact_with_monster(ecs, target, species),
             None => InteractionResult::Failed("Cannot interact with this entity".into()),
@@ -90,7 +92,7 @@ impl PlayerInteractionSystem {
 
     /// Interact with an NPC (trade, talk, etc.)
     fn interact_with_npc(&self, ecs: &Ecs, target: u64) -> InteractionResult {
-        let name = ecs.names.get(&target)
+        let name = ecs.get_name(target)
             .map(|n| n.0.as_str())
             .unwrap_or("NPC");
 
@@ -111,7 +113,7 @@ impl PlayerInteractionSystem {
         };
 
         // Check monster health
-        if let Some(needs) = ecs.personal_needs.get(&target) {
+        if let Some(needs) = ecs.get_needs(target) {
             if needs.health <= 0.0 {
                 return InteractionResult::Success(format!("The {} is dead.", species_name));
             }
@@ -128,12 +130,12 @@ impl PlayerInteractionSystem {
         };
 
         // Check if target is an NPC with economy
-        if !matches!(ecs.kinds.get(&target), Some(EntityKind::Npc)) {
+        if !matches!(ecs.get_kind(target), Some(EntityKind::Npc)) {
             return TradeResult::Failed("Cannot trade with this entity".into());
         }
 
         // Check if NPC has economy
-        let _npc_economy = match ecs.npc_economies.get(&target) {
+        let _npc_economy = match ecs.get_npc_economy(target) {
             Some(e) => e.clone(),
             None => return TradeResult::Failed("This NPC cannot trade".into()),
         };
@@ -144,7 +146,7 @@ impl PlayerInteractionSystem {
         }
 
         // Update NPC economy
-        if let Some(economy) = ecs.npc_economies.get_mut(&target) {
+        if let Some(economy) = ecs.get_npc_economy_mut(target) {
             economy.money += amount;
         }
 
@@ -162,7 +164,7 @@ impl PlayerInteractionSystem {
         };
 
         // Check if target is hostile
-        match ecs.kinds.get(&target) {
+        match ecs.get_kind(target) {
             Some(EntityKind::Monster(_)) => {
                 InteractionResult::Success("Combat initiated!".into())
             }
@@ -177,17 +179,17 @@ impl PlayerInteractionSystem {
     pub fn get_target_info(&self, ecs: &Ecs) -> Option<TargetInfo> {
         let target = self.target_entity?;
         
-        let name = ecs.names.get(&target)
+        let name = ecs.get_name(target)
             .map(|n| n.0.clone())
             .unwrap_or_else(|| "Unknown".into());
 
-        let kind = ecs.kinds.get(&target).cloned();
+        let kind = ecs.get_kind(target).cloned();
         
-        let health = ecs.personal_needs.get(&target)
+        let health = ecs.get_needs(target)
             .map(|n| n.health)
             .unwrap_or(1.0);
 
-        let position = ecs.transforms.get(&target)
+        let position = ecs.get_transform(target)
             .map(|t| (t.x, t.y))
             .unwrap_or((0.0, 0.0));
 
@@ -229,7 +231,7 @@ mod tests {
         let ecs = Ecs::new();
         
         match system.try_interact(&ecs, (0.0, 0.0)) {
-            InteractionResult::NotFound => {},
+            InteractionResult::NotFound => {}
             _ => panic!("Expected NotFound"),
         }
     }
@@ -258,3 +260,4 @@ mod tests {
         }
     }
 }
+

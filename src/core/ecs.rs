@@ -207,6 +207,171 @@ impl Ecs {
             matches!(self.kinds.get(&e), Some(EntityKind::Npc))
         }).count()
     }
+
+    // ========================================================================
+    // QUERY API HELPERS - Use these instead of direct storage access
+    // ========================================================================
+
+    /// Get monster traits if entity is a monster.
+    #[inline]
+    pub fn get_monster_traits(&self, entity: Entity) -> Option<&NpcTraits> {
+        self.monster_traits.get(&entity)
+    }
+
+    /// Get monster traits mutable if entity is a monster.
+    #[inline]
+    pub fn get_monster_traits_mut(&mut self, entity: Entity) -> Option<&mut NpcTraits> {
+        self.monster_traits.get_mut(&entity)
+    }
+
+    /// Get NPC traits if entity is an NPC.
+    #[inline]
+    pub fn get_npc_traits(&self, entity: Entity) -> Option<&NpcTraits> {
+        self.npc_traits.get(&entity)
+    }
+
+    /// Get NPC traits mutable if entity is an NPC.
+    #[inline]
+    pub fn get_npc_traits_mut(&mut self, entity: Entity) -> Option<&mut NpcTraits> {
+        self.npc_traits.get_mut(&entity)
+    }
+
+    /// Get ecosystem needs for a monster.
+    #[inline]
+    pub fn get_ecosystem_needs(&self, entity: Entity) -> Option<&EcosystemNeeds> {
+        self.ecosystem_needs.get(&entity)
+    }
+
+    /// Get ecosystem needs mutable for a monster.
+    #[inline]
+    pub fn get_ecosystem_needs_mut(&mut self, entity: Entity) -> Option<&mut EcosystemNeeds> {
+        self.ecosystem_needs.get_mut(&entity)
+    }
+
+    /// Get social needs for an NPC.
+    #[inline]
+    pub fn get_social_needs(&self, entity: Entity) -> Option<&SocialNeeds> {
+        self.social_needs.get(&entity)
+    }
+
+    /// Get social needs mutable for an NPC.
+    #[inline]
+    pub fn get_social_needs_mut(&mut self, entity: Entity) -> Option<&mut SocialNeeds> {
+        self.social_needs.get_mut(&entity)
+    }
+
+    /// Get memory for an entity.
+    #[inline]
+    pub fn get_memory(&self, entity: Entity) -> Option<&Memory> {
+        self.memories.get(&entity)
+    }
+
+    /// Get memory mutable for an entity.
+    #[inline]
+    pub fn get_memory_mut(&mut self, entity: Entity) -> Option<&mut Memory> {
+        self.memories.get_mut(&entity)
+    }
+
+    /// Get emotions for an entity.
+    #[inline]
+    pub fn get_emotions(&self, entity: Entity) -> Option<&Emotions> {
+        self.emotions.get(&entity)
+    }
+
+    /// Get emotions mutable for an entity.
+    #[inline]
+    pub fn get_emotions_mut(&mut self, entity: Entity) -> Option<&mut Emotions> {
+        self.emotions.get_mut(&entity)
+    }
+
+    /// Get plan for an entity.
+    #[inline]
+    pub fn get_plan(&self, entity: Entity) -> Option<&Plan> {
+        self.plans.get(&entity)
+    }
+
+    /// Get plan mutable for an entity.
+    #[inline]
+    pub fn get_plan_mut(&mut self, entity: Entity) -> Option<&mut Plan> {
+        self.plans.get_mut(&entity)
+    }
+
+    /// Get life info for an entity.
+    #[inline]
+    pub fn get_life_info(&self, entity: Entity) -> Option<&LifeInfo> {
+        self.life_info.get(&entity)
+    }
+
+    /// Get life info mutable for an entity.
+    #[inline]
+    pub fn get_life_info_mut(&mut self, entity: Entity) -> Option<&mut LifeInfo> {
+        self.life_info.get_mut(&entity)
+    }
+
+    /// Get transform mutable.
+    #[inline]
+    pub fn get_transform_mut(&mut self, entity: Entity) -> Option<&mut Transform> {
+        self.transforms.get_mut(&entity)
+    }
+
+    /// Get inventory for an entity.
+    #[inline]
+    pub fn get_inventory(&self, entity: Entity) -> Option<&Inventory> {
+        self.inventories.get(&entity)
+    }
+
+ /// Get inventory mutable for an entity.
+ #[inline]
+ pub fn get_inventory_mut(&mut self, entity: Entity) -> Option<&mut Inventory> {
+ self.inventories.get_mut(&entity)
+ }
+
+ /// Get simulation level for an entity.
+ #[inline]
+ pub fn get_sim_level(&self, entity: Entity) -> Option<&SimLevel> {
+ self.sim_levels.get(&entity)
+ }
+
+ /// Get simulation level mutable for an entity.
+ #[inline]
+ pub fn get_sim_level_mut(&mut self, entity: Entity) -> Option<&mut SimLevel> {
+ self.sim_levels.get_mut(&entity)
+ }
+
+ /// Get NPC economy for an NPC.
+ #[inline]
+ pub fn get_npc_economy(&self, entity: Entity) -> Option<&NpcEconomy> {
+ self.npc_economies.get(&entity)
+ }
+
+    /// Get NPC economy mutable for an NPC.
+    #[inline]
+    pub fn get_npc_economy_mut(&mut self, entity: Entity) -> Option<&mut NpcEconomy> {
+        self.npc_economies.get_mut(&entity)
+    }
+
+    /// Check if entity is a monster of specific species.
+    #[inline]
+    pub fn is_monster_of(&self, entity: Entity, species: MonsterSpecies) -> bool {
+        matches!(self.kinds.get(&entity), Some(EntityKind::Monster(s)) if *s == species)
+    }
+
+    /// Check if entity is a nocturnal monster (Bloodsucker).
+    #[inline]
+    pub fn is_nocturnal(&self, entity: Entity) -> bool {
+        matches!(self.kinds.get(&entity), Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)))
+    }
+
+    /// Get entity kind name for debugging.
+    pub fn get_kind_name(&self, entity: Entity) -> &'static str {
+        match self.kinds.get(&entity) {
+            Some(EntityKind::Npc) => "NPC",
+            Some(EntityKind::Monster(MonsterSpecies::Wolf)) => "Wolf",
+            Some(EntityKind::Monster(MonsterSpecies::Boar)) => "Boar",
+            Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)) => "Bloodsucker",
+            _ => "Unknown",
+        }
+    }
 }
 
 #[cfg(test)]

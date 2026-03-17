@@ -9,17 +9,20 @@ pub struct Group {
     pub formed_tick: u64,
 }
 
+/// Find or form a group for the given entity.
+/// 
+/// Uses helper methods instead of direct storage access.
 pub fn find_or_form_group(ecs: &Ecs, entity: Entity) -> Option<Group> {
-    let kind = ecs.kinds.get(&entity)?;
-    let et = ecs.transforms.get(&entity)?;
-    let mem = ecs.memories.get(&entity);
+    let kind = ecs.get_kind(entity)?;
+    let et = ecs.get_transform(entity)?;
+    let mem = ecs.get_memory(entity);
     let r2 = 100.0 * 100.0;
 
     let mut candidates: Vec<(Entity, f32)> = Vec::new();
     for e in ecs.spatial.candidates_in_radius(et.x, et.y, 100.0) {
         if e == entity { continue; }
-        if !same_kind(kind, ecs.kinds.get(&e)) { continue; }
-        let Some(t) = ecs.transforms.get(&e) else { continue };
+        if !same_kind(kind, ecs.get_kind(e)) { continue; }
+        let Some(t) = ecs.get_transform(e) else { continue };
         let d2 = (t.x - et.x).powi(2) + (t.y - et.y).powi(2);
         if d2 > r2 { continue; }
 
@@ -61,9 +64,9 @@ fn pick_leader(ecs: &Ecs, self_entity: Entity, members: &[Entity]) -> Entity {
 }
 
 fn reputation_of(ecs: &Ecs, entity: Entity) -> f32 {
-    ecs.social_needs.get(&entity).map_or(0.0, |s| s.reputation)
-        + ecs.ecosystem_needs.get(&entity).map_or(0.0, |e| e.food_chain_position * 0.5)
-        + ecs.personal_needs.get(&entity).map_or(0.0, |p| p.health * 0.3)
+    ecs.get_social_needs(entity).map_or(0.0, |s| s.reputation)
+        + ecs.get_ecosystem_needs(entity).map_or(0.0, |e| e.food_chain_position * 0.5)
+        + ecs.get_needs(entity).map_or(0.0, |p| p.health * 0.3)
 }
 
 fn same_kind(a: &EntityKind, b: Option<&EntityKind>) -> bool {

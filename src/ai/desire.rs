@@ -5,13 +5,16 @@ use crate::ai::thresholds::Thresholds;
 use crate::core::ecs::{Ecs, Entity};
 use crate::world::components::*;
 
+/// Determine NPC goal based on needs, traits, and context.
+/// 
+/// Uses helper methods instead of direct storage access.
 pub fn desire_npc(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
-    let pn = match ecs.personal_needs.get(&entity) { Some(p) => p, None => return Goal::Rest };
-    let traits = match ecs.npc_traits.get(&entity) { Some(t) => t, None => return Goal::Rest };
-    let sn = match ecs.social_needs.get(&entity) { Some(s) => s, None => return Goal::Rest };
-    let econ = match ecs.npc_economies.get(&entity) { Some(e) => e, None => return Goal::Rest };
-    let emo = match ecs.emotions.get(&entity) { Some(e) => e, None => return Goal::Rest };
-    let mem = ecs.memories.get(&entity);
+    let pn = match ecs.get_needs(entity) { Some(p) => p, None => return Goal::Rest };
+    let traits = match ecs.get_npc_traits(entity) { Some(t) => t, None => return Goal::Rest };
+    let sn = match ecs.get_social_needs(entity) { Some(s) => s, None => return Goal::Rest };
+    let econ = match ecs.get_npc_economy(entity) { Some(e) => e, None => return Goal::Rest };
+    let emo = match ecs.get_emotions(entity) { Some(e) => e, None => return Goal::Rest };
+    let mem = ecs.get_memory(entity);
     let th = Thresholds::from_npc(traits, mem);
 
     if pn.health < th.health_panic {
@@ -22,7 +25,7 @@ pub fn desire_npc(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     }
 
     // Territory avoidance: if in rival monster territory, increase urgency to flee
-    if let Some(t) = ecs.transforms.get(&entity) {
+    if let Some(t) = ecs.get_transform(entity) {
         if ecs.territory.contains_key(&(t.cell_x, t.cell_y)) && traits.bravery < 0.6 {
             return Goal::Flee;
         }
@@ -38,7 +41,7 @@ pub fn desire_npc(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     let is_night = body::is_night(day_progress);
     if is_night && pn.sleep > th.sleep_critical {
         let at_shelter = mem.map_or(false, |m| {
-            if let Some(t) = ecs.transforms.get(&entity) {
+            if let Some(t) = ecs.get_transform(entity) {
                 m.spatial.get(&(t.cell_x, t.cell_y)).map_or(false, |k| k.shelter > 0.3)
             } else { false }
         });
@@ -48,7 +51,7 @@ pub fn desire_npc(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     if pn.sleep > th.sleep_critical || pn.energy < th.energy_low { return Goal::Rest; }
 
     // Reproduction: if healthy, fed, energetic, and cooldown passed
-    if let Some(li) = ecs.life_info.get(&entity) {
+    if let Some(li) = ecs.get_life_info(entity) {
         if li.life_stage() == LifeStage::Adult && pn.health > 0.7 && pn.hunger < 0.3 && pn.energy > 0.5 {
             if li.can_mate(ecs.tick as u32 / 120) {
                 if traits.sociality > 0.3 { return Goal::Mate; }
@@ -102,13 +105,13 @@ pub fn desire_npc(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
 }
 
 pub fn desire_monster(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
-    let pn = match ecs.personal_needs.get(&entity) { Some(p) => p, None => return Goal::Rest };
-    let traits = match ecs.monster_traits.get(&entity) { Some(t) => t, None => return Goal::Rest };
-    let eco = match ecs.ecosystem_needs.get(&entity) { Some(e) => e, None => return Goal::Rest };
-    let emo = match ecs.emotions.get(&entity) { Some(e) => e, None => return Goal::Rest };
-    let mem = ecs.memories.get(&entity);
+    let pn = match ecs.get_needs(entity) { Some(p) => p, None => return Goal::Rest };
+    let traits = match ecs.get_monster_traits(entity) { Some(t) => t, None => return Goal::Rest };
+    let eco = match ecs.get_ecosystem_needs(entity) { Some(e) => e, None => return Goal::Rest };
+    let emo = match ecs.get_emotions(entity) { Some(e) => e, None => return Goal::Rest };
+    let mem = ecs.get_memory(entity);
     let th = Thresholds::from_monster(traits, mem);
-    let is_nocturnal = matches!(ecs.kinds.get(&entity), Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)));
+    let is_nocturnal = matches!(ecs.get_kind(entity), Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)));
 
     if pn.health < th.health_panic {
         return if traits.bravery > 0.7 { Goal::DefendTerritory } else { Goal::Flee };
@@ -118,9 +121,9 @@ pub fn desire_monster(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     }
 
     // Territory avoidance: if in rival species territory, flee or avoid
-    if let Some(t) = ecs.transforms.get(&entity) {
+    if let Some(t) = ecs.get_transform(entity) {
         if let Some(&dom) = ecs.territory.get(&(t.cell_x, t.cell_y)) {
-            if let Some(EntityKind::Monster(my_sp)) = ecs.kinds.get(&entity) {
+            if let Some(EntityKind::Monster(my_sp)) = ecs.get_kind(entity) {
                 if dom != *my_sp && traits.bravery < 0.6 {
                     return Goal::Flee;
                 }
@@ -138,7 +141,7 @@ pub fn desire_monster(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     let wants_sleep = if is_nocturnal { !is_night } else { is_night };
     if wants_sleep && pn.sleep > th.sleep_critical {
         let at_shelter = mem.map_or(false, |m| {
-            if let Some(t) = ecs.transforms.get(&entity) {
+            if let Some(t) = ecs.get_transform(entity) {
                 m.spatial.get(&(t.cell_x, t.cell_y)).map_or(false, |k| k.shelter > 0.3)
             } else { false }
         });
@@ -148,7 +151,7 @@ pub fn desire_monster(entity: Entity, ecs: &Ecs, day_progress: f32) -> Goal {
     if pn.sleep > th.sleep_critical || pn.energy < th.energy_low { return Goal::Rest; }
 
     // Reproduction for adult monsters
-    if let Some(li) = ecs.life_info.get(&entity) {
+    if let Some(li) = ecs.get_life_info(entity) {
         if li.life_stage() == LifeStage::Adult && pn.health > 0.7 && pn.hunger < 0.3 && pn.energy > 0.5 {
             if li.can_mate(ecs.tick as u32 / 120) {
                 return Goal::Mate;

@@ -1,4 +1,4 @@
-use glam::Vec2;
+﻿use glam::Vec2;
 use crate::core::ecs::{Ecs, Entity};
 use crate::ai::combat_tactics::tactics::Tactic;
 
@@ -16,7 +16,7 @@ pub fn assign_group_roles(
     target: Entity,
     group_tactic: Tactic,
 ) -> Vec<GroupRole> {
-    let target_pos = ecs.transforms.get(&target).map(|t| Vec2::new(t.x, t.y));
+    let target_pos = ecs.get_transform(target).map(|t| Vec2::new(t.x, t.y));
     let target_pos = match target_pos {
         Some(p) => p,
         None => return Vec::new(),
@@ -68,17 +68,17 @@ pub fn assign_group_roles(
 }
 
 pub fn find_group_members(ecs: &Ecs, leader: Entity, radius: f32) -> Vec<Entity> {
-    let leader_pos = match ecs.transforms.get(&leader) {
+    let leader_pos = match ecs.get_transform(leader) {
         Some(t) => (t.x, t.y),
         None => return Vec::new(),
     };
-    let leader_kind = ecs.kinds.get(&leader);
+    let leader_kind = ecs.get_kind(leader);
 
     let mut members = vec![leader];
     for &e in &ecs.alive {
         if e == leader { continue; }
-        if ecs.kinds.get(&e) != leader_kind { continue; }
-        if let Some(t) = ecs.transforms.get(&e) {
+        if ecs.get_kind(e) != leader_kind { continue; }
+        if let Some(t) = ecs.get_transform(e) {
             let dx = t.x - leader_pos.0;
             let dy = t.y - leader_pos.1;
             if dx * dx + dy * dy < radius * radius {

@@ -14,10 +14,10 @@ pub fn snapshot(ecs: &Ecs) -> EconomySnapshot {
     let mut count = 0_u32;
 
     for &e in &ecs.alive {
-        if !matches!(ecs.kinds.get(&e), Some(EntityKind::Npc)) {
+        if !matches!(ecs.get_kind(e), Some(EntityKind::Npc)) {
             continue;
         }
-        if let Some(econ) = ecs.npc_economies.get(&e) {
+        if let Some(econ) = ecs.get_npc_economy(e) {
             total_money += econ.money;
             total_desp += econ.desperation;
             if econ.job == crate::world::components::Job::Bandit {

@@ -78,7 +78,7 @@ impl EngineSystem for AiSystem {
 
             // SAFETY: ResourceGrid is independent of ECS iteration
             let resources = unsafe { &mut *resources_ptr };
-            match ctx.ecs.kinds.get(&entity) {
+            match ctx.ecs.get_kind(entity) {
                 Some(EntityKind::Npc) => {
                     npc_ai::tick_npc(ctx.ecs, ctx.events, resources, entity, tick_delta, day_progress);
                 }
@@ -88,7 +88,7 @@ impl EngineSystem for AiSystem {
                 None => {}
             }
 
-            if let Some(pn) = ctx.ecs.personal_needs.get_mut(&entity) {
+            if let Some(pn) = ctx.ecs.get_needs_mut(entity) {
                 let extra_drain = (season.hunger_drain_mult() - 1.0) * tick_delta * 0.003;
                 pn.hunger = (pn.hunger + extra_drain).min(1.0);
             }
@@ -97,7 +97,7 @@ impl EngineSystem for AiSystem {
         // Wire social interactions: group formation and trade for L0 NPCs
         if frame % 100 == 0 {
             let npc_entities: Vec<_> = ctx.ecs.alive.iter().copied()
-                .filter(|e| matches!(ctx.ecs.kinds.get(e), Some(EntityKind::Npc)))
+                .filter(|e| matches!(ctx.ecs.get_kind(*e), Some(EntityKind::Npc)))
                 .collect();
             for &npc in &npc_entities {
                 let _ = groups::find_or_form_group(ctx.ecs, npc);
@@ -124,13 +124,13 @@ impl EngineSystem for AiSystem {
 
 fn collect_dead(ecs: &mut crate::core::ecs::Ecs, resources: &mut ResourceGrid) {
     let dead: Vec<_> = ecs.alive.iter().copied()
-        .filter(|e| ecs.personal_needs.get(e).map_or(false, |pn| pn.health <= 0.0))
+        .filter(|e| ecs.get_needs(*e).map_or(false, |pn| pn.health <= 0.0))
         .collect();
 
     for e in dead {
-        let food_val = ecs.kinds.get(&e).map_or(0.3, food_value);
-        let name = ecs.names.get(&e).map(|n| n.0.clone()).unwrap_or_default();
-        if let Some(t) = ecs.transforms.get(&e) {
+        let food_val = ecs.get_kind(e).map_or(0.3, food_value);
+        let name = ecs.get_name(e).map(|n| n.0.clone()).unwrap_or_default();
+        if let Some(t) = ecs.get_transform(e) {
             resources.add_carcass(t.x, t.y, t.cell_x, t.cell_y, food_val, name);
         }
         ecs.despawn(e);
@@ -142,7 +142,7 @@ fn age_entities(ecs: &mut crate::core::ecs::Ecs, delta: f32) {
     let mut died_of_age: Vec<u64> = Vec::new();
 
     for &e in &ecs.alive {
-        if let Some(li) = ecs.life_info.get_mut(&e) {
+        if let Some(li) = ecs.get_life_info_mut(e) {
             li.age += age_increment;
             if li.age >= li.max_age {
                 died_of_age.push(e);
@@ -151,7 +151,7 @@ fn age_entities(ecs: &mut crate::core::ecs::Ecs, delta: f32) {
     }
 
     for e in died_of_age {
-        if let Some(pn) = ecs.personal_needs.get_mut(&e) {
+        if let Some(pn) = ecs.get_needs_mut(e) {
             pn.health = 0.0;
         }
     }

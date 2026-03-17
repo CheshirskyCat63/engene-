@@ -31,17 +31,15 @@ impl EngineSystem for EconomySystem {
 }
 
 fn process_monthly_payment(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::core::events::EventBus, entity: Entity) {
-    let (paid, remaining_desperation) = {
-        let econ = match ecs.npc_economies.get(&entity) {
-            Some(e) => e,
-            None => return,
-        };
+ let (paid, remaining_desperation) = {
+ let econ = match ecs.get_npc_economy(entity) {
+ Some(e) => e,
+ None => return,
+ };
 
-        let name = ecs
-            .names
-            .get(&entity)
-            .map(|n| n.0.as_str())
-            .unwrap_or("?");
+ let name = ecs
+ .get_name(entity)
+ .unwrap_or("?");
 
         if econ.money >= econ.monthly_required {
             println!(
@@ -60,7 +58,7 @@ fn process_monthly_payment(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::
         }
     };
 
-    if let Some(econ) = ecs.npc_economies.get_mut(&entity) {
+    if let Some(econ) = ecs.get_npc_economy_mut(entity) {
         if paid {
             econ.money -= econ.monthly_required;
             econ.desperation = (econ.desperation - 0.1).max(0.0);
@@ -74,29 +72,27 @@ fn process_monthly_payment(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::
 }
 
 fn escalate_desperation(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::core::events::EventBus, entity: Entity) {
-    let (desperation, current_job) = {
-        let econ = match ecs.npc_economies.get(&entity) {
-            Some(e) => e,
-            None => return,
-        };
-        (econ.desperation, econ.job)
-    };
+ let (desperation, current_job) = {
+ let econ = match ecs.get_npc_economy(entity) {
+ Some(e) => e,
+ None => return,
+ };
+ (econ.desperation, econ.job)
+ };
 
     if desperation > 0.7 && current_job != Job::Bandit {
-        let honesty = ecs
-            .npc_traits
-            .get(&entity)
-            .map_or(0.5, |t| t.honesty);
+let honesty = ecs
+ .get_npc_traits(entity)
+ .map_or(0.5, |t| t.honesty);
 
         if honesty < 0.5 || desperation > 0.9 {
-            let name = ecs
-                .names
-                .get(&entity)
-                .map(|n| n.0.clone())
-                .unwrap_or_default();
+let name = ecs
+ .get_name(entity)
+ .unwrap_or_default()
+ .to_string();
             println!("  [econ] {} turned BANDIT (desperation {:.2})", name, desperation);
 
-            if let Some(econ) = ecs.npc_economies.get_mut(&entity) {
+            if let Some(econ) = ecs.get_npc_economy_mut(entity) {
                 econ.job = Job::Bandit;
             }
             events.emit(NpcWentBankrupt(entity));

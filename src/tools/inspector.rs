@@ -54,7 +54,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
 
         egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
             for &entity in &ecs.alive {
-                let name = ecs.names.get(&entity)
+                let name = ecs.get_name(entity)
                     .map(|n| n.0.as_str())
                     .unwrap_or("unnamed");
 
@@ -73,11 +73,11 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
 
         if let Some(entity) = state.selected_entity {
             if state.synced_entity != Some(entity) {
-                if let Some(t) = ecs.transforms.get(&entity) {
+                if let Some(t) = ecs.get_transform(entity) {
                     state.edit_x = t.x;
                     state.edit_y = t.y;
                 }
-                if let Some(n) = ecs.personal_needs.get(&entity) {
+                if let Some(n) = ecs.get_needs(entity) {
                     state.edit_health = n.health;
                     state.edit_hunger = n.hunger;
                     state.edit_thirst = n.thirst;
@@ -91,14 +91,14 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
             if let Some(pid) = ecs.identity.persistent_id_of(entity) {
                 ui.label(format!("PID: {:?}", pid));
             }
-            if let Some(name) = ecs.names.get(&entity) {
+            if let Some(name) = ecs.get_name(entity) {
                 ui.label(format!("Name: {}", name.0));
             }
-            if let Some(kind) = ecs.kinds.get(&entity) {
+            if let Some(kind) = ecs.get_kind(entity) {
                 ui.label(format!("Kind: {:?}", kind));
             }
 
-            if ecs.transforms.get(&entity).is_some() {
+            if ecs.get_transform(entity).is_some() {
                 ui.collapsing("Transform", |ui| {
                     if state.editing_enabled {
                         let mut changed = false;
@@ -117,7 +117,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                 y: state.edit_y,
                             });
                         }
-                    } else if let Some(t) = ecs.transforms.get(&entity) {
+                    } else if let Some(t) = ecs.get_transform(entity) {
                         ui.label(format!("Position: ({:.1}, {:.1})", t.x, t.y));
                         ui.label(format!("Cell: ({}, {})", t.cell_x, t.cell_y));
                     }
@@ -126,7 +126,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
             if let Some(sim) = ecs.sim_levels.get(&entity) {
                 ui.label(format!("Sim Level: {:?}", sim.level));
             }
-            if ecs.personal_needs.get(&entity).is_some() {
+            if ecs.get_needs(entity).is_some() {
                 ui.collapsing("Personal Needs", |ui| {
                     if state.editing_enabled {
                         let mut changed = false;
@@ -164,7 +164,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                 value: state.edit_energy,
                             });
                         }
-                    } else if let Some(needs) = ecs.personal_needs.get(&entity) {
+                    } else if let Some(needs) = ecs.get_needs(entity) {
                         ui.label(format!("Health: {:.2}", needs.health));
                         ui.label(format!("Hunger: {:.2}", needs.hunger));
                         ui.label(format!("Thirst: {:.2}", needs.thirst));
@@ -176,7 +176,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
             if let Some(ai) = ecs.ai_states.get(&entity) {
                 ui.label(format!("AI State: {:?}", ai));
             }
-            if let Some(emotions) = ecs.emotions.get(&entity) {
+            if let Some(emotions) = ecs.get_emotions(entity) {
                 ui.collapsing("Emotions", |ui| {
                     ui.label(format!("Fear:     {:.2}", emotions.fear));
                     ui.label(format!("Anger:    {:.2}", emotions.anger));
@@ -198,7 +198,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                     }
                 });
             }
-            if let Some(econ) = ecs.npc_economies.get(&entity) {
+            if let Some(econ) = ecs.get_npc_economy(entity) {
                 ui.collapsing("Economy", |ui| {
                     ui.label(format!("Money: ${:.0}", econ.money));
                     ui.label(format!("Monthly required: ${:.0}", econ.monthly_required));

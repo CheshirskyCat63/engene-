@@ -29,10 +29,10 @@ pub fn find_nearby_cover(
     search_radius: f32,
     terrain_height_fn: &dyn Fn(f32, f32) -> f32,
 ) -> Vec<CoverPoint> {
-    let my_pos = match ecs.transforms.get(&entity) {
-        Some(t) => Vec2::new(t.x, t.y),
-        None => return Vec::new(),
-    };
+let my_pos = match ecs.get_transform(entity) {
+ Some(t) => Vec2::new(t.x, t.y),
+ None => return Vec::new(),
+};
 
     let threat_dir = (threat_pos - my_pos).normalize_or_zero();
     let mut points = Vec::new();

@@ -155,14 +155,14 @@ pub struct SerFactionMembership {
 
 pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
     let persistent_id = ecs.identity.persistent_id_of(id).map(|pid| pid.0);
-    let transform = ecs.transforms.get(&id).map(|t| SerTransform {
+    let transform = ecs.get_transform(id).map(|t| SerTransform {
         x: t.x,
         y: t.y,
         cell_x: t.cell_x,
         cell_y: t.cell_y,
     });
 
-    let kind = ecs.kinds.get(&id).map(|k| match k {
+    let kind = ecs.get_kind(id).map(|k| match k {
         EntityKind::Npc => SerEntityKind {
             is_npc: true,
             species: None,
@@ -177,7 +177,7 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
         },
     });
 
-    let personal_needs = ecs.personal_needs.get(&id).map(|pn| SerPersonalNeeds {
+    let personal_needs = ecs.get_needs(id).map(|pn| SerPersonalNeeds {
         hunger: pn.hunger,
         thirst: pn.thirst,
         sleep: pn.sleep,
@@ -186,21 +186,21 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
         fear: pn.fear,
     });
 
-    let social_needs = ecs.social_needs.get(&id).map(|sn| SerSocialNeeds {
+    let social_needs = ecs.get_social_needs(id).map(|sn| SerSocialNeeds {
         family: sn.family,
         money: sn.money,
         reputation: sn.reputation,
         friendship: sn.friendship,
     });
 
-    let ecosystem_needs = ecs.ecosystem_needs.get(&id).map(|en| SerEcosystemNeeds {
+    let ecosystem_needs = ecs.get_ecosystem_needs(id).map(|en| SerEcosystemNeeds {
         hunting: en.hunting,
         territory_control: en.territory_control,
         pack_following: en.pack_following,
         migration_urge: en.migration_urge,
     });
 
-    let npc_traits = ecs.npc_traits.get(&id).map(|t| SerNpcTraits {
+    let npc_traits = ecs.get_npc_traits(id).map(|t| SerNpcTraits {
         bravery: t.bravery,
         aggressiveness: t.aggressiveness,
         work_ethic: t.work_ethic,
@@ -209,7 +209,7 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
         sociality: t.sociality,
     });
 
-    let monster_traits = ecs.monster_traits.get(&id).map(|t| SerMonsterTraits {
+    let monster_traits = ecs.get_monster_traits(id).map(|t| SerMonsterTraits {
         aggressiveness: t.aggressiveness,
         caution: t.caution,
         territoriality: t.territoriality,
@@ -217,7 +217,7 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
         pack_mentality: t.pack_mentality,
     });
 
-    let npc_economy = ecs.npc_economies.get(&id).map(|e| SerNpcEconomy {
+    let npc_economy = ecs.get_npc_economy(id).map(|e| SerNpcEconomy {
         money: e.money,
         monthly_required: e.monthly_required,
         job: match e.job {
@@ -243,14 +243,14 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
 
     let ai_state = ecs.ai_states.get(&id).map(|_| 0u8);
 
-    let life_info = ecs.life_info.get(&id).map(|li| SerLifeInfo {
+    let life_info = ecs.get_life_info(id).map(|li| SerLifeInfo {
         age: li.age,
         max_age: li.max_age,
         last_mate_day: li.last_mate_day,
         mate_cooldown_days: li.mate_cooldown_days,
     });
 
-    let emotions = ecs.emotions.get(&id).map(|e| SerEmotions {
+    let emotions = ecs.get_emotions(id).map(|e| SerEmotions {
         anger: e.anger,
         grief: e.grief,
         joy: e.joy,
@@ -264,7 +264,7 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
         FlammableMaterial::Stone => 3,
     });
 
-    let name = ecs.names.get(&id).map(|n| n.0.clone());
+    let name = ecs.get_name(id).map(|n| n.0.clone());
 
     let inventory = ecs.inventories.get(&id).map(|inv| SerInventory {
         items: inv

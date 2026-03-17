@@ -23,7 +23,7 @@ pub fn print_brief(engine: &Engine, frame: u64) {
     let mut boars = 0u32;
     let mut bloods = 0u32;
     for &m in &monsters {
-        match engine.ecs.kinds.get(&m) {
+        match engine.ecs.get_kind(m) {
             Some(EntityKind::Monster(MonsterSpecies::Wolf)) => wolves += 1,
             Some(EntityKind::Monster(MonsterSpecies::Boar)) => boars += 1,
             Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)) => bloods += 1,
@@ -51,7 +51,7 @@ pub fn print_brief(engine: &Engine, frame: u64) {
 pub fn print_economy(engine: &Engine) {
     println!("--- NPCs ({}) ---", engine.ecs.count_npcs());
     for &e in &engine.ecs.alive {
-        if !matches!(engine.ecs.kinds.get(&e), Some(EntityKind::Npc)) {
+        if !matches!(engine.ecs.get_kind(e), Some(EntityKind::Npc)) {
             continue;
         }
         print_entity_summary(&engine.ecs, e);
@@ -59,7 +59,7 @@ pub fn print_economy(engine: &Engine) {
     
     println!("--- Monsters ({}) ---", engine.ecs.monsters().len());
     for &e in &engine.ecs.alive {
-        if !matches!(engine.ecs.kinds.get(&e), Some(EntityKind::Monster(_))) {
+        if !matches!(engine.ecs.get_kind(e), Some(EntityKind::Monster(_))) {
             continue;
         }
         print_entity_summary(&engine.ecs, e);
@@ -72,8 +72,8 @@ pub fn print_economy(engine: &Engine) {
 }
 
 fn print_entity_summary(ecs: &Ecs, e: u64) {
-    let name = ecs.names.get(&e).map(|n| n.0.as_str()).unwrap_or("?");
-    let species = match ecs.kinds.get(&e) {
+    let name = ecs.get_name(e).map(|n| n.0.as_str()).unwrap_or("?");
+    let species = match ecs.get_kind(e) {
         Some(EntityKind::Monster(s)) => format!("({:?})", s),
         _ => String::new(),
     };
@@ -83,18 +83,18 @@ fn print_entity_summary(ecs: &Ecs, e: u64) {
         _ => "Idle".into(),
     };
     
-    let hp = ecs.personal_needs.get(&e).map_or(1.0, |p| p.health);
-    let hunger = ecs.personal_needs.get(&e).map_or(0.0, |p| p.hunger);
-    let emo_str = ecs.emotions.get(&e)
+    let hp = ecs.get_needs(e).map_or(1.0, |p| p.health);
+    let hunger = ecs.get_needs(e).map_or(0.0, |p| p.hunger);
+    let emo_str = ecs.get_emotions(e)
         .map(|em| format!("{}", em.dominant()))
         .unwrap_or_else(|| "?".into());
     
-    let mem_count = ecs.memories.get(&e).map_or(0, |m| m.events.len());
-    let relations = ecs.memories.get(&e).map_or(0, |m| m.entities.len());
+    let mem_count = ecs.get_memory(e).map_or(0, |m| m.events.len());
+    let relations = ecs.get_memory(e).map_or(0, |m| m.entities.len());
     let has_plan = ecs.plans.contains_key(&e);
     
-    let money = ecs.npc_economies.get(&e).map_or(0.0, |e| e.money);
-    let age_str = ecs.life_info.get(&e)
+    let money = ecs.get_npc_economy(e).map_or(0.0, |e| e.money);
+    let age_str = ecs.get_life_info(e)
         .map(|li| format!("age:{:.0}/{:.0} {:?}", li.age, li.max_age, li.life_stage()))
         .unwrap_or_default();
 
@@ -118,7 +118,7 @@ pub fn collect_entity_instances(
     let mut out = Vec::with_capacity(ecs.alive.len());
     
     for &e in &ecs.alive {
-        let t = match ecs.transforms.get(&e) {
+        let t = match ecs.get_transform(e) {
             Some(t) => t,
             None => continue,
         };
@@ -134,7 +134,7 @@ pub fn collect_entity_instances(
             continue;
         }
         
-        let color = match ecs.kinds.get(&e) {
+        let color = match ecs.get_kind(e) {
             Some(EntityKind::Npc) => [0.16, 0.47, 1.0],
             Some(EntityKind::Monster(MonsterSpecies::Wolf)) => [0.9, 0.9, 0.9],
             Some(EntityKind::Monster(MonsterSpecies::Boar)) => [0.55, 0.43, 0.39],

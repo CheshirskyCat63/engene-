@@ -11,13 +11,16 @@ const MAX_WOLVES: usize = 40;
 const MAX_BOARS: usize = 40;
 const MAX_BLOODSUCKERS: usize = 25;
 
+/// Attempt reproduction between two entities.
+/// 
+/// Uses helper methods instead of direct storage access.
 pub fn try_reproduce(ecs: &mut Ecs, parent: Entity, mate: Entity) -> Option<Entity> {
-    let kind = ecs.kinds.get(&parent)?.clone();
+    let kind = ecs.get_kind(parent)?.clone();
     let species_count = count_species(ecs, &kind);
     let cap = species_cap(&kind);
     if species_count >= cap { return None; }
 
-    let pt = ecs.transforms.get(&parent)?.clone();
+    let pt = ecs.get_transform(parent)?.clone();
     let mut rng = rand::thread_rng();
 
     let (child, child_pid) = ecs.spawn_new();
@@ -38,8 +41,8 @@ pub fn try_reproduce(ecs: &mut Ecs, parent: Entity, mate: Entity) -> Option<Enti
 
     match &kind {
         EntityKind::Npc => {
-            let p_traits = ecs.npc_traits.get(&parent);
-            let m_traits = ecs.npc_traits.get(&mate);
+            let p_traits = ecs.get_npc_traits(parent);
+            let m_traits = ecs.get_npc_traits(mate);
             let blended = blend_npc_traits(p_traits, m_traits, &mut rng);
             let name = generate_child_name(ecs, parent);
             ecs.names.insert(child, Name(name));
@@ -65,13 +68,13 @@ pub fn try_reproduce(ecs: &mut Ecs, parent: Entity, mate: Entity) -> Option<Enti
 
     // Mark mate cooldown on both parents
     let current_day = ecs.tick as u32 / 120;
-    if let Some(li) = ecs.life_info.get_mut(&parent) { li.last_mate_day = current_day; }
-    if let Some(li) = ecs.life_info.get_mut(&mate) { li.last_mate_day = current_day; }
+    if let Some(li) = ecs.get_life_info_mut(parent) { li.last_mate_day = current_day; }
+    if let Some(li) = ecs.get_life_info_mut(mate) { li.last_mate_day = current_day; }
 
-    if let Some(mem) = ecs.memories.get_mut(&parent) {
+    if let Some(mem) = ecs.get_memory_mut(parent) {
         mem.adjust_opinion(child_pid, |op| { op.trust = 0.8; op.familiarity = 0.5; });
     }
-    if let Some(mem) = ecs.memories.get_mut(&mate) {
+    if let Some(mem) = ecs.get_memory_mut(mate) {
         mem.adjust_opinion(child_pid, |op| { op.trust = 0.7; op.familiarity = 0.4; });
     }
 
@@ -122,8 +125,8 @@ fn blend_monster_traits(ecs: &Ecs, parent: Entity, mate: Entity, species: Monste
         let mid = (va + vb) * 0.5;
         (mid + rng.gen_range(-0.1..0.1)).clamp(0.0, 1.0)
     };
-    let pa = ecs.monster_traits.get(&parent);
-    let pb = ecs.monster_traits.get(&mate);
+    let pa = ecs.get_monster_traits(parent);
+    let pb = ecs.get_monster_traits(mate);
     let base = match species {
         MonsterSpecies::Wolf => MonsterTraits { aggressiveness: 0.6, caution: 0.4, territoriality: 0.5, bravery: 0.5, pack_mentality: 0.8, energy_level: 0.7, hoarding: 0.2, curiosity: 0.3, adaptability: 0.5, stress_tolerance: 0.5 },
         MonsterSpecies::Boar => MonsterTraits { aggressiveness: 0.3, caution: 0.6, territoriality: 0.3, bravery: 0.3, pack_mentality: 0.4, energy_level: 0.6, hoarding: 0.3, curiosity: 0.2, adaptability: 0.5, stress_tolerance: 0.5 },
@@ -155,6 +158,6 @@ fn generate_child_name(ecs: &Ecs, parent: Entity) -> String {
     let mut rng = rand::thread_rng();
     let idx = rng.gen_range(0..CHILD_NAMES.len());
     let base = CHILD_NAMES[idx];
-    let parent_name = ecs.names.get(&parent).map(|n| n.0.as_str()).unwrap_or("?");
+    let parent_name = ecs.get_name(parent).map(|n| n.0.as_str()).unwrap_or("?");
     format!("{} (child of {})", base, parent_name)
 }

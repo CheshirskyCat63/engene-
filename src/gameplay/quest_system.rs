@@ -49,9 +49,7 @@ impl EngineSystem for QuestSystem {
 
             let traders: Vec<_> = ctx.ecs.npcs()
                 .into_iter()
-                .filter(|&e| {
-                    ctx.ecs.npc_economies.get(&e).map_or(false, |econ| econ.job == Job::Trader)
-                })
+                .filter(|&e| ctx.ecs.get_npc_economy(e).map_or(false, |econ| econ.job == Job::Trader))
                 .filter_map(|e| ctx.ecs.identity.persistent_id_of(e))
                 .collect();
 
@@ -70,21 +68,21 @@ impl EngineSystem for QuestSystem {
                 None => continue,
             };
 
-            let npc_pos = match ctx.ecs.transforms.get(&npc_entity) {
+            let npc_pos = match ctx.ecs.get_transform(npc_entity) {
                 Some(t) => (t.x, t.y),
                 None => continue,
             };
 
             // Find traders within range
             for trader_entity in ctx.ecs.npcs() {
-                if ctx.ecs.npc_economies.get(&trader_entity).map_or(true, |e| e.job != Job::Trader) {
+                if ctx.ecs.get_npc_economy(trader_entity).map_or(true, |e| e.job != Job::Trader) {
                     continue;
                 }
                 let trader_pid = match ctx.ecs.identity.persistent_id_of(trader_entity) {
                     Some(p) => p,
                     None => continue,
                 };
-                let trader_pos = match ctx.ecs.transforms.get(&trader_entity) {
+                let trader_pos = match ctx.ecs.get_transform(trader_entity) {
                     Some(t) => (t.x, t.y),
                     None => continue,
                 };
@@ -113,7 +111,7 @@ impl EngineSystem for QuestSystem {
         let deaths = ctx.events.read::<EntityDied>().to_vec();
         for ev in deaths {
             let killer_pid = ev.killer.and_then(|e| ctx.ecs.identity.persistent_id_of(e));
-            let victim_kind = ctx.ecs.kinds.get(&ev.entity).cloned();
+            let victim_kind = ctx.ecs.get_kind(ev.entity).cloned();
 
             if let (Some(killer_pid), Some(EntityKind::Monster(species))) = (killer_pid, victim_kind) {
                 let to_process: Option<(u32, f32, _)> = registry.active_quests_for(killer_pid)
@@ -125,7 +123,7 @@ impl EngineSystem for QuestSystem {
                         if q.progress >= q.target_count {
                             if let Some(pid) = assignee_pid {
                                 if let Some(entity) = ctx.ecs.identity.resolve(pid) {
-                                    if let Some(econ) = ctx.ecs.npc_economies.get_mut(&entity) {
+                                    if let Some(econ) = ctx.ecs.get_npc_economy_mut(entity) {
                                         econ.money += reward;
                                     }
                                 }
@@ -143,7 +141,7 @@ impl EngineSystem for QuestSystem {
                 Some(p) => p,
                 None => continue,
             };
-            let (cell_x, cell_y) = match ctx.ecs.transforms.get(&npc_entity) {
+            let (cell_x, cell_y) = match ctx.ecs.get_transform(npc_entity) {
                 Some(t) => (t.cell_x, t.cell_y),
                 None => continue,
             };
@@ -158,7 +156,7 @@ impl EngineSystem for QuestSystem {
             if let Some((quest_id, reward, assignee_pid)) = to_complete {
                 if let Some(pid) = assignee_pid {
                     if let Some(entity) = ctx.ecs.identity.resolve(pid) {
-                        if let Some(econ) = ctx.ecs.npc_economies.get_mut(&entity) {
+                        if let Some(econ) = ctx.ecs.get_npc_economy_mut(entity) {
                             econ.money += reward;
                         }
                     }

@@ -3,14 +3,17 @@ use crate::world::cell::GRID_SIZE;
 use crate::world::components::EntityKind;
 use crate::world::world::WorldGrid;
 
+/// Update cell danger levels based on monster positions.
+/// 
+/// Uses helper methods instead of direct storage access.
 pub fn update_cell_danger(ecs: &Ecs, grid: &mut WorldGrid) {
     for cell in &mut grid.cells {
         cell.danger = cell.biome.danger_level();
     }
 
     for &e in &ecs.alive {
-        if let Some(EntityKind::Monster(species)) = ecs.kinds.get(&e) {
-            if let Some(t) = ecs.transforms.get(&e) {
+        if let Some(EntityKind::Monster(species)) = ecs.get_kind(e) {
+            if let Some(t) = ecs.get_transform(e) {
                 let cx = t.cell_x.min(GRID_SIZE - 1);
                 let cy = t.cell_y.min(GRID_SIZE - 1);
                 let cell = grid.get_mut(cx, cy);
@@ -31,8 +34,8 @@ pub fn update_cell_danger_scaled(ecs: &Ecs, grid: &mut WorldGrid, danger_mult: f
     }
 
     for &e in &ecs.alive {
-        if let Some(EntityKind::Monster(species)) = ecs.kinds.get(&e) {
-            if let Some(t) = ecs.transforms.get(&e) {
+        if let Some(EntityKind::Monster(species)) = ecs.get_kind(e) {
+            if let Some(t) = ecs.get_transform(e) {
                 let cx = t.cell_x.min(GRID_SIZE - 1);
                 let cy = t.cell_y.min(GRID_SIZE - 1);
                 let cell = grid.get_mut(cx, cy);
@@ -49,7 +52,7 @@ pub fn update_cell_danger_scaled(ecs: &Ecs, grid: &mut WorldGrid, danger_mult: f
 
 pub fn consume_food(ecs: &Ecs, grid: &mut WorldGrid) {
     for &e in &ecs.alive {
-        if let Some(t) = ecs.transforms.get(&e) {
+        if let Some(t) = ecs.get_transform(e) {
             let cx = t.cell_x.min(GRID_SIZE - 1);
             let cy = t.cell_y.min(GRID_SIZE - 1);
             let cell = grid.get_mut(cx, cy);

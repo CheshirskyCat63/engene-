@@ -1,4 +1,4 @@
-//! Phase 4: Animation wiring - connects ECS state to LocomotionMachine per entity.
+﻿//! Phase 4: Animation wiring - connects ECS state to LocomotionMachine per entity.
 
 use std::collections::{HashMap, HashSet};
 
@@ -60,17 +60,17 @@ impl EngineSystem for AnimationIntegrationSystem {
         let dt = SIM_DT;
 
         for &entity in &ctx.ecs.alive {
-            if ctx.ecs.transforms.get(&entity).is_none() {
+            if ctx.ecs.get_transform(entity).is_none() {
                 continue;
             }
-            let ai_state = ctx.ecs.ai_states.get(&entity);
+            let ai_state = ctx.ecs.get_ai_state(entity);
 
             // Determine speed from goal/state
             let speed = match ai_state {
                 Some(AiState::Executing(goal)) => {
-                    let stage = ctx.ecs.life_info.get(&entity)
+                    let stage = ctx.ecs.get_life_info(entity)
                         .map_or(LifeStage::Adult, |li| li.life_stage());
-                    let body = ctx.ecs.personal_needs.get(&entity)
+                    let body = ctx.ecs.get_needs(entity)
                         .map(|pn| BodyState::compute_with_stage(pn, stage))
                         .unwrap_or(BodyState {
                             move_speed_mult: 1.0,
@@ -83,7 +83,7 @@ impl EngineSystem for AnimationIntegrationSystem {
                 _ => 0.0,
             };
 
-            let is_dead = ctx.ecs.personal_needs.get(&entity)
+            let is_dead = ctx.ecs.get_needs(entity)
                 .map_or(false, |pn| pn.health <= 0.0);
 
             let machine = self.locomotion.entry(entity).or_insert_with(LocomotionMachine::new);

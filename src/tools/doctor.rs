@@ -654,8 +654,8 @@ fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
     let mut without_sim_level = 0;
 
     for &e in &ecs.alive {
-        if ecs.kinds.get(&e).is_none() { without_kind += 1; }
-        if ecs.transforms.get(&e).is_none() { without_transform += 1; }
+        if ecs.get_kind(e).is_none() { without_kind += 1; }
+        if ecs.get_transform(e).is_none() { without_transform += 1; }
         if ecs.sim_levels.get(&e).is_none() { without_sim_level += 1; }
     }
 
@@ -733,17 +733,17 @@ fn check_orphan_resolution(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic
     let mut orphaned_monsters = 0;
 
     for &e in &ecs.alive {
-        match ecs.kinds.get(&e) {
+        match ecs.get_kind(e) {
             Some(crate::world::components::EntityKind::Npc) => {
-                let has_needs = ecs.personal_needs.get(&e).is_some();
-                let has_economy = ecs.npc_economies.get(&e).is_some();
+                let has_needs = ecs.get_needs(e).is_some();
+                let has_economy = ecs.get_npc_economy(e).is_some();
                 if !has_needs || !has_economy {
                     orphaned_npcs += 1;
                 }
             }
             Some(crate::world::components::EntityKind::Monster(_)) => {
-                let has_needs = ecs.personal_needs.get(&e).is_some()
-                    || ecs.ecosystem_needs.get(&e).is_some();
+                let has_needs = ecs.get_needs(e).is_some()
+                    || ecs.get_ecosystem_needs(e).is_some();
                 if !has_needs {
                     orphaned_monsters += 1;
                 }

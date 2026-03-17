@@ -70,7 +70,7 @@ impl Memory {
     pub fn best_ally(&self) -> Option<PersistentEntityId> {
         self.entities.iter()
             .filter(|(_, op)| op.trust > 0.3)
-            .max_by(|a, b| a.1.trust.partial_cmp(&b.1.trust).unwrap())
+            .max_by(|a, b| a.1.trust.total_cmp(&b.1.trust))
             .map(|(&e, _)| e)
     }
 
@@ -107,7 +107,7 @@ impl Memory {
                 .map(|(&k, v)| (k, v.food + v.danger + v.ally_presence + v.shelter))
                 .collect();
             let mut sorted = to_remove;
-            sorted.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
+            sorted.sort_by(|a, b| a.1.total_cmp(&b.1));
             let remove_count = self.spatial.len() - MAX_SPATIAL;
             for (k, _) in sorted.into_iter().take(remove_count) {
                 self.spatial.remove(&k);

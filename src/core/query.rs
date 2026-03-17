@@ -6,6 +6,18 @@
 //!
 //! This module implements the Query API pattern for ECS access,
 //! replacing direct component storage access with composable queries.
+//!
+//! ## Usage
+//!
+//! ```ignore
+//! // Instead of direct access:
+//! let needs = ecs.personal_needs.get(&entity); // DON'T DO THIS
+//!
+//! // Use query API:
+//! for item in ecs.query_personal_needs() {
+//!     item.needs.hunger += 0.1;
+//! }
+//! ```
 
 use crate::core::ecs::Ecs;
 use crate::world::components::*;
@@ -15,6 +27,10 @@ pub trait QueryFilter {
     /// Returns true if the entity matches the filter criteria.
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool;
 }
+
+// ============================================================================
+// BASIC FILTERS
+// ============================================================================
 
 /// Filter that matches entities with a specific component type.
 pub struct WithTransform;
@@ -53,6 +69,102 @@ pub struct WithNeeds;
 impl QueryFilter for WithNeeds {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.personal_needs.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with AiState component.
+pub struct WithAiState;
+impl QueryFilter for WithAiState {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.ai_states.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with Inventory component.
+pub struct WithInventory;
+impl QueryFilter for WithInventory {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.inventories.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with LifeInfo component.
+pub struct WithLifeInfo;
+impl QueryFilter for WithLifeInfo {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.life_info.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with Memory component.
+pub struct WithMemory;
+impl QueryFilter for WithMemory {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.memories.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with Emotions component.
+pub struct WithEmotions;
+impl QueryFilter for WithEmotions {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.emotions.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with Plan component.
+pub struct WithPlan;
+impl QueryFilter for WithPlan {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.plans.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with NpcEconomy component.
+pub struct WithNpcEconomy;
+impl QueryFilter for WithNpcEconomy {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.npc_economies.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with SocialNeeds component.
+pub struct WithSocialNeeds;
+impl QueryFilter for WithSocialNeeds {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.social_needs.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with EcosystemNeeds component.
+pub struct WithEcosystemNeeds;
+impl QueryFilter for WithEcosystemNeeds {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.ecosystem_needs.contains_key(&entity)
+    }
+}
+
+/// Filter that matches entities with specific MonsterSpecies.
+pub struct WithSpecies(pub MonsterSpecies);
+impl QueryFilter for WithSpecies {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        matches!(ecs.kinds.get(&entity), Some(EntityKind::Monster(s)) if *s == self.0)
+    }
+}
+
+/// Filter that matches alive entities (health > 0).
+pub struct IsAlive;
+impl QueryFilter for IsAlive {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.personal_needs.get(&entity).map_or(false, |pn| pn.health > 0.0)
+    }
+}
+
+/// Filter that matches dead entities (health <= 0).
+pub struct IsDead;
+impl QueryFilter for IsDead {
+    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
+        ecs.personal_needs.get(&entity).map_or(false, |pn| pn.health <= 0.0)
     }
 }
 
@@ -97,6 +209,10 @@ impl<'a, F: QueryFilter> Iterator for QueryIter<'a, F> {
     }
 }
 
+// ============================================================================
+// QUERY ITEM TYPES - Bundled data for efficient iteration
+// ============================================================================
+
 /// Bundled NPC data for efficient query results.
 #[derive(Clone, Debug)]
 pub struct NpcQueryItem<'a> {
@@ -105,6 +221,53 @@ pub struct NpcQueryItem<'a> {
     pub name: &'a Name,
     pub needs: Option<&'a PersonalNeeds>,
     pub economy: Option<&'a NpcEconomy>,
+}
+
+/// Bundled Monster data for efficient query results.
+#[derive(Clone, Debug)]
+pub struct MonsterQueryItem<'a> {
+    pub entity: u64,
+    pub species: MonsterSpecies,
+    pub transform: &'a Transform,
+    pub needs: Option<&'a PersonalNeeds>,
+    pub ecosystem: Option<&'a EcosystemNeeds>,
+    pub ai_state: Option<&'a AiState>,
+}
+
+/// Bundled AI entity data (NPC or Monster).
+#[derive(Clone, Debug)]
+pub struct AiEntityQueryItem<'a> {
+    pub entity: u64,
+    pub kind: &'a EntityKind,
+    pub transform: Option<&'a Transform>,
+    pub needs: Option<&'a PersonalNeeds>,
+    pub ai_state: Option<&'a AiState>,
+    pub memory: Option<&'a crate::ai::memory::Memory>,
+    pub emotions: Option<&'a crate::ai::emotions::Emotions>,
+    pub plan: Option<&'a crate::ai::plan::Plan>,
+}
+
+/// Bundled data for combat participants.
+#[derive(Clone, Debug)]
+pub struct CombatantQueryItem<'a> {
+    pub entity: u64,
+    pub kind: &'a EntityKind,
+    pub transform: Option<&'a Transform>,
+    pub needs: Option<&'a PersonalNeeds>,
+    pub life_info: Option<&'a LifeInfo>,
+}
+
+/// Read-only access to a single component.
+#[derive(Clone, Copy)]
+pub struct ReadComponent<'a, T> {
+    pub entity: u64,
+    pub component: &'a T,
+}
+
+/// Mutable access to a single component.
+pub struct WriteComponent<'a, T> {
+    pub entity: u64,
+    pub component: &'a mut T,
 }
 
 /// Extension methods for Ecs to support query API.
@@ -147,6 +310,102 @@ impl Ecs {
             })
     }
 
+    /// Iterate over all Monsters with their data bundled.
+    pub fn iter_monsters(&self) -> impl Iterator<Item = MonsterQueryItem<'_>> {
+        self.alive.iter()
+            .filter_map(move |e| {
+                let kind = self.kinds.get(e)?;
+                let species = match kind {
+                    EntityKind::Monster(s) => *s,
+                    _ => return None,
+                };
+                let transform = self.transforms.get(e)?;
+                Some(MonsterQueryItem {
+                    entity: *e,
+                    species,
+                    transform,
+                    needs: self.personal_needs.get(e),
+                    ecosystem: self.ecosystem_needs.get(e),
+                    ai_state: self.ai_states.get(e),
+                })
+            })
+    }
+
+    /// Iterate over all AI entities (NPCs and Monsters) with full AI data.
+    pub fn iter_ai_entities(&self) -> impl Iterator<Item = AiEntityQueryItem<'_>> {
+        self.alive.iter()
+            .filter(|e| self.kinds.get(e).is_some())
+            .filter_map(move |e| {
+                let kind = self.kinds.get(e)?;
+                Some(AiEntityQueryItem {
+                    entity: *e,
+                    kind,
+                    transform: self.transforms.get(e),
+                    needs: self.personal_needs.get(e),
+                    ai_state: self.ai_states.get(e),
+                    memory: self.memories.get(e),
+                    emotions: self.emotions.get(e),
+                    plan: self.plans.get(e),
+                })
+            })
+    }
+
+    /// Iterate over all combat-ready entities.
+    pub fn iter_combatants(&self) -> impl Iterator<Item = CombatantQueryItem<'_>> {
+        self.alive.iter()
+            .filter(|e| self.kinds.get(e).is_some())
+            .filter_map(move |e| {
+                let kind = self.kinds.get(e)?;
+                Some(CombatantQueryItem {
+                    entity: *e,
+                    kind,
+                    transform: self.transforms.get(e),
+                    needs: self.personal_needs.get(e),
+                    life_info: self.life_info.get(e),
+                })
+            })
+    }
+
+    /// Iterate over entities with PersonalNeeds (mutable).
+    pub fn iter_needs_mut(&mut self) -> impl Iterator<Item = (u64, &mut PersonalNeeds)> {
+        let entities: Vec<u64> = self.alive.iter().cloned().collect();
+        entities.into_iter().filter_map(move |e| {
+            let needs = self.personal_needs.get_mut(&e)?;
+            Some((e, needs))
+        })
+    }
+
+    /// Get a single component for an entity (read-only).
+    #[inline]
+    pub fn get_transform(&self, entity: u64) -> Option<&Transform> {
+        self.transforms.get(&entity)
+    }
+
+    #[inline]
+    pub fn get_kind(&self, entity: u64) -> Option<&EntityKind> {
+        self.kinds.get(&entity)
+    }
+
+    #[inline]
+    pub fn get_needs(&self, entity: u64) -> Option<&PersonalNeeds> {
+        self.personal_needs.get(&entity)
+    }
+
+    #[inline]
+    pub fn get_needs_mut(&mut self, entity: u64) -> Option<&mut PersonalNeeds> {
+        self.personal_needs.get_mut(&entity)
+    }
+
+    #[inline]
+    pub fn get_ai_state(&self, entity: u64) -> Option<&AiState> {
+        self.ai_states.get(&entity)
+    }
+
+    #[inline]
+    pub fn get_ai_state_mut(&mut self, entity: u64) -> Option<&mut AiState> {
+        self.ai_states.get_mut(&entity)
+    }
+
     /// Collect all entities matching a filter into a Vec.
     pub fn query_collect<F: QueryFilter>(&self, filter: F) -> Vec<u64> {
         self.query_filter(filter).collect()
@@ -155,6 +414,24 @@ impl Ecs {
     /// Count entities matching a filter.
     pub fn query_count<F: QueryFilter>(&self, filter: F) -> usize {
         self.query_filter(filter).count()
+    }
+
+    /// Get entity position if available.
+    #[inline]
+    pub fn get_position(&self, entity: u64) -> Option<(f32, f32)> {
+        self.transforms.get(&entity).map(|t| (t.x, t.y))
+    }
+
+    /// Check if entity is alive (has health > 0).
+    #[inline]
+    pub fn is_entity_alive(&self, entity: u64) -> bool {
+        self.personal_needs.get(&entity).map_or(false, |pn| pn.health > 0.0)
+    }
+
+    /// Get entity name if available.
+    #[inline]
+    pub fn get_entity_name(&self, entity: u64) -> Option<&str> {
+        self.names.get(&entity).map(|n| n.0.as_str())
     }
 }
 

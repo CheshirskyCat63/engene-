@@ -1,733 +1,1739 @@
-ENGENE v0.1.0 → v1.0: Полный Production Roadmap (v2 — усиленный)
-Текущее состояние: production-ready, ~95% готовности
-Последнее обновление: 2026-03-16
 
-**Выполнено в этой сессии:**
-- ✅ A.1 — Data-driven config loading: 16/16 .ron файлов загружаются
-- ✅ A.2 — Query Layer: Query API создан (src/core/query.rs)
-- ✅ A.3 — Components split: world/components разделён на подмодули
-- ✅ A.4 — main.rs extraction: 68 строк (цель <150 достигнута)
-- ✅ B.1 — Feature Maturity Labels: добавлены в mod.rs файлы
-- ✅ B.2 — Stubs: gameplay.rs реализован, networking gate-ован
-- ✅ B.3 — Feature gates: networking gate добавлен
-- ✅ B.4 — Particles integration: ParticleSystem интегрирован в Renderer
-- ✅ B.5 — Unit tests: 90+ тестов (цель 75+ достигнута)
-- ✅ B.6 — Error handling: unwrap() не найден в критических путях
-- ✅ B.7 — Schema migration: SchemaMigrationRegistry реализован
-- ✅ B.8 — Memory accounting: memory_manager.rs реализрован
-- ✅ B.9 — Trust boundaries: quality_governor.rs с degradation_order
-- ✅ C.1 — Parallel tick: Engine.use_parallel_tick + fallback + determinism_gate.rs
-- ✅ C.2 — Incremental spatial index: HierarchicalSpatialIndex.update() + remove() + tests
-- ✅ C.3 — AI tick staggering: AiScheduler с budget-aware priority scheduling
-- ✅ C.4 — Physics LOD: should_tick_fire/water/cloth/ragdoll + max cells + tests
-- ✅ C.5 — Render budget: Renderer.apply_budget_settings() + quality governor integration
-- ✅ C.6 — Benchmarks: benches/hot_paths.rs (spatial, ecs, events, metrics, ai scheduler)
-- ✅ C.7 — Metrics Registry: MetricsRegistry с counters/gauges + CSV/JSON export
-- ✅ D.1 — Shader Hot Reload: hot_reload.rs (ShaderHotReloader, ConfigHotReloader)
-- ✅ D.2 — Config Hot Reload: hot_reload.rs (ConfigHotReloader с RON/JSON)
-- ✅ D.3 — Content Pipeline Wiring: pipeline.rs (ContentPipeline с import/cook/validate)
-- ✅ D.5 — Doctor improvements: config/shader/schema checks добавлены
-- ✅ D.6 — Documentation Generation: doc_generator.rs (API docs, README, module index)
-- ✅ D.7 — Schema Governance: schema_governance.rs с версионированием и миграциями
-- ✅ D.8 — Save/Load Torture: tests/save_load_torture.rs (9 сценариев, atomic_write)
+Conduct full engineering audit for ENGENE
+17 мар.
+·
+engene-
+·
+main
+·
++722
+-0
 
-**Статус сборки:**
-- cargo check --lib: ✅ 0 ошибок, 7 warnings (dead_code)
+Архивировать
 
-**Phase A: ✅ 100% Complete** — Data-Driven Architecture
-**Phase B: ✅ 100% Complete** — Feature Gating & Stability  
-**Phase C: ✅ 100% Complete** — Performance Optimization
-**Phase D: ✅ 95% Complete** — Tooling & Content Governance
+Поделиться
 
-**Remaining (5%):**
-- D.4 — Editor stability (в процессе стабилизации)
-- D.8 — Save/Load torture integration tests
-Целевое состояние: production-grade single-player engine, все подсистемы integrated + tested + shippable
-Базируется на: ENGINE_AUDIT_FULL.md (разделы 1-25) + рецензия ведущего инженера
-Ключевое решение: networking и deferred rendering явно выведены за скобки 1.0. Они находятся в Phase F (Ambition / post-1.0). 1.0 = single-player, forward rendering, полностью стабильный.
-________________________________________
-Принцип организации
-6 фаз. Phases A-E строго последовательны и обязательны для 1.0. Phase F — post-1.0 ambition. Внутри фазы задачи можно параллелить. Каждая фаза имеет жёсткий Definition of Done.
-flowchart LR
-    A[Phase_A\nStabilization] --> B[Phase_B\nRuntime_Integrity]
-    B --> C[Phase_C\nPerformance_and_Observability]
-    C --> D[Phase_D\nTooling_and_Content_Governance]
-    D --> E[Phase_E\nShipping_and_Release_Ops]
-    E --> v10["v1.0 RELEASE"]
-    v10 -.-> F[Phase_F\nAmbition_post_1.0]
-________________________________________
-Scope Lock for v1.0
-Roadmap хороший ровно до тех пор, пока его не начинают бесконтрольно расширять. Чем лучше план, тем легче впихнуть ещё 12 "очень нужных" улучшений. Это явный anti-scope-creep contract.
-Правило: В 1.0 запрещено добавлять новые подсистемы, форматы, крупные визуальные фичи или новые доменные слои, если они:
-•	НЕ закрывают уже зафиксированный release blocker
-•	НЕ относятся к stability / integrity / shipping
-•	НЕ уменьшают существующий технический риск
-Любая новая задача должна быть классифицирована как одно из:
-Класс	Значит	Действие
-release-blocker	Без этого нельзя выпустить	Включить в текущую фазу
-stability-improvement	Уменьшает риск, не добавляет scope	Включить если укладывается в фазу
-post-1.0	Хочется, но не блокирует	Записать в Phase F, не трогать
-Право вето на добавление в scope принадлежит владельцу фазы (см. Owner Model).
-________________________________________
-Stop Doing List
-Roadmap — это не только список того, что делаем. Это ещё и список того, чего не делаем, как бы ни чесались руки.
-До 1.0 запрещено:
-•	Вводить новые форматы данных (кроме schema migrations для существующих)
-•	Добавлять новые AI species (новые MonsterSpecies variants)
-•	Добавлять новые render passes кроме исправления обязательных (particles integration)
-•	Расширять editor panels сверх stability/workflow fixes
-•	Добавлять новые gameplay systems (quests, factions, crafting и т.д.)
-•	Начинать deferred/forward+ rendering
-•	Начинать networking implementation
-•	Добавлять новые external crate dependencies без согласования
-•	Переименовывать основные модули / крупные рефакторинги, не зафиксированные в плане
-________________________________________
-Owner Model
-Даже в маленькой команде нужна ответственность по зонам. Иначе все трогают всё, горячие файлы становятся полем merge-конфликтов, а roadmap — красивым надгробием.
-Area	Primary Owner	Approval Required For
-Core / ECS / Query	[TBD]	Query API design, tick model changes, event bus changes
-Graphics / Rendering	[TBD]	Render pass changes, shader loader design, quality governor
-Physics / Destruction	[TBD]	Damage pipeline, Rapier integration, sim_lod policy
-AI / Simulation / Economy	[TBD]	Desire/goal architecture, LOD simulation policy, data config schema
-World / Streaming / Persistence	[TBD]	Save schema changes, chunk format, content governance
-Tooling / SDK / Editor	[TBD]	Editor shell architecture, doctor strict criteria
-Release / CI / Shipping	[TBD]	CI gate criteria, platform matrix, release checklist
-Правила:
-•	Каждая задача в плане имеет Area → Primary Owner отвечает за execution и quality
-•	Merge в горячие файлы (core/engine.rs, core/ecs.rs, world/components/, graphics/renderer.rs) требует review от Primary Owner соответствующей Area
-•	Owner имеет право сказать "не берём в 1.0" для задач в своей Area
-[TBD] заполнить при начале исполнения. Для solo-dev все Area = один человек, но таблица всё равно полезна для приоритизации.
-________________________________________
-Release Blocker Register
-DoD по фазам — это хорошо. Но release blockers — это язык, на котором реально принимают решение "выпускаем / не выпускаем".
-ID	Severity	Phase	Description	Exit Criterion	Owner
-RB-01	P0	A	Direct ECS storage access exists in systems	0 occurrences of ecs.transforms.get, ecs.ai_states.get etc. outside query layer	Core
-RB-02	P0	A	Config constants duplicated in code and .ron	grep for hardcoded values matching .ron content = 0	Core
-RB-03	P0	A	main.rs > 150 lines with manual orchestration	main.rs < 150 LOC, all orchestration in registered systems	Core
-RB-04	P0	B	Stub files not fully implemented	All stubs in 1.0-scope fully implemented, compiles with 0 errors and 0 warnings	All
-RB-05	P0	B	Critical paths use unwrap()	0 unwrap() in engine.rs, renderer.rs, save_chunks.rs, chunk_persistence.rs	Core/Graphics
-RB-06	P0	B	Trust boundaries undefined	All 9 failure scenarios from B.9 tested and passing	Core
-RB-07	P1	C	Determinism gate fails in parallel mode	10000-tick sequential vs parallel snapshot comparison passes	Core
-RB-08	P0	C	No runtime observability	MetricsRegistry operational, headless soak (6mo) clean	Core
-RB-09	P0	D	Save/load torture test fails	All 9 torture scenarios pass, atomic writes verified	Persistence
-RB-10	P0	D	Content schema unversioned	All 6 formats have schema_version, backward compat enforced	Persistence
-RB-11	P0	E	Doctor --strict reports warnings	0 warnings in strict mode	Tooling
-RB-12	P0	E	First-run validation fails on clean machine	Binary starts, --version works, headless --months 1 completes	Release
-RB-13	P0	E	No crash symbol archive	.pdb/.dwarf generated and archived for shipping build	Release
-RB-14	P1	E	Benchmark regression > 5%	All benchmarks within 5% of baseline	Core
-P0 = абсолютный blocker, без него 1.0 не выпускается. P1 = серьёзный, допускается documented exception с mitigation plan.
-Обратить внимание: RB-07 (parallel tick determinism) — P1, не P0. См. Parallel Tick Rollback Rule ниже.
-________________________________________
-Parallel Tick Rollback Rule
-Parallel tick — самый опасный пункт плана. Не потому что плохой, а потому что умеет устроить недельный карнавал боли.
-Правило:
-Если parallel tick не проходит determinism gate стабильно к концу Phase C, то:
-1.	Sequential mode остаётся shipping default для 1.0
-2.	Parallel mode маркируется experimental и gate-ится за --parallel CLI flag
-3.	Roadmap 1.0 не блокируется
-4.	Parallel tick переносится в Phase F с пометкой "stabilize for 1.1"
-Обоснование: Production 1.0 со стабильным sequential tick лучше, чем вечный 0.97 с "почти готовым" parallel mode. Sequential tick при 200 entities и 20 Hz — это ~2-3ms. Достаточно для single-player.
-________________________________________
-Phase Visible Wins
-Люди устают на "не glamorous work". Каждая фаза должна давать заметный дофаминовый результат.
-Фаза	Visible Win после завершения
-A	Код чище. main.rs похудел в 3 раза. Конфиги реально живые — поменял .ron, увидел результат. Query API элегантнее прямого доступа.
-B	Stubs исчезли. Тесты реально ловят баги. Graceful degradation работает — подсунь битый файл, движок не падает. Particles наконец видно.
-C	Есть метрики. Soak report за 6 месяцев чистый. Perf стал прозрачным. Parallel tick (если взлетел) даёт ощутимый fps boost.
-D	Hot reload шейдеров и конфигов реально экономит часы. Save/load выживает пытки. Content pipeline — end-to-end.
-E	Можно собрать, валидировать и выпустить релиз без шаманства. CI ловит регрессии. Crash reports читаемы.
-________________________________________
-PHASE A — STABILIZATION (Сделать систему предсказуемой)
-Цель: Устранить data-code gap, ввести единый source of truth для всех параметров, устранить прямой coupling ECS-systems.
-A.1 — Data-driven config loading: подключить ВСЕ 19 .ron файлов
-Сейчас загрузчики существуют для ~10 из 19 файлов. Остальные authored, но hardcoded.
-Файлы для создания/изменения:
-•	Создать src/core/data_loader.rs — единый trait DataSource<T> для typed .ron loading с валидацией и fallback
-•	Изменить src/core/game_config.rs — подключить загрузку ВСЕХ конфигов:
-o	food_chain.ron → заменить hardcoded logic в src/ecosystem/food_chain.rs
-o	species.ron → заменить hardcoded defaults в src/world/components.rs (NpcTraits, MonsterTraits, EcosystemNeeds)
-o	rules.ron → заменить hardcoded system order и replicated events
-o	surfaces.ron → заменить MaterialTruthService::empty() в src/app/runtime_assembly.rs на loaded SurfaceDB
-o	material_bridge.ron → подключить к src/core/material_truth.rs вместо empty()
-•	Изменить src/world/biome.rs — читать food_density/danger/water из loaded biomes.ron, а не из match arms
-•	Изменить src/simulation/simulation_level.rs — L0/L1/L2 radii из simulation.ron
-•	Изменить src/ai/reproduction.rs — MAX_NPCS/WOLVES/BOARS/BLOODSUCKERS из population.ron
-•	Изменить src/ai/perception.rs — HUNT_RADIUS/FEAR_RADIUS и т.д. из perception.ron
-•	Изменить src/economy/jobs.rs — daily_income и т.д. из jobs.ron
-•	Изменить src/ai/thresholds.rs — base values из goals.ron
-Критерий завершения: Ни одна числовая константа, которая есть в .ron, не дублируется в Rust-коде. grep по hardcoded значениям = 0 совпадений.
-A.2 — ECS Query Layer: убрать прямой доступ к компонентам
-Это самая критичная архитектурная задача. Сейчас ecs.transforms.get(&e) — повсеместно.
-Шаг 1: Создать src/core/query.rs:
-•	Query<T> — read-only single component
-•	QueryMut<T> — mutable single component 
-•	Query2<A, B>, Query3<A, B, C> — multi-component read
-•	QueryFilter — with/without component
-•	Каждый query трекает accessed components для conflict detection
-Шаг 2: Создать src/core/ecs_view.rs (расширить существующий src/core/access/ecs_view.rs):
-•	EcsView — immutable snapshot для PreTick/PostTick
-•	EcsMut — mutable view для FixedTick
-•	Оба оборачивают Ecs и предоставляют только query API
-Шаг 3: Мигрировать системы (порядок по критичности):
-1.	src/ai/ai.rs, src/ai/npc_ai.rs, src/ai/monster_ai.rs — самые тяжёлые потребители
-2.	src/physics/physics.rs, src/physics/collision.rs, src/physics/movement.rs
-3.	src/simulation/background_world.rs, src/simulation/activation.rs
-4.	src/economy/economy.rs
-5.	src/body/body_system.rs
-6.	src/gameplay/quest_system.rs
-7.	src/main.rs — game loop entity collection
-Шаг 4: Сделать поля Ecs struct приватными (pub(crate) → pub(super)), оставив только query API публичным
-Критерий завершения: Ни одна система не обращается к ecs.transforms / ecs.ai_states / и т.д. напрямую. Все доступы через Query<T>.
-A.3 — Разделить world::components.rs
-Сейчас 30+ типов в одном файле. Blast radius изменений — огромный.
-•	src/world/components/mod.rs — re-exports
-•	src/world/components/transform.rs — Transform, Name
-•	src/world/components/entity_kind.rs — EntityKind, MonsterSpecies
-•	src/world/components/needs.rs — PersonalNeeds, SocialNeeds, EcosystemNeeds
-•	src/world/components/traits.rs — NpcTraits, MonsterTraits
-•	src/world/components/ai.rs — AiState, Goal
-•	src/world/components/economy.rs — NpcEconomy, Job, Inventory, Item
-•	src/world/components/life.rs — LifeInfo, LifeStage
-•	src/world/components/simulation.rs — SimLevel, SimulationLevel
-•	src/world/components/physical.rs — Flammable, ClothComponent
-•	src/world/components/faction.rs — FactionMembership
-Критерий: Каждый файл < 100 строк. Import paths обновлены во всех зависимых модулях.
-A.4 — Извлечь game loop из main.rs
-Сейчас 514 строк, вручную оркестрирует streaming, audio, spatial index, rendering.
-•	Создать src/core/systems/streaming_system.rs — WorldStreamer.update() + ChunkPersistenceService
-•	Создать src/core/systems/spatial_rebuild_system.rs — HierarchicalSpatialIndex rebuild
-•	Создать src/core/systems/audio_listener_system.rs — AudioEngine.set_listener() + update()
-•	Перенести entity instance collection в src/graphics/render_system.rs
-•	src/main.rs должен стать ~100 строк: init → event loop → tick → render → done
-Критерий: main.rs < 150 строк. Все orchestration — в зарегистрированных системах.
-Definition of Done — Phase A
-•	0 direct ECS storage accesses (ecs.transforms, ecs.ai_states и т.д.) во всех системах
-•	0 duplicated config constants (hardcoded value present in both .ron and Rust)
-•	main.rs < 150 строк, все orchestration в зарегистрированных системах
-•	world/components.rs разделён, каждый sub-file < 100 строк
-•	Все existing tests green после миграции
-•	cargo clippy clean
-________________________________________
-PHASE B — RUNTIME INTEGRITY (Сделать систему надёжной)
-Цель: Убрать stubs, достроить integration paths, добавить тесты, маркировать зрелость подсистем, ввести базовый memory accounting и trust boundaries.
-B.1 — Feature Maturity Labels
-Добавить в каждый mod.rs каждого модуля doc-comment с матрицей зрелости:
-//! # Status: production | experimental | partial | planned | deprecated
-//! # Integration: enabled | disabled | conditional
-//! # Tests: unit + integration | integration only | none
-По результатам аудита (раздел 18) — начальная разметка:
-•	production: core/engine, core/events, core/registry, input, world/streaming
-•	experimental: core/replay, core/determinism, animation/ragdoll, physics/cloth
-•	partial: graphics/particles, graphics/taa, animation, content pipeline, audio
-•	planned: networking, memory/entity_pool, memory/memory_manager, graphics/deferred
-•	deprecated: ai/decision.rs, ai/goals.rs (scoring alternative)
-B.2 — Достроить stubs до полноценных модулей
-Принцип: всё реализуем от и до. Stub → рабочий модуль. 0 ошибок, 0 warnings. Исключение — модули явно вне scope 1.0 (networking), которые gate-ятся за feature flag.
-Файл	Действие
-src/graphics/gpu_jobs.rs	Реализовать базовый GPU job scheduler для forward path (compute dispatch queue, fence tracking). Deferred-specific расширения — Phase F.
-src/graphics/lighting.rs	Реализовать forward lighting module (point/spot/directional light list, shadow map binding, light culling). Deferred path — Phase F.
-src/memory/entity_pool.rs	Реализовать reusable entity ID pool (ring buffer + generation).
-src/memory/memory_manager.rs	Реализовать базовый budget tracking — поднято из бывшей Phase E (см. B.8).
-src/memory/streaming_cache.rs	Реализовать LRU cache для chunk data.
-src/gameplay/gameplay.rs	Реализовать полноценный player interaction layer. Stub → рабочий модуль. 0 ошибок, 0 warnings.
-src/network/network_system.rs	Networking не входит в 1.0. Пометить planned, скрыть за #[cfg(feature = "networking")].
-B.3 — Feature gates для неиспользуемых features
-Сейчас body_sim, advanced_anim, networking, scoring_ai объявлены, но не gate-ят код.
-•	Добавить #[cfg(feature = "networking")] вокруг src/network/
-•	Добавить #[cfg(feature = "body_sim")] вокруг src/body/
-•	Добавить #[cfg(feature = "advanced_anim")] вокруг src/animation/ragdoll.rs, active_ragdoll.rs, foot_ik.rs
-•	Добавить #[cfg(feature = "scoring_ai")] вокруг src/ai/decision.rs, src/ai/goals.rs
-B.4 — Интеграция particles в render loop
-Сейчас ParticleSystem реализован, но не подключён.
-•	Изменить src/graphics/renderer.rs:
-o	Добавить particle_system: Option<ParticleSystem> в Renderer
-o	В render(): после geometry pass, перед post-process — particle_system.dispatch_update() + particle_system.render()
-•	Добавить spawn API: renderer.spawn_particles(emitter) доступный из game loop / events
-B.5 — Unit-тесты для критических модулей
-Создать #[cfg(test)] mod tests в каждом из следующих файлов:
-Файл	Тесты
-src/core/ecs.rs	spawn, despawn, component CRUD, stale handle safety, capacity
-src/core/events/mod.rs	emit, read, capacity overflow, sticky, clear
-src/core/commands.rs	spawn command, despawn, deferred events
-src/core/sparse_set.rs	insert, remove, get, iteration, edge cases
-src/core/query.rs (new)	single query, multi query, filter, conflict detection
-src/physics/damage_pipeline/orchestrator.rs	submit impact, resolve all, drain responses
-src/physics/ballistics.rs	projectile step, material penetration, ricochet
-src/physics/fire.rs	ignition, spread, cooldown
-src/ai/desire.rs	goal priority under different need combinations
-src/ai/thresholds.rs	threshold computation from traits
-src/ai/memory.rs	event recording, lesson learning, capacity limits
-src/ai/emotions.rs	decay, dominant, personality modulation
-src/economy/trading.rs	trade success/failure, money transfer
-src/world/streaming.rs	chunk load/unload, mark_loaded, transaction rollback
-src/navigation/navmesh.rs	pathfinding on simple grids
-Целевое покрытие: Каждый модуль с production или partial статусом имеет минимум 5 unit-тестов.
-B.6 — Error handling: убрать unwrap() из критических путей
-Заменить unwrap() на Result<> / Option handling:
-•	src/core/engine.rs — system execution
-•	src/graphics/renderer.rs — GPU resource creation
-•	src/memory/asset_manager.rs — file I/O
-•	src/memory/save_chunks.rs — serialization
-•	src/world/chunk_persistence.rs — save/load
-•	src/core/crash_telemetry.rs — заменить global Mutex на parking_lot::Mutex с try_lock fallback
-B.7 — Save schema migration infrastructure
-Сейчас все версии = 1, SchemaMigrationRegistry пуст.
-•	Добавить тест-миграцию v1→v2 как proof of concept в src/core/build_manifest.rs
-•	Добавить integration test: save v1, bump schema, load with migration
-•	Задокументировать migration policy в docs/canonical/SAVE_MIGRATION_POLICY.md
-B.8 — Basic memory accounting (поднято из бывшей Phase E)
-Performance без memory visibility — слепая. Streaming без cache policy врёт. Soak tests без leak detection бесполезны.
-•	Реализовать src/memory/memory_manager.rs:
-o	Per-subsystem byte counters (physics, AI, world, graphics, audio, content)
-o	record_alloc(subsystem, bytes) / record_free(subsystem, bytes)
-o	current_usage(subsystem) / total_usage()
-o	Warning при превышении budget
-o	Integration с MemoryBudgetRegistry из src/core/perf/memory_budget.rs
-•	Добавить в src/memory/streaming_cache.rs:
-o	Cache hit/miss counters
-o	Eviction stats
-o	Current cache size tracking
-•	Добавить leak detection hook:
-o	Track allocations in debug builds
-o	Report leaks on shutdown (entities not despawned, resources not freed)
-o	Integration test: spawn 100 entities, despawn all, verify 0 leaked bytes
-B.9 — Trust boundaries & graceful degradation (NEW)
-Определить что происходит когда входные данные невалидны. Для production engine это не роскошь.
-Создать src/core/trust_policy.rs:
-Ситуация	Поведение
-.ron config parse error	Log error, fall back to hardcoded defaults, Doctor warning. Не crash.
-Shader file missing/broken	Fall back to include_str!() embedded shader. Log error.
-Cooked asset невалиден	Skip asset, emit ContentInvalid event, quarantine file.
-Prefab has circular inheritance	Detect at load time, reject with error, Doctor warning.
-Save file corrupted	Attempt partial load, report what failed, offer "load anyway" or "abort".
-Content dependency graph has cycle	ContentDependencyGraph::add_dependency() returns Err(Cycle).
-Network packet malformed	Drop packet, increment counter, log at debug level. No crash.
-Editor panel panic	editor_safe_mode catches, disables panel, continues.
-System panic during tick	crash_telemetry catches, saves crash bundle, abort cleanly.
-Добавить integration test tests/trust_boundaries.rs:
-•	Feed broken .ron → verify fallback
-•	Feed corrupted save → verify partial load
-•	Feed cyclic prefab → verify rejection
-Definition of Done — Phase B
-•	0 stub files in production/partial modules (все либо реализованы, либо удалены)
-•	Все in-scope features labeled с maturity status
-•	Все critical unwrap() заменены на error handling
-•	75+ unit tests (15 modules x 5 tests minimum)
-•	Memory accounting active: memory_manager reports per-subsystem usage
-•	Trust policy defined and tested for all 9 scenarios
-•	All affected tests green
-________________________________________
-PHASE C — PERFORMANCE & OBSERVABILITY (Сделать систему быстрой и прозрачной)
-Цель: Включить parallel tick, оптимизировать горячие пути, добить LOD/budget системы, построить единый контур диагностики.
-C.1 — Parallel tick: включить и стабилизировать
-Шаг 1: Prerequisite — Query conflict detection (из A.2)
-AccessDescriptor (уже есть в src/core/access/queries.rs) должен автоматически строиться из Query usage каждой системы.
-Шаг 2: В src/core/engine.rs:
-•	tick() → использовать tick_parallel() по умолчанию
-•	tick_parallel() → использовать FrameGraph из src/core/jobs/frame_graph.rs для topological sort
-•	Обязательно: --sequential CLI flag для fallback (осознанный выбор, не баг)
-•	При обнаружении divergence в runtime — auto-fallback to sequential + log warning
-Шаг 3: В src/core/jobs/frame_graph.rs:
-•	Build graph из SystemDescriptor access declarations
-•	Auto-detect parallel groups через has_write_conflict()
-•	Serialize only when conflict detected
-•	Новое: emit topology report в Doctor (сколько групп, сколько serialized, причины)
-Шаг 4: Determinism gate:
-•	В src/core/replay/divergence.rs — добавить auto-comparison: run 1000 ticks sequential vs parallel, compare snapshots
-•	CI test: tests/determinism_parallel.rs
-•	Новое: golden snapshot test — reference snapshot committed to repo, CI verifies match
-Критерий: Parallel tick включён по умолчанию. Determinism test проходит на 10000 тиков. Sequential fallback работает.
-Rollback Rule: Если parallel tick не проходит determinism gate стабильно к концу Phase C — sequential mode остаётся shipping default для 1.0, parallel маркируется experimental за --parallel flag. Roadmap 1.0 не блокируется. См. "Parallel Tick Rollback Rule" в начале документа.
-C.2 — Incremental spatial index
-Сейчас HierarchicalSpatialIndex.clear() + full rebuild каждый кадр.
-•	Изменить src/world/hierarchical_spatial.rs:
-o	Добавить update(entity, old_pos, new_pos) — incremental move
-o	Добавить insert_new(entity, pos) / remove(entity) — для spawn/despawn
-o	clear() + rebuild() — только при origin shift или chunk load
-•	Изменить streaming_system (из A.4) — использовать incremental API
-C.3 — AI tick staggering
-Сейчас все NPC/monsters обрабатываются каждый тик.
-•	Изменить src/ai/ai.rs:
-o	Ввести ai_budget_us: u64 (из PerfBudgetManager, default 25% of frame = ~12500us at 60fps)
-o	Сортировать entities по priority: L0 > combat > hungry > idle
-o	Обрабатывать entities пока budget не исчерпан
-o	Остальные — skip до следующего тика (round-robin)
-•	Добавить src/ai/ai_scheduler.rs:
-o	AiScheduler — tracks last_tick per entity, priority scoring
-o	Guarantee: каждый entity тикается минимум раз в 3 тика
-o	Новое: emit ai_budget_miss counter когда budget исчерпан раньше чем все entities обработаны
-C.4 — Physics LOD enforcement
-sim_lod.rs частично реализован, но не полностью enforced.
-•	Изменить src/physics/physics.rs:
-o	Fire: тикать только если sim_lod::should_tick_fire() для региона камеры
-o	Water: sim_lod::water_active() check
-o	Cloth: iterations из sim_lod::cloth_iterations()
-o	Rapier: step только L0 entities (physics_bubble::collect_l0())
-C.5 — Render budget enforcement
-•	Изменить src/graphics/renderer.rs:
-o	Respect QualityGovernor degradation order:
-	CutFirst: dirty uploads, micro-motion, debris
-	CutSecond: chain reactions, nav cells
-	CutThird: particles, cloth
-	NeverCut: shadows, PBR, terrain
-o	При PressureLevel::High — автоматически reduce cloud steps, shadow resolution
-C.6 — Benchmarks для горячих путей
-Расширить benches/engine_benchmarks.rs:
-•	bench_full_tick_200_entities — полный engine.tick() с 200 entities
-•	bench_parallel_tick_200_entities — parallel tick comparison
-•	bench_ai_desire_100_npcs — desire computation scaling
-•	bench_damage_pipeline_64_impacts — damage resolve throughput
-•	bench_spatial_index_incremental — incremental vs rebuild
-•	Новое: bench_save_load_roundtrip_200_entities — save/load throughput
-•	Новое: bench_streaming_chunk_load_unload — chunk lifecycle
-C.7 — Unified Observability Layer (NEW)
-Не просто инструменты, а единый контур диагностики. Production engine без observability — красивый костюм на слепом кроте.
-Создать src/core/metrics_registry.rs:
-•	MetricsRegistry — singleton, per-subsystem counter groups
-•	Counter types: Counter (monotonic), Gauge (current value), Histogram (distribution)
-•	Registration: metrics.register_counter("ai.budget_misses")
-•	Thread-safe: atomic counters, lock-free where possible
-Per-subsystem metrics (обязательные):
-Подсистема	Метрики
-Engine	frame_time_us, tick_time_us, systems_serialized_count, parallel_groups_count
-AI	entities_ticked, budget_misses, replan_count, stuck_entities
-Physics	rapier_step_us, fire_cells_active, water_cells_active, cloth_particles, impacts_resolved
-Graphics	draw_calls, triangles, gpu_time_us (if available), shader_reloads, degradation_level
-World	chunks_loaded, chunks_unloaded, entities_streamed_in, entities_streamed_out
-Memory	total_bytes, per_subsystem_bytes, cache_hits, cache_misses, leak_suspects
-Events	events_emitted, events_dropped, bus_pressure_ratio
-Streaming	read_bytes_frame, decompress_bytes_frame, upload_bytes_frame
-Export:
-•	MetricsRegistry::export_csv(path) — for CI / automated analysis
-•	MetricsRegistry::export_json(path) — for dashboards
-•	Console command: metrics — dump current snapshot
-•	Headless mode: auto-export to metrics_report.json on shutdown
-Integration with existing tools:
-•	profiler_dashboard.rs → read from MetricsRegistry
-•	runtime_truth_dashboard.rs → read from MetricsRegistry
-•	doctor.rs → check metric thresholds (e.g., >10% event drops = warning)
-Headless soak report:
-•	cargo run --bin engene_headless -- --months 6 --metrics-report soak.json
-•	Report includes: peak memory, average frame time, population stability, event drops, AI budget misses, determinism checks
-•	CI gate: soak report must show 0 critical anomalies
-Definition of Done — Phase C
-•	Parallel tick is default mode, --sequential fallback works
-•	Determinism gate passes on 10000 ticks (sequential vs parallel)
-•	AI budget staggering active, no entity skipped > 3 ticks
-•	Physics LOD fully enforced (fire/water/cloth/rapier)
-•	QualityGovernor degradation order respected in renderer
-•	7+ benchmarks, all tracked, regression < 5% between builds
-•	MetricsRegistry operational with all per-subsystem counters
-•	Headless soak test (6 simulated months) produces clean metrics report
-•	CSV/JSON export functional
-________________________________________
-PHASE D — TOOLING & CONTENT GOVERNANCE (Сделать систему удобной и предсказуемой)
-Цель: Hot reload, улучшенный content pipeline, editor stability, schema versioning, content compatibility policy, save/load torture.
-D.1 — Shader hot reload
-Шаг 1: Вынести все inline WGSL шейдеры в файлы:
-•	assets/shaders/pbr_terrain.wgsl
-•	assets/shaders/pbr_entity.wgsl
-•	assets/shaders/shadow_depth.wgsl
-•	assets/shaders/particle_update.wgsl
-•	assets/shaders/particle_render.wgsl
-•	assets/shaders/bloom.wgsl
-•	assets/shaders/tonemap.wgsl
-•	assets/shaders/vegetation.wgsl
-•	assets/shaders/skybox.wgsl
-•	assets/shaders/taa_resolve.wgsl
-•	assets/shaders/cull.wgsl
-•	assets/shaders/atmosphere.wgsl
-•	assets/shaders/contact_shadow.wgsl
-•	assets/shaders/volumetric.wgsl
-•	assets/shaders/ssr.wgsl
-•	assets/shaders/sky/cloud_render.wgsl
-•	assets/shaders/sky/cloud_coverage.wgsl
-•	assets/shaders/sky/cloud_shadow.wgsl
-•	assets/shaders/sky/fog.wgsl
-•	assets/shaders/sky/moon.wgsl
-•	assets/shaders/sky/precipitation.wgsl
-•	assets/shaders/sky/stars.wgsl
-•	(и остальные)
-Шаг 2: Создать src/graphics/shader_loader.rs:
-•	Load from file at startup
-•	include_str!() fallback для shipping builds
-•	File watcher thread (notify crate) для dev builds
-•	При изменении файла — recreate pipeline
-Шаг 3: В src/graphics/renderer.rs — все device.create_shader_module() через shader_loader
-D.2 — Config hot reload
-•	Создать src/core/config_watcher.rs:
-o	Watch game/data/*.ron directory
-o	При изменении — reload config, emit ConfigReloaded event
-o	Systems подписываются на event и обновляют внутреннее состояние
-•	Добавить console command: reload_config <name> или reload_all
-D.3 — Content pipeline: wire import → cook → validate
-Сейчас pipeline exists but not fully connected.
-•	Изменить src/content/import/asset_pipeline.rs — подключить к AssetManager
-•	Изменить src/content/cooking/cook_pipeline.rs — автоматический cook при import
-•	Изменить src/content/validation/content_validator.rs — валидация при cook completion
-•	Добавить CLI tool: cargo run --bin engene_cook -- --input game/data --output cooked/
-D.4 — Editor stability (safe mode improvements)
-•	Изменить src/tools/editor_safe_mode.rs:
-o	Per-panel crash counter persistent across sessions (save to editor_state.json)
-o	Auto-disable panels that crash 3+ times
-o	"Reset all panels" button
-•	Добавить src/tools/editor_layout.rs:
-o	Save/restore panel layout
-o	Preset layouts: "Full", "Gameplay", "Graphics", "Performance"
-D.5 — Doctor improvements
-•	Изменить src/tools/doctor.rs:
-o	Добавить check: all .ron configs loadable
-o	Добавить check: no data-code gaps (compare loaded values vs hardcoded)
-o	Добавить check: all systems registered in RuntimeAssembly
-o	Добавить check: shader files present (after D.1)
-o	Добавить DoctorMode::Strict — fail on any warning
-D.6 — Documentation generation
-•	Создать src/tools/doc_generator.rs:
-o	Auto-generate module status table from doc-comments (B.1)
-o	Auto-generate config reference from loaded .ron files
-o	Auto-generate system dependency graph from AccessDescriptors
-o	Output to docs/generated/
-D.7 — Schema & Content Governance (NEW)
-После первых серьёзных изменений без governance получаются: "почему старые чанки сломались", "почему prefab cooked, но не соответствует runtime", "почему asset browser видит одно, а runtime грузит другое".
-Создать docs/canonical/SCHEMA_GOVERNANCE_POLICY.md:
-Versioning policy для каждого формата:
-Формат	Текущая версия	Файл версии	Кто читает
-.ron game configs	schema_version: 1	inside each .ron	GameConfig loader
-Save files	SCHEMA_VERSION_SAVE = 1	build_manifest.rs	save_chunks.rs
-Chunk persistence	SCHEMA_VERSION_CHUNK = 1	build_manifest.rs	chunk_persistence.rs
-Entity snapshots	SCHEMA_VERSION_ENTITY = 1	build_manifest.rs	save_chunks.rs
-Prefab descriptors	unversioned	—	prefab_registry.rs
-Cooked artifacts	unversioned	—	cook_pipeline.rs
-Действия:
-•	Добавить schema_version в prefab format и cooked artifact format
-•	Для каждого формата определить backward compatibility policy:
-o	Game configs: breaking changes require migration code + version bump
-o	Save files: must always support loading N-1 version
-o	Chunk data: must support loading N-1, N-2 (because chunks persist on disk)
-o	Prefabs: must support loading N-1
-o	Cooked artifacts: may be regenerated (no backward compat needed, just invalidation)
-•	Добавить src/core/content_hash.rs:
-o	Deterministic content hash для каждого cooked artifact
-o	Hash includes: source content + import settings + cook variant
-o	Used for cache invalidation: if hash mismatch → re-cook
-•	Добавить Doctor check: all loaded content has valid schema version
-D.8 — Save/Load Torture Testing (NEW)
-Save/load работает "в обычные дни", а потом один странный вечер с дождём, кровососами и разрушенной стеной — и привет, каша.
-Создать tests/save_load_torture.rs:
-Сценарий	Что тестируется
-Save during active combat	Entity states mid-update, health changing
-Save during chunk unload	Race between persistence and streaming
-Save during particle/destruction-heavy scene	Large state snapshot, debris, fire, water
-Save after config version bump	Schema migration path during save/load cycle
-Load partial/corrupted save	Graceful degradation, trust_policy.rs fallback
-Interrupted write recovery	Simulate crash mid-write (truncated file), verify recovery
-Cross-version load matrix	Save on v1, load on v2 after schema migration
-Large world persistence soak	1000+ entities, 10+ chunks, save/load 100 times, verify consistency
-Rapid save-load cycle	Save + load 50 times in 10 seconds, verify no corruption or leak
-Также добавить:
-•	src/memory/save_chunks.rs → atomic write (write to .tmp, rename on success)
-•	Backup previous save before overwrite (.bak file)
-•	Doctor check: save file integrity on load
-Definition of Done — Phase D
-•	All shaders in external .wgsl files, hot reload works in SDK
-•	Config hot reload works: change .ron, see effect without restart
-•	Content pipeline wired: import → cook → validate end-to-end
-•	Editor safe mode: panel crash counters persistent, auto-disable works
-•	Doctor --strict mode: fails on any warning including config gaps
-•	Schema versions defined for all 6 formats
-•	Backward compatibility policy documented and enforced
-•	Content hash-based invalidation functional
-•	Save/load torture tests pass (all 9 scenarios)
-•	Atomic writes for save files, .bak backup functional
-________________________________________
-PHASE E — SHIPPING & RELEASE OPS (Сделать систему выпускаемой) (NEW)
-Цель: Для 1.0 мало "движок работает". Нужна воспроизводимая сборка, release pipeline, platform validation, crash symbolication, release gates. Без этого код хороший, а релиз — картонный.
-E.1 — CI/CD Pipeline
-Создать .github/workflows/ (или аналог) с матрицей:
-Job	Trigger	Profile	Features	Что проверяет
-build-dev	every push	dev	full	Компиляция
-build-release	every push	release	full	Компиляция без warnings
-build-shipping	tag/manual	shipping	full	Финальный бинарник
-build-headless	every push	headless-server	headless	Серверный бинарник
-build-sdk	every push	sdk-tools	sdk_tools	Editor бинарник
-test-unit	every push	dev	full	cargo test
-test-integration	every push	dev	full	cargo test --test '*'
-bench-regression	nightly/PR	release	full	Benchmarks, fail if > 5% regression
-soak-test	nightly	release	headless	engene_headless --months 6, check metrics report
-clippy-check	every push	dev	full	cargo clippy -- -D warnings
-doctor-strict	every push	dev	full	engene_headless --months 0 --doctor strict
-Artifact validation:
-•	Каждый build job сохраняет binary как artifact
-•	Post-build step: verify binary runs (--version flag), exits 0
-•	Post-build step: verify binary size within expected range (alert if >2x change)
-E.2 — Platform Compatibility Matrix
-Создать docs/canonical/PLATFORM_MATRIX.md:
-Параметр	Значение для 1.0
-OS	Windows 10+ (primary), Linux x86_64 (secondary / headless)
-GPU Backend	Vulkan (primary), DX12 (secondary, Windows), Metal (future, not 1.0)
-Min GPU	Vulkan 1.2 compatible, 2GB VRAM
-Min CPU	4 cores, x86_64
-Min RAM	4 GB (8 GB recommended)
-Headless	No GPU required, Linux or Windows
-Editor	Same as game + egui overhead (~200MB extra RAM)
-Действия:
-•	Добавить в src/graphics/renderer.rs: backend selection logic (prefer Vulkan, fallback DX12)
-•	Добавить startup check: if GPU does not meet min spec → warning + quality auto-downgrade
-•	Добавить в Doctor: hardware capability report
-•	Тестирование: CI matrix с Vulkan + DX12 (если CI GPU available) или manual test matrix checklist
-E.3 — Crash Symbolication
-Сейчас crash bundles содержат panic message + location, но нет symbol resolution для release builds.
-•	Изменить build_release.ps1 / CI:
-o	При shipping profile: strip = "symbols", но сохранить .pdb / .dwarf отдельно
-o	Archive symbols alongside binary: dist/symbols/engene_game.pdb
-•	Изменить src/core/crash_telemetry.rs:
-o	В crash bundle включить: binary hash, symbol file path hint
-o	Для shipping builds: generate minidump (Windows: MiniDumpWriteDump via winapi)
-•	Создать tools/symbolicate.ps1:
-o	Input: crash bundle + symbol archive
-o	Output: resolved stack trace
-•	Для 1.0: Ручной workflow. Автоматический symbol server — post-1.0.
-E.4 — Release Packaging & Versioning
-•	Изменить package_release.ps1:
-o	Reproducible builds: lock all dependency versions (Cargo.lock committed)
-o	Version stamping: BuildManifest::current() включает semver + git hash + build timestamp
-o	Generate CHANGELOG.md from git log between tags (или вручную maintained)
-o	Generate COMPATIBILITY.md: which save versions are loadable, which configs changed
-•	Создать docs/canonical/SAVE_COMPATIBILITY_MATRIX.md:
-o	Table: engine version → save schema version → loadable?
-o	Updated on every schema bump
-•	First-run validation on clean machine:
-o	Script / test: unpack release archive on clean environment (no Rust, no dev tools)
-o	Verify: binary starts, --version works, headless --months 1 completes, SDK opens
-o	Verify: game/data/ present, all .ron loadable
-E.5 — Release Checklist & Gates
-Создать docs/canonical/RELEASE_CHECKLIST.md:
-Ни один релиз не публикуется без прохождения всех gate:
-Gate	Критерий	Автоматизация
-G1: Build	All 5 profiles compile without warnings	CI
-G2: Tests	All unit + integration tests green	CI
-G3: Doctor	--strict mode passes	CI
-G4: Benchmarks	No regression > 5% vs previous release	CI (nightly)
-G5: Soak	6-month headless soak, 0 critical anomalies in metrics	CI (nightly)
-G6: Save compat	Save/load torture tests pass	CI
-G7: Platform	Manual test on min-spec hardware or CI GPU matrix	Manual / CI
-G8: Crash sym	Symbol archive generated alongside binary	CI
-G9: First-run	Clean machine test passes	Manual
-G10: Changelog	CHANGELOG.md and COMPATIBILITY.md updated	Manual
-Definition of Done — Phase E
-•	CI pipeline runs on every push: build (5 profiles), test, clippy, doctor
-•	Nightly CI: benchmarks + soak test + regression check
-•	Platform matrix documented, min-spec check in renderer startup
-•	Crash symbolication: .pdb/.dwarf archived, minidump generation on Windows
-•	Release packaging reproducible: Cargo.lock committed, version stamping works
-•	Save compatibility matrix documented
-•	First-run validation script passes on clean environment
-•	Release checklist: all 10 gates defined and automatable (7/10 automated in CI)
-•	RELEASE_CHECKLIST.md, PLATFORM_MATRIX.md, SAVE_COMPATIBILITY_MATRIX.md created
-________________________________________
-PHASE F — AMBITION (Post-1.0, расширение после стабилизации)
-Цель: Networking, deferred rendering, advanced animation, full engine-game separation. Эти задачи не блокируют 1.0. Они являются отдельными продуктовыми ветвями с огромным blast radius.
-Networking: если проект не сетевой по определению, это почти второй движок внутри первого (authority model, rollback, prediction, replication, cheat surface). Отложено.
-Deferred rendering: если current forward path достаточен под целевой контент — не делать обязательным. Рендерный слой съедает полгода жизни.
-F.1 — Networking (post-1.0)
-Требует отдельного scope decision: dedicated server? P2P? listen server?
-•	Определить authority model (server-authoritative vs owner-predicted)
-•	Определить rollback/prediction policy
-•	Определить replication granularity (per-component? per-entity?)
-•	Создать state serialization contracts (через Query API из A.2)
-•	Создать disconnect/reconnect model
-•	Определить snapshot budget (bytes/frame)
-•	Cheat surface analysis: что клиент может подделать, что нет
-•	Изменить src/network/protocol.rs — production message format with versioning
-•	Изменить src/network/server.rs — reliable delivery, delta compression
-•	Создать src/network/state_replication.rs
-•	Создать src/network/prediction.rs
-•	Gate behind #[cfg(feature = "networking")]
-•	Integration test: 2 clients, 100 ticks, state consistency
-F.2 — Deferred / Forward+ rendering (post-1.0)
-•	Реализовать src/graphics/lighting.rs:
-o	G-Buffer: albedo, normal, metallic-roughness, depth
-o	Light list: point, spot, directional
-o	Deferred resolve pass
-•	Добавить src/graphics/forward_plus.rs как альтернативу:
-o	Clustered light culling
-o	Light index buffer
-•	Quality setting: forward (current) vs deferred vs forward+
-•	SSAO pass (new file src/graphics/ssao.rs)
-F.3 — Advanced animation pipeline (post-1.0)
-•	Достроить src/animation/ragdoll.rs — full Rapier integration
-•	Достроить src/animation/active_ragdoll.rs — PD controller tuning, get-up transitions
-•	Достроить src/animation/foot_ik.rs — terrain adaptation
-•	Подключить к render: renderer.render_skinned() in main render loop
-•	Gate behind #[cfg(feature = "advanced_anim")]
-F.4 — Full memory management (post-1.0)
-Базовый accounting уже в B.8. Здесь — sophisticated system:
-•	Реализовать src/memory/entity_pool.rs:
-o	Ring buffer с generation counter
-o	Free list для O(1) alloc/dealloc
-o	Integration с Ecs::spawn() / Ecs::despawn()
-•	Расширить src/memory/memory_manager.rs:
-o	Per-allocation tracking (debug builds)
-o	Custom allocator для hot paths
-o	Memory fragmentation analysis
-o	Automatic budget enforcement (reject alloc when over budget)
-F.5 — Engine-game separation (post-1.0)
-Финальная чистка для переиспользуемости:
-•	Создать src/game_pack/ — вынести всю game-specific logic:
-o	game_pack/stalker_ai.rs — desire, thresholds, combat для STALKER-specific behavior
-o	game_pack/stalker_economy.rs — jobs, desperation, banditry
-o	game_pack/stalker_ecosystem.rs — wolf/boar/bloodsucker specific logic
-o	game_pack/stalker_factions.rs — Loners, Duty, Freedom, Bandits
-•	Engine core (src/ai/, src/economy/, src/ecosystem/) становится generic:
-o	AI: generic goal system, generic desire framework (traits, not hardcoded)
-o	Economy: generic trade/job framework
-o	Ecosystem: generic food chain / territory framework
-•	Конкретная игра подключается через Plugin trait
-________________________________________
-Критерии v1.0
-Версия 1.0 считается достигнутой когда все gates Phase E пройдены, все P0 release blockers закрыты, плюс:
-Functional Completeness (функциональная полнота)
-1.	Все .ron конфиги — единственный source of truth (нет hardcoded дублей)
-2.	ECS доступ только через Query API (нет прямого доступа к SparseSet полям)
-3.	Все stubs реализованы — каждый файл в 1.0-scope полностью достроен, 0 ошибок, 0 warnings
-4.	Parallel tick — default или documented sequential (если rollback rule сработал — sequential is OK, не blocker)
-5.	Каждый модуль имеет maturity label и минимум 5 unit-тестов (для production/partial)
-6.	main.rs < 150 строк — чистый dispatcher
-7.	Шейдеры в файлах с hot reload в dev mode
-Architectural Integrity (архитектурная целостность)
-1.	Doctor --strict passes без warnings
-2.	Trust boundaries: all 9 failure scenarios handled gracefully
-3.	Content governance: all 6 formats versioned, backward compat enforced, content hash invalidation works
-4.	Memory: per-subsystem byte accounting active, leak detection on shutdown
-Operational Reliability (эксплуатационная надёжность)
-1.	Integration tests: 25+ existing + 15 new (parallel, determinism, save migration, config loading, trust boundaries, save torture)
-2.	Benchmarks: regression suite, tracked in CI, < 5% regression gate
-3.	Observability: MetricsRegistry active, headless soak report clean (6 months, 0 critical)
-4.	Save/Load: all 9 torture scenarios pass
-Release Readiness (готовность к выпуску)
-1.	CI/CD: automated build, test, clippy, doctor, bench, soak
-2.	Platform: matrix documented, min-spec check in renderer, tested on target configurations
-3.	Crash symbolication: symbols archived, minidump generation works
-4.	Release: reproducible builds, version stamp, changelog, save compat matrix, first-run validation
-5.	First-run validation passes on clean machine (fresh Windows install, no dev tools)
-6.	Release Blocker Register: all P0 items closed, all P1 items either closed or have documented exception with mitigation
-Out of Scope (не блокирует 1.0)
-1.	Networking, deferred, advanced anim: explicitly marked planned/post-1.0, feature-gated, not blocking release
-2.	Parallel tick (если rollback rule сработал): sequential = shipping default, parallel = experimental
-________________________________________
-Оценка объёма (скорректированная)
-Предыдущая оценка (28-40 недель / 1 dev) была подозрительно оптимистичной. Query layer миграция — недельное болото. Parallel tick + determinism — debugging hell. Shader externalization вскрывает скрытые проблемы пайплайнов. Content governance плодит хвосты. Unit tests на legacy-ish код всегда дольше, чем в воображении.
-Фаза	Задач	Файлов затронуто	1 сильный dev	3 dev (реальный мир)
-A — Stabilization	4	~80	8-10 недель	3-4 недели
-B — Runtime Integrity	9	~70	8-10 недель	4-5 недель
-C — Performance & Observability	7	~30	6-8 недель	3-4 недели
-D — Tooling & Content Governance	8	~45	6-8 недель	3-4 недели
-E — Shipping & Release Ops	5	~20	4-6 недель	2-3 недели
-Итого до v1.0	33	~245	32-42 недели (8-10 мес)	15-20 недель (4-5 мес)
-F — Ambition (post-1.0)	5	~40	12-16 недель	5-7 недель
-Реалистичные сроки:
-•	1 сильный dev: 8-12 месяцев до 1.0
-•	3 сильных dev без координационной боли: 4-6 месяцев до 1.0
-•	3 dev в реальном мире (конфликты, баги, переделки): 6-9 месяцев до 1.0
-"Production 1.0" значит не просто "код написан", а: протестировано, отлажено, задокументировано, release-готово.
+Создать PR
 
+
+You are performing a FULL ENGINEERING AUDIT, BUG AUDIT, ARCHITECTURAL RISK REVIEW, and DOCUMENTATION GENERATION for a game engine repository.
+
+Your task is NOT to summarize casually.  
+You must scan the entire codebase and produce a **production-grade technical documentation package**, plus a **real engineering verdict**.
+
+Treat this as if you were a senior engine architect and release reviewer preparing the final internal technical review before a 1.0 release.
+
+The engine name is: ENGENE.
+
+Your goals:
+
+1. Extract the complete architecture of the engine
+2. Verify roadmap compliance
+3. Identify all subsystems
+4. Identify all dependencies and module relations
+5. Extract configuration sources
+6. Validate data-driven architecture
+7. Verify ECS access rules
+8. Verify tests and coverage
+9. Verify determinism / save / crash policies
+10. Audit bugs, risky code paths, and architectural fragility
+11. Detect false completeness (features that exist in code but are not actually integrated)
+12. Produce an honest production-readiness verdict
+13. Generate final technical documentation
+
+You must work step-by-step, and you must distinguish clearly between:
+- IMPLEMENTED
+- INTEGRATED
+- TESTED
+- SHIPPING-READY
+- PARTIAL
+- STUB
+- NOT FOUND
+
+Do not assume.  
+Do not hallucinate.  
+Always reference file paths and code evidence.
+
+--------------------------------------------------
+PHASE 1 — REPOSITORY STRUCTURE SCAN
+
+Scan the entire repository and output:
+
+1. Full module tree
+2. All directories
+3. All Rust modules
+4. Binary entry points
+5. Tools and scripts
+6. Assets directories
+7. Config directories
+
+Produce:
+- Module tree
+- Subsystem grouping
+
+Also list all binaries:
+src/bin/*
+and their roles.
+
+--------------------------------------------------
+PHASE 2 — DEPENDENCY GRAPH
+
+Build the internal dependency graph.
+
+For each module determine:
+- imports
+- cross-module dependencies
+- cyclic dependencies
+- ownership boundaries
+
+Output:
+1. Dependency matrix
+2. subsystem boundaries
+3. hot files (high fan-in)
+4. architectural risk zones
+5. likely merge-conflict hotspots
+
+--------------------------------------------------
+PHASE 3 — ECS ANALYSIS
+
+Detect the ECS implementation.
+
+Locate:
+- Ecs struct
+- component storages
+- query system
+- systems
+
+Check for violations of the rule:
+NO DIRECT STORAGE ACCESS
+
+Search for patterns like:
+ecs.transforms.get
+ecs.ai_states.get
+ecs.*.get(
+direct storage field access
+pub fields exposing storages
+
+Report:
+1. Query API usage
+2. Direct storage access occurrences
+3. System → component access patterns
+
+Produce a table:
+System | Components Read | Components Written | Access Method (Query / Direct / Mixed)
+
+Mark violations clearly.
+
+--------------------------------------------------
+PHASE 4 — CONFIGURATION SYSTEM
+
+Scan for configuration loading.
+
+Identify:
+- .ron files
+- config loaders
+- GameConfig
+- data_loader.rs
+- fallback constants
+- hardcoded constants that overlap configs
+
+List every config file.
+
+Expected canonical set (example):
+biomes.ron
+economy.ron
+food_chain.ron
+goals.ron
+jobs.ron
+materials.ron
+material_bridge.ron
+perception.ron
+population.ron
+rules.ron
+seasons.ron
+simulation.ron
+species.ron
+surfaces.ron
+tactics.ron
+weapons.ron
+
+For each config output:
+File | Exists | Parsed | Bound in GameConfig | Runtime Usage | Hardcoded duplicates | Scope (required/optional)
+
+Also detect:
+- config files referenced only by tooling
+- config files referenced only by doctor.rs
+- config files present but unused
+- fake configs (exist but not consumed)
+- hidden fallback logic that bypasses config
+
+--------------------------------------------------
+PHASE 5 — SYSTEMS AND GAME LOOP
+
+Locate:
+main.rs
+engine.rs
+tick pipeline
+system registration
+
+Determine:
+- game loop architecture
+- system execution order
+- streaming integration
+- render integration
+- audio integration
+- startup sequence
+- shutdown sequence
+
+Produce:
+ENGINE EXECUTION PIPELINE DIAGRAM
+
+Also identify:
+- orchestration still left outside systems
+- monolithic control flow
+- duplicated execution logic
+
+--------------------------------------------------
+PHASE 6 — SUBSYSTEM INVENTORY
+
+Detect all subsystems.
+
+Expected major areas:
+Core
+ECS
+Events
+Jobs / parallelism
+Physics
+Ballistics
+Fire simulation
+AI
+Emotion system
+Economy
+World streaming
+Chunk persistence
+Rendering
+Particles
+Audio
+Navigation
+Content pipeline
+Editor
+Memory manager
+Metrics / observability
+
+For each subsystem produce:
+Subsystem name
+Main files
+Status (production / experimental / partial / planned / deprecated)
+Integration level
+Test coverage
+Critical dependencies
+Known risks
+
+--------------------------------------------------
+PHASE 7 — TEST COVERAGE
+
+Scan:
+tests/
+#[cfg(test)]
+benches/
+
+List all tests.
+
+Classify them:
+- Unit tests
+- Integration tests
+- Benchmarks
+- Soak tests
+- Determinism tests
+- Save/load tests
+- Trust boundary tests
+- Migration tests
+- Tooling tests
+
+Output:
+Module | Test Count | Coverage type | Risk level if under-tested
+
+Also detect:
+- modules with zero tests
+- files that are high-risk and only integration-tested
+- tests marked ignored
+- tests that exist but do not assert much
+
+--------------------------------------------------
+PHASE 8 — SAVE / PERSISTENCE
+
+Locate:
+save_chunks.rs
+chunk_persistence.rs
+build_manifest.rs
+
+Verify:
+- save schema version
+- chunk schema version
+- entity snapshot schema
+- migration registry
+- atomic write
+- backup saves
+- partial recovery
+- load validation
+- corrupted save handling
+
+Output:
+SAVE PIPELINE DOCUMENTATION
+
+Also answer:
+- Can this system survive interrupted writes?
+- Can it load previous versions?
+- Is persistence deterministic enough for production?
+- Is save/load torture evidence present in code/tests?
+
+--------------------------------------------------
+PHASE 9 — OBSERVABILITY
+
+Locate:
+metrics_registry.rs
+profiler_dashboard.rs
+runtime dashboards
+doctor.rs
+
+List all metrics.
+
+Categories:
+- Engine metrics
+- AI metrics
+- Physics metrics
+- Memory metrics
+- Event bus metrics
+- Streaming metrics
+- Render metrics
+- Crash metrics
+
+Output:
+- metrics table
+- producers
+- consumers
+- export paths
+- retention or artifact paths if present
+
+Also detect:
+- metrics registered but never updated
+- metrics used in doctor thresholds
+- observability gaps
+
+--------------------------------------------------
+PHASE 10 — PERFORMANCE SYSTEM
+
+Locate:
+parallel tick
+frame graph
+job scheduler
+AI budgets
+LOD systems
+quality governor
+
+Determine:
+- parallelization model
+- access conflict detection
+- determinism tests
+- fallback rules
+- perf budget enforcement
+- AI scheduling
+- physics LOD enforcement
+- renderer degradation strategy
+
+Output:
+ENGINE PERFORMANCE ARCHITECTURE
+
+Also detect:
+- code that exists but is not enabled
+- fake parallelism
+- fallback-only code paths
+- perf-critical systems still running sequentially
+
+--------------------------------------------------
+PHASE 11 — CONTENT PIPELINE
+
+Locate:
+import pipeline
+cook pipeline
+validator
+asset manager
+content hash / invalidation code
+
+Describe pipeline:
+Import → Cook → Validate → Runtime load
+
+Also detect:
+- cooked schema versioning
+- prefab schema versioning
+- invalidation rules
+- cycle detection
+- quarantine handling for invalid content
+
+--------------------------------------------------
+PHASE 12 — TOOLING
+
+Detect tools:
+doctor.rs
+editor
+cook tools
+doc generators
+CLI tools
+safe mode
+layout persistence
+symbolication scripts
+
+Describe capabilities.
+
+Also detect:
+- tools that exist but are not wired
+- partial editors
+- panels that can crash without isolation
+- doctor checks that are stale or wrong
+
+--------------------------------------------------
+PHASE 13 — RELEASE SYSTEM
+
+Locate:
+CI workflows
+build scripts
+packaging scripts
+version stamping
+symbol generation
+first-run validation scripts
+compatibility docs
+release checklist
+
+Describe release pipeline.
+
+Also detect:
+- workflows present but not complete
+- jobs not actually gating release
+- missing symbol generation
+- lack of reproducibility controls
+- missing clean-machine validation
+
+--------------------------------------------------
+PHASE 14 — ROADMAP VALIDATION
+
+Compare actual code with roadmap requirements.
+
+Check:
+- Data-driven configs
+- Query ECS
+- Stub removal
+- Parallel tick
+- Metrics
+- Content governance
+- Save torture
+- CI gates
+- Release blockers
+- Scope lock violations
+- stop-doing violations
+
+Produce:
+ROADMAP COMPLIANCE REPORT
+
+For each roadmap item mark:
+IMPLEMENTED / PARTIAL / NOT FOUND / CONTRADICTED
+
+--------------------------------------------------
+PHASE 15 — BUG AUDIT (NEW)
+
+Perform a real bug-oriented audit.
+
+Look for:
+- unwrap() / expect() in critical paths
+- TODO / FIXME / unimplemented! / panic! in shipping paths
+- dead code in critical modules
+- stale feature flags
+- code paths that can never execute
+- obvious race risks
+- persistence corruption risks
+- invalid fallback logic
+- impossible assumptions
+- duplicated logic
+- mismatch between config and runtime
+- missing error propagation
+- unsafe startup assumptions
+- missing file existence checks
+- silent failures
+- metrics/reporting that can lie
+
+Output:
+BUG AUDIT TABLE
+
+Columns:
+ID | Severity | File | Problem | Why it is dangerous | Suggested fix
+
+Severity values:
+CRITICAL / HIGH / MEDIUM / LOW
+
+--------------------------------------------------
+PHASE 16 — ARCHITECTURAL RISK AUDIT (NEW)
+
+Perform a dedicated architectural risk review.
+
+Detect:
+- excessive coupling
+- monolithic hot files
+- fake abstraction boundaries
+- game-specific logic inside engine core
+- feature garden syndrome
+- code claiming to be generic but actually game-bound
+- duplicated source of truth
+- systems too central to change safely
+- bus factor = 1 zones
+- release process fragility
+- schema compatibility fragility
+
+Output:
+ARCHITECTURAL RISK REGISTER
+
+Columns:
+Risk ID | Severity | Area | Description | Evidence | Release impact | Recommendation
+
+--------------------------------------------------
+PHASE 17 — FALSE COMPLETENESS AUDIT (NEW)
+
+Identify features that appear complete in code but are not truly production-ready.
+
+For each major feature/subsystem classify:
+- CODE EXISTS
+- ENABLED IN RUNTIME
+- USED BY DEFAULT
+- COVERED BY TESTS
+- SHIPPING READY
+
+Look especially for:
+- systems compiled but never registered
+- features gated but not reachable
+- files that exist but are unused
+- fallback-only implementations
+- metrics present but not consumed
+- config files present but not bound
+- tools present but not wired
+- test files present but not run in CI
+
+Output:
+FALSE COMPLETENESS MATRIX
+
+Feature | Code Exists | Registered | Used in Runtime | Tested | Shipping Ready | Notes
+
+--------------------------------------------------
+PHASE 18 — RELEASE BLOCKER AUDIT (NEW)
+
+Evaluate the codebase against a release-blocker model.
+
+Check for:
+- direct ECS storage access
+- config duplication
+- oversized manual orchestration in main.rs
+- unresolved stubs in 1.0 scope
+- unwrap in critical paths
+- undefined trust boundaries
+- missing determinism guarantees or fallback
+- missing observability
+- failing save/load torture guarantees
+- unversioned content formats
+- doctor strict gaps
+- first-run validation gaps
+- missing symbol archive
+- benchmark regressions
+
+Output:
+RELEASE BLOCKER STATUS TABLE
+
+Columns:
+Blocker | Status (PASS / FAIL / PARTIAL / EXCEPTION) | Evidence | Blocking? | Notes
+
+Be strict.
+
+--------------------------------------------------
+PHASE 19 — PRODUCTION READINESS VERDICT (NEW)
+
+Based only on code evidence, tests, tooling, and release system, answer honestly:
+
+Is this engine:
+1. NOT READY FOR PRODUCTION
+2. RELEASE CANDIDATE ONLY
+3. READY FOR SINGLE-PLAYER 1.0 PRODUCTION
+4. READY FOR FULL PLATFORM-QUALITY PRODUCTION
+
+You must justify the verdict with hard evidence.
+
+Output:
+PRODUCTION READINESS VERDICT
+
+Include:
+- final verdict
+- strongest evidence for readiness
+- strongest evidence against readiness
+- remaining blockers
+- acceptable documented exceptions
+- exact next steps before release
+
+Important:
+Do not use motivational language.
+Do not say "looks good overall" unless evidence supports it.
+Be willing to say "NOT READY".
+
+--------------------------------------------------
+PHASE 20 — FINAL DOCUMENTATION OUTPUT
+
+Generate full documentation sections:
+
+1. Engine Overview
+2. Architecture
+3. Subsystem Map
+4. ECS Design
+5. Configuration System
+6. Execution Pipeline
+7. Physics System
+8. AI System
+9. Economy System
+10. Rendering System
+11. Streaming System
+12. Persistence System
+13. Observability
+14. Tooling
+15. CI/CD
+16. Release Process
+17. Bug Audit Summary
+18. Architectural Risk Summary
+19. False Completeness Summary
+20. Production Readiness Verdict
+
+Also include:
+- Risk assessment
+- Technical debt
+- Architecture strengths
+- Recommended improvements
+- Release blockers and mitigations
+
+--------------------------------------------------
+IMPORTANT RULES
+
+Do not hallucinate.
+If something is missing in code, mark it clearly as:
+NOT FOUND
+PARTIAL
+UNIMPLEMENTED
+
+Do not assume.
+
+Always reference file paths.
+
+If roadmap text contradicts repository state, say so explicitly.
+
+If documentation claims something but code evidence does not confirm it, mark:
+CLAIM NOT VERIFIED
+
+--------------------------------------------------
+FINAL OUTPUT FORMAT
+
+Return a structured ENGINE DOCUMENTATION + AUDIT report.
+
+Include:
+- Architecture diagrams
+- Subsystem tables
+- Config mapping tables
+- Test coverage tables
+- Dependency graph
+- Roadmap compliance analysis
+- Bug audit table
+- Architectural risk register
+- Release blocker status table
+- Final production readiness verdict
+
+The final document should read like an internal engine technical manual plus a release audit report.
+Копировать
+Summary
+Added a new full technical documentation and audit package at docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md, covering all 20 requested phases: architecture mapping, dependency graph, ECS compliance, config wiring, game loop/system ordering, subsystem inventory, tests, persistence, observability, performance, content pipeline, tooling, release process, roadmap compliance, bug/risk audits, false-completeness checks, release blockers, and final production-readiness verdict.
+
+The report explicitly classifies findings using the requested statuses (IMPLEMENTED / INTEGRATED / TESTED / SHIPPING-READY / PARTIAL / STUB / NOT FOUND), and includes blocker/risk matrices plus an explicit verdict of RELEASE CANDIDATE ONLY with concrete next steps before 1.0.
+
+Committed on the current branch with commit 8a763ba, and created a PR entry via the required tool.
+
+Testing
+
+✅ find .. -name AGENTS.md -print
+
+✅ find . -maxdepth 3 -type d | sort
+
+✅ cat Cargo.toml
+
+✅ python - <<'PY' ... (module/dependency/ECS/config/test inventory scripts used during audit generation)
+
+⚠️ cargo test -q (long-running compile/test process in this environment; no final completion output was returned within the interactive polling window)
+
+⚠️ cargo check -q --bin engene_headless --no-default-features --features headless && echo CHECK_OK (same limitation: long-running build with no terminal completion signal observed during polling)
+
+
+файл (1)
+смотри такой план исправления всех ошибок пойдет или както расширить? Да. Ниже — чистый, приземлённый roadmap, уже не “всё обо всём”, а именно как довести ENGENE из current RC-state до честного single-player production 1.0.
+
+Я специально выкину лишнюю романтику и оставлю:
+
+что чинить,
+
+в каком порядке,
+
+что является выходным критерием,
+
+что не трогать до 1.1.
+
+ENGENE → Production 1.0 Hardening Roadmap
+Главная цель
+
+Довести движок до состояния:
+
+single-player only
+
+sequential shipping-safe by default
+
+без фальшивых claims
+
+с реальными release gates
+
+с предсказуемой persistence/config/runtime behavior
+
+Главный принцип
+
+Сейчас не время “улучшать движок”.
+Сейчас время убирать ложную зрелость и закрывать реальные блокеры.
+
+Что считаем блокерами прямо сейчас
+
+По аудиту у тебя реальные стопперы такие:
+
+P0 — без этого не выпускать
+
+Direct ECS storage access
+
+Silent config fallback for required configs
+
+Silent persistence load failures
+
+Content pipeline placeholder logic в 1.0 scope
+
+Отсутствие реального CI release gating
+
+Unwrap/expect в критических путях
+
+Нечёткая truth-синхронизация между roadmap / doctor / code
+
+P1 — можно выпустить только с documented exception
+
+Parallel tick не настоящий
+
+Metrics partially wired
+
+Некоторые release ops могут быть manual
+
+Часть тестового покрытия больше integration-heavy, чем boundary-focused
+
+Порядок работ
+
+Я бы делал 5 жёстких фаз, без расползания.
+
+PHASE 0 — Freeze & Truth Alignment
+Цель
+
+Зафиксировать реальность. Прекратить спор документации с кодом.
+
+Что сделать
+0.1 Зафиксировать 1.0 scope письменно
+
+Создать или обновить документ:
+
+docs/canonical/V1_SCOPE_LOCK.md
+
+Там написать:
+
+1.0 = single-player
+
+shipping default = sequential tick
+
+networking = out of scope
+
+deferred/forward+ = out of scope
+
+advanced animation = out of scope
+
+content pipeline: либо в scope, либо explicitly demoted
+
+cook/prefab если не готовы — вывести за 1.0
+
+0.2 Синхронизировать roadmap и реальность по config set
+
+Исправить строку:
+
+не “19 .ron”, если реально top-level их 16
+
+Создать один canonical список:
+src/core/game_config.rs или src/core/data_loader.rs
+
+Doctor должен брать required configs оттуда, а не из своего ручного массива.
+
+0.3 Завести release blocker register как живой файл
+
+Создать:
+docs/canonical/RELEASE_BLOCKERS.md
+
+С текущими блокерами:
+
+RB-01 ECS direct access
+
+RB-02 config truth ambiguity
+
+RB-03 persistence silent fail
+
+RB-04 unresolved placeholders in 1.0 path
+
+RB-05 CI gates missing
+
+RB-06 critical unwraps
+
+RB-07 fake parallel claim
+
+RB-08 metrics partial wiring
+
+Done criteria
+
+scope lock зафиксирован
+
+canonical config set определён
+
+roadmap/doc/doctor больше не противоречат друг другу
+
+release blockers перечислены в одном месте
+
+PHASE 1 — ECS Boundary Enforcement
+Цель
+
+Убрать главный архитектурный дефект: прямой доступ к ECS storage.
+
+Почему это первое
+
+Пока все системы лезут в ecs.transforms, ecs.ai_states и прочее, ты не можешь честно заявлять:
+
+query-based architecture,
+
+controlled access,
+
+safe evolution,
+
+meaningful parallel scheduling.
+
+Что сделать
+1.1 Закрыть публичные storage fields
+
+В src/core/ecs.rs:
+
+storage fields перестают быть публичными для runtime systems
+
+доступ остаётся только:
+
+внутри ECS
+
+внутри query layer
+
+в низкоуровневых ECS tests, если нужно
+
+1.2 Довести query API до usable состояния
+
+Если текущий API неудобен, не надо героически терпеть. Доведите его до нормального вида.
+
+Цель:
+
+single component read/write
+
+tuple queries
+
+with/without filters
+
+iteration without awkward ceremony
+
+1.3 Мигрировать системы по приоритету
+
+Порядок:
+
+src/ai/*
+
+src/physics/*
+
+src/simulation/*
+
+src/economy/*
+
+src/world/*, где есть runtime logic
+
+src/gameplay/*
+
+src/tools/*, если они мутируют ECS напрямую
+
+1.4 Ввести временный fail-check
+
+Добавить скрипт или grep-check в CI/doctor:
+
+искать ecs\.[a-zA-Z_]+\.(get|get_mut|insert|remove)
+
+исключить только query-layer и ECS internals
+
+Что не делать
+
+не пытаться одновременно сделать “идеальный generic ECS”
+
+не переписывать полдвижка на новую философию
+
+цель тут: enforced boundary, а не диссертация по ECS
+
+Done criteria
+
+0 direct storage accesses в runtime systems
+
+query layer — единственный sanctioned path
+
+Ecs storages не торчат наружу
+
+тесты ECS/query зелёные
+
+PHASE 2 — Config & Runtime Truth Hardening
+Цель
+
+Сделать required configs настоящим source of truth, а не “можно не загрузить и тихо жить дальше”.
+
+Проблема сейчас
+
+Аудит показывает:
+
+loader есть
+
+fallback defaults есть
+
+ошибки могут маскироваться
+
+Для dev это удобно. Для production — опасно.
+
+Что сделать
+2.1 Разделить config policy на dev и strict
+
+Нужны 2 режима:
+
+Dev mode
+
+можно fallback-нуться
+
+warning/log
+
+удобно для локальной разработки
+
+Strict / shipping mode
+
+required config missing/invalid = hard failure
+
+никакой тихой подмены дефолтом
+
+2.2 Для каждого из 16 canonical .ron сделать mapping table
+
+Создать документ:
+docs/generated/CONFIG_WIRING_MATRIX.md
+
+Колонки:
+
+file
+
+exists
+
+parsed
+
+bound in GameConfig
+
+runtime consumer
+
+required/optional
+
+fallback allowed? yes/no
+
+2.3 Удалить hardcoded duplicates
+
+Особенно проверить:
+
+population limits
+
+simulation radii
+
+jobs/economy values
+
+goals/thresholds
+
+perception radii
+
+biome values
+
+materials/surfaces bridge
+
+2.4 Починить doctor
+
+Doctor должен проверять:
+
+all required configs exist
+
+all required configs parse
+
+strict mode fails on required config parse/load error
+
+no stale expected filenames like game.ron
+
+Done criteria
+
+все required configs реально wired
+
+в strict mode required config failure = fail
+
+hardcoded duplicates removed or documented as fallback-only in dev
+
+doctor uses canonical config source, not hand-maintained fantasy list
+
+PHASE 3 — Persistence Hardening
+Цель
+
+Сделать save/load честным, диагностируемым и не молчащим.
+
+Проблема сейчас
+
+Аудит пишет:
+
+silent failure on chunk load (return 0)
+
+migration infra есть, но цепочки слабые
+
+torture evidence не до конца подтверждено
+
+Что сделать
+3.1 Убрать silent failure
+
+В:
+
+src/world/chunk_persistence.rs
+
+src/memory/save_chunks.rs
+
+Запретить паттерны:
+
+“не смогли прочитать/декодировать → вернуть 0 и притвориться, что всё ок”
+
+Нужно:
+
+structured error
+
+log with context
+
+metric increment
+
+optional quarantine/bad file marker
+
+3.2 Разделить error classes
+
+Нужны как минимум:
+
+FileMissing
+
+DecodeFailed
+
+VersionMismatch
+
+MigrationFailed
+
+PartialLoad
+
+AtomicWriteFailed
+
+BackupRestoreFailed
+
+3.3 Довести atomic write policy
+
+Для всех save-critical путей:
+
+write temp
+
+flush if applicable
+
+rename
+
+backup previous
+
+recovery path
+
+3.4 Подтвердить migration path
+
+Сделать минимум:
+
+одна реальная тестовая миграция
+
+test save on old schema → load on new schema
+
+documented save compatibility matrix
+
+3.5 Save/load torture tests должны реально run в CI
+
+Не просто файл существует.
+Они должны быть частью release gating.
+
+Done criteria
+
+0 silent persistence failures
+
+corrupted save/load produces explicit diagnostics
+
+atomic save confirmed
+
+migration path tested
+
+save torture tests green in CI
+
+PHASE 4 — Cut Fake Completeness
+Цель
+
+Убрать всё, что создаёт видимость готовности, но по факту не готово.
+
+Это один из самых важных этапов
+4.1 Parallel tick: принять правду
+
+Сейчас есть 2 честных варианта:
+
+Вариант A
+
+Реально доделать parallel tick
+— но это дорого и рискованно.
+
+Вариант B
+
+Для 1.0:
+
+shipping default = sequential
+
+parallel = experimental
+
+claims в документации исправить
+
+release blocker снять как documented exception
+
+Для single-player 1.0 я бы выбрал Вариант B, если цель — реально выпустить.
+
+4.2 Content pipeline: либо добить, либо выкинуть из 1.0 claims
+
+Если:
+
+cook phase placeholder
+
+prefab phase placeholder
+
+то есть 2 пути:
+
+Путь 1
+
+Доделать pipeline до рабочей формы
+
+Путь 2
+
+Сказать честно:
+
+authored/static content only
+
+cook pipeline not required for 1.0 shipping
+
+pipeline stays partial/post-1.0
+
+Но не надо оставлять “ну вроде есть”.
+
+4.3 Metrics: подтвердить producers
+
+Надо пройтись по metrics_registry.rs и runtime модулям и сделать таблицу:
+
+metric registered
+
+metric updated
+
+metric exported
+
+metric consumed by doctor/dashboard
+
+Убрать “пустые” метрики или довести их до живого состояния.
+
+4.4 Tooling claims
+
+Если есть editor/tool that exists but not really wired, пометить честно:
+
+partial
+
+planned
+
+internal-only
+
+Done criteria
+
+parallel tick truth aligned
+
+content pipeline либо real, либо out-of-scope
+
+metrics no longer lie
+
+tooling maturity labels соответствуют коду
+
+PHASE 5 — Release Engineering & CI
+Цель
+
+Перевести релиз из устной традиции в автоматизированный процесс.
+
+Проблема сейчас
+
+Аудит прямо говорит:
+
+.github/workflows not found
+
+Это серьёзный production blocker.
+
+Что сделать
+5.1 Добавить реальные CI workflows
+
+Минимальный набор:
+
+build-dev
+
+build-release
+
+build-headless
+
+build-sdk
+
+test-unit
+
+test-integration
+
+doctor-strict
+
+persistence/save tests
+
+determinism/sequential baseline tests
+
+benchmark regression
+
+soak test
+
+5.2 Сделать release gates executable, а не документальными
+
+То, что написано в RELEASE_CHECKLIST.md, должно быть:
+
+либо CI job
+
+либо script
+
+либо manual validation with artifact
+
+5.3 First-run validation
+
+Нужен реальный сценарий:
+
+clean machine / VM
+
+no Rust tools
+
+unpack package
+
+run --version
+
+run headless
+
+run game
+
+check config/assets pathing
+
+5.4 Crash symbol flow
+
+Если full symbol server не нужен, минимально надо:
+
+archive symbols
+
+tie symbol archive to build hash
+
+symbolicate script
+
+5.5 Versioning artifacts
+
+Release package должен содержать:
+
+semver
+
+git hash
+
+build timestamp
+
+compatibility docs
+
+Done criteria
+
+CI workflows in repo
+
+release gates reproducible
+
+clean machine validation done
+
+symbol archive produced
+
+release package buildable without шаманство
+
+PHASE 6 — Final Production Gate Review
+Цель
+
+Перед релизом не писать код, а провести жёсткую приёмку.
+
+Что проверить руками и автоматически
+Functional completeness
+
+configs wired
+
+ECS boundary enforced
+
+no fake stubs in 1.0 path
+
+sequential shipping path stable
+
+Architectural integrity
+
+doctor strict green
+
+trust boundaries implemented
+
+no contradiction between docs and code
+
+content/save schema policy enforced
+
+Operational reliability
+
+tests green
+
+save/load torture green
+
+soak green
+
+metrics report sane
+
+no silent corruption paths
+
+Release readiness
+
+CI green
+
+package valid
+
+symbols archived
+
+compatibility docs present
+
+first-run verified
+
+Итоговые статусы
+
+Только один из трёх:
+
+1. NOT READY
+
+если есть любой незакрытый P0 blocker
+
+2. RELEASE CANDIDATE
+
+если P0 закрыты, но есть documented P1 exceptions
+
+3. READY FOR SINGLE-PLAYER 1.0
+
+если:
+
+P0 = 0
+
+P1 = либо 0, либо accepted with written mitigation
+
+release ops подтверждены артефактами
+
+Что конкретно я бы выкинул из 1.0 claims уже сейчас
+
+Чтобы не мучить себя лишним пафосом:
+
+Из 1.0 не обещать:
+
+real parallel execution, если его нет
+
+fully production content cook pipeline, если он placeholder
+
+broader engine-generic purity
+
+networking/deferred/advanced animation
+
+“full production platform quality”
+
+Для 1.0 обещать:
+
+single-player stable runtime
+
+sequential shipping-safe execution
+
+data-driven required configs
+
+save/load integrity
+
+release automation
+
+observability baseline
+
+editor/tooling partial but usable
+
+documented limits
+
+Самый практичный краткий план по неделям
+
+Если делать без цирка и распухания:
+
+Sprint 1
+
+scope lock
+
+roadmap/doc/doctor truth alignment
+
+canonical config set
+
+release blockers file
+
+Sprint 2–3
+
+ECS direct access removal
+
+query enforcement
+
+direct access grep gate
+
+Sprint 4
+
+config strict mode
+
+hardcoded duplicate cleanup
+
+config wiring matrix
+
+Sprint 5
+
+persistence hardening
+
+no silent load failure
+
+atomic save verification
+
+migration test
+
+Sprint 6
+
+parallel truth alignment
+
+mark sequential shipping default
+
+metrics producer audit
+
+content pipeline scope decision
+
+Sprint 7
+
+CI workflows
+
+doctor/test/build gates
+
+benchmark + soak jobs
+
+Sprint 8
+
+package release
+
+clean machine validation
+
+symbol archive
+
+final blocker review
+
+Честный итог
+
+Если делать по-чистому, а не “давайте ещё добавим SSAO, раз уж сели”, то ENGENE можно довести до:
+
+single-player production 1.0
+
+через:
+
+закрытие ECS boundary,
+
+жёсткую config/persistence правду,
+
+отказ от fake-complete claims,
+
+реальный CI/release pipeline.
+
+Если в одной фразе
+
+Не надо сейчас “улучшать движок”. Надо убрать ложь, закрыть границы, сделать релиз воспроизводимым и заставить код, документацию и tooling говорить одно и то же.
+
+Если хочешь, следующим сообщением я могу превратить это в таблицу task-by-task:
+задача → файл → что менять → критерий приёмки → приоритет.
+Копировать
+Summary
+
+Добавил отдельный практический документ docs/canonical/ENGENE_HARDENING_ROADMAP_1_0.md с жёсткой структурой: P0/P1 blocker model, 6 фаз исполнения, done criteria, что не обещать в 1.0, sprint map и task-by-task матрица (задача → файлы → критерий приёмки).
+
+Обновил исходный аудит docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md, добавив post-review примечание и прямую привязку к новому execution roadmap, чтобы закрыть комментарий “нужен более прикладной план, а не только аудит”.
+
+Изменения закоммичены на текущей ветке (6da7b26) и PR-описание зафиксировано через make_pr.
+
+Testing
+
+✅ git status --short && nl -ba docs/canonical/ENGENE_HARDENING_ROADMAP_1_0.md | sed -n '1,260p' && nl -ba docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md | tail -n 20
+
+✅ git add docs/canonical/ENGENE_HARDENING_ROADMAP_1_0.md docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md && git commit -m "docs: add actionable 1.0 hardening roadmap and task matrix"
+
+
+файла (2)
+
+ENGENE_HARDENING_ROADMAP_1_0.md
+Новый
+
+ENGENE_PRODUCTION_AUDIT_2026.md
+Новый
+
+
+
+Разница
+Журналы
+
+docs/canonical/ENGENE_HARDENING_ROADMAP_1_0.md
+docs/canonical/ENGENE_HARDENING_ROADMAP_1_0.md
+Новый
++220
+-0
+
+# ENGENE → Production 1.0 Hardening Roadmap
+
+Статус: post-audit execution plan (после `ENGENE_PRODUCTION_AUDIT_2026.md`)
+Цель: довести ENGENE до **честного single-player production 1.0** без ложных claims.
+
+---
+
+## 1. Главная цель и принципы
+
+### Target state for 1.0
+- single-player only;
+- shipping default = sequential tick;
+- required configs fail-fast в strict/shipping режиме;
+- persistence без silent failure;
+- release gates автоматизированы в CI.
+
+### Главный принцип
+Сейчас не “улучшение всего движка”, а закрытие P0-блокеров и синхронизация truth между code/docs/tooling.
+
+---
+
+## 2. Release blocker model
+
+### P0 (без этого не выпускать)
+1. Direct ECS storage access в runtime-системах.
+2. Silent config fallback для required config.
+3. Silent persistence load failures.
+4. Placeholder-логика в 1.0 content path.
+5. Отсутствие реального CI release gating.
+6. `unwrap/expect` в критических путях.
+7. Расхождение roadmap/doctor/code truth.
+
+### P1 (можно только с documented exception)
+1. Parallel tick как experimental path (если не завершён).
+2. Partial metrics wiring.
+3. Часть release operations manual (временно).
+4. Integration-heavy coverage без достаточных boundary checks.
+
+---
+
+## 3. Phase plan (execution order)
+
+## PHASE 0 — Freeze & Truth Alignment
+
+### Что делаем
+- Ввести/обновить `docs/canonical/V1_SCOPE_LOCK.md`:
+  - single-player only;
+  - sequential default;
+  - networking, advanced anim, и прочее — explicit out-of-scope для 1.0 (или documented exception).
+- Завести `docs/canonical/RELEASE_BLOCKERS.md` как живой реестр RB-01..RB-08.
+- Устранить расхождение “16 vs 19 configs”: единый canonical list в коде и переиспользование этого списка в doctor.
+
+### Done criteria
+- scope lock зафиксирован;
+- один canonical config source;
+- roadmap/doc/doctor формулируют одинаковую реальность.
+
+---
+
+## PHASE 1 — ECS Boundary Enforcement
+
+### Что делаем
+- Закрыть `pub`-доступ к component storages в `src/core/ecs.rs`.
+- Расширить/дошлифовать query API до пригодного для систем.
+- Мигрировать runtime-системы на sanctioned ECS access path:
+  - `src/ai/*`, `src/physics/*`, `src/simulation/*`, `src/economy/*`, `src/gameplay/*`, runtime-части `src/world/*`.
+- Добавить gate-проверку (doctor/CI script) на прямой доступ `ecs.<storage>.<get|get_mut|insert|remove>` вне whitelist.
+
+### Done criteria
+- 0 прямых storage access в runtime systems;
+- storages больше не торчат наружу;
+- query path — единственный sanctioned.
+
+---
+
+## PHASE 2 — Config & Runtime Truth Hardening
+
+### Что делаем
+- Ввести dual-mode policy:
+  - Dev mode: controlled fallback + warning;
+  - Strict/Shipping mode: required config error = hard fail.
+- Сгенерировать `docs/generated/CONFIG_WIRING_MATRIX.md` для всех canonical `.ron`.
+- Удалить hardcoded duplicates (или явно пометить как dev-only fallback).
+- Перевести doctor на canonical config list из runtime/config слоя.
+
+### Done criteria
+- required configs реально wired;
+- strict mode падает на missing/invalid required config;
+- doctor не содержит hand-maintained stale list.
+
+---
+
+## PHASE 3 — Persistence Hardening
+
+### Что делаем
+- Убрать silent return-paths в load (например “decode failed -> return 0”).
+- Ввести typed error classes:
+  - `FileMissing`, `DecodeFailed`, `VersionMismatch`, `MigrationFailed`, `PartialLoad`, `AtomicWriteFailed`, `BackupRestoreFailed`.
+- Довести atomic/backup/recovery policy для save-critical paths.
+- Подтвердить минимум 1 реальную migration chain test-case.
+- Включить persistence torture tests в release CI gates.
+
+### Done criteria
+- 0 silent failures;
+- corruption выдает явную диагностику;
+- migration path и save/load torture подтверждены в CI.
+
+---
+
+## PHASE 4 — Cut Fake Completeness
+
+### Что делаем
+- Parallel tick truth alignment:
+  - если не production-ready — явно `experimental`,
+  - shipping default остаётся sequential.
+- Content pipeline decision:
+  - либо реально добить cook/prefab path,
+  - либо честно вывести из 1.0 claims (documented scope demotion).
+- Metrics producer audit: “registered vs updated vs consumed”.
+- Tooling maturity labels привести к фактическому integration status.
+
+### Done criteria
+- нет misleading claims;
+- partial/stub зоны формально помечены и не маскируются как production-ready.
+
+---
+
+## PHASE 5 — Release Engineering & CI
+
+### Что делаем
+- Добавить `.github/workflows/*` с минимумом:
+  - build (dev/release/headless/sdk),
+  - unit+integration tests,
+  - doctor strict,
+  - persistence/determinism checks,
+  - benchmark regression,
+  - soak job.
+- Превратить release checklist в executable gates (job/script/artifact).
+- First-run clean-machine validation сценарий.
+- Symbol archive + symbolication flow, привязанный к build hash.
+
+### Done criteria
+- CI workflow присутствует в репо;
+- release gates воспроизводимы;
+- first-run validation и symbol artifacts подтверждены.
+
+---
+
+## PHASE 6 — Final Production Gate Review
+
+### Gate categories
+1. Functional completeness;
+2. Architectural integrity;
+3. Operational reliability;
+4. Release readiness.
+
+### Final status options
+1. NOT READY (любой незакрытый P0);
+2. RELEASE CANDIDATE (P0 закрыты, есть P1 exceptions);
+3. READY FOR SINGLE-PLAYER 1.0 (P0=0, P1=0 или formal accepted with mitigation).
+
+---
+
+## 4. Что НЕ обещать в 1.0
+
+Не включать в 1.0 claims, если не доведено до production качества:
+- real parallel execution;
+- full production content cook pipeline;
+- networking/deferred/advanced animation;
+- full platform-grade production statement.
+
+Обещать в 1.0:
+- single-player stable runtime;
+- sequential shipping-safe execution;
+- data-driven required config discipline;
+- save/load integrity;
+- reproducible release pipeline;
+- baseline observability.
+
+---
+
+## 5. Sprint map (8-week practical cadence)
+
+1. Sprint 1: scope lock + truth alignment + blockers register.
+2. Sprint 2–3: ECS boundary enforcement.
+3. Sprint 4: config strict mode + wiring matrix.
+4. Sprint 5: persistence hardening + migration test.
+5. Sprint 6: fake completeness cleanup (parallel/content/metrics truth).
+6. Sprint 7: CI workflows + gates.
+7. Sprint 8: packaging + first-run + symbol archive + final gate review.
+
+---
+
+## 6. Task-by-task matrix (задача → файл → критерий)
+
+| ID | Priority | Task | Primary files | Acceptance criteria |
+|---|---|---|---|---|
+| T-001 | P0 | Scope lock doc | `docs/canonical/V1_SCOPE_LOCK.md` | 1.0 scope утверждён, out-of-scope explicit |
+| T-002 | P0 | Release blockers register | `docs/canonical/RELEASE_BLOCKERS.md` | RB-01..RB-08 задокументированы, владельцы/статусы назначены |
+| T-003 | P0 | Canonical config source | `src/core/game_config.rs`, `src/tools/doctor.rs` | doctor читает canonical list, без ручного дублирования |
+| T-004 | P0 | ECS storage privacy | `src/core/ecs.rs` | runtime code не может обращаться к storages напрямую |
+| T-005 | P0 | Query API migration | `src/core/query.rs`, runtime systems | 0 forbidden direct access hits по CI grep gate |
+| T-006 | P0 | Strict config mode | `src/core/game_config.rs`, runtime startup | required parse/load fail => hard fail in shipping/strict |
+| T-007 | P0 | Config wiring matrix | `docs/generated/CONFIG_WIRING_MATRIX.md` | все canonical `.ron` имеют runtime consumer mapping |
+| T-008 | P0 | Remove silent load fail | `src/world/chunk_persistence.rs`, `src/memory/save_chunks.rs` | decode/read/version errors возвращают typed errors + diagnostics |
+| T-009 | P0 | Save atomic policy verification | `src/memory/atomic_saved.rs`, persistence callers | save-critical paths проходят atomic+backup policy checks |
+| T-010 | P0 | Migration proof test | persistence tests | old schema save successfully migrates/loads on current build |
+| T-011 | P1 | Parallel truth alignment | `src/core/engine.rs`, docs | shipping default sequential, parallel clearly experimental |
+| T-012 | P0/P1 | Content pipeline scope decision | `src/content/pipeline.rs`, scope docs | либо functional cook/prefab, либо explicit out-of-scope |
+| T-013 | P1 | Metrics producer audit | `src/core/metrics_registry.rs`, producers, dashboards | no registered-but-dead critical metrics |
+| T-014 | P0 | CI workflows | `.github/workflows/*` | build/test/doctor/persistence/determinism jobs green |
+| T-015 | P1 | Benchmark/soak gates | workflows + benches/tests | regression threshold and soak stability tracked |
+| T-016 | P1 | First-run validation | release scripts/docs | clean-machine runbook + artifact evidence |
+| T-017 | P1 | Symbol archive flow | release scripts/docs | symbols archived and tied to build hash |
+
+---
+
+## 7. Executive one-liner
+
+**Не расширять scope; убрать ложные claims, закрыть ECS/config/persistence/CI границы и выпустить воспроизводимый single-player 1.0.**
+docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md
+docs/canonical/ENGENE_PRODUCTION_AUDIT_2026.md
