@@ -1,6 +1,6 @@
 #[test]
 fn quest_system_generates_quest() {
-    use engene::gameplay::quest_system::QuestSystem;
+    use engene::game::gameplay::quest_system::QuestSystem;
 
     let _quest_system = QuestSystem::new();
 }
@@ -48,7 +48,7 @@ fn quest_board_tracking() {
 
 #[test]
 fn faction_relations_default() {
-    use engene::gameplay::factions::{Faction, FactionRelations, FactionStance};
+    use engene::game::gameplay::factions::{Faction, FactionRelations, FactionStance};
 
     let rel = FactionRelations::new();
     assert_eq!(rel.stance_between(Faction::Loners, Faction::Loners), FactionStance::Allied);
@@ -59,7 +59,7 @@ fn faction_relations_default() {
 
 #[test]
 fn faction_hostility_check() {
-    use engene::gameplay::factions::{Faction, FactionRelations};
+    use engene::game::gameplay::factions::{Faction, FactionRelations};
 
     let mut rel = FactionRelations::new();
     assert!(!rel.is_hostile(Faction::Loners, Faction::Duty));
@@ -73,8 +73,7 @@ fn faction_hostility_check() {
 
 #[test]
 fn faction_membership_component() {
-    use engene::gameplay::factions::Faction;
-    use engene::world::components::FactionMembership;
+    use engene::world::components::{Faction, FactionMembership};
 
     let membership = FactionMembership::default();
     assert_eq!(membership.faction, Faction::Loners);

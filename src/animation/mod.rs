@@ -12,7 +12,6 @@ pub mod animation;
 pub mod animation_ladder;
 pub mod clip_map;
 pub mod injury_animation;
-pub mod animation_integration;
 pub mod locomotion;
 pub mod micro_motion;
 pub mod procedural;

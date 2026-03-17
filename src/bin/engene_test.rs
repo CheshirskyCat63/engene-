@@ -338,7 +338,7 @@ impl ApplicationHandler for TestApp {
 
                 // Player-object collision (push-back)
                 for &e in &self.engine.ecs.alive {
-                    if let Some(t) = self.engine.ecs.transforms.get(&e) {
+                    if let Some(t) = self.engine.ecs.get_transform(e) {
                         let dx = self.camera.position.x - t.x;
                         let dz = self.camera.position.z - t.y;
                         let dist_sq = dx * dx + dz * dz;
@@ -429,14 +429,14 @@ impl ApplicationHandler for TestApp {
                     if let Some(ballistics) = self.engine.resources.get::<BallisticsSystem>() {
                         for (pi, proj) in ballistics.projectiles.iter().enumerate() {
                             for &e in &self.engine.ecs.alive {
-                                if let Some(t) = self.engine.ecs.transforms.get(&e) {
+                                if let Some(t) = self.engine.ecs.get_transform(e) {
                                     let ey = self.heightmap.sample(t.x, t.y) + 1.0;
                                     let dx = proj.pos.x - t.x;
                                     let dy = proj.pos.y - ey;
                                     let dz = proj.pos.z - t.y;
                                     let dist_sq = dx * dx + dy * dy + dz * dz;
                                     if dist_sq < 1.5 * 1.5 {
-                                        let name = self.engine.ecs.names.get(&e)
+                                        let name = self.engine.ecs.get_name(e)
                                             .map(|n| n.0.clone())
                                             .unwrap_or_default();
                                         hits.push((pi, e, [t.x, ey, t.y], name));
@@ -454,13 +454,13 @@ impl ApplicationHandler for TestApp {
                             for i in 0..4u32 {
                                 let angle = i as f32 * std::f32::consts::FRAC_PI_2;
                                 let debris = self.engine.ecs.spawn();
-                                self.engine.ecs.transforms.insert(debris, Transform {
+                                self.engine.ecs.set_transform(debris, Transform {
                                     x: pos[0] + angle.cos() * 0.6,
                                     y: pos[2] + angle.sin() * 0.6,
                                     cell_x: 0,
                                     cell_y: 0,
                                 });
-                                self.engine.ecs.names.insert(debris, Name(format!("debris_{}", name)));
+                                self.engine.ecs.set_name(debris, Name(format!("debris_{}", name)));
                             }
                             self.hud.push_notification(
                                 &format!("DESTROYED: {}", name),
@@ -525,7 +525,7 @@ impl ApplicationHandler for TestApp {
                 {
                     spatial.clear();
                     for &e in &self.engine.ecs.alive {
-                        if let Some(t) = self.engine.ecs.transforms.get(&e) {
+                        if let Some(t) = self.engine.ecs.get_transform(e) {
                             spatial.insert(e, t.x, t.y);
                         }
                     }
@@ -632,7 +632,7 @@ fn collect_sandbox_instances(
     let cam = glam::Vec3::from(camera_pos);
     let mut out = Vec::with_capacity(ecs.alive.len());
     for &e in &ecs.alive {
-        let t = match ecs.transforms.get(&e) {
+        let t = match ecs.get_transform(e) {
             Some(t) => t,
             None => continue,
         };
@@ -645,12 +645,12 @@ fn collect_sandbox_instances(
         if !frustum.test_sphere(pos, 2.0) {
             continue;
         }
-        let color = if let Some(EntityKind::Npc) = ecs.kinds.get(&e) {
+        let color = if let Some(EntityKind::Npc) = ecs.get_kind(e) {
             [0.16, 0.47, 1.0]
-        } else if let Some(EntityKind::Monster(_)) = ecs.kinds.get(&e) {
+        } else if let Some(EntityKind::Monster(_)) = ecs.get_kind(e) {
             [0.83, 0.0, 0.0]
         } else {
-            prefab_color(ecs.names.get(&e).map(|n| n.0.as_str()))
+            prefab_color(ecs.get_name(e).map(|n| n.0.as_str()))
         };
         out.push(EntityInstance {
             position: [t.x, y, t.y],

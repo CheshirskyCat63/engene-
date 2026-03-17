@@ -64,7 +64,7 @@ fn production_world_layout_skeleton() {
 
 #[test]
 fn production_item_registry_coverage() {
-    use engene::economy::item_registry::{ItemRegistry, ItemCategory};
+    use engene::game::economy::item_registry::{ItemRegistry, ItemCategory};
     let registry = ItemRegistry::new();
     assert!(registry.by_category(ItemCategory::Medkit).len() >= 2);
     assert!(registry.by_category(ItemCategory::Food).len() >= 2);

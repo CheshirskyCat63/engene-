@@ -10,7 +10,7 @@ use crate::core::mutation_policy::FixedTickContext;
 use crate::core::plugin::EngineBuilder;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
-use crate::economy::resource_flow;
+use crate::game::economy::resource_flow;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -118,7 +118,7 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
 
     {
         use std::collections::HashMap;
-        use crate::ai::combat_tactics::tactics::TacticProfile;
+        use crate::game::ai::combat_tactics::tactics::TacticProfile;
         use crate::core::config::{load_config, ConfigEnvelope};
         let tactics: HashMap<String, TacticProfile> =
             load_config::<ConfigEnvelope<HashMap<String, TacticProfile>>>("game/data/tactics.ron")
@@ -158,29 +158,29 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.add_system_default(Box::new(crate::simulation::simulation::SimulationSystem::new(
         center, center,
     )));
-    builder.add_system_default(Box::new(crate::simulation::world_tick::WorldTickSystem::new(
+    builder.add_system_default(Box::new(crate::game::runtime_world_tick::WorldTickSystem::new(
         grid,
     )));
-    builder.add_system_default(Box::new(crate::ai::ai::AiSystem::new()));
+    builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
     builder.add_system_default(Box::new(crate::physics::physics::PhysicsSystem::new(
         heightmap,
     )));
-    builder.add_system_default(Box::new(crate::economy::economy::EconomySystem));
+    builder.add_system_default(Box::new(crate::game::economy::economy::EconomySystem));
     builder.add_system_default(Box::new(
-        crate::core::integration_systems::BallisticsTickSystem,
+        crate::game::integration_systems::BallisticsTickSystem,
     ));
-    builder.add_system_default(Box::new(crate::core::integration_systems::DamageDispatchSystem));
+    builder.add_system_default(Box::new(crate::game::integration_systems::DamageDispatchSystem));
     builder.add_system_default(Box::new(
-        crate::core::integration_systems::DestructionTickSystem,
+        crate::game::integration_systems::DestructionTickSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::core::integration_systems::TerrainDeformationTickSystem,
+        crate::game::integration_systems::TerrainDeformationTickSystem,
     ));
-    builder.add_system_default(Box::new(crate::core::integration_systems::NavDirtyTickSystem));
-    builder.add_system_default(Box::new(crate::core::integration_systems::OcclusionWireSystem));
-    builder.add_system_default(Box::new(crate::core::integration_systems::GoreWireSystem));
+    builder.add_system_default(Box::new(crate::game::integration_systems::NavDirtyTickSystem));
+    builder.add_system_default(Box::new(crate::game::integration_systems::OcclusionWireSystem));
+    builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
     builder.add_system_default(Box::new(
-        crate::animation::animation_integration::AnimationIntegrationSystem::new(),
+        crate::game::animation_integration::AnimationIntegrationSystem::new(),
     ));
     builder.add_system_default(Box::new(
         crate::audio::audio_integration::AudioIntegrationSystem::new(),

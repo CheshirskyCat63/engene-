@@ -131,7 +131,7 @@ impl MigrationService {
     ) -> Vec<(PersistentEntityId, u64)> {
         let mut to_demote = Vec::new();
         for &entity in &ecs.alive {
-            if let Some(transform) = ecs.transforms.get(&entity) {
+            if let Some(transform) = ecs.get_transform(entity) {
                 let coord = ChunkCoord::from_world(transform.x, transform.y);
                 if !streamer.is_loaded(&coord) {
                     if let Some(pid) = ecs.identity.persistent_id_of(entity) {

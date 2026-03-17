@@ -6,8 +6,7 @@ use engene::app::runtime_assembly::RuntimeAssembly;
 use engene::core::ecs::Ecs;
 use engene::core::engine::Engine;
 use engene::core::system::EngineSystem;
-use engene::economy::trader_economy::TraderState;
-use engene::gameplay::factions::Faction;
+use engene::game::economy::trader_economy::TraderState;
 use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
 use engene::simulation::simulation_level::{level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L2_RADIUS, L1_TICK_INTERVAL, L2_TICK_INTERVAL};
@@ -270,7 +269,9 @@ fn engine_tick_advances_elapsed() {
 
 #[test]
 fn engine_tick_ecs_tick_advances() {
-    let mut engine = RuntimeAssembly::sandbox();
+    let grid = WorldGrid::generate();
+    let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
+    let mut engine = RuntimeAssembly::headless(&biomes);
     engine.tick(0.05);
     assert!(engine.ecs.tick >= 1);
 }
@@ -404,7 +405,7 @@ fn personal_needs_default_monster_valid() {
 
 #[test]
 fn decide_npc_returns_goal() {
-    use engene::ai::decision::decide_npc;
+    use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
         bravery: 0.5, aggressiveness: 0.3, work_ethic: 0.6, curiosity: 0.4,
         honesty: 0.7, sociality: 0.5, autonomy: 0.5, materialism: 0.3,
@@ -421,7 +422,7 @@ fn decide_npc_returns_goal() {
 
 #[test]
 fn decide_monster_returns_goal() {
-    use engene::ai::decision::decide_monster;
+    use engene::game::ai::decision::decide_monster;
     let traits = MonsterTraits {
         aggressiveness: 0.5, caution: 0.4, territoriality: 0.3, bravery: 0.5,
         pack_mentality: 0.6, energy_level: 0.7, hoarding: 0.2,
@@ -435,7 +436,7 @@ fn decide_monster_returns_goal() {
 
 #[test]
 fn decide_npc_high_hunger_seeks_food() {
-    use engene::ai::decision::decide_npc;
+    use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
         bravery: 0.5, aggressiveness: 0.1, work_ethic: 0.3, curiosity: 0.2,
         honesty: 0.8, sociality: 0.3, autonomy: 0.5, materialism: 0.2,
@@ -453,7 +454,7 @@ fn decide_npc_high_hunger_seeks_food() {
 
 #[test]
 fn decide_monster_high_fear_flees() {
-    use engene::ai::decision::decide_monster;
+    use engene::game::ai::decision::decide_monster;
     let traits = MonsterTraits {
         aggressiveness: 0.2, caution: 0.9, territoriality: 0.3, bravery: 0.1,
         pack_mentality: 0.5, energy_level: 0.6, hoarding: 0.2,
@@ -468,7 +469,7 @@ fn decide_monster_high_fear_flees() {
 
 #[test]
 fn perception_cache_build_empty_ecs() {
-    use engene::ai::perception::PerceptionCache;
+    use engene::game::ai::perception::PerceptionCache;
     let mut ecs = Ecs::new();
     let (entity, _) = ecs.spawn_new();
     ecs.transforms.insert(entity, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
@@ -481,7 +482,7 @@ fn perception_cache_build_empty_ecs() {
 
 #[test]
 fn memory_new_empty() {
-    use engene::ai::memory::Memory;
+    use engene::game::ai::memory::Memory;
     let mem = Memory::new();
     assert!(mem.events.is_empty());
     assert!(mem.spatial.is_empty());
@@ -489,7 +490,7 @@ fn memory_new_empty() {
 
 #[test]
 fn memory_record_event() {
-    use engene::ai::memory::{Memory, EventMemory, EventKind};
+    use engene::game::ai::memory::{Memory, EventMemory, EventKind};
     let mut mem = Memory::new();
     mem.record_event(EventMemory {
         tick: 0, kind: EventKind::AllyDied, location: (0, 0), other: None, emotional_impact: 0.2,
@@ -499,7 +500,7 @@ fn memory_record_event() {
 
 #[test]
 fn memory_mark_cell() {
-    use engene::ai::memory::{Memory, CellTag};
+    use engene::game::ai::memory::{Memory, CellTag};
     let mut mem = Memory::new();
     mem.mark_cell(5, 5, CellTag::Danger, 0.8);
     assert!(mem.cell_danger(5, 5) > 0.0);
@@ -603,7 +604,7 @@ fn engine_tick_parallel_100_ticks() {
 
 #[test]
 fn ai_decision_high_desperation_can_steal() {
-    use engene::ai::decision::decide_npc;
+    use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
         bravery: 0.7, aggressiveness: 0.6, work_ethic: 0.2, curiosity: 0.3,
         honesty: 0.2, sociality: 0.3, autonomy: 0.7, materialism: 0.5,
@@ -665,7 +666,7 @@ fn headless_has_item_registry() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::economy::item_registry::ItemRegistry>().is_some());
+    assert!(engine.resources.get::<engene::game::economy::item_registry::ItemRegistry>().is_some());
 }
 
 #[test]
@@ -736,7 +737,7 @@ fn vertical_slice_has_faction_relations() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::gameplay::factions::FactionRelations>().is_some());
+    assert!(engine.resources.get::<engene::game::gameplay::factions::FactionRelations>().is_some());
 }
 
 #[test]
@@ -748,15 +749,15 @@ fn resource_grid_from_biomes() {
 
 #[test]
 fn item_registry_defaults() {
-    let reg = engene::economy::item_registry::ItemRegistry::new();
+    let reg = engene::game::economy::item_registry::ItemRegistry::new();
     let medkit = reg.get("medkit");
     assert!(medkit.is_some());
 }
 
 #[test]
 fn item_registry_by_category() {
-    use engene::economy::item_registry::ItemCategory;
-    let reg = engene::economy::item_registry::ItemRegistry::new();
+    use engene::game::economy::item_registry::ItemCategory;
+    let reg = engene::game::economy::item_registry::ItemRegistry::new();
     let medkits = reg.by_category(ItemCategory::Medkit);
     assert!(!medkits.is_empty());
 }
@@ -1344,14 +1345,14 @@ fn world_milestone_tracker_summary() {
 
 #[test]
 fn economy_system_name() {
-    use engene::economy::economy::EconomySystem;
+    use engene::game::economy::economy::EconomySystem;
     let sys = EconomySystem;
     assert_eq!(sys.name(), "Economy");
 }
 
 #[test]
 fn item_template_has_category() {
-    use engene::economy::item_registry::{ItemTemplate, ItemCategory, ItemRarity};
+    use engene::game::economy::item_registry::{ItemTemplate, ItemCategory, ItemRarity};
     let t = ItemTemplate {
         id: "test".into(), name: "Test".into(), category: ItemCategory::Food,
         rarity: ItemRarity::Common, base_value: 10.0, weight: 0.5,
@@ -1406,7 +1407,7 @@ fn sim_level_l2() {
 
 #[test]
 fn perception_cache_entities_nearby() {
-    use engene::ai::perception::PerceptionCache;
+    use engene::game::ai::perception::PerceptionCache;
     let mut ecs = Ecs::new();
     let (entity, _) = ecs.spawn_new();
     ecs.transforms.insert(entity, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
@@ -1418,7 +1419,7 @@ fn perception_cache_entities_nearby() {
 
 #[test]
 fn memory_opinion_of_unknown() {
-    use engene::ai::memory::Memory;
+    use engene::game::ai::memory::Memory;
     use engene::core::persistent_id::PersistentEntityId;
     let mem = Memory::new();
     let op = mem.opinion_of(PersistentEntityId(999));
@@ -1427,7 +1428,7 @@ fn memory_opinion_of_unknown() {
 
 #[test]
 fn memory_best_ally_none() {
-    use engene::ai::memory::Memory;
+    use engene::game::ai::memory::Memory;
     let mem = Memory::new();
     assert!(mem.best_ally().is_none());
 }

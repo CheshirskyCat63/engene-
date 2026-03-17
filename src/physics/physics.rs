@@ -83,13 +83,14 @@ fn apply_fire_fear(ecs: &mut crate::core::ecs::Ecs, fire: &FireGrid) {
     }
 
     let fire_radius = 80.0;
-    for &e in &ecs.alive {
-        if let Some(t) = ecs.transforms.get(&e) {
+    let entities = ecs.alive.clone();
+    for e in entities {
+        if let Some(t) = ecs.get_transform(e) {
             if fire.is_near_fire(t.x, t.y, fire_radius) {
-                if let Some(pn) = ecs.personal_needs.get_mut(&e) {
+                if let Some(pn) = ecs.get_needs_mut(e) {
                     pn.fear = (pn.fear + 0.1).min(1.0);
                 }
-                if let Some(emo) = ecs.emotions.get_mut(&e) {
+                if let Some(emo) = ecs.get_emotions_mut(e) {
                     emo.fear = (emo.fear + 0.15).min(1.0);
                 }
             }

@@ -1,0 +1,17 @@
+# query internal: Ecs query/filter internals operate directly on storage maps.
+src/core/query.rs
+
+# ecs internal: ECS storage owner and core orchestration internals.
+src/core/ecs.rs
+src/core/engine.rs
+
+# runtime ecs internal: active game runtime systems still mutating storage directly.
+src/game/integration_systems.rs
+src/game/ai/reproduction.rs
+src/world/population.rs
+
+# serialization internal: persistence/snapshot paths require direct storage access.
+src/memory/save_chunks.rs
+src/memory/component_delta.rs
+src/world/chunk_persistence.rs
+

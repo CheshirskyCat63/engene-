@@ -11,7 +11,7 @@ impl SpatialRebuildSystem {
     pub fn rebuild(spatial: &mut HierarchicalSpatialIndex, ecs: &Ecs) {
         spatial.clear();
         for &e in &ecs.alive {
-            if let Some(t) = ecs.transforms.get(&e) {
+            if let Some(t) = ecs.get_transform(e) {
                 spatial.insert(e, t.x, t.y);
             }
         }

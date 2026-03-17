@@ -36,8 +36,8 @@ use engene::body::body_response::{BodyPhysicalResponseCache, PhysicalResponseTie
 use engene::body::body_store::{BodyHandle, BodyStateStore};
 use engene::body::death_pipeline::{CorpseManager, CorpseState, DeathState};
 use engene::body::dismemberment::{check_dismemberment, severed_zones};
-use engene::ai::combat::{HitLocation, StaggerState, resolve_combat};
-use engene::ai::body::{is_night, time_of_day_mult, BodyState as AiBodyState};
+use engene::game::ai::combat::{HitLocation, StaggerState, resolve_combat};
+use engene::game::ai::body::{is_night, time_of_day_mult, BodyState as AiBodyState};
 use engene::core::ecs::Ecs;
 use engene::core::events::EventBus;
 use engene::navigation::path_cache::PathCache;

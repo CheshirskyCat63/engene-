@@ -541,10 +541,10 @@ fn pid_relink_social_tie_success() {
     let (e1, p1) = ecs.spawn_new();
     let (e2, p2) = ecs.spawn_new();
     assert_eq!(ecs.identity.persistent_id_of(e1), Some(p1));
-    let mut mem = engene::ai::memory::Memory::new();
+    let mut mem = engene::game::ai::memory::Memory::new();
     mem.entities.insert(
         p2,
-        engene::ai::memory::EntityOpinion {
+        engene::game::ai::memory::EntityOpinion {
             trust: 0.5,
             hostility: 0.0,
             familiarity: 0.3,
@@ -566,7 +566,7 @@ fn pid_relink_group_leader() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let (e1, p1) = ecs.spawn_new();
     let (e2, p2) = ecs.spawn_new();
-    let group = engene::ai::groups::Group {
+    let group = engene::game::ai::groups::Group {
         leader: p1,
         members: vec![p1, p2],
         formed_tick: 0,

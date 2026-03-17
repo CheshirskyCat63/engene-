@@ -34,11 +34,11 @@ impl WorldMapPanel {
         let mut monster_counts = vec![0u32; gs * gs];
 
         for &e in &ecs.alive {
-            if let Some(t) = ecs.transforms.get(&e) {
+            if let Some(t) = ecs.get_transform(e) {
                 let cx = (t.x / self.cell_size).min(self.grid_size as f32 - 1.0).max(0.0) as usize;
                 let cy = (t.y / self.cell_size).min(self.grid_size as f32 - 1.0).max(0.0) as usize;
                 let idx = cy * gs + cx;
-                match ecs.kinds.get(&e) {
+                match ecs.get_kind(e) {
                     Some(EntityKind::Npc) => npc_counts[idx] += 1,
                     Some(EntityKind::Monster(_)) => monster_counts[idx] += 1,
                     _ => {}

@@ -62,16 +62,16 @@ impl SimMetricsDashboard {
         let mut total_health = 0.0f32;
 
         for &e in &ecs.alive {
-            match ecs.kinds.get(&e) {
+            match ecs.get_kind(e) {
                 Some(EntityKind::Npc) => {
                     snap.stalker_count += 1;
                     npc_count += 1;
-                    if let Some(econ) = ecs.npc_economies.get(&e) {
+                    if let Some(econ) = ecs.get_npc_economy(e) {
                         total_money += econ.money as f64;
                         min_money = min_money.min(econ.money as f64);
                         max_money = max_money.max(econ.money as f64);
                     }
-                    if let Some(needs) = ecs.personal_needs.get(&e) {
+                    if let Some(needs) = ecs.get_needs(e) {
                         total_health += needs.health;
                         total_hunger += needs.hunger;
                     }

@@ -3,7 +3,8 @@ use std::path::PathBuf;
 
 use crate::core::ecs::{Ecs, Entity};
 use crate::core::persistent_id::{EntityRef, PersistentEntityId, RelinkContext};
-use crate::memory::save_chunks::{snapshot_entity, EntitySnapshot};
+use crate::memory::atomic_saved::{atomic_save, recover_from_backup};
+use crate::memory::save_chunks::{snapshot_entity, EntitySnapshot, PersistenceError};
 use crate::world::streaming::{ChunkCoord, CHUNK_SIZE};
 
 /// Extended snapshot that includes persistent identity and additional state
@@ -191,9 +192,8 @@ impl ChunkPersistenceService {
             .save_dir
             .join(format!("chunk_{}_{}.bin", coord.x, coord.z));
         if let Ok(encoded) = bincode::serialize(&save_data) {
-            // Use atomic save for crash safety
-            use crate::memory::atomic_saved::atomic_save_fast;
-            if let Err(e) = atomic_save_fast(&file, &encoded) {
+            // Use atomic save + backup policy
+            if let Err(e) = atomic_save(&file, &encoded) {
                 tracing::error!("atomic write chunk failed: {}", e);
             } else {
                 self.saved_chunks.insert((coord.x, coord.z), current_tick);
@@ -215,22 +215,73 @@ impl ChunkPersistenceService {
         coord: ChunkCoord,
         ecs: &mut Ecs,
     ) -> usize {
+        match self.try_load_chunk_entities(coord, ecs) {
+            Ok(count) => count,
+            Err(e) => {
+                tracing::error!("chunk ({},{}): load failed: {}", coord.x, coord.z, e);
+                0
+            }
+        }
+    }
+
+    pub fn try_load_chunk_entities(
+        &mut self,
+        coord: ChunkCoord,
+        ecs: &mut Ecs,
+    ) -> Result<usize, PersistenceError> {
         let file = self
             .save_dir
             .join(format!("chunk_{}_{}.bin", coord.x, coord.z));
         if !file.exists() {
-            return 0;
+            return Ok(0);
         }
 
-        let data = match std::fs::read(&file) {
-            Ok(d) => d,
-            Err(_) => return 0,
-        };
+        let mut data = std::fs::read(&file).map_err(|e| PersistenceError::Io {
+            op: "read chunk",
+            path: file.display().to_string(),
+            source: e,
+        })?;
 
         let save_data: ChunkSaveData = match bincode::deserialize(&data) {
             Ok(d) => d,
-            Err(_) => return 0,
+            Err(e) => {
+                let recovered = recover_from_backup(&file).map_err(|ioe| PersistenceError::Io {
+                    op: "recover backup",
+                    path: file.display().to_string(),
+                    source: ioe,
+                })?;
+                if !recovered {
+                    return Err(PersistenceError::Deserialize {
+                        context: "chunk save data",
+                        source: e.to_string(),
+                    });
+                }
+                data = std::fs::read(&file).map_err(|ioe| PersistenceError::Io {
+                    op: "read recovered chunk",
+                    path: file.display().to_string(),
+                    source: ioe,
+                })?;
+                bincode::deserialize(&data).map_err(|de| PersistenceError::Deserialize {
+                    context: "chunk save data after recovery",
+                    source: de.to_string(),
+                })?
+            }
         };
+
+        if save_data.schema_version_chunk != crate::core::build_manifest::SCHEMA_VERSION_CHUNK {
+            return Err(PersistenceError::SchemaVersion {
+                kind: "chunk",
+                expected: crate::core::build_manifest::SCHEMA_VERSION_CHUNK,
+                found: save_data.schema_version_chunk,
+            });
+        }
+        if save_data.schema_version_entity != crate::core::build_manifest::SCHEMA_VERSION_ENTITY {
+            return Err(PersistenceError::SchemaVersion {
+                kind: "entity",
+                expected: crate::core::build_manifest::SCHEMA_VERSION_ENTITY,
+                found: save_data.schema_version_entity,
+            });
+        }
 
         let mut count = 0;
         for ps in &save_data.entities {
@@ -254,7 +305,7 @@ impl ChunkPersistenceService {
             coord.x, coord.z, count
         );
 
-        count
+        Ok(count)
     }
 
     /// Load chunk and produce a detailed relink report
@@ -502,7 +553,7 @@ fn restore_entity_from_snapshot(entity: Entity, snap: &EntitySnapshot, ecs: &mut
     if let Some(ref em) = snap.emotions {
         ecs.emotions.insert(
             entity,
-            crate::ai::emotions::Emotions {
+            crate::core::ai_emotions::Emotions {
                 anger: em.anger,
                 grief: em.grief,
                 joy: em.joy,
@@ -549,7 +600,7 @@ fn restore_entity_from_snapshot(entity: Entity, snap: &EntitySnapshot, ecs: &mut
     }
 
     if let Some(ref fm) = snap.faction_membership {
-        use crate::gameplay::factions::Faction;
+        use crate::world::components::Faction;
         let faction = match fm.faction {
             0 => Faction::Loners,
             1 => Faction::Duty,

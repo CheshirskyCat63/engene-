@@ -3,7 +3,6 @@
 //! Wires together content import, cooking, validation, and prefabs.
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
 
 /// Content pipeline configuration
 #[derive(Debug, Clone)]
@@ -271,8 +270,6 @@ impl PipelineReport {
 
 /// Check if path is a recognized asset file
 fn is_asset_file(path: &Path) -> bool {
-    use std::path::Component;
-    
     let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
     
     matches!(ext,
@@ -360,8 +357,7 @@ mod tests {
     #[test]
     fn test_quick_check() {
         let result = quick_check();
-        // Should find at least some config files
-        assert!(result.config_files_present >= 0);
+        assert!(result.asset_dirs_present <= 2);
     }
 
     #[test]

@@ -143,56 +143,26 @@ pub fn run_doctor(engine: &Engine, mode: DoctorMode) -> DoctorReport {
 
 /// Check all .ron config files are loadable
 fn check_ron_configs(out: &mut Vec<Diagnostic>) {
- // Keep this list aligned with GameConfig::load_from_dir() loaders.
- let config_files = [
- "game/data/biomes.ron",
- "game/data/economy.ron",
- "game/data/food_chain.ron",
- "game/data/goals.ron",
- "game/data/jobs.ron",
- "game/data/materials.ron",
- "game/data/material_bridge.ron",
- "game/data/perception.ron",
- "game/data/population.ron",
- "game/data/rules.ron",
- "game/data/seasons.ron",
- "game/data/simulation.ron",
- "game/data/species.ron",
- "game/data/surfaces.ron",
- "game/data/tactics.ron",
- "game/data/weapons.ron",
- ];
+    use crate::core::game_config::{canonical_config_default_paths, validate_canonical_configs_default};
 
-    let mut missing = Vec::new();
-    let errors: Vec<String> = Vec::new();
+    let config_files = canonical_config_default_paths();
 
-    for path in &config_files {
-        if !std::path::Path::new(path).exists() {
-            missing.push(*path);
-        }
-    }
-
-    if !missing.is_empty() {
-        out.push(Diagnostic {
-            severity: DiagnosticSeverity::Warning,
-            category: "config",
-            message: format!("{} config files not found: {}", missing.len(), missing.join(", ")),
-        });
-    } else {
-        out.push(Diagnostic {
-            severity: DiagnosticSeverity::Info,
-            category: "config",
-            message: format!("all {} config files present", config_files.len()),
-        });
-    }
-
-    if !errors.is_empty() {
-        for err in &errors {
+    match validate_canonical_configs_default() {
+        Ok(()) => {
             out.push(Diagnostic {
-                severity: DiagnosticSeverity::Error,
+                severity: DiagnosticSeverity::Info,
                 category: "config",
-                message: format!("config parse error: {}", err),
+                message: format!("all {} canonical configs present and parseable", config_files.len()),
             });
+        }
+        Err(errors) => {
+            for err in errors {
+                out.push(Diagnostic {
+                    severity: DiagnosticSeverity::Error,
+                    category: "config",
+                    message: format!("canonical config validation failed: {}", err),
+                });
+            }
         }
     }
 }
@@ -656,7 +626,7 @@ fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
     for &e in &ecs.alive {
         if ecs.get_kind(e).is_none() { without_kind += 1; }
         if ecs.get_transform(e).is_none() { without_transform += 1; }
-        if ecs.sim_levels.get(&e).is_none() { without_sim_level += 1; }
+        if ecs.get_sim_level(e).is_none() { without_sim_level += 1; }
     }
 
     if without_kind > 0 {
@@ -863,7 +833,7 @@ fn check_editor_truth(out: &mut Vec<Diagnostic>) {
 /// Generate a JSON runtime truth snapshot for CI/dashboard consumption.
 pub fn generate_runtime_truth_json(engine: &Engine) -> String {
     let report = run_doctor(engine, DoctorMode::Advisory);
-    let snap = crate::economy::resource_flow::snapshot(&engine.ecs);
+    let snap = crate::game::economy::resource_flow::snapshot(&engine.ecs);
 
     let entity_count = engine.ecs.alive.len();
     let npc_count = engine.ecs.count_npcs();

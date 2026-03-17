@@ -178,7 +178,7 @@ impl RuntimeTruthDashboard {
             },
             ModuleEntry {
                 name: "AnimationIntegration".into(),
-                path: "src/animation/animation_integration.rs".into(),
+                path: "src/game/animation_integration.rs".into(),
                 status: ModuleStatus::Active,
                 notes: "Locomotion, hit reactions, goal-based".into(),
             },

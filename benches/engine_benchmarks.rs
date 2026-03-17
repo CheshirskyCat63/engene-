@@ -190,9 +190,9 @@ fn bench_world_tick_100_entities() {
 fn bench_ai_batch_50_npcs() {
     use engene::core::ecs::Ecs;
     use engene::world::components::*;
-    use engene::ai::decision;
-    use engene::ai::emotions::Emotions;
-    use engene::ai::memory::Memory;
+    use engene::game::ai::decision;
+    use engene::game::ai::emotions::Emotions;
+    use engene::game::ai::memory::Memory;
 
     let mut ecs = Ecs::new();
     let mut rng = rand::thread_rng();

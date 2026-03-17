@@ -2,19 +2,19 @@
 //! 208 tests covering Perception, Memory, Emotions, Goals, Plans, Decisions,
 //! Groups, Camp simulation, Role simulation, Trader economy, and Item registry.
 
-use engene::ai::body::{is_night, time_of_day_mult, BodyState};
-use engene::ai::decision::{decide_monster, decide_npc};
-use engene::ai::emotions::{apply_monster_personality, apply_npc_personality, DominantEmotion, Emotions};
-use engene::ai::goals::{pick_best, ScoredGoal};
-use engene::ai::memory::{context_for_kind, CellTag, EventKind, EventMemory, Lesson, LessonAction, LessonContext, Memory};
-use engene::ai::perception::{find_allies, find_prey, find_predator, npcs_nearby, PerceptionCache, distance2};
-use engene::ai::plan::Plan;
+use engene::game::ai::body::{is_night, time_of_day_mult, BodyState};
+use engene::game::ai::decision::{decide_monster, decide_npc};
+use engene::game::ai::emotions::{apply_monster_personality, apply_npc_personality, DominantEmotion, Emotions};
+use engene::game::ai::goals::{pick_best, ScoredGoal};
+use engene::game::ai::memory::{context_for_kind, CellTag, EventKind, EventMemory, Lesson, LessonAction, LessonContext, Memory};
+use engene::game::ai::perception::{find_allies, find_prey, find_predator, npcs_nearby, PerceptionCache, distance2};
+use engene::game::ai::plan::Plan;
 use engene::core::ecs::Ecs;
 use engene::core::persistent_id::PersistentEntityId;
-use engene::economy::item_registry::{ItemCategory, ItemRarity, ItemRegistry, ItemTemplate};
-use engene::economy::resource_flow::snapshot;
-use engene::economy::trader_economy::{TraderInventorySlot, TraderState};
-use engene::economy::trading::attempt_trade;
+use engene::game::economy::item_registry::{ItemCategory, ItemRarity, ItemRegistry, ItemTemplate};
+use engene::game::economy::resource_flow::snapshot;
+use engene::game::economy::trader_economy::{TraderInventorySlot, TraderState};
+use engene::game::economy::trading::attempt_trade;
 use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
 use engene::simulation::world_milestones::WorldMilestoneTracker;
@@ -998,7 +998,7 @@ fn decide_npc_steal_desperate() {
 
 #[test]
 fn group_new_leader_members() {
-    use engene::ai::groups::Group;
+    use engene::game::ai::groups::Group;
     let group = Group {
         leader: PersistentEntityId(1),
         members: vec![PersistentEntityId(2), PersistentEntityId(3)],
@@ -1120,7 +1120,7 @@ fn context_for_kind_mapping_wolf() {
 
 #[test]
 fn group_members_count() {
-    use engene::ai::groups::Group;
+    use engene::game::ai::groups::Group;
     let group = Group {
         leader: PersistentEntityId(1),
         members: vec![

@@ -21,7 +21,7 @@ pub const CANONICAL_CONFIG_FILES: [&str;16] = [
 ];
 
 fn join_config_path(dir: &str, file: &str) -> String {
- format!("}/{}", dir.trim_end_matches('/'), file)
+ format!("{}/{}", dir.trim_end_matches('/'), file)
 }
 
 fn push_err<T, E: std::fmt::Display>(res: Result<T, E>, path: &str, errors: &mut Vec<String>) {
@@ -1847,7 +1847,8 @@ pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_defau
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
-
+ canonical_config_truth_errors()
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PerceptionConfig {

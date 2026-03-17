@@ -13,7 +13,7 @@ env:
 jobs:
   check:
     name: Check
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       
@@ -42,9 +42,16 @@ jobs:
       - name: Check compilation
         run: cargo check --all-targets --all-features
 
+      - name: ECS direct-access gate
+        run: bash scripts/check_ecs_direct_access.sh
+
+      - name: Dependency direction gate
+        run: bash scripts/check_dependency_direction.sh
+
+
   test:
     name: Test
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: check
     steps:
       - uses: actions/checkout@v4
@@ -68,7 +75,7 @@ jobs:
 
   docs:
     name: Documentation
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: check
     steps:
       - uses: actions/checkout@v4

@@ -99,7 +99,7 @@ impl RapierPhysics {
             if !is_l0 {
                 continue;
             }
-            if let Some(t) = ecs.transforms.get(&e) {
+            if let Some(t) = ecs.get_transform(e) {
                 let y = self.heightmap.sample(t.x, t.y) + 1.0;
                 let body = RigidBodyBuilder::kinematic_position_based()
                     .translation(Vec3::new(t.x, y, t.y))
@@ -119,7 +119,7 @@ impl RapierPhysics {
         for (&entity, &handle) in &self.entity_handles {
             if let Some(body) = self.bodies.get_mut(handle) {
                 if body.is_kinematic() {
-                    if let Some(t) = ecs.transforms.get(&entity) {
+                    if let Some(t) = ecs.get_transform(entity) {
                         let y = self.heightmap.sample(t.x, t.y) + 1.0;
                         body.set_next_kinematic_translation(Vec3::new(t.x, y, t.y));
                     }
@@ -150,7 +150,7 @@ impl RapierPhysics {
             if let Some(body) = self.bodies.get(handle) {
                 if body.is_dynamic() {
                     let pos = body.translation();
-                    if let Some(t) = ecs.transforms.get_mut(&entity) {
+                    if let Some(t) = ecs.get_transform_mut(entity) {
                         t.x = pos.x;
                         t.y = pos.z;
                     }

@@ -242,9 +242,9 @@ pub struct AiEntityQueryItem<'a> {
     pub transform: Option<&'a Transform>,
     pub needs: Option<&'a PersonalNeeds>,
     pub ai_state: Option<&'a AiState>,
-    pub memory: Option<&'a crate::ai::memory::Memory>,
-    pub emotions: Option<&'a crate::ai::emotions::Emotions>,
-    pub plan: Option<&'a crate::ai::plan::Plan>,
+    pub memory: Option<&'a crate::core::ai_memory::Memory>,
+    pub emotions: Option<&'a crate::core::ai_emotions::Emotions>,
+    pub plan: Option<&'a crate::core::ai_plan::Plan>,
 }
 
 /// Bundled data for combat participants.
@@ -366,13 +366,13 @@ impl Ecs {
             })
     }
 
-    /// Iterate over entities with PersonalNeeds (mutable).
-    pub fn iter_needs_mut(&mut self) -> impl Iterator<Item = (u64, &mut PersonalNeeds)> {
-        let entities: Vec<u64> = self.alive.iter().cloned().collect();
-        entities.into_iter().filter_map(move |e| {
-            let needs = self.personal_needs.get_mut(&e)?;
-            Some((e, needs))
-        })
+    /// Collect entity ids that currently have PersonalNeeds.
+    pub fn iter_needs_mut(&mut self) -> Vec<u64> {
+        self.alive
+            .iter()
+            .copied()
+            .filter(|e| self.personal_needs.get(e).is_some())
+            .collect()
     }
 
     /// Get a single component for an entity (read-only).

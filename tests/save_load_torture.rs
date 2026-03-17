@@ -2,7 +2,7 @@
 //! 
 //! Comprehensive tests for save/load reliability under stress conditions.
 
-use std::io::{self, Read, Write};
+use std::io::{self, Write};
 use std::path::Path;
 
 /// Torture test scenarios for save/load
@@ -318,7 +318,7 @@ fn test_rapid_save_load_cycle() -> TortureResult {
 /// Atomic write: write to .tmp file, then rename
 pub fn atomic_write(path: impl AsRef<Path>, data: &[u8]) -> io::Result<()> {
     let path = path.as_ref();
-    let tmp_path = path.with_extension("tmp");
+    let tmp_path = path.with_extension("tmpwrite");
     let bak_path = path.with_extension("bak");
     
     // Create backup if original exists

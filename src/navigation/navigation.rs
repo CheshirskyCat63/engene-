@@ -10,7 +10,7 @@ pub fn travel_toward(
     speed: f32,
     delta: f32,
 ) -> bool {
-    let t = match ecs.transforms.get_mut(&entity) {
+    let t = match ecs.get_transform_mut(entity) {
         Some(t) => t,
         None => return false,
     };

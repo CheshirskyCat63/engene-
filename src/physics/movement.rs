@@ -14,7 +14,7 @@ impl Default for Velocity {
 }
 
 pub fn apply_velocity(ecs: &mut Ecs, entity: Entity, _delta: f32) {
-    let t = match ecs.transforms.get_mut(&entity) {
+    let t = match ecs.get_transform_mut(entity) {
         Some(t) => t,
         None => return,
     };
@@ -35,7 +35,7 @@ pub fn move_toward(
     speed: f32,
     delta: f32,
 ) -> bool {
-    let t = match ecs.transforms.get_mut(&entity) {
+    let t = match ecs.get_transform_mut(entity) {
         Some(t) => t,
         None => return false,
     };

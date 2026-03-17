@@ -173,7 +173,7 @@ fn blackboard_typed_values() {
 
 #[test]
 fn emotions_dominant_and_decay() {
-    use engene::ai::emotions::*;
+    use engene::game::ai::emotions::*;
 
     let mut emo = Emotions::new();
     assert_eq!(emo.dominant(), DominantEmotion::Calm);
@@ -187,7 +187,7 @@ fn emotions_dominant_and_decay() {
 
 #[test]
 fn emotions_mood_calculation() {
-    use engene::ai::emotions::Emotions;
+    use engene::game::ai::emotions::Emotions;
 
     let mut emo = Emotions::new();
     let base_mood = emo.mood();
@@ -203,7 +203,7 @@ fn emotions_mood_calculation() {
 
 #[test]
 fn apply_npc_personality_modulates_emotions() {
-    use engene::ai::emotions::*;
+    use engene::game::ai::emotions::*;
     use engene::world::components::NpcTraits;
 
     let traits = NpcTraits {
@@ -220,7 +220,7 @@ fn apply_npc_personality_modulates_emotions() {
 
 #[test]
 fn apply_monster_personality_modulates_emotions() {
-    use engene::ai::emotions::*;
+    use engene::game::ai::emotions::*;
     use engene::world::components::MonsterTraits;
 
     let traits = MonsterTraits {
@@ -239,7 +239,7 @@ fn apply_monster_personality_modulates_emotions() {
 
 #[test]
 fn memory_event_recording_with_cap() {
-    use engene::ai::memory::*;
+    use engene::game::ai::memory::*;
 
     let mut mem = Memory::new();
     for i in 0..40 {
@@ -256,7 +256,7 @@ fn memory_event_recording_with_cap() {
 
 #[test]
 fn memory_spatial_knowledge() {
-    use engene::ai::memory::*;
+    use engene::game::ai::memory::*;
 
     let mut mem = Memory::new();
     mem.mark_cell(5, 5, CellTag::Danger, 0.8);
@@ -269,7 +269,7 @@ fn memory_spatial_knowledge() {
 
 #[test]
 fn memory_entity_opinions() {
-    use engene::ai::memory::*;
+    use engene::game::ai::memory::*;
     use engene::core::persistent_id::PersistentEntityId;
 
     let pid = PersistentEntityId(42);
@@ -286,7 +286,7 @@ fn memory_entity_opinions() {
 
 #[test]
 fn memory_lessons_learning() {
-    use engene::ai::memory::*;
+    use engene::game::ai::memory::*;
 
     let mut mem = Memory::new();
     mem.record_lesson(Lesson { action: LessonAction::SoloHunt, context: LessonContext::VsWolf, attempts: 5, successes: 4 });
@@ -301,7 +301,7 @@ fn memory_lessons_learning() {
 
 #[test]
 fn context_for_kind_mapping() {
-    use engene::ai::memory::*;
+    use engene::game::ai::memory::*;
     use engene::world::components::*;
 
     assert_eq!(context_for_kind(&EntityKind::Npc), LessonContext::VsNpc);
@@ -313,7 +313,7 @@ fn context_for_kind_mapping() {
 
 #[test]
 fn personal_needs_decay_increases_hunger() {
-    use engene::ai::needs::*;
+    use engene::game::ai::needs::*;
     use engene::world::components::PersonalNeeds;
 
     let mut needs = PersonalNeeds::default_npc();
@@ -326,7 +326,7 @@ fn personal_needs_decay_increases_hunger() {
 
 #[test]
 fn satisfy_needs_functions() {
-    use engene::ai::needs::*;
+    use engene::game::ai::needs::*;
     use engene::world::components::PersonalNeeds;
 
     let mut needs = PersonalNeeds::default_npc();
@@ -345,7 +345,7 @@ fn satisfy_needs_functions() {
 
 #[test]
 fn damage_and_heal() {
-    use engene::ai::needs::*;
+    use engene::game::ai::needs::*;
     use engene::world::components::PersonalNeeds;
 
     let mut needs = PersonalNeeds::default_npc();
@@ -359,7 +359,7 @@ fn damage_and_heal() {
 
 #[test]
 fn urgency_reflects_critical_needs() {
-    use engene::ai::needs::*;
+    use engene::game::ai::needs::*;
     use engene::world::components::PersonalNeeds;
 
     let mut needs = PersonalNeeds::default_npc();
@@ -377,7 +377,7 @@ fn urgency_reflects_critical_needs() {
 
 #[test]
 fn body_state_healthy_adult() {
-    use engene::ai::body::BodyState;
+    use engene::game::ai::body::BodyState;
     use engene::world::components::PersonalNeeds;
 
     let pn = PersonalNeeds::default_npc();
@@ -389,7 +389,7 @@ fn body_state_healthy_adult() {
 
 #[test]
 fn body_state_exhausted_old() {
-    use engene::ai::body::BodyState;
+    use engene::game::ai::body::BodyState;
     use engene::world::components::{PersonalNeeds, LifeStage};
 
     let pn = PersonalNeeds {
@@ -403,7 +403,7 @@ fn body_state_exhausted_old() {
 
 #[test]
 fn is_night_and_time_of_day() {
-    use engene::ai::body::{is_night, time_of_day_mult};
+    use engene::game::ai::body::{is_night, time_of_day_mult};
 
     assert!(is_night(0.1));
     assert!(is_night(0.8));
@@ -418,7 +418,7 @@ fn is_night_and_time_of_day() {
 
 #[test]
 fn plan_expiration_and_target() {
-    use engene::ai::plan::Plan;
+    use engene::game::ai::plan::Plan;
     use engene::world::components::Goal;
 
     let mut plan = Plan::new(Goal::Hunt, Some((100.0, 200.0)), 0);
@@ -434,7 +434,7 @@ fn plan_expiration_and_target() {
 
 #[test]
 fn plan_durations_vary_by_goal() {
-    use engene::ai::plan::Plan;
+    use engene::game::ai::plan::Plan;
     use engene::world::components::Goal;
 
     let flee = Plan::new(Goal::Flee, None, 0);
@@ -446,7 +446,7 @@ fn plan_durations_vary_by_goal() {
 
 #[test]
 fn decide_npc_hungry_seeks_food() {
-    use engene::ai::decision::decide_npc;
+    use engene::game::ai::decision::decide_npc;
     use engene::world::components::*;
 
     let traits = NpcTraits {
@@ -467,7 +467,7 @@ fn decide_npc_hungry_seeks_food() {
 
 #[test]
 fn decide_monster_scared_flees() {
-    use engene::ai::decision::decide_monster;
+    use engene::game::ai::decision::decide_monster;
     use engene::world::components::*;
 
     let traits = MonsterTraits {
@@ -501,7 +501,7 @@ fn biome_properties() {
 
 #[test]
 fn food_chain_relationships() {
-    use engene::ecosystem::food_chain::*;
+    use engene::game::ecosystem::food_chain::*;
     use engene::world::components::MonsterSpecies;
 
     assert!(is_predator_of(MonsterSpecies::Wolf, MonsterSpecies::Boar));

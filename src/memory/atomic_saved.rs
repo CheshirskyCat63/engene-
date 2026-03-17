@@ -5,7 +5,7 @@
 
 use std::fs::{self, File};
 use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
 /// Atomic save: write to temp file, sync, then rename to final.
 /// Creates .bak backup of existing file before overwriting.
@@ -110,6 +110,7 @@ pub fn recover_from_backup(path: impl AsRef<Path>) -> io::Result<bool> {
 mod tests {
     use super::*;
     use std::io::Write;
+    use std::path::PathBuf;
 
     #[test]
     fn test_atomic_save() {

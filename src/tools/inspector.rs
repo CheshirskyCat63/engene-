@@ -123,7 +123,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                     }
                 });
             }
-            if let Some(sim) = ecs.sim_levels.get(&entity) {
+            if let Some(sim) = ecs.get_sim_level(entity) {
                 ui.label(format!("Sim Level: {:?}", sim.level));
             }
             if ecs.get_needs(entity).is_some() {
@@ -173,7 +173,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                     }
                 });
             }
-            if let Some(ai) = ecs.ai_states.get(&entity) {
+            if let Some(ai) = ecs.get_ai_state(entity) {
                 ui.label(format!("AI State: {:?}", ai));
             }
             if let Some(emotions) = ecs.get_emotions(entity) {
@@ -187,7 +187,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                     ui.label(format!("Longing:  {:.2}", emotions.longing));
                 });
             }
-            if let Some(inv) = ecs.inventories.get(&entity) {
+            if let Some(inv) = ecs.get_inventory(entity) {
                 ui.collapsing("Inventory", |ui| {
                     if inv.items.is_empty() {
                         ui.label("(empty)");

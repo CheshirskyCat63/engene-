@@ -93,7 +93,7 @@ fn vertical_slice_hud() {
 
 #[test]
 fn vertical_slice_item_registry() {
-    use engene::economy::item_registry::ItemRegistry;
+    use engene::game::economy::item_registry::ItemRegistry;
 
     let registry = ItemRegistry::new();
     assert!(registry.get("medkit").is_some());

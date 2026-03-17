@@ -39,6 +39,7 @@ pub struct DocGenerator {
     modules: HashMap<String, ModuleDoc>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 struct ModuleDoc {
     name: String,
@@ -50,6 +51,7 @@ struct ModuleDoc {
     structs: Vec<StructDoc>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 struct FunctionDoc {
     name: String,
@@ -58,6 +60,7 @@ struct FunctionDoc {
     stability: String,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 struct StructDoc {
     name: String,
@@ -65,6 +68,7 @@ struct StructDoc {
     fields: Vec<FieldDoc>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Default)]
 struct FieldDoc {
     name: String,

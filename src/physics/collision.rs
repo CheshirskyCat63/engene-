@@ -5,7 +5,7 @@ const ENTITY_RADIUS: f32 = 1.5;
 pub fn resolve_collisions(ecs: &mut Ecs, entities: &[Entity]) {
     let positions: Vec<(Entity, f32, f32)> = entities
         .iter()
-        .filter_map(|&e| ecs.transforms.get(&e).map(|t| (e, t.x, t.y)))
+        .filter_map(|&e| ecs.get_transform(e).map(|t| (e, t.x, t.y)))
         .collect();
 
     for i in 0..positions.len() {
@@ -24,11 +24,11 @@ pub fn resolve_collisions(ecs: &mut Ecs, entities: &[Entity]) {
                 let nx = dx / dist;
                 let ny = dy / dist;
 
-                if let Some(ta) = ecs.transforms.get_mut(&ea) {
+                if let Some(ta) = ecs.get_transform_mut(ea) {
                     ta.x -= nx * overlap;
                     ta.y -= ny * overlap;
                 }
-                if let Some(tb) = ecs.transforms.get_mut(&eb) {
+                if let Some(tb) = ecs.get_transform_mut(eb) {
                     tb.x += nx * overlap;
                     tb.y += ny * overlap;
                 }

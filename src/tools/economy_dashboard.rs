@@ -38,11 +38,11 @@ impl EconomyDashboard {
         };
 
         for &e in &ecs.alive {
-            if !matches!(ecs.kinds.get(&e), Some(EntityKind::Npc)) {
+            if !matches!(ecs.get_kind(e), Some(EntityKind::Npc)) {
                 continue;
             }
             snap.npc_count += 1;
-            if let Some(econ) = ecs.npc_economies.get(&e) {
+            if let Some(econ) = ecs.get_npc_economy(e) {
                 let m = econ.money as f64;
                 snap.total_money += m;
                 snap.min_money = snap.min_money.min(m);

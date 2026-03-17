@@ -191,7 +191,7 @@ fn roundtrip_with_faction() {
     ecs.transforms.insert(e, Transform { x: 400.0, y: 400.0, cell_x: 0, cell_y: 0 });
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.faction_memberships.insert(e, FactionMembership {
-        faction: engene::gameplay::factions::Faction::Duty,
+        faction: Faction::Duty,
         standing: 0.7,
     });
 
@@ -503,7 +503,7 @@ fn roundtrip_emotions() {
     let (e, _) = ecs.spawn_new();
     ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.emotions.insert(e, engene::ai::emotions::Emotions {
+    ecs.emotions.insert(e, engene::game::ai::emotions::Emotions {
         anger: 0.2, grief: 0.1, joy: 0.5, fear: 0.3,
         disgust: 0.0, surprise: 0.0, longing: 0.0,
     });

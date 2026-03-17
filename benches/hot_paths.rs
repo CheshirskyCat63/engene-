@@ -106,7 +106,7 @@ fn bench_spatial_index(c: &mut Criterion) {
 fn bench_ecs_component_access(c: &mut Criterion) {
     use std::collections::HashMap;
     
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     struct Entity { id: u64, generation: u32 }
     
     #[derive(Clone, Copy, Default)]
@@ -163,7 +163,7 @@ fn bench_ecs_component_access(c: &mut Criterion) {
                         }
                     }
                 }
-                black_box(&ecs.transforms)
+                black_box(ecs.transforms.len())
             });
         });
     }
@@ -293,7 +293,7 @@ fn bench_metrics_registry(c: &mut Criterion) {
 fn bench_ai_scheduler(c: &mut Criterion) {
     use std::collections::HashMap;
     
-    #[derive(Clone, Copy, Debug)]
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     struct Entity { id: u64 }
     
     #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

@@ -29,8 +29,6 @@ pub struct Engine {
     use_parallel_tick: bool,
     /// Number of consecutive divergence detections before fallback
     divergence_count: u32,
-    /// Maximum allowed divergences before automatic fallback to sequential
-    max_divergences: u32,
 }
 
 impl Engine {
@@ -51,7 +49,6 @@ impl Engine {
             running: false,
             use_parallel_tick: true,
             divergence_count: 0,
-            max_divergences: 3,
         }
     }
 
@@ -70,7 +67,6 @@ impl Engine {
             running: false,
             use_parallel_tick: true,
             divergence_count: 0,
-            max_divergences: 3,
         }
     }
 
@@ -186,14 +182,14 @@ impl Engine {
         let time_events = self.time.advance(real_delta);
 
         if time_events.new_day {
-            self.events.emit(crate::simulation::world_tick::NewDay {
+            self.events.emit(crate::simulation::time_events::NewDay {
                 day: self.time.day,
                 month: self.time.month,
             });
         }
         if time_events.new_month {
             self.events
-                .emit(crate::simulation::world_tick::NewMonth(self.time.month));
+                .emit(crate::simulation::time_events::NewMonth(self.time.month));
         }
     }
 
@@ -368,9 +364,9 @@ impl Engine {
         use std::any::TypeId;
         use crate::world::components::*;
         use crate::world::extension_components::*;
-        use crate::ai::emotions::Emotions;
-        use crate::ai::memory::Memory;
-        use crate::ai::plan::Plan;
+        use crate::core::ai_emotions::Emotions;
+        use crate::core::ai_memory::Memory;
+        use crate::core::ai_plan::Plan;
 
         let tid = (*data).type_id();
         macro_rules! try_insert {

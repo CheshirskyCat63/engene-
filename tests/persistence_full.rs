@@ -102,7 +102,7 @@ fn faction_membership_roundtrip() {
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
     use engene::world::chunk_persistence::ChunkPersistenceService;
-    use engene::gameplay::factions::Faction;
+    use engene::world::components::Faction;
 
     let test_dir = std::env::temp_dir().join("engene_test_faction_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
@@ -127,6 +127,45 @@ fn faction_membership_roundtrip() {
     let fm = ecs.faction_memberships.get(&restored).expect("faction membership missing");
     assert_eq!(fm.faction, Faction::Duty);
     assert!((fm.standing - 0.8).abs() < 0.01);
+
+    let _ = std::fs::remove_dir_all(&test_dir);
+}
+
+#[test]
+fn chunk_load_rejects_schema_mismatch() {
+    use engene::core::ecs::Ecs;
+    use engene::memory::save_chunks::PersistenceError;
+    use engene::world::chunk_persistence::{ChunkPersistenceService, ChunkSaveData, ChunkSurfaceState};
+    use engene::world::streaming::ChunkCoord;
+
+    let test_dir = std::env::temp_dir().join("engene_test_schema_mismatch");
+    let _ = std::fs::remove_dir_all(&test_dir);
+    std::fs::create_dir_all(&test_dir).expect("mkdir");
+
+    let coord = ChunkCoord { x: 0, z: 0 };
+    let file = test_dir.join(format!("chunk_{}_{}.bin", coord.x, coord.z));
+
+    let bad = ChunkSaveData {
+        schema_version_chunk: 9999,
+        schema_version_entity: engene::core::build_manifest::SCHEMA_VERSION_ENTITY,
+        coord: (coord.x, coord.z),
+        entities: vec![],
+        surface_state: ChunkSurfaceState::default(),
+        save_tick: 0,
+        terrain_deformation_patches: vec![],
+        carcass_states: vec![],
+    };
+    let bytes = bincode::serialize(&bad).expect("serialize");
+    std::fs::write(&file, bytes).expect("write");
+
+    let mut svc = ChunkPersistenceService::new(test_dir.to_str().unwrap());
+    let mut ecs = Ecs::new();
+    let err = svc.try_load_chunk_entities(coord, &mut ecs).expect_err("must fail");
+
+    match err {
+        PersistenceError::SchemaVersion { kind, .. } => assert_eq!(kind, "chunk"),
+        other => panic!("unexpected error: {}", other),
+    }
 
     let _ = std::fs::remove_dir_all(&test_dir);
 }

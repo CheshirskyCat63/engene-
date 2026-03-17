@@ -33,14 +33,14 @@ impl SpatialAudioSystem {
         let listener = engine.listener_pos;
 
         for &e in &ecs.alive {
-            if let Some(t) = ecs.transforms.get(&e) {
+            if let Some(t) = ecs.get_transform(e) {
                 let pos = Vec3::new(t.x, 0.0, t.y);
                 let dist = (pos - listener).length();
                 if dist > self.max_audible_distance {
                     continue;
                 }
 
-                if let Some(ai) = ecs.ai_states.get(&e) {
+                if let Some(ai) = ecs.get_ai_state(e) {
                     if matches!(ai, crate::world::components::AiState::Executing(_)) {
                         let vol = (1.0 - dist / self.max_audible_distance) * 0.3;
                         engine.play_3d(SoundKind::Footstep, pos, vol, 0.3);

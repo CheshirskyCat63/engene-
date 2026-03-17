@@ -44,7 +44,7 @@ fn build_stress_world(
         let (e, _pid) = engine.ecs.spawn_new();
         let cx = rng.gen_range(0..GRID_SIZE);
         let cy = rng.gen_range(0..GRID_SIZE);
-        engine.ecs.transforms.insert(
+        engine.ecs.set_transform(
             e,
             crate::world::components::Transform {
                 x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
@@ -53,23 +53,23 @@ fn build_stress_world(
                 cell_y: cy,
             },
         );
-        engine.ecs.kinds.insert(e, crate::world::components::EntityKind::Npc);
-        engine.ecs.names.insert(e, crate::world::components::Name("StressNPC".into()));
-        engine.ecs.personal_needs.insert(e, crate::world::components::PersonalNeeds::default_npc());
-        engine.ecs.npc_economies.insert(e, crate::world::components::NpcEconomy {
+        engine.ecs.set_kind(e, crate::world::components::EntityKind::Npc);
+        engine.ecs.set_name(e, crate::world::components::Name("StressNPC".into()));
+        engine.ecs.set_personal_needs(e, crate::world::components::PersonalNeeds::default_npc());
+        engine.ecs.set_npc_economy(e, crate::world::components::NpcEconomy {
             money: 50.0,
             monthly_required: 50.0,
             job: crate::world::components::Job::Guard,
             desperation: 0.0,
         });
-        engine.ecs.sim_levels.insert(e, crate::world::components::SimLevel {
+        engine.ecs.set_sim_level(e, crate::world::components::SimLevel {
             level: crate::world::components::SimulationLevel::L1,
         });
-        engine.ecs.ai_states.insert(e, crate::world::components::AiState::Idle);
-        engine.ecs.inventories.insert(e, crate::world::components::Inventory { items: Vec::new() });
-        engine.ecs.memories.insert(e, crate::ai::memory::Memory::new());
-        engine.ecs.emotions.insert(e, crate::ai::emotions::Emotions::new());
-        engine.ecs.life_info.insert(e, crate::world::components::LifeInfo {
+        engine.ecs.set_ai_state(e, crate::world::components::AiState::Idle);
+        engine.ecs.set_inventory(e, crate::world::components::Inventory { items: Vec::new() });
+        engine.ecs.set_memory(e, crate::core::ai_memory::Memory::new());
+        engine.ecs.set_emotions(e, crate::core::ai_emotions::Emotions::new());
+        engine.ecs.set_life_info(e, crate::world::components::LifeInfo {
             age: 100.0,
             max_age: 400.0,
             last_mate_day: 0,

@@ -196,7 +196,7 @@ impl GameApp {
         if let Some(spatial) = self.engine.resources.get_mut::<HierarchicalSpatialIndex>() {
             spatial.clear();
             for &e in &self.engine.ecs.alive {
-                if let Some(t) = self.engine.ecs.transforms.get(&e) {
+                if let Some(t) = self.engine.ecs.get_transform(e) {
                     spatial.insert(e, t.x, t.y);
                 }
             }

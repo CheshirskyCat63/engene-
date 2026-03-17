@@ -86,10 +86,10 @@ impl EngineConsole {
                     .count();
                 let without_pid = total - with_pid;
                 let without_kind = ecs.alive.iter()
-                    .filter(|&&e| ecs.kinds.get(&e).is_none())
+                    .filter(|&&e| ecs.get_kind(e).is_none())
                     .count();
                 let without_transform = ecs.alive.iter()
-                    .filter(|&&e| ecs.transforms.get(&e).is_none())
+                    .filter(|&&e| ecs.get_transform(e).is_none())
                     .count();
                 let tombstones = ecs.identity.tombstone_count();
                 format!(
@@ -160,15 +160,15 @@ impl EngineConsole {
                     let x: f32 = parts[2].parse().unwrap_or(500.0);
                     let z: f32 = parts[3].parse().unwrap_or(500.0);
                     let entity = engine.ecs.spawn();
-                    engine.ecs.transforms.insert(entity, crate::world::components::Transform { x, y: z, cell_x: (x / 256.0) as u32, cell_y: (z / 256.0) as u32 });
+                    engine.ecs.set_transform(entity, crate::world::components::Transform { x, y: z, cell_x: (x / 256.0) as u32, cell_y: (z / 256.0) as u32 });
                     let ek = match kind {
                         "wolf" => crate::world::components::EntityKind::Monster(crate::world::components::MonsterSpecies::Wolf),
                         "boar" => crate::world::components::EntityKind::Monster(crate::world::components::MonsterSpecies::Boar),
                         "bloodsucker" => crate::world::components::EntityKind::Monster(crate::world::components::MonsterSpecies::Bloodsucker),
                         _ => crate::world::components::EntityKind::Npc,
                     };
-                    engine.ecs.kinds.insert(entity, ek);
-                    engine.ecs.names.insert(entity, crate::world::components::Name(format!("spawned_{}", entity)));
+                    engine.ecs.set_kind(entity, ek);
+                    engine.ecs.set_name(entity, crate::world::components::Name(format!("spawned_{}", entity)));
                     format!("Spawned {} entity {} at ({}, {})", kind, entity, x, z)
                 }
             }
@@ -179,7 +179,7 @@ impl EngineConsole {
                     let eid: u64 = parts[1].parse().unwrap_or(0);
                     let x: f32 = parts[2].parse().unwrap_or(0.0);
                     let z: f32 = parts[3].parse().unwrap_or(0.0);
-                    if let Some(t) = engine.ecs.transforms.get_mut(&eid) {
+                    if let Some(t) = engine.ecs.get_transform_mut(eid) {
                         t.x = x;
                         t.y = z;
                         format!("Teleported entity {} to ({}, {})", eid, x, z)

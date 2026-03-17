@@ -56,10 +56,10 @@ impl EngineSystem for RenderSystem {
         data.day_progress = 0.0;
 
         for &e in &ctx.ecs.alive {
-            let Some(t) = ctx.ecs.transforms.get(&e) else {
+            let Some(t) = ctx.ecs.get_transform(e) else {
                 continue;
             };
-            let color = match ctx.ecs.kinds.get(&e) {
+            let color = match ctx.ecs.get_kind(e) {
                 Some(EntityKind::Npc) => [0.16, 0.47, 1.0],
                 Some(EntityKind::Monster(crate::world::components::MonsterSpecies::Wolf)) => {
                     [0.9, 0.9, 0.9]

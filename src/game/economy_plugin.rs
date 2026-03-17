@@ -1,5 +1,5 @@
 use crate::core::plugin::{EngineBuilder, Plugin};
-use crate::economy::economy::EconomySystem;
+use crate::game::economy::economy::EconomySystem;
 
 pub struct EconomyPlugin;
 

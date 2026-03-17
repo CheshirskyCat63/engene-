@@ -217,28 +217,28 @@ impl EditorShell {
         for edit in edits {
             match edit {
                 InspectorEdit::SetTransform { entity, x, y } => {
-                    if let Some(t) = engine.ecs.transforms.get_mut(&entity) {
+                    if let Some(t) = engine.ecs.get_transform_mut(entity) {
                         t.x = x;
                         t.y = y;
                     }
                 }
                 InspectorEdit::SetHealth { entity, value } => {
-                    if let Some(n) = engine.ecs.personal_needs.get_mut(&entity) {
+                    if let Some(n) = engine.ecs.get_needs_mut(entity) {
                         n.health = value;
                     }
                 }
                 InspectorEdit::SetHunger { entity, value } => {
-                    if let Some(n) = engine.ecs.personal_needs.get_mut(&entity) {
+                    if let Some(n) = engine.ecs.get_needs_mut(entity) {
                         n.hunger = value;
                     }
                 }
                 InspectorEdit::SetThirst { entity, value } => {
-                    if let Some(n) = engine.ecs.personal_needs.get_mut(&entity) {
+                    if let Some(n) = engine.ecs.get_needs_mut(entity) {
                         n.thirst = value;
                     }
                 }
                 InspectorEdit::SetEnergy { entity, value } => {
-                    if let Some(n) = engine.ecs.personal_needs.get_mut(&entity) {
+                    if let Some(n) = engine.ecs.get_needs_mut(entity) {
                         n.energy = value;
                     }
                 }

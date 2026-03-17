@@ -84,7 +84,7 @@ pub fn save_state(state: &EditorState) -> Result<(), String> {
         .map(|d| d.as_secs())
         .unwrap_or(0);
 
-    let content = serde_json::to_string_pretty(state)
+    let content = serde_json::to_string_pretty(&state)
         .map_err(|e| format!("serialize: {}", e))?;
     
     // Use atomic save for safety
@@ -112,7 +112,7 @@ pub fn restore_to_safe_mode(
             // by triggering a "virtual" failure that sets the reason
             tracing::info!(
                 "panel '{}' was disabled at last shutdown: {}",
-                panel_name,
+                panel_name.clone(),
                 failure_state.disabled_reason.as_deref().unwrap_or("unknown")
             );
         }
@@ -135,7 +135,7 @@ pub fn capture_state(
     for (panel_name, (consecutive, total, was_disabled)) in failure_counts {
         if total > 0 || was_disabled {
             panel_failures.insert(
-                panel_name,
+                panel_name.clone(),
                 PanelFailureState {
                     consecutive_failures: consecutive,
                     total_failures: total,

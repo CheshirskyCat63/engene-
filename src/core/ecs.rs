@@ -2,9 +2,9 @@ use std::collections::{HashMap, HashSet};
 
 use slotmap::SlotMap;
 
-use crate::ai::emotions::Emotions;
-use crate::ai::memory::Memory;
-use crate::ai::plan::Plan;
+use crate::core::ai_emotions::Emotions;
+use crate::core::ai_memory::Memory;
+use crate::core::ai_plan::Plan;
 use crate::core::persistent_id::{DuplicateIdError, IdentityRegistry, PersistentEntityId};
 use crate::core::sparse_set::SparseSet;
 use crate::world::components::*;
@@ -98,6 +98,7 @@ impl Ecs {
         self.alive.push(id);
         self.alive_set.insert(id);
         self.gen_alloc.insert(id);
+        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after spawn");
         id
     }
 
@@ -126,6 +127,7 @@ impl Ecs {
             self.identity.mark_unloaded(pid);
         }
         self.remove_entity_data(entity);
+        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after unload");
     }
 
     pub fn despawn(&mut self, entity: Entity) {
@@ -133,6 +135,66 @@ impl Ecs {
             self.identity.mark_dead(pid, self.tick);
         }
         self.remove_entity_data(entity);
+        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after despawn");
+    }
+
+    pub fn validate_invariants(&self) -> Result<(), String> {
+        if self.alive.len() != self.alive_set.len() {
+            return Err(format!(
+                "alive/alive_set mismatch: {} vs {}",
+                self.alive.len(),
+                self.alive_set.len()
+            ));
+        }
+
+        for &e in &self.alive {
+            if !self.alive_set.contains(&e) {
+                return Err(format!("alive entity {e} missing from alive_set"));
+            }
+        }
+
+        let check_storage = |name: &str, entities: &[u64], alive_set: &HashSet<u64>| -> Result<(), String> {
+            for &e in entities {
+                if !alive_set.contains(&e) {
+                    return Err(format!("storage '{name}' contains non-alive entity {e}"));
+                }
+            }
+            Ok(())
+        };
+
+        check_storage("transforms", self.transforms.entities(), &self.alive_set)?;
+        check_storage("kinds", self.kinds.entities(), &self.alive_set)?;
+        check_storage("names", self.names.entities(), &self.alive_set)?;
+        check_storage("npc_traits", self.npc_traits.entities(), &self.alive_set)?;
+        check_storage("monster_traits", self.monster_traits.entities(), &self.alive_set)?;
+        check_storage("personal_needs", self.personal_needs.entities(), &self.alive_set)?;
+        check_storage("social_needs", self.social_needs.entities(), &self.alive_set)?;
+        check_storage("ecosystem_needs", self.ecosystem_needs.entities(), &self.alive_set)?;
+        check_storage("npc_economies", self.npc_economies.entities(), &self.alive_set)?;
+        check_storage("sim_levels", self.sim_levels.entities(), &self.alive_set)?;
+        check_storage("ai_states", self.ai_states.entities(), &self.alive_set)?;
+        check_storage("inventories", self.inventories.entities(), &self.alive_set)?;
+        check_storage("memories", self.memories.entities(), &self.alive_set)?;
+        check_storage("emotions", self.emotions.entities(), &self.alive_set)?;
+        check_storage("plans", self.plans.entities(), &self.alive_set)?;
+        check_storage("life_info", self.life_info.entities(), &self.alive_set)?;
+        check_storage("equipment", self.equipment.entities(), &self.alive_set)?;
+        check_storage("faction_memberships", self.faction_memberships.entities(), &self.alive_set)?;
+        // Identity consistency: live identity mappings must point to alive entities and be bijective.
+        let mut seen = HashSet::new();
+        for (pid, entity) in self.identity.live_entities() {
+            if !seen.insert(pid) {
+                return Err(format!("duplicate live PersistentEntityId {}", pid.0));
+            }
+            if !self.alive_set.contains(&entity) {
+                return Err(format!("identity live entity {} not in alive_set", entity));
+            }
+            if self.identity.persistent_id_of(entity) != Some(pid) {
+                return Err(format!("identity reverse mapping mismatch for entity {}", entity));
+            }
+        }
+
+        Ok(())
     }
 
     fn remove_entity_data(&mut self, entity: Entity) {
@@ -214,14 +276,36 @@ impl Ecs {
 
     /// Get monster traits if entity is a monster.
     #[inline]
-    pub fn get_monster_traits(&self, entity: Entity) -> Option<&NpcTraits> {
+    pub fn get_monster_traits(&self, entity: Entity) -> Option<&MonsterTraits> {
         self.monster_traits.get(&entity)
     }
 
     /// Get monster traits mutable if entity is a monster.
     #[inline]
-    pub fn get_monster_traits_mut(&mut self, entity: Entity) -> Option<&mut NpcTraits> {
+    pub fn get_monster_traits_mut(&mut self, entity: Entity) -> Option<&mut MonsterTraits> {
         self.monster_traits.get_mut(&entity)
+    }
+
+    /// Get entity display name.
+    #[inline]
+    pub fn get_name(&self, entity: Entity) -> Option<&Name> {
+        self.names.get(&entity)
+    }
+
+    #[inline]
+    pub fn name(&self, entity: Entity) -> Option<&Name> {
+        self.get_name(entity)
+    }
+
+    /// Get entity display name mutable.
+    #[inline]
+    pub fn get_name_mut(&mut self, entity: Entity) -> Option<&mut Name> {
+        self.names.get_mut(&entity)
+    }
+
+    #[inline]
+    pub fn name_mut(&mut self, entity: Entity) -> Option<&mut Name> {
+        self.get_name_mut(entity)
     }
 
     /// Get NPC traits if entity is an NPC.
@@ -312,6 +396,101 @@ impl Ecs {
     #[inline]
     pub fn get_transform_mut(&mut self, entity: Entity) -> Option<&mut Transform> {
         self.transforms.get_mut(&entity)
+    }
+
+    #[inline]
+    pub fn transform(&self, entity: Entity) -> Option<&Transform> {
+        self.transforms.get(&entity)
+    }
+
+    #[inline]
+    pub fn transform_mut(&mut self, entity: Entity) -> Option<&mut Transform> {
+        self.transforms.get_mut(&entity)
+    }
+
+    #[inline]
+    pub fn kind(&self, entity: Entity) -> Option<&EntityKind> {
+        self.kinds.get(&entity)
+    }
+
+    #[inline]
+    pub fn kind_mut(&mut self, entity: Entity) -> Option<&mut EntityKind> {
+        self.kinds.get_mut(&entity)
+    }
+
+    #[inline]
+    pub fn set_transform(&mut self, entity: Entity, value: Transform) {
+        self.transforms.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_kind(&mut self, entity: Entity, value: EntityKind) {
+        self.kinds.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_name(&mut self, entity: Entity, value: Name) {
+        self.names.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_personal_needs(&mut self, entity: Entity, value: PersonalNeeds) {
+        self.personal_needs.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_social_needs(&mut self, entity: Entity, value: SocialNeeds) {
+        self.social_needs.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_npc_economy(&mut self, entity: Entity, value: NpcEconomy) {
+        self.npc_economies.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_sim_level(&mut self, entity: Entity, value: SimLevel) {
+        self.sim_levels.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_ai_state(&mut self, entity: Entity, value: AiState) {
+        self.ai_states.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_inventory(&mut self, entity: Entity, value: Inventory) {
+        self.inventories.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_memory(&mut self, entity: Entity, value: Memory) {
+        self.memories.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_emotions(&mut self, entity: Entity, value: Emotions) {
+        self.emotions.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_life_info(&mut self, entity: Entity, value: LifeInfo) {
+        self.life_info.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn set_plan(&mut self, entity: Entity, value: Plan) {
+        self.plans.insert(entity, value);
+    }
+
+    #[inline]
+    pub fn take_plan(&mut self, entity: Entity) -> Option<Plan> {
+        self.plans.remove(&entity)
+    }
+
+    #[inline]
+    pub fn territory_owner(&self, cell_x: u32, cell_y: u32) -> Option<MonsterSpecies> {
+        self.territory.get(&(cell_x, cell_y)).copied()
     }
 
     /// Get inventory for an entity.

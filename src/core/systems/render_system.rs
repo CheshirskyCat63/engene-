@@ -42,7 +42,7 @@ impl RenderSystem {
         let mut instances = Vec::with_capacity(ecs.alive.len());
         
         for &e in &ecs.alive {
-            let t = match ecs.transforms.get(&e) {
+            let t = match ecs.get_transform(e) {
                 Some(t) => t,
                 None => continue,
             };
@@ -62,7 +62,7 @@ impl RenderSystem {
             }
 
             // Entity color based on kind
-            let color = match ecs.kinds.get(&e) {
+            let color = match ecs.get_kind(e) {
                 Some(EntityKind::Npc) => [0.16, 0.47, 1.0],
                 Some(EntityKind::Monster(MonsterSpecies::Wolf)) => [0.9, 0.9, 0.9],
                 Some(EntityKind::Monster(MonsterSpecies::Boar)) => [0.55, 0.43, 0.39],
@@ -95,7 +95,7 @@ impl EntityInstanceCollector {
         let mut instances = Vec::with_capacity(ecs.alive.len());
 
         for &e in &ecs.alive {
-            let t = match ecs.transforms.get(&e) {
+            let t = match ecs.get_transform(e) {
                 Some(t) => t,
                 None => continue,
             };
@@ -112,7 +112,7 @@ impl EntityInstanceCollector {
                 continue;
             }
 
-            let color = match ecs.kinds.get(&e) {
+            let color = match ecs.get_kind(e) {
                 Some(EntityKind::Npc) => [0.16, 0.47, 1.0],
                 Some(EntityKind::Monster(MonsterSpecies::Wolf)) => [0.9, 0.9, 0.9],
                 Some(EntityKind::Monster(MonsterSpecies::Boar)) => [0.55, 0.43, 0.39],

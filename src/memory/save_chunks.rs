@@ -1,10 +1,50 @@
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
+use std::fmt;
 
 use crate::core::ecs::{Ecs, Entity};
 use crate::world::components::*;
 use crate::world::streaming::ChunkCoord;
+
+#[derive(Debug)]
+pub enum PersistenceError {
+    Io {
+        op: &'static str,
+        path: String,
+        source: std::io::Error,
+    },
+    Serialize {
+        context: &'static str,
+        source: String,
+    },
+    Deserialize {
+        context: &'static str,
+        source: String,
+    },
+    SchemaVersion {
+        kind: &'static str,
+        expected: u32,
+        found: u32,
+    },
+}
+
+impl fmt::Display for PersistenceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Io { op, path, source } => write!(f, "{} {}: {}", op, path, source),
+            Self::Serialize { context, source } => write!(f, "serialize {}: {}", context, source),
+            Self::Deserialize { context, source } => write!(f, "deserialize {}: {}", context, source),
+            Self::SchemaVersion { kind, expected, found } => write!(
+                f,
+                "schema version mismatch for {}: expected {}, found {}",
+                kind, expected, found
+            ),
+        }
+    }
+}
+
+impl std::error::Error for PersistenceError {}
 
 pub const SNAPSHOT_VERSION: u32 = 2;
 
@@ -287,7 +327,7 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
     });
 
     let faction_membership = ecs.faction_memberships.get(&id).map(|fm| {
-        use crate::gameplay::factions::Faction;
+        use crate::world::components::Faction;
         let faction_id = match fm.faction {
             Faction::Loners => 0u8,
             Faction::Duty => 1,
@@ -326,11 +366,18 @@ pub fn snapshot_entity(id: Entity, ecs: &Ecs) -> EntitySnapshot {
     }
 }
 
-pub fn save_world(path: &Path, snapshot: &WorldSnapshot) -> Result<(), String> {
+pub fn save_world(path: &Path, snapshot: &WorldSnapshot) -> Result<(), PersistenceError> {
     use crate::memory::atomic_saved::atomic_save;
-    
-    let encoded = bincode::serialize(snapshot).map_err(|e| format!("serialize: {e}"))?;
-    atomic_save(path, &encoded).map_err(|e| format!("atomic write: {e}"))?;
+
+    let encoded = bincode::serialize(snapshot).map_err(|e| PersistenceError::Serialize {
+        context: "world snapshot",
+        source: e.to_string(),
+    })?;
+    atomic_save(path, &encoded).map_err(|e| PersistenceError::Io {
+        op: "atomic write",
+        path: path.display().to_string(),
+        source: e,
+    })?;
     tracing::info!(
         "world saved to {} ({} entities)",
         path.display(),
@@ -339,10 +386,25 @@ pub fn save_world(path: &Path, snapshot: &WorldSnapshot) -> Result<(), String> {
     Ok(())
 }
 
-pub fn load_world(path: &Path) -> Result<WorldSnapshot, String> {
-    let data = fs::read(path).map_err(|e| format!("read: {e}"))?;
+pub fn load_world(path: &Path) -> Result<WorldSnapshot, PersistenceError> {
+    let data = fs::read(path).map_err(|e| PersistenceError::Io {
+        op: "read",
+        path: path.display().to_string(),
+        source: e,
+    })?;
     let snapshot: WorldSnapshot =
-        bincode::deserialize(&data).map_err(|e| format!("deserialize: {e}"))?;
+        bincode::deserialize(&data).map_err(|e| PersistenceError::Deserialize {
+            context: "world snapshot",
+            source: e.to_string(),
+        })?;
+
+    if snapshot.version != crate::core::build_manifest::SCHEMA_VERSION_SAVE {
+        return Err(PersistenceError::SchemaVersion {
+            kind: "world",
+            expected: crate::core::build_manifest::SCHEMA_VERSION_SAVE,
+            found: snapshot.version,
+        });
+    }
     tracing::info!(
         "world loaded from {} ({} entities)",
         path.display(),
@@ -351,23 +413,45 @@ pub fn load_world(path: &Path) -> Result<WorldSnapshot, String> {
     Ok(snapshot)
 }
 
-pub fn save_chunk(dir: &Path, coord: ChunkCoord, entities: &[EntitySnapshot]) -> Result<(), String> {
-    use crate::memory::atomic_saved::atomic_save_fast;
-    
-    fs::create_dir_all(dir).map_err(|e| format!("mkdir: {e}"))?;
+pub fn save_chunk(dir: &Path, coord: ChunkCoord, entities: &[EntitySnapshot]) -> Result<(), PersistenceError> {
+    use crate::memory::atomic_saved::atomic_save;
+
+    fs::create_dir_all(dir).map_err(|e| PersistenceError::Io {
+        op: "mkdir",
+        path: dir.display().to_string(),
+        source: e,
+    })?;
     let file = dir.join(format!("{}_{}.bin", coord.x, coord.z));
-    let encoded = bincode::serialize(entities).map_err(|e| format!("serialize chunk: {e}"))?;
-    atomic_save_fast(&file, &encoded).map_err(|e| format!("atomic write chunk: {e}"))?;
+    let encoded = bincode::serialize(entities).map_err(|e| PersistenceError::Serialize {
+        context: "chunk entities",
+        source: e.to_string(),
+    })?;
+    atomic_save(&file, &encoded).map_err(|e| PersistenceError::Io {
+        op: "atomic write chunk",
+        path: file.display().to_string(),
+        source: e,
+    })?;
     Ok(())
 }
 
-pub fn load_chunk(dir: &Path, coord: ChunkCoord) -> Result<Vec<EntitySnapshot>, String> {
+pub fn load_chunk(dir: &Path, coord: ChunkCoord) -> Result<Vec<EntitySnapshot>, PersistenceError> {
     let file = dir.join(format!("{}_{}.bin", coord.x, coord.z));
     if !file.exists() {
-        return Ok(Vec::new());
+        return Err(PersistenceError::Io {
+            op: "read chunk",
+            path: file.display().to_string(),
+            source: std::io::Error::new(std::io::ErrorKind::NotFound, "chunk file not found"),
+        });
     }
-    let data = fs::read(&file).map_err(|e| format!("read chunk: {e}"))?;
+    let data = fs::read(&file).map_err(|e| PersistenceError::Io {
+        op: "read chunk",
+        path: file.display().to_string(),
+        source: e,
+    })?;
     let entities: Vec<EntitySnapshot> =
-        bincode::deserialize(&data).map_err(|e| format!("deserialize chunk: {e}"))?;
+        bincode::deserialize(&data).map_err(|e| PersistenceError::Deserialize {
+            context: "chunk entities",
+            source: e.to_string(),
+        })?;
     Ok(entities)
 }

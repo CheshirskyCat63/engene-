@@ -1,7 +1,7 @@
 use rand::Rng;
 
-use crate::ai::emotions::Emotions;
-use crate::ai::memory::Memory;
+use crate::core::ai_emotions::Emotions;
+use crate::core::ai_memory::Memory;
 use crate::core::ecs::Ecs;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE};
 use crate::world::components::*;

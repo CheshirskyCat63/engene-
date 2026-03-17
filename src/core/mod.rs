@@ -15,6 +15,9 @@
 //! - `systems` - production, extracted game systems (Phase A.4)
 
 pub mod budget_registry;
+pub mod ai_emotions;
+pub mod ai_memory;
+pub mod ai_plan;
 pub mod failure_taxonomy;
 pub mod component_registry;
 pub mod config;
@@ -36,7 +39,6 @@ pub mod registry;
 pub mod scheduler;
 pub mod sparse_set;
 pub mod integration_matrix;
-pub mod integration_systems;
 pub mod system;
 pub mod systems;
 pub mod time;

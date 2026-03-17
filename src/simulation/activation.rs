@@ -7,7 +7,7 @@ pub fn update_simulation_levels(ecs: &mut Ecs, player_x: f32, player_y: f32) {
 
     for entity in entities {
         let distance = {
-            let t = match ecs.transforms.get(&entity) {
+            let t = match ecs.get_transform(entity) {
                 Some(t) => t,
                 None => continue,
             };

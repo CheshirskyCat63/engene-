@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::mpsc::{channel, Sender};
 use std::time::Duration;
 
 /// File event for hot reload
@@ -19,8 +19,6 @@ pub enum FileEvent {
 pub struct HotReloadWatcher {
     /// Watched paths
     watched: HashMap<PathBuf, ()>,
-    /// File system event receiver
-    receiver: Option<Receiver<FileEvent>>,
     /// Event sender for internal use
     sender: Option<Sender<FileEvent>>,
     /// Poll interval in milliseconds
@@ -35,10 +33,9 @@ impl Default for HotReloadWatcher {
 
 impl HotReloadWatcher {
     pub fn new() -> Self {
-        let (tx, rx) = channel();
+        let (tx, _rx) = channel();
         Self {
             watched: HashMap::new(),
-            receiver: Some(rx),
             sender: Some(tx),
             poll_interval_ms: 1000,
         }
@@ -53,7 +50,7 @@ impl HotReloadWatcher {
     /// Watch a file or directory for changes
     pub fn watch(&mut self, path: PathBuf) {
         if path.exists() {
-            self.watched.insert(path, ());
+            self.watched.insert(path.clone(), ());
             tracing::info!("watching for changes: {:?}", path);
         } else {
             tracing::warn!("cannot watch non-existent path: {:?}", path);
