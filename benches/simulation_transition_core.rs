@@ -5,7 +5,8 @@ use engine_runtime::simulation_core::{
     TransitionMetricsSnapshot, TransitionOrchestrator, TransitionReason, TransitionRequest,
     TransitionShardMergePolicy, TransitionShardOutput,
 };
-use rayon::ThreadPool;
+use std::sync::mpsc::{self, Receiver, Sender};
+use std::thread::JoinHandle;
 
 const CLASSIFY_COUNT: usize = 131_072;
 const REQUEST_COUNT: usize = 16_384;
@@ -56,13 +57,6 @@ fn make_requests(orchestrator: TransitionOrchestrator, count: usize) -> Vec<Tran
     out
 }
 
-fn make_thread_pool(threads: usize) -> ThreadPool {
-    rayon::ThreadPoolBuilder::new()
-        .num_threads(threads)
-        .build()
-        .expect("thread pool")
-}
-
 #[inline(always)]
 fn request_for_entity(idx: usize, to: SimulationLevel) -> TransitionRequest {
     TransitionRequest::Promote(PromotionRequest {
@@ -78,6 +72,181 @@ fn request_for_entity(idx: usize, to: SimulationLevel) -> TransitionRequest {
 #[derive(Clone)]
 struct ShardRanges {
     ranges: [(usize, usize); SHARDS],
+}
+
+#[derive(Clone, Copy)]
+struct ClassifyOnlySignal {
+    distances_addr: usize,
+    out_addr: usize,
+}
+
+enum ClassifyOnlyCommand {
+    Run(ClassifyOnlySignal),
+    Stop,
+}
+
+struct PersistentClassifyOnlyPool {
+    txs: Vec<Sender<ClassifyOnlyCommand>>,
+    done_rx: Receiver<()>,
+    handles: Vec<JoinHandle<()>>,
+}
+
+impl PersistentClassifyOnlyPool {
+    fn new(orchestrator: TransitionOrchestrator, ranges: &ShardRanges) -> Self {
+        let (done_tx, done_rx) = mpsc::channel();
+        let mut txs = Vec::with_capacity(SHARDS);
+        let mut handles = Vec::with_capacity(SHARDS);
+        for sid in 0..SHARDS {
+            let (start, end) = ranges.get(sid);
+            let (tx, rx) = mpsc::channel();
+            let done_tx = done_tx.clone();
+            let handle = std::thread::spawn(move || {
+                while let Ok(cmd) = rx.recv() {
+                    match cmd {
+                        ClassifyOnlyCommand::Run(signal) => {
+                            if start < end {
+                                let distances_ptr = signal.distances_addr as *const f32;
+                                let out_ptr = signal.out_addr as *mut SimulationLevel;
+                                for idx in start..end {
+                                    // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
+                                    unsafe {
+                                        *out_ptr.add(idx) =
+                                            orchestrator.classify_distance(*distances_ptr.add(idx));
+                                    }
+                                }
+                            }
+                            done_tx.send(()).expect("classify-only done send");
+                        }
+                        ClassifyOnlyCommand::Stop => break,
+                    }
+                }
+            });
+            txs.push(tx);
+            handles.push(handle);
+        }
+        Self {
+            txs,
+            done_rx,
+            handles,
+        }
+    }
+
+    fn run(&self, distances: &[f32], out_levels: &mut [SimulationLevel]) {
+        let signal = ClassifyOnlySignal {
+            distances_addr: distances.as_ptr() as usize,
+            out_addr: out_levels.as_mut_ptr() as usize,
+        };
+        for tx in &self.txs {
+            tx.send(ClassifyOnlyCommand::Run(signal))
+                .expect("classify-only send");
+        }
+        for _ in 0..self.txs.len() {
+            self.done_rx.recv().expect("classify-only done recv");
+        }
+    }
+}
+
+impl Drop for PersistentClassifyOnlyPool {
+    fn drop(&mut self) {
+        for tx in &self.txs {
+            let _ = tx.send(ClassifyOnlyCommand::Stop);
+        }
+        while let Some(handle) = self.handles.pop() {
+            let _ = handle.join();
+        }
+    }
+}
+
+#[derive(Clone, Copy)]
+struct MaterializeSignal {
+    distances_addr: usize,
+    arena_addr: usize,
+}
+
+enum MaterializeCommand {
+    Run(MaterializeSignal),
+    Stop,
+}
+
+struct PersistentMaterializePool {
+    txs: Vec<Sender<MaterializeCommand>>,
+    done_rx: Receiver<()>,
+    handles: Vec<JoinHandle<()>>,
+}
+
+impl PersistentMaterializePool {
+    fn new(orchestrator: TransitionOrchestrator, ranges: &ShardRanges) -> Self {
+        let (done_tx, done_rx) = mpsc::channel();
+        let mut txs = Vec::with_capacity(SHARDS);
+        let mut handles = Vec::with_capacity(SHARDS);
+        for sid in 0..SHARDS {
+            let (start, end) = ranges.get(sid);
+            let (tx, rx) = mpsc::channel();
+            let done_tx = done_tx.clone();
+            let handle = std::thread::spawn(move || {
+                while let Ok(cmd) = rx.recv() {
+                    match cmd {
+                        MaterializeCommand::Run(signal) => {
+                            if start < end {
+                                let distances_ptr = signal.distances_addr as *const f32;
+                                let arena_ptr = signal.arena_addr as *mut TransitionRequest;
+                                for idx in start..end {
+                                    // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
+                                    unsafe {
+                                        let level =
+                                            orchestrator.classify_distance(*distances_ptr.add(idx));
+                                        *arena_ptr.add(idx) =
+                                            TransitionRequest::Promote(PromotionRequest {
+                                                subject: SimulationSubject {
+                                                    entity_id: idx as u64,
+                                                },
+                                                from: SimulationLevel::L1,
+                                                to: level,
+                                                reason: TransitionReason::PlayerProximity,
+                                            });
+                                    }
+                                }
+                            }
+                            done_tx.send(()).expect("materialize done send");
+                        }
+                        MaterializeCommand::Stop => break,
+                    }
+                }
+            });
+            txs.push(tx);
+            handles.push(handle);
+        }
+        Self {
+            txs,
+            done_rx,
+            handles,
+        }
+    }
+
+    fn run(&self, distances: &[f32], arena: &mut [TransitionRequest]) {
+        let signal = MaterializeSignal {
+            distances_addr: distances.as_ptr() as usize,
+            arena_addr: arena.as_mut_ptr() as usize,
+        };
+        for tx in &self.txs {
+            tx.send(MaterializeCommand::Run(signal))
+                .expect("materialize send");
+        }
+        for _ in 0..self.txs.len() {
+            self.done_rx.recv().expect("materialize done recv");
+        }
+    }
+}
+
+impl Drop for PersistentMaterializePool {
+    fn drop(&mut self) {
+        for tx in &self.txs {
+            let _ = tx.send(MaterializeCommand::Stop);
+        }
+        while let Some(handle) = self.handles.pop() {
+            let _ = handle.join();
+        }
+    }
 }
 
 impl ShardRanges {
@@ -121,33 +290,12 @@ fn classify_only_single_thread(
 }
 
 fn classify_only_multi_thread_x8(
-    orchestrator: TransitionOrchestrator,
     distances: &[f32],
     out_levels: &mut [SimulationLevel],
-    pool: &ThreadPool,
-    ranges: &ShardRanges,
+    workers: &PersistentClassifyOnlyPool,
 ) {
     debug_assert_eq!(distances.len(), out_levels.len());
-    let out_addr = out_levels.as_mut_ptr() as usize;
-    let distances_addr = distances.as_ptr() as usize;
-    pool.scope(|scope| {
-        for sid in 0..SHARDS {
-            let (start, end) = ranges.get(sid);
-            if start >= end {
-                continue;
-            }
-            scope.spawn(move |_| {
-                let out_ptr = out_addr as *mut SimulationLevel;
-                let distances_ptr = distances_addr as *const f32;
-                for idx in start..end {
-                    // SAFETY: shard ranges are disjoint and in-bounds.
-                    unsafe {
-                        *out_ptr.add(idx) = orchestrator.classify_distance(*distances_ptr.add(idx));
-                    }
-                }
-            });
-        }
-    });
+    workers.run(distances, out_levels);
 }
 
 fn classify_materialize_single_thread(
@@ -169,40 +317,11 @@ fn classify_materialize_single_thread(
 }
 
 fn classify_materialize_multi_thread_x8(
-    orchestrator: TransitionOrchestrator,
     distances: &[f32],
     arena: &mut [TransitionRequest],
-    pool: &ThreadPool,
-    ranges: &ShardRanges,
+    workers: &PersistentMaterializePool,
 ) {
-    let arena_addr = arena.as_mut_ptr() as usize;
-    let distances_addr = distances.as_ptr() as usize;
-    pool.scope(|scope| {
-        for sid in 0..SHARDS {
-            let (start, end) = ranges.get(sid);
-            if start >= end {
-                continue;
-            }
-            scope.spawn(move |_| {
-                let arena_ptr = arena_addr as *mut TransitionRequest;
-                let distances_ptr = distances_addr as *const f32;
-                for idx in start..end {
-                    // SAFETY: shard ranges are disjoint and in-bounds.
-                    unsafe {
-                        let level = orchestrator.classify_distance(*distances_ptr.add(idx));
-                        *arena_ptr.add(idx) = TransitionRequest::Promote(PromotionRequest {
-                            subject: SimulationSubject {
-                                entity_id: idx as u64,
-                            },
-                            from: SimulationLevel::L1,
-                            to: level,
-                            reason: TransitionReason::PlayerProximity,
-                        });
-                    }
-                }
-            });
-        }
-    });
+    workers.run(distances, arena);
 }
 
 fn bench_classify_only_single_thread(c: &mut Criterion) {
@@ -221,19 +340,13 @@ fn bench_classify_only_single_thread(c: &mut Criterion) {
 fn bench_classify_only_multi_thread_x8(c: &mut Criterion) {
     let orchestrator = TransitionOrchestrator::default();
     let distances = make_distances(CLASSIFY_COUNT);
-    let pool = make_thread_pool(SHARDS);
     let ranges = ShardRanges::new(CLASSIFY_COUNT);
+    let workers = PersistentClassifyOnlyPool::new(orchestrator, &ranges);
     let mut out_levels = vec![SimulationLevel::L3; CLASSIFY_COUNT];
 
     c.bench_function("simulation_core/classify_only_multi_thread_x8", |b| {
         b.iter(|| {
-            classify_only_multi_thread_x8(
-                orchestrator,
-                &distances,
-                &mut out_levels,
-                &pool,
-                &ranges,
-            );
+            classify_only_multi_thread_x8(&distances, &mut out_levels, &workers);
             black_box(out_levels[0])
         })
     });
@@ -256,8 +369,8 @@ fn bench_classify_materialize_single_thread(c: &mut Criterion) {
 fn bench_classify_materialize_multi_thread_x8(c: &mut Criterion) {
     let orchestrator = TransitionOrchestrator::default();
     let distances = make_distances(CLASSIFY_COUNT);
-    let pool = make_thread_pool(SHARDS);
     let ranges = ShardRanges::new(CLASSIFY_COUNT);
+    let workers = PersistentMaterializePool::new(orchestrator, &ranges);
     let placeholder = request_for_entity(0, SimulationLevel::L1);
     let mut arena = vec![placeholder; CLASSIFY_COUNT];
 
@@ -265,13 +378,7 @@ fn bench_classify_materialize_multi_thread_x8(c: &mut Criterion) {
         "simulation_core/classify_materialize_multi_thread_x8",
         |b| {
             b.iter(|| {
-                classify_materialize_multi_thread_x8(
-                    orchestrator,
-                    &distances,
-                    &mut arena,
-                    &pool,
-                    &ranges,
-                );
+                classify_materialize_multi_thread_x8(&distances, &mut arena, &workers);
                 black_box(arena[0])
             })
         },

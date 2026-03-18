@@ -245,7 +245,15 @@ proof_isolation() {
   cargo rustc --bench simulation_transition_core --profile bench -vv -- -C debuginfo=0 >"$log_file" 2>&1
 
   local bin_hits
-  bin_hits=$( (rg -o "src/bin/engene_(game|sdk|headless|test)\.rs" "$log_file" || true) | wc -l | tr -d " " )
+  if command -v rg >/dev/null 2>&1; then
+    bin_hits=$( (rg -o "src/bin/engene_(game|sdk|headless|test)\.rs" "$log_file" || true) | wc -l | tr -d " " )
+  elif command -v grep >/dev/null 2>&1; then
+    bin_hits=$( (grep -Eo "src/bin/engene_(game|sdk|headless|test)\.rs" "$log_file" || true) | wc -l | tr -d " " )
+  else
+    echo "CRITICAL_FAILURE: ${mode}-build isolation proof requires rg or grep to scan build log" >&2
+    exit 1
+  fi
+
   if [[ "$bin_hits" == "0" ]]; then
     echo "PASS: ${mode}-build isolation proof (no root runtime bins compiled by isolated bench rustc path)"
   else
