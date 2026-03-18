@@ -5,7 +5,6 @@ use engine_runtime::simulation_core::{
     TransitionMetricsSnapshot, TransitionOrchestrator, TransitionReason, TransitionRequest,
     TransitionShardMergePolicy, TransitionShardOutput,
 };
-use rayon::prelude::*;
 use rayon::ThreadPool;
 
 const CLASSIFY_COUNT: usize = 131_072;
@@ -103,6 +102,11 @@ impl ShardRanges {
         }
         out
     }
+
+    #[inline(always)]
+    fn get(&self, sid: usize) -> (usize, usize) {
+        self.ranges[sid]
+    }
 }
 
 fn classify_only_single_thread(
@@ -121,19 +125,28 @@ fn classify_only_multi_thread_x8(
     distances: &[f32],
     out_levels: &mut [SimulationLevel],
     pool: &ThreadPool,
+    ranges: &ShardRanges,
 ) {
     debug_assert_eq!(distances.len(), out_levels.len());
-    let chunk = distances.len().div_ceil(SHARDS);
-    pool.install(|| {
-        out_levels
-            .par_chunks_mut(chunk)
-            .enumerate()
-            .for_each(|(sid, out_chunk)| {
-                let start = sid * chunk;
-                for (i, slot) in out_chunk.iter_mut().enumerate() {
-                    *slot = orchestrator.classify_distance(distances[start + i]);
+    let out_addr = out_levels.as_mut_ptr() as usize;
+    let distances_addr = distances.as_ptr() as usize;
+    pool.scope(|scope| {
+        for sid in 0..SHARDS {
+            let (start, end) = ranges.get(sid);
+            if start >= end {
+                continue;
+            }
+            scope.spawn(move |_| {
+                let out_ptr = out_addr as *mut SimulationLevel;
+                let distances_ptr = distances_addr as *const f32;
+                for idx in start..end {
+                    // SAFETY: shard ranges are disjoint and in-bounds.
+                    unsafe {
+                        *out_ptr.add(idx) = orchestrator.classify_distance(*distances_ptr.add(idx));
+                    }
                 }
             });
+        }
     });
 }
 
@@ -144,7 +157,14 @@ fn classify_materialize_single_thread(
 ) {
     for idx in 0..distances.len() {
         let level = orchestrator.classify_distance(distances[idx]);
-        arena[idx] = request_for_entity(idx, level);
+        arena[idx] = TransitionRequest::Promote(PromotionRequest {
+            subject: SimulationSubject {
+                entity_id: idx as u64,
+            },
+            from: SimulationLevel::L1,
+            to: level,
+            reason: TransitionReason::PlayerProximity,
+        });
     }
 }
 
@@ -153,20 +173,35 @@ fn classify_materialize_multi_thread_x8(
     distances: &[f32],
     arena: &mut [TransitionRequest],
     pool: &ThreadPool,
+    ranges: &ShardRanges,
 ) {
-    let chunk = distances.len().div_ceil(SHARDS);
-    pool.install(|| {
-        arena
-            .par_chunks_mut(chunk)
-            .enumerate()
-            .for_each(|(sid, out_chunk)| {
-                let start = sid * chunk;
-                for (i, slot) in out_chunk.iter_mut().enumerate() {
-                    let idx = start + i;
-                    let level = orchestrator.classify_distance(distances[idx]);
-                    *slot = request_for_entity(idx, level);
+    let arena_addr = arena.as_mut_ptr() as usize;
+    let distances_addr = distances.as_ptr() as usize;
+    pool.scope(|scope| {
+        for sid in 0..SHARDS {
+            let (start, end) = ranges.get(sid);
+            if start >= end {
+                continue;
+            }
+            scope.spawn(move |_| {
+                let arena_ptr = arena_addr as *mut TransitionRequest;
+                let distances_ptr = distances_addr as *const f32;
+                for idx in start..end {
+                    // SAFETY: shard ranges are disjoint and in-bounds.
+                    unsafe {
+                        let level = orchestrator.classify_distance(*distances_ptr.add(idx));
+                        *arena_ptr.add(idx) = TransitionRequest::Promote(PromotionRequest {
+                            subject: SimulationSubject {
+                                entity_id: idx as u64,
+                            },
+                            from: SimulationLevel::L1,
+                            to: level,
+                            reason: TransitionReason::PlayerProximity,
+                        });
+                    }
                 }
             });
+        }
     });
 }
 
@@ -187,11 +222,18 @@ fn bench_classify_only_multi_thread_x8(c: &mut Criterion) {
     let orchestrator = TransitionOrchestrator::default();
     let distances = make_distances(CLASSIFY_COUNT);
     let pool = make_thread_pool(SHARDS);
+    let ranges = ShardRanges::new(CLASSIFY_COUNT);
     let mut out_levels = vec![SimulationLevel::L3; CLASSIFY_COUNT];
 
     c.bench_function("simulation_core/classify_only_multi_thread_x8", |b| {
         b.iter(|| {
-            classify_only_multi_thread_x8(orchestrator, &distances, &mut out_levels, &pool);
+            classify_only_multi_thread_x8(
+                orchestrator,
+                &distances,
+                &mut out_levels,
+                &pool,
+                &ranges,
+            );
             black_box(out_levels[0])
         })
     });
@@ -215,6 +257,7 @@ fn bench_classify_materialize_multi_thread_x8(c: &mut Criterion) {
     let orchestrator = TransitionOrchestrator::default();
     let distances = make_distances(CLASSIFY_COUNT);
     let pool = make_thread_pool(SHARDS);
+    let ranges = ShardRanges::new(CLASSIFY_COUNT);
     let placeholder = request_for_entity(0, SimulationLevel::L1);
     let mut arena = vec![placeholder; CLASSIFY_COUNT];
 
@@ -222,7 +265,13 @@ fn bench_classify_materialize_multi_thread_x8(c: &mut Criterion) {
         "simulation_core/classify_materialize_multi_thread_x8",
         |b| {
             b.iter(|| {
-                classify_materialize_multi_thread_x8(orchestrator, &distances, &mut arena, &pool);
+                classify_materialize_multi_thread_x8(
+                    orchestrator,
+                    &distances,
+                    &mut arena,
+                    &pool,
+                    &ranges,
+                );
                 black_box(arena[0])
             })
         },

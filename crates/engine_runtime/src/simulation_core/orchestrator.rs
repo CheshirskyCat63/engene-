@@ -7,22 +7,29 @@ use crate::simulation_core::contracts::{
 };
 
 #[inline(always)]
-fn request_sort_key(request: TransitionRequest) -> (u64, u8, u8, u8) {
-    let (subject, from, to, reason) = match request {
+fn compare_requests(left: TransitionRequest, right: TransitionRequest) -> std::cmp::Ordering {
+    let (left_subject, left_from, left_to, left_reason) = match left {
         TransitionRequest::Promote(r) => (r.subject.entity_id, r.from, r.to, r.reason),
         TransitionRequest::Demote(r) => (r.subject.entity_id, r.from, r.to, r.reason),
     };
-    (
-        subject,
-        level_rank(from),
-        level_rank(to),
-        reason_rank(reason),
-    )
+    let (right_subject, right_from, right_to, right_reason) = match right {
+        TransitionRequest::Promote(r) => (r.subject.entity_id, r.from, r.to, r.reason),
+        TransitionRequest::Demote(r) => (r.subject.entity_id, r.from, r.to, r.reason),
+    };
+
+    left_subject
+        .cmp(&right_subject)
+        .then(level_rank(left_from).cmp(&level_rank(right_from)))
+        .then(level_rank(left_to).cmp(&level_rank(right_to)))
+        .then(reason_rank(left_reason).cmp(&reason_rank(right_reason)))
 }
 
 #[inline(always)]
-fn compare_requests(left: TransitionRequest, right: TransitionRequest) -> std::cmp::Ordering {
-    request_sort_key(left).cmp(&request_sort_key(right))
+fn request_subject_id(request: TransitionRequest) -> u64 {
+    match request {
+        TransitionRequest::Promote(r) => r.subject.entity_id,
+        TransitionRequest::Demote(r) => r.subject.entity_id,
+    }
 }
 
 #[derive(Clone, Copy)]
@@ -226,8 +233,8 @@ impl TransitionOrchestrator {
                 if shard.requests.is_empty() {
                     continue;
                 }
-                let first_id = shard.requests[0].subject().entity_id;
-                let last_id = shard.requests[shard.requests.len() - 1].subject().entity_id;
+                let first_id = request_subject_id(shard.requests[0]);
+                let last_id = request_subject_id(shard.requests[shard.requests.len() - 1]);
                 if has_prev && prev_last >= first_id {
                     concat_ok = false;
                     break;

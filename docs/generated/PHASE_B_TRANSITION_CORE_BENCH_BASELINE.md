@@ -1,4 +1,4 @@
-# Phase B Transition Core Bench Baseline (Batch 11)
+# Phase B Transition Core Bench Baseline (Batch 12)
 
 ## Harness
 - Bench target: `simulation_transition_core` (criterion).
@@ -57,7 +57,16 @@ Scaling checks in gate:
 - no string formatting in transition-core hot path
 - deterministic ordering + merge policy maintained
 
+## Batch 12 measured result snapshot (`--from-existing` on 2026-03-18)
+- PASS: `classify_only_single_thread` (0.058003ms, 2,259,757,508/s)
+- PASS: `classify_only_multi_thread_x8` (0.114272ms, 1,147,020,746/s)
+- PASS: `classify_materialize_single_thread` (0.193818ms, 676,264,673/s)
+- PASS: `classify_materialize_multi_thread_x8` (0.224837ms, 582,965,463/s)
+- PASS: `classify_order` (0.024838ms, 659,638,310/s)
+- PASS: `classify_order_resolve` (0.125528ms, 130,520,602/s)
+- PASS: `deferred_queue_replay` (0.005105ms, 200,577,306/s)
+- PASS: `deterministic_merge_prep` (0.398503ms, 328,910,609/s)
+- CRITICAL_FAILURE: `classify_only_x8` scaling = 0.508x (MT slower than ST)
+- CRITICAL_FAILURE: `classify_materialize_x8` scaling = 0.862x (MT slower than ST)
 
-## Batch 11 measured result snapshot
-- Gate run (`bash scripts/check_transition_speed_law.sh --from-existing`) currently reports PASS for classify_only_single_thread, classify_only_multi_thread_x8, classify_order, classify_order_resolve, deferred_queue_replay.
-- Current FAIL set: classify_materialize_single_thread, classify_materialize_multi_thread_x8, deterministic_merge_prep, classify_only_x8 scaling, classify_materialize_x8 scaling.
+Closure status: **Phase B remains open** because runtime scaling gates still fail.

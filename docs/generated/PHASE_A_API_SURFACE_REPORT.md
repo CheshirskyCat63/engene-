@@ -1,4 +1,4 @@
-# Phase A API Surface Report (Batch 8 closure) + Phase B Batch 11 update
+# Phase A API Surface Report (Batch 8 closure) + Phase B Batch 12 update
 
 ## New crate facades
 Each new crate exposes a minimal `api` module to establish stable public entrypoints:
@@ -54,7 +54,7 @@ Each new crate exposes a minimal `api` module to establish stable public entrypo
   - `ReadComponent<'a, T>` / `WriteComponent<'a, T>`
   - `collect_matching(...)` / `count_matching(...)`
 
-## `engine_runtime` exported modules (Phase B Batch 11)
+## `engine_runtime` exported modules (Phase B Batch 12)
 - `engine_runtime::simulation_core::contracts` including:
   - `SimulationLevel`, `SimulationPolicyProfile`, `TransitionSpeedLawTargets`
   - `PromotionRequest`, `DemotionRequest`, `TransitionRequest`
@@ -79,7 +79,7 @@ Each new crate exposes a minimal `api` module to establish stable public entrypo
 - Domain truth (world/render/audio/physics/game) remains outside `engine_runtime`.
 
 
-## Bench/regression tooling (Phase B Batch 11)
+## Bench/regression tooling (Phase B Batch 12)
 - `benches/simulation_transition_core.rs` retains the same fair ST/MT benchmark pairs (Batch 7 truth) while Batch 11 focuses on structural transition-core closure work and severity-tagged runtime gate truth output:
   - `classify_only_single_thread` vs `classify_only_multi_thread_x8`
   - `classify_materialize_single_thread` vs `classify_materialize_multi_thread_x8`

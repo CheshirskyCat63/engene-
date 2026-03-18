@@ -1,4 +1,4 @@
-# Phase A/Phase B Dependency Graph Snapshot (Batch 8 closure + Phase B Batch 11)
+# Phase A/Phase B Dependency Graph Snapshot (Batch 8 closure + Phase B Batch 12)
 
 ## Workspace members
 - root package `engene`
@@ -29,4 +29,4 @@
 - ECS direct storage gate: PASS.
 
 ## Notes
-Phase B Batch 11 continues structural transition-core closure work under unchanged benchmark semantics/thresholds and severity-tagged runtime gate output, with no crate-direction law changes and no reverse dependencies added.
+Phase B Batch 12 continues structural transition-core closure work under unchanged benchmark semantics/thresholds and severity-tagged runtime gate output, with no crate-direction law changes and no reverse dependencies added.
