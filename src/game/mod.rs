@@ -1,22 +1,14 @@
 pub mod ai;
 pub mod ai_config;
 pub mod combat_plugin;
-pub mod debug_output;
 pub mod economy;
 pub mod economy_plugin;
 pub mod ecosystem;
 pub mod gameplay;
 pub mod hud;
-pub mod integration_systems;
 pub mod player;
 pub mod player_save;
 pub mod population_plugin;
 pub mod rules;
-pub mod runtime_assembly;
 pub mod stalker_plugin;
 pub mod weapons_plugin;
-
-pub use stalker_plugin::StalkerPlugin;
-pub mod animation_integration;
-pub mod runtime_background;
-pub mod runtime_world_tick;

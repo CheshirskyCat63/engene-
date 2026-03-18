@@ -167,6 +167,12 @@ impl IdentityRegistry {
     }
 }
 
+impl Default for IdentityRegistry {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// A reference to another entity that uses PersistentEntityId for stability.
 /// When the target is unloaded, resolution returns None but the reference remains valid.
 #[derive(Clone, Copy, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]

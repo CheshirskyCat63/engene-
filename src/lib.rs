@@ -12,7 +12,7 @@ pub mod memory;
 pub mod navigation;
 pub mod network;
 pub mod physics;
-pub mod sdk;
+pub mod runtime;
 pub mod simulation;
 pub mod testsupport;
 pub mod tools;

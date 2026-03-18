@@ -9,7 +9,6 @@ use winit::event_loop::EventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
-use crate::app::runtime_assembly::RuntimeAssembly;
 use crate::audio::audio::AudioEngine;
 use crate::core::build_manifest::BuildManifest;
 use crate::core::crash_telemetry;
@@ -21,6 +20,7 @@ use crate::graphics::renderer::{RenderCamera, Renderer};
 use crate::graphics::visibility::Frustum;
 use crate::input::input::InputState;
 use crate::memory::asset_manager::AssetManager;
+use crate::runtime::bootstrap::ToolsRuntimeAssembly;
 use crate::tools::doctor;
 use crate::tools::editor_shell::EditorShell;
 use crate::world::chunk_persistence::ChunkPersistenceService;
@@ -28,22 +28,10 @@ use crate::world::components::*;
 use crate::world::heightmap::Heightmap;
 use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
 use crate::world::streaming::WorldStreamer;
-use crate::world::world::WorldGrid;
 
 type ArcHeightmap = Arc<Heightmap>;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
-pub enum SdkStartupMode {
-    Editor,
-}
-
-pub fn run(mode: SdkStartupMode) {
-    match mode {
-        SdkStartupMode::Editor => run_editor(),
-    }
-}
-
-fn run_editor() {
+pub fn run_from_env_args() {
     if BuildManifest::handle_version_flag() {
         return;
     }
@@ -62,11 +50,8 @@ fn run_editor() {
     BuildManifest::ensure_data_dirs();
     manifest.write_manifest_json();
 
-    let grid = WorldGrid::generate();
-    let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
-    let heightmap: ArcHeightmap = Arc::new(Heightmap::generate(&biomes));
-
-    let engine = RuntimeAssembly::vertical_slice(heightmap.clone(), &biomes);
+    let heightmap: ArcHeightmap = Arc::new(Heightmap::flat(crate::world::cell::WORLD_SIZE));
+    let engine = ToolsRuntimeAssembly::minimal();
 
     let doctor_report = doctor::run_doctor(&engine, doctor::DoctorMode::Strict);
     println!(
@@ -94,7 +79,6 @@ fn run_editor() {
         sim_paused: false,
         sim_speed: 1.0,
         heightmap,
-        biomes,
         editor_shell,
     };
 
@@ -115,7 +99,6 @@ struct SdkApp {
     sim_paused: bool,
     sim_speed: f32,
     heightmap: ArcHeightmap,
-    biomes: Vec<crate::world::biome::Biome>,
     editor_shell: EditorShell,
 }
 
@@ -128,11 +111,9 @@ impl ApplicationHandler for SdkApp {
             .with_title("ENGENE SDK — Editor")
             .with_inner_size(winit::dpi::LogicalSize::new(1600, 900));
         let window = Arc::new(event_loop.create_window(attrs).unwrap());
-        let mut renderer = Renderer::new(window.clone());
-        renderer.upload_terrain(&self.heightmap, &self.biomes);
-        renderer.upload_vegetation(&self.heightmap, &self.biomes);
-        self.camera.aspect = renderer.aspect();
-        self.renderer = Some(renderer);
+        // Tools runtime purity:
+        // avoid booting renderer weather/sky prototype stack in tools mode.
+        self.renderer = None;
         self.window = Some(window);
         self.last_frame = Some(Instant::now());
     }

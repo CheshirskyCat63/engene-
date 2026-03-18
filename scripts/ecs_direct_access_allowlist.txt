@@ -5,8 +5,8 @@ src/core/query.rs
 src/core/ecs.rs
 src/core/engine.rs
 
-# runtime ecs internal: active game runtime systems still mutating storage directly.
-src/game/integration_systems.rs
+# runtime ecs internal: runtime wiring systems still mutating storage directly.
+src/runtime/wiring/integration.rs
 src/game/ai/reproduction.rs
 src/world/population.rs
 
@@ -14,4 +14,3 @@ src/world/population.rs
 src/memory/save_chunks.rs
 src/memory/component_delta.rs
 src/world/chunk_persistence.rs
-

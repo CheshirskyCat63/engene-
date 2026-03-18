@@ -4,11 +4,14 @@ use crate::core::mutation_policy::*;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::physics::cloth::ClothWorld;
+use crate::physics::damage_pipeline::response_aggregator::SurfaceMaskType;
 use crate::physics::fire::FireGrid;
 use crate::physics::rapier_world::RapierPhysics;
 use crate::physics::sim_lod;
 use crate::physics::water::WaterGrid;
+use crate::world::fields::WorldFields;
 use crate::world::heightmap::Heightmap;
+use crate::world::surface_state::SurfaceStateStore;
 
 pub struct PhysicsSystem {
     rapier: RapierPhysics,
@@ -35,6 +38,16 @@ impl PhysicsSystem {
         self.cam_x = x;
         self.cam_z = z;
     }
+
+    /// Apply canonical world-field truth into fire/water owner inputs.
+    /// Returns sampled rain intensity used for this tick.
+    pub fn apply_world_fields(&mut self, fields: &WorldFields, time: f32) -> f32 {
+        let sampled_wind = fields.wind.sample(glam::Vec3::ZERO, time);
+        self.fire.wind = [sampled_wind.x, sampled_wind.z];
+        let rain = fields.rain.sample(glam::Vec3::ZERO, time).max(0.0);
+        self.water.rain_intensity = rain;
+        rain
+    }
 }
 
 impl EngineSystem for PhysicsSystem {
@@ -46,6 +59,8 @@ impl EngineSystem for PhysicsSystem {
         SystemDescriptor::new("Physics")
             .with_determinism(DeterminismTier::Hard)
             .with_headless(true)
+            .reads_resource::<WorldFields>()
+            .writes_resource::<SurfaceStateStore>()
             .after("AI")
     }
 
@@ -65,9 +80,30 @@ impl EngineSystem for PhysicsSystem {
             sim_lod::region_sim_level(self.cam_x, self.cam_z, world_center_x, world_center_z);
 
         let dt = 1.0 / 20.0;
-        self.fire.update(dt, region_level);
+        let mut rain = 0.0;
+        if let Some(fields) = ctx.resources.get::<WorldFields>() {
+            rain = self.apply_world_fields(fields, 0.0);
+            if rain > 0.0 {
+                // Ensure canonical rain contributes to water truth even in coarse/far simulation levels.
+                self.water.add_water(0, 0, rain * dt * 0.01);
+            }
+        }
+
+        let fire_dt = dt * (1.0 - (rain * 0.5).min(0.8));
+        self.fire.update(fire_dt, region_level);
         self.water.update(dt, region_level);
         self.cloth.update(dt, region_level);
+
+        let water_present = self.water.has_any_water();
+        if let Some(surface) = ctx.resources.get_mut::<SurfaceStateStore>() {
+            let raining = rain > 0.0;
+            surface.decay_tick(dt, raining);
+            if raining {
+                surface.apply_mask_delta(0, 0, SurfaceMaskType::Wetness, dt * rain.min(1.0));
+            } else if water_present {
+                surface.apply_mask_delta(0, 0, SurfaceMaskType::Wetness, dt * 0.02);
+            }
+        }
 
         apply_fire_fear(ctx.ecs, &self.fire);
     }

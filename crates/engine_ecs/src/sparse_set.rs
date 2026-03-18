@@ -91,6 +91,12 @@ impl<T> SparseSet<T> {
     }
 }
 
+impl<T> Default for SparseSet<T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

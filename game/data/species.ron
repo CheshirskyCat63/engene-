@@ -57,8 +57,17 @@
             food_value: 0.5,
             max_age: 400.0,
             mate_cooldown_days: 60,
-            ecosystem_needs: (),
-            base_traits: (),
+            ecosystem_needs: (
+                hunting: 0.0, predator_avoidance: 0.4, food_chain_position: 0.5,
+                territory_control: 0.4, migration_urge: 0.2, resource_competition: 0.4,
+                pack_following: 0.6, shelter_seeking: 0.5, world_event_reaction: 0.6,
+                prey_selection: 0.1,
+            ),
+            base_traits: (
+                aggressiveness: 0.3, caution: 0.6, territoriality: 0.3,
+                bravery: 0.4, pack_mentality: 0.7, energy_level: 0.6,
+                hoarding: 0.5, curiosity: 0.5, adaptability: 0.7, stress_tolerance: 0.6,
+            ),
         ),
     },
 )

@@ -16,7 +16,7 @@ Scope: Cleanup / Archaeology / Repository Sanitation only (no new feature work, 
 | Doc generator references non-canonical roadmap path | `src/tools/doc_generator.rs` | REFACTOR_THEN_MOVE | False reference to root roadmap creates ambiguity | Updated link to `docs/canonical/ENGENE_2_0_ROADMAP.md` |
 | Network module comment points to legacy roadmap path | `src/network/mod.rs` | REFACTOR_THEN_MOVE | Incorrect roadmap pointer for handoff/readability | Updated to canonical roadmap path |
 | First-run guide prioritizes packaged `.exe` path and root artifact assumptions | `README_FIRST_RUN.md` | REFACTOR_THEN_MOVE | Conflicts with canonical entrypoint law; creates multiple perceived entrypoints | Rewritten around canonical `cargo run --bin ...` commands |
-| Thin dispatch `src/main.rs` exists alongside canonical `src/bin/*` | `src/main.rs` | REFACTOR_THEN_MOVE | Potential false entrypoint confusion in future workspace split | Not changed in batch; scheduled for Phase A clarification |
+| Thin dispatch `src/main.rs` exists alongside canonical `src/bin/*` | `src/main.rs` | REFACTOR_THEN_MOVE | Potential false entrypoint confusion in future workspace split | **Resolved in Phase C foundation cleanup:** root dispatcher removed; only `src/bin/*` remains canonical |
 | PowerShell launcher scripts (`run_game.ps1`, `run_sdk.ps1`) | repo root | CANONICAL_KEEP | Valid optional launch helpers; referenced and documented | Kept |
 | Build/package scripts (`build_release.ps1`, `package_release.ps1`) | repo root | CANONICAL_KEEP | Required packaging path; still used in docs/workflow | Kept |
 | Direction/ECS guard scripts | `scripts/*` | CANONICAL_KEEP | Phase-gate compliance checks used in canonical docs | Kept |

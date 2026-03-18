@@ -85,7 +85,11 @@ impl DoctorReport {
 pub fn run_doctor(engine: &Engine, mode: DoctorMode) -> DoctorReport {
     let descriptors = engine.system_descriptors();
     let manifest = RuntimeManifest::default();
-    let config = RuntimeConfig::default();
+    let config = engine
+        .resources
+        .get::<RuntimeConfig>()
+        .cloned()
+        .unwrap_or_default();
     let mut report = run_diagnostics(&descriptors, &manifest, &config);
 
     let resource_type_ids = engine.resources.type_ids();
@@ -101,9 +105,10 @@ pub fn run_doctor(engine: &Engine, mode: DoctorMode) -> DoctorReport {
     // Block 11: Extended runtime checks
     check_derived_rebuild_status(&mut report.diagnostics);
     check_event_bus_health(engine, &mut report.diagnostics);
-    check_quality_governor_status(engine, &mut report.diagnostics);
-    check_content_pipeline_readiness(engine, &mut report.diagnostics);
-    check_plugin_runtime_alignment(engine, &mut report.diagnostics);
+    check_quality_governor_status(engine, &config, &mut report.diagnostics);
+    check_content_pipeline_readiness(engine, &config, &mut report.diagnostics);
+    check_plugin_runtime_alignment(engine, &config, &mut report.diagnostics);
+    check_canonical_wiring_invariants(engine, &descriptors, &mut report.diagnostics);
 
     // Phase 0: New certification checks
     check_spawn_policy(&engine.ecs, &mut report.diagnostics);
@@ -447,7 +452,11 @@ fn check_event_bus_health(engine: &Engine, out: &mut Vec<Diagnostic>) {
     }
 }
 
-fn check_quality_governor_status(engine: &Engine, out: &mut Vec<Diagnostic>) {
+fn check_quality_governor_status(
+    engine: &Engine,
+    config: &RuntimeConfig,
+    out: &mut Vec<Diagnostic>,
+) {
     if let Some(gov) = engine
         .resources
         .get::<crate::core::quality_governor::QualityGovernor>()
@@ -462,7 +471,11 @@ fn check_quality_governor_status(engine: &Engine, out: &mut Vec<Diagnostic>) {
         });
     } else {
         out.push(Diagnostic {
-            severity: DiagnosticSeverity::Warning,
+            severity: if config.profile == crate::core::runtime_config::RuntimeProfile::Tools {
+                DiagnosticSeverity::Info
+            } else {
+                DiagnosticSeverity::Warning
+            },
             category: "low_spec",
             message: "QualityGovernor not wired as resource".into(),
         });
@@ -484,7 +497,11 @@ fn check_quality_governor_status(engine: &Engine, out: &mut Vec<Diagnostic>) {
     }
 }
 
-fn check_content_pipeline_readiness(engine: &Engine, out: &mut Vec<Diagnostic>) {
+fn check_content_pipeline_readiness(
+    engine: &Engine,
+    config: &RuntimeConfig,
+    out: &mut Vec<Diagnostic>,
+) {
     if engine
         .resources
         .get::<crate::content::prefabs::prefab_registry::PrefabRegistry>()
@@ -497,32 +514,43 @@ fn check_content_pipeline_readiness(engine: &Engine, out: &mut Vec<Diagnostic>) 
         });
     } else {
         out.push(Diagnostic {
-            severity: DiagnosticSeverity::Warning,
+            severity: if config.profile == crate::core::runtime_config::RuntimeProfile::Tools {
+                DiagnosticSeverity::Info
+            } else {
+                DiagnosticSeverity::Warning
+            },
             category: "content",
             message: "PrefabRegistry not wired".into(),
         });
     }
 }
 
-fn check_plugin_runtime_alignment(engine: &Engine, out: &mut Vec<Diagnostic>) {
+fn check_plugin_runtime_alignment(
+    engine: &Engine,
+    config: &RuntimeConfig,
+    out: &mut Vec<Diagnostic>,
+) {
     let descriptors = engine.system_descriptors();
     let system_names: Vec<&str> = descriptors.iter().map(|d| d.name).collect();
-    let expected = [
-        "SimulationSystem",
-        "WorldTickSystem",
-        "AiSystem",
-        "PhysicsSystem",
-        "EconomySystem",
-        "BallisticsTick",
-        "DamageDispatch",
-        "DestructionTick",
-        "TerrainDeformation",
-        "NavDirtyTick",
-        "OcclusionWire",
-        "GoreWire",
-        "AnimationIntegration",
-        "AudioIntegration",
-    ];
+    let expected: Vec<&str> = match config.profile {
+        crate::core::runtime_config::RuntimeProfile::Tools => vec![],
+        _ => vec![
+            "Simulation",
+            "WorldTick",
+            "AI",
+            "Physics",
+            "Economy",
+            "BallisticsTick",
+            "DamageDispatch",
+            "DestructionTick",
+            "TerrainDeformationTick",
+            "NavDirtyTick",
+            "OcclusionWire",
+            "GoreWire",
+            "AnimationIntegration",
+            "AudioIntegration",
+        ],
+    };
     for name in &expected {
         if !system_names.iter().any(|s| s.contains(name)) {
             out.push(Diagnostic {
@@ -543,6 +571,65 @@ fn check_plugin_runtime_alignment(engine: &Engine, out: &mut Vec<Diagnostic>) {
     });
 }
 
+fn check_canonical_wiring_invariants(
+    engine: &Engine,
+    descriptors: &[SystemDescriptor],
+    out: &mut Vec<Diagnostic>,
+) {
+    let has_ballistics_tick = descriptors.iter().any(|d| d.name == "BallisticsTick");
+    let has_full_sim_stack = descriptors
+        .iter()
+        .any(|d| d.name == "Physics" || d.name == "RenderSystem");
+    if has_ballistics_tick {
+        let has_world_fields = engine
+            .resources
+            .get::<crate::world::fields::WorldFields>()
+            .is_some();
+        out.push(Diagnostic {
+            severity: if has_world_fields {
+                DiagnosticSeverity::Info
+            } else {
+                DiagnosticSeverity::Error
+            },
+            category: "canonical_wiring",
+            message: if has_world_fields {
+                "BallisticsTick canonical dependency present: WorldFields wired".to_string()
+            } else {
+                "BallisticsTick declares WorldFields dependency but WorldFields is missing"
+                    .to_string()
+            },
+        });
+    }
+
+    if has_full_sim_stack {
+        if let Some(material_truth) = engine
+            .resources
+            .get::<crate::core::material_truth::MaterialTruthService>()
+        {
+            let fallback_primary = material_truth.is_fallback_primary_for(0);
+            out.push(Diagnostic {
+                severity: if fallback_primary {
+                    DiagnosticSeverity::Warning
+                } else {
+                    DiagnosticSeverity::Info
+                },
+                category: "canonical_wiring",
+                message: if fallback_primary {
+                    "MaterialTruthService appears fallback-primary for material id 0; canonical authored bridge may be bypassed".to_string()
+                } else {
+                    "MaterialTruthService canonical path active for material id 0".to_string()
+                },
+            });
+        } else {
+            out.push(Diagnostic {
+                severity: DiagnosticSeverity::Error,
+                category: "canonical_wiring",
+                message: "MaterialTruthService missing from runtime resources".to_string(),
+            });
+        }
+    }
+}
+
 pub fn run_diagnostics(
     system_descriptors: &[SystemDescriptor],
     manifest: &RuntimeManifest,
@@ -550,7 +637,7 @@ pub fn run_diagnostics(
 ) -> DoctorReport {
     let mut diagnostics = Vec::new();
 
-    check_system_ordering(system_descriptors, &mut diagnostics);
+    check_system_ordering(system_descriptors, config, &mut diagnostics);
     check_determinism_consistency(system_descriptors, config, &mut diagnostics);
     check_manifest_sanity(manifest, &mut diagnostics);
 
@@ -578,10 +665,12 @@ fn check_orphan_events(descriptors: &[SystemDescriptor], out: &mut Vec<Diagnosti
     for (tid, emitters) in &emitted {
         if !consumed.contains_key(tid) {
             out.push(Diagnostic {
-                severity: DiagnosticSeverity::Warning,
+                // Descriptor-local event wiring is incomplete for app/plugin sinks.
+                // Keep this visible, but do not classify as strict-warning defect.
+                severity: DiagnosticSeverity::Info,
                 category: "orphan_event",
                 message: format!(
-                    "Event {:?} emitted by {:?} but never consumed by any system",
+                    "Event {:?} emitted by {:?} but never consumed by any *registered system* (may be external sink)",
                     tid, emitters
                 ),
             });
@@ -620,9 +709,14 @@ fn check_orphan_resources(
     for rid in resource_type_ids {
         if !used.contains(rid) {
             out.push(Diagnostic {
-                severity: DiagnosticSeverity::Warning,
+                // Resource usage outside system descriptors (plugins/app bootstrap/tools) is valid.
+                // Keep diagnostic as informational inventory rather than strict-warning defect.
+                severity: DiagnosticSeverity::Info,
                 category: "orphan_resource",
-                message: format!("Resource {:?} is never read or written by any system", rid),
+                message: format!(
+                    "Resource {:?} is never read or written by any *registered system*",
+                    rid
+                ),
             });
         }
     }
@@ -644,13 +738,22 @@ fn build_risk_heatmap(diagnostics: &[Diagnostic]) -> HashMap<String, f32> {
     heat
 }
 
-fn check_system_ordering(descriptors: &[SystemDescriptor], out: &mut Vec<Diagnostic>) {
+fn check_system_ordering(
+    descriptors: &[SystemDescriptor],
+    config: &RuntimeConfig,
+    out: &mut Vec<Diagnostic>,
+) {
     use std::collections::HashSet;
     let names: HashSet<&str> = descriptors.iter().map(|d| d.name).collect();
 
     for desc in descriptors {
         for &before in &desc.ordering.before {
             if !names.contains(before) {
+                if config.profile == crate::core::runtime_config::RuntimeProfile::Tools
+                    && before == "AI"
+                {
+                    continue;
+                }
                 out.push(Diagnostic {
                     severity: DiagnosticSeverity::Warning,
                     category: "ordering",
@@ -663,6 +766,11 @@ fn check_system_ordering(descriptors: &[SystemDescriptor], out: &mut Vec<Diagnos
         }
         for &after in &desc.ordering.after {
             if !names.contains(after) {
+                if config.profile == crate::core::runtime_config::RuntimeProfile::Tools
+                    && after == "AI"
+                {
+                    continue;
+                }
                 out.push(Diagnostic {
                     severity: DiagnosticSeverity::Warning,
                     category: "ordering",

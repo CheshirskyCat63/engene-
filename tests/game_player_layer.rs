@@ -74,10 +74,10 @@ fn player_controller_default_camera_mode() {
 }
 
 #[test]
-fn player_controller_works_with_sandbox_engine() {
-    use engene::app::runtime_assembly::RuntimeAssembly;
+fn player_controller_works_with_tools_engine() {
+    use engene::runtime::bootstrap::ToolsRuntimeAssembly;
 
-    let mut engine = RuntimeAssembly::sandbox();
+    let mut engine = ToolsRuntimeAssembly::minimal();
     engine.tick(0.016);
 
     let player = PlayerController::new([500.0, 10.0, 500.0]);

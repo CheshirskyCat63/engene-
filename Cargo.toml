@@ -59,8 +59,8 @@ path = "src/bin/engene_headless.rs"
 bench = false
 
 [[bin]]
-name = "engene_test"
-path = "src/bin/engene_test.rs"
+name = "engene_tools"
+path = "src/bin/engene_tools.rs"
 bench = false
 
 [[bench]]
@@ -147,4 +147,17 @@ tempfile = "3"
 
 [[bench]]
 name = "simulation_transition_core"
+harness = false
+
+
+[[bench]]
+name = "kernel_throughput"
+harness = false
+
+[[bench]]
+name = "boundary_cost"
+harness = false
+
+[[bench]]
+name = "tick_pressure"
 harness = false

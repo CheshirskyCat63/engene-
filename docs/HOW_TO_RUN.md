@@ -2,10 +2,10 @@
 
 ## Canonical commands
 ```bash
-cargo run --bin engene_test
 cargo run --bin engene_game
 cargo run --bin engene_sdk
-cargo run --bin engene_headless -- --months 12
+cargo run --bin engene_tools
+cargo run --bin engene_headless -- --ticks 1200
 ```
 
 ## Optional helpers

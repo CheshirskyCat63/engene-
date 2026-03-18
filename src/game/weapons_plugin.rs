@@ -57,13 +57,15 @@ impl Plugin for WeaponsPlugin {
             .get::<crate::core::game_config::GameConfig>()
         {
             let mut next_id: u16 = 0;
-            for (name, mat_cfg) in &config.materials {
+            for surface in &config.surfaces.materials {
                 let props = MaterialProps {
-                    hardness: mat_cfg.hardness,
-                    penetration_resistance: mat_cfg.penetration_resistance,
-                    density: mat_cfg.density,
+                    hardness: surface.hardness,
+                    penetration_resistance: surface.penetration_resistance,
+                    density: surface.density,
                 };
-                ballistics.material_table.register(name, next_id, props);
+                ballistics
+                    .material_table
+                    .register(&surface.name, next_id, props);
                 next_id += 1;
             }
             println!(

@@ -52,7 +52,6 @@
 ///
 /// NO CONSUMER MAY INFER MISSING UPSTREAM TRUTH.
 /// All downstream consumers receive explicit events.
-
 pub struct IntegrationEntry {
     pub event_name: &'static str,
     pub class: EventClass,

@@ -2,6 +2,10 @@
     schema_version: 1,
     data: {
         "AK74": (
+            damage: 35.0,
+            range: 400.0,
+            accuracy: 0.88,
+            noise_radius: 180.0,
             muzzle_velocity: 900.0,
             bullet_mass: 0.0034,
             drag_coefficient: 0.0003,
@@ -12,6 +16,10 @@
             accuracy_spread: 0.02,
         ),
         "Makarov": (
+            damage: 25.0,
+            range: 120.0,
+            accuracy: 0.80,
+            noise_radius: 90.0,
             muzzle_velocity: 315.0,
             bullet_mass: 0.006,
             drag_coefficient: 0.0005,
@@ -22,6 +30,10 @@
             accuracy_spread: 0.04,
         ),
         "SVD": (
+            damage: 55.0,
+            range: 700.0,
+            accuracy: 0.95,
+            noise_radius: 220.0,
             muzzle_velocity: 830.0,
             bullet_mass: 0.0098,
             drag_coefficient: 0.00025,
@@ -32,6 +44,10 @@
             accuracy_spread: 0.005,
         ),
         "Shotgun": (
+            damage: 60.0,
+            range: 80.0,
+            accuracy: 0.65,
+            noise_radius: 140.0,
             muzzle_velocity: 400.0,
             bullet_mass: 0.032,
             drag_coefficient: 0.001,
@@ -42,6 +58,10 @@
             accuracy_spread: 0.08,
         ),
         "Grenade": (
+            damage: 200.0,
+            range: 30.0,
+            accuracy: 0.55,
+            noise_radius: 260.0,
             muzzle_velocity: 18.0,
             bullet_mass: 0.6,
             drag_coefficient: 0.01,

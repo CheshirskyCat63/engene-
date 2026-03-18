@@ -70,7 +70,7 @@ fn equipment_state_roundtrip() {
     use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
-    let test_dir = std::env::temp_dir().join("engene_test_equip_rt");
+    let test_dir = std::env::temp_dir().join("engene_itest_equip_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
 
     let mut ecs = Ecs::new();
@@ -129,7 +129,7 @@ fn faction_membership_roundtrip() {
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
 
-    let test_dir = std::env::temp_dir().join("engene_test_faction_rt");
+    let test_dir = std::env::temp_dir().join("engene_itest_faction_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
 
     let mut ecs = Ecs::new();
@@ -184,7 +184,7 @@ fn chunk_load_rejects_schema_mismatch() {
     };
     use engene::world::streaming::ChunkCoord;
 
-    let test_dir = std::env::temp_dir().join("engene_test_schema_mismatch");
+    let test_dir = std::env::temp_dir().join("engene_itest_schema_mismatch");
     let _ = std::fs::remove_dir_all(&test_dir);
     std::fs::create_dir_all(&test_dir).expect("mkdir");
 
@@ -225,7 +225,7 @@ fn surface_destruction_state_roundtrip() {
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
 
-    let test_dir = std::env::temp_dir().join("engene_test_surface_rt");
+    let test_dir = std::env::temp_dir().join("engene_itest_surface_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
 
     let mut ecs = Ecs::new();
@@ -282,7 +282,7 @@ fn surface_destruction_state_roundtrip() {
 
 #[test]
 fn runtime_truth_json_generation() {
-    use engene::app::runtime_assembly::RuntimeAssembly;
+    use engene::runtime::bootstrap::GameRuntimeAssembly;
     use engene::tools::doctor;
     use engene::world::heightmap::Heightmap;
     use engene::world::world::WorldGrid;
@@ -291,7 +291,7 @@ fn runtime_truth_json_generation() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
 
     let json = doctor::generate_runtime_truth_json(&engine);
     assert!(json.contains("engine_version"));

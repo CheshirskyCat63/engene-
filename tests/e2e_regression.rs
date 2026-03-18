@@ -1,6 +1,5 @@
 //! End-to-End and Regression tests — 101 tests covering integration of all major subsystems.
 
-use engene::app::runtime_assembly::RuntimeAssembly;
 use engene::audio::audio::AudioEngine;
 use engene::body::body_response::BodyPhysicalResponseCache;
 use engene::body::body_store::BodyStateStore;
@@ -16,6 +15,7 @@ use engene::navigation::world_graph::WorldGraph;
 use engene::physics::ballistics::BallisticsSystem;
 use engene::physics::destruction::DestructionSystem;
 use engene::physics::fire::FireGrid;
+use engene::runtime::bootstrap::{GameRuntimeAssembly, ToolsRuntimeAssembly};
 use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
 use engene::simulation::world_milestones::WorldMilestoneTracker;
@@ -34,17 +34,20 @@ use std::sync::Arc;
 // =============================================================================
 
 #[test]
-fn e2e_sandbox_boots() {
-    let engine = RuntimeAssembly::sandbox();
+fn e2e_tools_boots() {
+    let engine = ToolsRuntimeAssembly::minimal();
     assert!(engine.is_running());
-    assert!(engine.resource_grid().food.len() > 0);
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_none());
 }
 
 #[test]
 fn e2e_headless_boots() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.ecs.alive.len() > 0);
     assert!(engine.is_running());
 }
@@ -54,14 +57,14 @@ fn e2e_vertical_slice_boots() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     assert!(engine.ecs.alive.len() > 0);
     assert!(engine.ecs.npcs().len() > 0);
 }
 
 #[test]
-fn e2e_sandbox_tick() {
-    let mut engine = RuntimeAssembly::sandbox();
+fn e2e_tools_tick() {
+    let mut engine = ToolsRuntimeAssembly::minimal();
     let before = engine.ecs.alive.len();
     engine.tick(1.0 / 20.0);
     assert_eq!(engine.ecs.alive.len(), before);
@@ -71,7 +74,7 @@ fn e2e_sandbox_tick() {
 fn e2e_headless_tick() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
-    let mut engine = RuntimeAssembly::headless(&biomes);
+    let mut engine = GameRuntimeAssembly::headless(&biomes);
     engine.tick(1.0 / 20.0);
     assert!(engine.ecs.alive.len() > 0);
 }
@@ -81,25 +84,29 @@ fn e2e_vertical_slice_tick() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let mut engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let mut engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     engine.tick(1.0 / 20.0);
     assert!(engine.time.tick_count > 0);
 }
 
 #[test]
 fn e2e_engine_shutdown() {
-    let mut engine = RuntimeAssembly::sandbox();
+    let mut engine = ToolsRuntimeAssembly::minimal();
     engine.shutdown();
     assert!(!engine.is_running());
 }
 
 #[test]
 fn e2e_engine_has_ecs_and_resources() {
-    let engine = RuntimeAssembly::sandbox();
+    let engine = ToolsRuntimeAssembly::minimal();
+    assert!(engine
+        .resources
+        .get::<engene::core::runtime_config::RuntimeConfig>()
+        .is_some());
     assert!(engine
         .resources
         .get::<engene::world::resources::ResourceGrid>()
-        .is_some());
+        .is_none());
 }
 
 // =============================================================================
@@ -409,21 +416,21 @@ fn e2e_chunk_persistence_has_save() {
 
 #[test]
 fn e2e_doctor_advisory_no_panic() {
-    let engine = RuntimeAssembly::sandbox();
+    let engine = ToolsRuntimeAssembly::minimal();
     let report = run_doctor(&engine, DoctorMode::Advisory);
     assert!(report.diagnostics.len() > 0);
 }
 
 #[test]
-fn e2e_doctor_strict_sandbox() {
-    let engine = RuntimeAssembly::sandbox();
+fn e2e_doctor_strict_tools() {
+    let engine = ToolsRuntimeAssembly::minimal();
     let report = run_doctor(&engine, DoctorMode::Strict);
     assert_eq!(report.error_count(), 0);
 }
 
 #[test]
 fn e2e_doctor_report_error_count() {
-    let engine = RuntimeAssembly::sandbox();
+    let engine = ToolsRuntimeAssembly::minimal();
     let report = run_doctor(&engine, DoctorMode::Advisory);
     let ec = report.error_count();
     let wc = report.warning_count();
@@ -443,7 +450,7 @@ fn e2e_doctor_vertical_slice_zero_errors() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     let report = run_doctor(&engine, DoctorMode::Advisory);
     assert_eq!(report.error_count(), 0);
 }
@@ -1064,7 +1071,7 @@ fn e2e_golden_engine_tick_doctor() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let mut engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let mut engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
 
     for _ in 0..10 {
         engine.tick(1.0 / 20.0);

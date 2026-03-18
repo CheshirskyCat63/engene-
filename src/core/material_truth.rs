@@ -1,5 +1,6 @@
 //! Material truth service: unified query layer over MaterialBridge with fallbacks.
 
+use crate::core::game_config::GameConfig;
 use crate::world::material_bridge::{
     AudioMaterialMapping, MaterialBridge, MaterialBridgeData, ParticleMaterialMapping,
     RenderMaterialMapping,
@@ -71,6 +72,66 @@ impl MaterialTruthService {
         self.bridge
             .get_particle(material_id)
             .unwrap_or(&self.fallback_particle)
+    }
+
+    /// Build canonical runtime material truth from authored GameConfig bridge data.
+    pub fn from_game_config(config: &GameConfig) -> Self {
+        let data = MaterialBridgeData {
+            render: config
+                .material_bridge
+                .render
+                .iter()
+                .map(|r| RenderMaterialMapping {
+                    material_id: r.material_id as MaterialId,
+                    base_albedo_tint: [
+                        r.base_albedo_tint.0,
+                        r.base_albedo_tint.1,
+                        r.base_albedo_tint.2,
+                    ],
+                    roughness_range: r.roughness_range,
+                    metallic: r.metallic,
+                    normal_intensity: r.normal_intensity,
+                    subsurface: r.subsurface,
+                })
+                .collect(),
+            audio: config
+                .material_bridge
+                .audio
+                .iter()
+                .map(|a| AudioMaterialMapping {
+                    material_id: a.material_id as MaterialId,
+                    impact_sound_class: a.impact_sound_class.clone(),
+                    footstep_sound_class: a.footstep_sound_class.clone(),
+                    scrape_sound_class: a.scrape_sound_class.clone(),
+                    break_sound_class: a.break_sound_class.clone(),
+                })
+                .collect(),
+            particle: config
+                .material_bridge
+                .particle
+                .iter()
+                .map(|p| ParticleMaterialMapping {
+                    material_id: p.material_id as MaterialId,
+                    debris_color: [p.debris_color.0, p.debris_color.1, p.debris_color.2],
+                    debris_size_range: p.debris_size_range,
+                    dust_color: [p.dust_color.0, p.dust_color.1, p.dust_color.2],
+                    dust_density: p.dust_density,
+                    spark_on_impact: p.spark_on_impact,
+                })
+                .collect(),
+        };
+        Self::new(MaterialBridge::from_data(data))
+    }
+
+    /// Canonical wiring guard helper:
+    /// true means all three channels for this material resolve to fallback.
+    pub fn is_fallback_primary_for(&self, material_id: MaterialId) -> bool {
+        let r = self.query_render(material_id);
+        let a = self.query_audio(material_id);
+        let p = self.query_particle(material_id);
+        r.material_id == self.fallback_render.material_id
+            && a.impact_sound_class == self.fallback_audio.impact_sound_class
+            && p.material_id == self.fallback_particle.material_id
     }
 
     /// Validates bridge against SurfaceDB; returns list of validation errors.

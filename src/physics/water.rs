@@ -74,6 +74,10 @@ impl WaterGrid {
         self.cells[self.idx(cx, cy)].water_level
     }
 
+    pub fn has_any_water(&self) -> bool {
+        self.cells.iter().any(|c| c.water_level > 0.0)
+    }
+
     pub fn update(&mut self, dt: f32, sim_level: SimulationLevel) {
         self.tick_counter += 1;
 

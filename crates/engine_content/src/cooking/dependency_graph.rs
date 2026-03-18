@@ -120,7 +120,7 @@ impl ContentDependencyGraph {
 
     pub fn build_order(&self) -> Vec<ArtifactId> {
         let mut in_degree: HashMap<ArtifactId, usize> = HashMap::new();
-        for (&id, _) in &self.edges {
+        for &id in self.edges.keys() {
             in_degree.entry(id).or_insert(0);
         }
         for deps in self.edges.values() {

@@ -295,7 +295,7 @@ impl MetricsRegistry {
             if i < metrics.len() - 1 {
                 json.push_str(",\n");
             } else {
-                json.push_str("\n");
+                json.push('\n');
             }
         }
 

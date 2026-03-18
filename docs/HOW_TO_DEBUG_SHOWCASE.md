@@ -1,9 +1,9 @@
 # How to Debug Showcase (Phase 0 baseline)
 
 ## Launch paths
-- Sandbox: `cargo run --bin engene_test`
 - Game path: `cargo run --bin engene_game`
 - SDK path: `cargo run --bin engene_sdk`
+- Tools diagnostics path: `cargo run --bin engene_tools`
 
 ## Debug references
 - Showcase truth rules: `docs/canonical/ENGENE_2_0_SHOWCASE_TRUTH_RULES.md`

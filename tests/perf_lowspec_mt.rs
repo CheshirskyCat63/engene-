@@ -2,7 +2,6 @@
 //! 110 tests covering QualityGovernor, degradation, BudgetRegistry, LowSpecCertifier,
 //! Telemetry, WorkerPool, DirtySet, Simulation LOD, Physics LOD, Engine integration, RuntimeConfig.
 
-use engene::app::runtime_assembly::RuntimeAssembly;
 use engene::core::budget_registry::{create_default_registry, BudgetEntry, BudgetRegistry};
 use engene::core::dirty_set::DirtySet;
 use engene::core::jobs::WorkerPool;
@@ -13,6 +12,7 @@ use engene::core::quality_governor::{
 };
 use engene::core::runtime_config::{QualityTier, RuntimeConfig, RuntimeProfile};
 use engene::physics::sim_lod::PhysicsLod;
+use engene::runtime::bootstrap::{GameRuntimeAssembly, ToolsRuntimeAssembly};
 use engene::simulation::simulation_level::{
     level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L1_TICK_INTERVAL, L2_RADIUS,
     L2_TICK_INTERVAL,
@@ -723,7 +723,7 @@ fn phys_should_tick_fire_simplified_at_interval() {
 fn engine_headless_has_quality_governor() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.resources.get::<QualityGovernor>().is_some());
 }
 
@@ -731,7 +731,7 @@ fn engine_headless_has_quality_governor() {
 fn engine_headless_has_budget_registry() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.resources.get::<BudgetRegistry>().is_some());
 }
 
@@ -740,7 +740,7 @@ fn engine_vertical_slice_has_quality_governor() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     assert!(engine.resources.get::<QualityGovernor>().is_some());
 }
 
@@ -749,7 +749,7 @@ fn engine_vertical_slice_has_budget_registry() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     assert!(engine.resources.get::<BudgetRegistry>().is_some());
 }
 
@@ -757,7 +757,7 @@ fn engine_vertical_slice_has_budget_registry() {
 fn engine_headless_has_low_spec_certifier() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.resources.get::<LowSpecCertifier>().is_some());
 }
 
@@ -766,7 +766,7 @@ fn engine_vertical_slice_has_low_spec_certifier() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     assert!(engine.resources.get::<LowSpecCertifier>().is_some());
 }
 
@@ -774,14 +774,17 @@ fn engine_vertical_slice_has_low_spec_certifier() {
 fn engine_headless_ecs_non_empty_after_init() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.ecs.alive.len() > 0);
 }
 
 #[test]
-fn engine_sandbox_creates() {
-    let engine = RuntimeAssembly::sandbox();
-    let _ = engine.resource_grid();
+fn engine_tools_creates() {
+    let engine = ToolsRuntimeAssembly::minimal();
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_none());
 }
 
 #[test]
@@ -789,7 +792,7 @@ fn engine_vertical_slice_governor_target_60() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
     let gov = engine.resources.get::<QualityGovernor>().unwrap();
     assert_eq!(gov.frame_budget_us, 1_000_000 / 60);
 }
@@ -798,7 +801,7 @@ fn engine_vertical_slice_governor_target_60() {
 fn engine_headless_worker_pool_created() {
     let grid = WorldGrid::generate();
     let biomes: Vec<Biome> = grid.cells.iter().map(|c| c.biome).collect();
-    let engine = RuntimeAssembly::headless(&biomes);
+    let engine = GameRuntimeAssembly::headless(&biomes);
     assert!(engine.worker_pool.worker_count() >= 2);
 }
 
@@ -817,40 +820,40 @@ fn rc_quality_tier_variants() {
 #[test]
 fn rc_default_profile_vertical_slice() {
     let config = RuntimeConfig::default();
-    assert_eq!(config.profile, RuntimeProfile::VerticalSlice);
+    assert_eq!(config.profile, RuntimeProfile::Game);
 }
 
 #[test]
-fn rc_sandbox_profile() {
-    let config = RuntimeConfig::sandbox();
-    assert_eq!(config.profile, RuntimeProfile::Sandbox);
+fn rc_tools_profile() {
+    let config = RuntimeConfig::tools();
+    assert_eq!(config.profile, RuntimeProfile::Tools);
 }
 
 #[test]
 fn rc_headless_profile() {
     let config = RuntimeConfig::headless();
-    assert_eq!(config.profile, RuntimeProfile::HeadlessServer);
+    assert_eq!(config.profile, RuntimeProfile::Headless);
 }
 
 #[test]
 fn rc_budgets_low_spec_tier() {
-    let config = RuntimeConfig::low_spec();
+    let config = RuntimeConfig::game();
     let budgets = config.budgets();
-    assert_eq!(budgets.quality, QualityTier::Low);
+    assert_eq!(budgets.quality, QualityTier::Medium);
 }
 
 #[test]
 fn rc_budgets_shipping_tier() {
-    let config = RuntimeConfig::shipping();
+    let config = RuntimeConfig::game();
     let budgets = config.budgets();
-    assert_eq!(budgets.quality, QualityTier::High);
+    assert_eq!(budgets.quality, QualityTier::Medium);
 }
 
 #[test]
 fn rc_budgets_low_spec_max_particles() {
-    let config = RuntimeConfig::low_spec();
+    let config = RuntimeConfig::game();
     let budgets = config.budgets();
-    assert_eq!(budgets.max_particles, 2000);
+    assert_eq!(budgets.max_particles, 5000);
 }
 
 #[test]

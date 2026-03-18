@@ -23,7 +23,15 @@ use engene::world::streaming::{ChunkCoord, ChunkInfo, ChunkState, WorldStreamer,
 use std::collections::HashMap;
 
 fn temp_test_dir() -> std::path::PathBuf {
-    std::env::temp_dir().join(format!("engene_test_{}", std::process::id()))
+    use std::sync::atomic::{AtomicU64, Ordering};
+
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+    let unique = NEXT_ID.fetch_add(1, Ordering::Relaxed);
+    std::env::temp_dir().join(format!(
+        "engene_itest_{}_{}",
+        std::process::id(),
+        unique
+    ))
 }
 
 // =============================================================================
@@ -1043,7 +1051,7 @@ fn identity_gc_tombstones() {
     );
     ecs.despawn(e);
     assert!(ecs.identity.tombstone_count() >= 1);
-    ecs.identity.gc_tombstones(0, 1);
+    ecs.identity.gc_tombstones(2, 1);
     assert_eq!(ecs.identity.tombstone_count(), 0);
 }
 
@@ -2035,7 +2043,7 @@ fn streamer_load_unload_radius_ordering() {
 fn persistence_temp_dir_unique() {
     let d1 = temp_test_dir();
     let d2 = temp_test_dir();
-    assert_eq!(d1, d2);
+    assert_ne!(d1, d2);
 }
 
 #[test]

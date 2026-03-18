@@ -26,7 +26,7 @@ impl PrefabRegistry {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
-                if path.extension().map_or(false, |ext| ext == "ron") {
+                if path.extension().is_some_and(|ext| ext == "ron") {
                     if let Ok(contents) = std::fs::read_to_string(&path) {
                         match ron::from_str::<PrefabDescriptor>(&contents) {
                             Ok(prefab) => {

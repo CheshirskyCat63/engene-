@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
-use crate::app::runtime_assembly::RuntimeAssembly;
+use crate::runtime::bootstrap::GameRuntimeAssembly;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -30,7 +30,7 @@ pub struct PerformanceBaseline {
 pub fn measure_baseline(ticks: u64) -> PerformanceBaseline {
     let grid = crate::world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
-    let mut engine = RuntimeAssembly::headless(&biomes);
+    let mut engine = GameRuntimeAssembly::headless(&biomes);
 
     let mut frame_times: Vec<f64> = Vec::with_capacity(ticks as usize);
     let _destruction_times: Vec<f64> = Vec::new();

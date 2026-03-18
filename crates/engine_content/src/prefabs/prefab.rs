@@ -45,11 +45,7 @@ impl PrefabDescriptor {
 }
 
 fn count_entities(entity: &PrefabEntity) -> usize {
-    1 + entity
-        .children
-        .iter()
-        .map(|c| count_entities(c))
-        .sum::<usize>()
+    1 + entity.children.iter().map(count_entities).sum::<usize>()
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

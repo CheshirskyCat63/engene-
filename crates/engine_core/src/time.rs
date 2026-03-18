@@ -57,6 +57,12 @@ impl GameTime {
     }
 }
 
+impl Default for GameTime {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub struct TimeEvents {
     pub new_day: bool,
     pub new_month: bool,

@@ -34,7 +34,7 @@ fn runtime_config_default_profile() {
     use engene::core::runtime_config::{RuntimeConfig, RuntimeProfile};
 
     let config = RuntimeConfig::default();
-    assert_eq!(config.profile, RuntimeProfile::VerticalSlice);
+    assert_eq!(config.profile, RuntimeProfile::Game);
 }
 
 #[test]

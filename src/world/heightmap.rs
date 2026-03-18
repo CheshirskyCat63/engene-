@@ -8,7 +8,7 @@ pub struct Heightmap {
 }
 
 impl Heightmap {
-    /// Flat heightmap for bounded test arenas (e.g. Destruction Sandbox 50x50).
+    /// Flat heightmap for bounded test arenas (e.g. Destruction Tools 50x50).
     pub fn flat(world_size: f32) -> Self {
         let resolution = 128u32;
         let n = (resolution + 1) as usize;

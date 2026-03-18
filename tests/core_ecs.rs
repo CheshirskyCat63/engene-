@@ -831,7 +831,11 @@ fn pid_player_persistence() {
     assert_eq!(ecs.identity.persistent_id_of(e), Some(pid));
     ecs.despawn(e);
     let e2 = ecs.spawn_restored(pid).expect("player restore");
-    assert_eq!(ecs.names.get(&e2).unwrap().0, "Player");
+    assert_eq!(ecs.identity.persistent_id_of(e2), Some(pid));
+    assert!(
+        ecs.names.get(&e2).is_none(),
+        "spawn_restored rebinds persistent identity only; component payload restore is snapshot-owned"
+    );
 }
 
 #[test]

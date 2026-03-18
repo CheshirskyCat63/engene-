@@ -6,9 +6,9 @@ use std::time::Instant;
 use glam::Vec3;
 use rand::Rng;
 
-use crate::app::runtime_assembly::RuntimeAssembly;
 use crate::core::engine::Engine;
 use crate::physics::ballistics::BallisticsSystem;
+use crate::runtime::bootstrap::GameRuntimeAssembly;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
 use crate::world::components::MonsterSpecies;
 use crate::world::population;
@@ -34,7 +34,7 @@ pub struct StressReport {
 fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> Engine {
     let grid = crate::world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
-    let mut engine = RuntimeAssembly::headless(&biomes);
+    let mut engine = GameRuntimeAssembly::headless(&biomes);
 
     let mut rng = rand::thread_rng();
     for _ in 0..extra_npcs {

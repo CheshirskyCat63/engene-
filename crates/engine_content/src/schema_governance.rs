@@ -42,8 +42,10 @@ impl SchemaVersion {
 /// Schema registry for tracking all schema versions
 pub struct SchemaRegistry {
     schemas: HashMap<String, SchemaVersion>,
-    migrations: HashMap<(String, u32, u32), Box<dyn Fn(&[u8]) -> Vec<u8> + Send + Sync>>,
+    migrations: HashMap<(String, u32, u32), MigrationFn>,
 }
+
+type MigrationFn = Box<dyn Fn(&[u8]) -> Vec<u8> + Send + Sync>;
 
 impl SchemaRegistry {
     pub fn new() -> Self {
@@ -375,7 +377,7 @@ pub fn generate_governance_report(results: &[ValidationResult]) -> String {
             for error in &result.errors {
                 report.push_str(&format!("- {}\n", error));
             }
-            report.push_str("\n");
+            report.push('\n');
         }
     }
 
@@ -386,7 +388,7 @@ pub fn generate_governance_report(results: &[ValidationResult]) -> String {
             for warning in &result.warnings {
                 report.push_str(&format!("- {}\n", warning));
             }
-            report.push_str("\n");
+            report.push('\n');
         }
     }
 

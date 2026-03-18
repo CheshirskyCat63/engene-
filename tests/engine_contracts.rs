@@ -106,8 +106,8 @@ fn runtime_manifest_feature_toggle() {
 fn runtime_config_profiles() {
     use engene::core::runtime_config::{RendererBackend, RuntimeConfig, RuntimeProfile};
 
-    let sandbox = RuntimeConfig::sandbox();
-    assert_eq!(sandbox.profile, RuntimeProfile::Sandbox);
+    let tools = RuntimeConfig::tools();
+    assert_eq!(tools.profile, RuntimeProfile::Tools);
 
     let headless = RuntimeConfig::headless();
     assert!(headless.is_headless());
@@ -721,7 +721,7 @@ fn chunk_persistence_save_and_load_cycle() {
     use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::streaming::ChunkCoord;
 
-    let dir = std::env::temp_dir().join("engene_test_chunks");
+    let dir = std::env::temp_dir().join("engene_itest_chunks");
     let _ = std::fs::remove_dir_all(&dir);
 
     let mut ecs = Ecs::new();
@@ -766,7 +766,7 @@ fn chunk_persistence_identity_survives_cycle() {
     use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::streaming::ChunkCoord;
 
-    let dir = std::env::temp_dir().join("engene_test_identity");
+    let dir = std::env::temp_dir().join("engene_itest_identity");
     let _ = std::fs::remove_dir_all(&dir);
 
     let mut ecs = Ecs::new();
@@ -811,7 +811,7 @@ fn relink_report_clean_after_simple_cycle() {
     use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::streaming::ChunkCoord;
 
-    let dir = std::env::temp_dir().join("engene_test_relink");
+    let dir = std::env::temp_dir().join("engene_itest_relink");
     let _ = std::fs::remove_dir_all(&dir);
 
     let mut ecs = Ecs::new();
@@ -915,24 +915,15 @@ fn nightly_streaming_4_region_cycle() {
 fn runtime_profiles_have_correct_budgets() {
     use engene::core::runtime_config::{QualityTier, RuntimeConfig};
 
-    let low = RuntimeConfig::low_spec();
-    let budgets = low.budgets();
-    assert_eq!(budgets.quality, QualityTier::Low);
-    assert!(!budgets.enable_ssao, "low spec should disable SSAO");
+    let game = RuntimeConfig::game();
+    let budgets = game.budgets();
+    assert_eq!(budgets.quality, QualityTier::Medium);
+    assert!(budgets.enable_ssao, "game profile enables SSAO");
     assert!(
         !budgets.enable_volumetrics,
-        "low spec should disable volumetrics"
+        "game profile keeps volumetrics off"
     );
-    assert!(budgets.max_visible_npcs <= 50, "low spec should cap NPCs");
-
-    let shipping = RuntimeConfig::shipping();
-    let budgets = shipping.budgets();
-    assert_eq!(budgets.quality, QualityTier::High);
-    assert!(budgets.enable_ssao, "shipping should enable SSAO");
-    assert!(
-        budgets.max_visible_npcs >= 200,
-        "shipping should support many NPCs"
-    );
+    assert_eq!(budgets.max_visible_npcs, 100, "game NPC budget is fixed");
 
     let headless = RuntimeConfig::headless();
     let budgets = headless.budgets();
@@ -951,12 +942,12 @@ fn all_profiles_produce_valid_budgets() {
     use engene::core::runtime_config::{ProfileBudgets, RuntimeProfile};
 
     let profiles = [
-        RuntimeProfile::Shipping,
-        RuntimeProfile::LowSpec,
-        RuntimeProfile::DebugTools,
-        RuntimeProfile::HeadlessServer,
-        RuntimeProfile::Sandbox,
-        RuntimeProfile::VerticalSlice,
+        RuntimeProfile::Game,
+        RuntimeProfile::Game,
+        RuntimeProfile::Tools,
+        RuntimeProfile::Headless,
+        RuntimeProfile::Tools,
+        RuntimeProfile::Game,
     ];
 
     for profile in &profiles {

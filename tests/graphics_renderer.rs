@@ -511,7 +511,10 @@ fn frustum_sphere_at_origin_identity_vp() {
 #[test]
 fn frustum_negative_radius_handled() {
     let f = Frustum::from_view_projection(&Mat4::IDENTITY);
-    assert!(f.test_sphere(Vec3::ZERO, -0.5));
+    assert!(
+        !f.test_sphere(Vec3::ZERO, -0.5),
+        "negative radius should not be treated as visible geometry"
+    );
 }
 
 #[test]

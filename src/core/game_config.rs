@@ -2263,6 +2263,16 @@ pub struct MaterialConfig {
     pub density: f32,
 }
 
+fn project_material_from_surface(surface: &SurfaceMaterial) -> MaterialConfig {
+    MaterialConfig {
+        flammability: surface.flammability,
+        fuel: surface.fuel_content,
+        hardness: surface.hardness,
+        penetration_resistance: surface.penetration_resistance,
+        density: surface.density,
+    }
+}
+
 // === NEW: Food Chain Config ===
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2609,12 +2619,8 @@ impl GameConfig {
             config.seasons = s.data;
         }
 
-        if let Ok(m) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, MaterialConfig>>,
-        >(&format!("{}/materials.ron", dir))
-        {
-            config.materials = m.data;
-        }
+        // NOTE(C0.4): runtime material truth is projected from canonical surfaces config.
+        // materials.ron stays as authored compatibility input, but runtime meaning is derived.
 
         // NEW loaders
         if let Ok(fc) = crate::core::config::load_config::<
@@ -2652,6 +2658,12 @@ impl GameConfig {
         // Surfaces & Material Bridge
         if let Ok(s) = load_surfaces_config(&format!("{}/surfaces.ron", dir)) {
             config.surfaces = s;
+            config.materials = config
+                .surfaces
+                .materials
+                .iter()
+                .map(|m| (m.name.clone(), project_material_from_surface(m)))
+                .collect();
         }
 
         if let Ok(m) = load_material_bridge_config(&format!("{}/material_bridge.ron", dir)) {

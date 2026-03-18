@@ -128,7 +128,9 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.insert_resource(crate::physics::destruction::DestructionSystem::new());
     builder.insert_resource(crate::world::terrain_deformation::TerrainDeformationSystem::new());
 
-    builder.add_plugin(crate::game::StalkerPlugin::from_config("game/data"));
+    builder.add_plugin(crate::game::stalker_plugin::StalkerPlugin::from_config(
+        "game/data",
+    ));
     builder.add_plugin(crate::game::weapons_plugin::WeaponsPlugin::new("game/data"));
 
     {
@@ -173,7 +175,7 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
         crate::simulation::simulation::SimulationSystem::new(center, center),
     ));
     builder.add_system_default(Box::new(
-        crate::game::runtime_world_tick::WorldTickSystem::new(grid),
+        crate::runtime::wiring::world_tick::WorldTickSystem::new(grid),
     ));
     builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
     builder.add_system_default(Box::new(crate::physics::physics::PhysicsSystem::new(
@@ -181,26 +183,28 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     )));
     builder.add_system_default(Box::new(crate::game::economy::economy::EconomySystem));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::BallisticsTickSystem,
+        crate::runtime::wiring::integration::BallisticsTickSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::DamageDispatchSystem,
+        crate::runtime::wiring::integration::DamageDispatchSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::DestructionTickSystem,
+        crate::runtime::wiring::integration::DestructionTickSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::TerrainDeformationTickSystem,
+        crate::runtime::wiring::integration::TerrainDeformationTickSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::NavDirtyTickSystem,
+        crate::runtime::wiring::integration::NavDirtyTickSystem,
     ));
     builder.add_system_default(Box::new(
-        crate::game::integration_systems::OcclusionWireSystem,
+        crate::runtime::wiring::integration::OcclusionWireSystem,
     ));
-    builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
     builder.add_system_default(Box::new(
-        crate::game::animation_integration::AnimationIntegrationSystem::new(),
+        crate::runtime::wiring::integration::GoreWireSystem,
+    ));
+    builder.add_system_default(Box::new(
+        crate::runtime::wiring::animation::AnimationIntegrationSystem::new(),
     ));
     builder.add_system_default(Box::new(
         crate::audio::audio_integration::AudioIntegrationSystem::new(),

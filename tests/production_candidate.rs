@@ -19,7 +19,7 @@ fn production_schema_compatibility() {
 
 #[test]
 fn production_doctor_no_errors() {
-    use engene::app::runtime_assembly::RuntimeAssembly;
+    use engene::runtime::bootstrap::GameRuntimeAssembly;
     use engene::tools::doctor;
     use engene::world::heightmap::Heightmap;
     use engene::world::world::WorldGrid;
@@ -28,7 +28,7 @@ fn production_doctor_no_errors() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
 
     let report = doctor::run_doctor(&engine, doctor::DoctorMode::Advisory);
     assert_eq!(
@@ -40,7 +40,7 @@ fn production_doctor_no_errors() {
 
 #[test]
 fn production_runtime_truth_json() {
-    use engene::app::runtime_assembly::RuntimeAssembly;
+    use engene::runtime::bootstrap::GameRuntimeAssembly;
     use engene::tools::doctor;
     use engene::world::heightmap::Heightmap;
     use engene::world::world::WorldGrid;
@@ -49,7 +49,7 @@ fn production_runtime_truth_json() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
-    let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
+    let engine = GameRuntimeAssembly::vertical_slice(heightmap, &biomes);
 
     let json = doctor::generate_runtime_truth_json(&engine);
     assert!(json.contains("engine_version"));

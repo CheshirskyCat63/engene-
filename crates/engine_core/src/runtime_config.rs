@@ -1,15 +1,10 @@
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum RuntimeProfile {
-    Sandbox,
-    VerticalSlice,
-    /// Final game, all optimizations on, no debug overhead
-    Shipping,
-    /// Targets 10-year-old hardware: reduced draw distance, simplified AI, no SSAO
-    LowSpec,
-    /// Editor/tools mode with debug panels and profiler
-    DebugTools,
-    /// No GPU, pure simulation for dedicated server
-    HeadlessServer,
+    /// Canonical playable product runtime.
+    Game,
+    /// No GPU, pure simulation runtime.
+    Headless,
+    /// Editor/tools runtime with diagnostics/UI tooling.
     Tools,
 }
 
@@ -47,37 +42,7 @@ pub struct ProfileBudgets {
 impl ProfileBudgets {
     pub fn for_profile(profile: &RuntimeProfile) -> Self {
         match profile {
-            RuntimeProfile::Shipping => Self {
-                quality: QualityTier::High,
-                max_visible_npcs: 200,
-                ai_think_budget_ms: 4.0,
-                render_budget_ms: 12.0,
-                physics_budget_ms: 4.0,
-                streaming_radius: 4000.0,
-                shadow_cascades: 4,
-                enable_ssao: true,
-                enable_volumetrics: true,
-                enable_detailed_decals: true,
-                enable_debug_ui: false,
-                max_particles: 10000,
-                far_animation_lod: true,
-            },
-            RuntimeProfile::LowSpec => Self {
-                quality: QualityTier::Low,
-                max_visible_npcs: 50,
-                ai_think_budget_ms: 2.0,
-                render_budget_ms: 8.0,
-                physics_budget_ms: 2.0,
-                streaming_radius: 2000.0,
-                shadow_cascades: 2,
-                enable_ssao: false,
-                enable_volumetrics: false,
-                enable_detailed_decals: false,
-                enable_debug_ui: false,
-                max_particles: 2000,
-                far_animation_lod: false,
-            },
-            RuntimeProfile::DebugTools => Self {
+            RuntimeProfile::Tools => Self {
                 quality: QualityTier::Medium,
                 max_visible_npcs: 100,
                 ai_think_budget_ms: 6.0,
@@ -92,7 +57,7 @@ impl ProfileBudgets {
                 max_particles: 5000,
                 far_animation_lod: true,
             },
-            RuntimeProfile::HeadlessServer => Self {
+            RuntimeProfile::Headless => Self {
                 quality: QualityTier::Low,
                 max_visible_npcs: 500,
                 ai_think_budget_ms: 8.0,
@@ -107,7 +72,7 @@ impl ProfileBudgets {
                 max_particles: 0,
                 far_animation_lod: false,
             },
-            _ => Self {
+            RuntimeProfile::Game => Self {
                 quality: QualityTier::Medium,
                 max_visible_npcs: 100,
                 ai_think_budget_ms: 4.0,
@@ -165,7 +130,7 @@ pub struct RuntimeConfig {
 impl Default for RuntimeConfig {
     fn default() -> Self {
         Self {
-            profile: RuntimeProfile::VerticalSlice,
+            profile: RuntimeProfile::Game,
             fixed_tick_rate: 20.0,
             enabled_plugins: Vec::new(),
             renderer_backend: RendererBackend::Wgpu,
@@ -181,16 +146,9 @@ impl Default for RuntimeConfig {
 }
 
 impl RuntimeConfig {
-    pub fn sandbox() -> Self {
-        Self {
-            profile: RuntimeProfile::Sandbox,
-            ..Default::default()
-        }
-    }
-
     pub fn headless() -> Self {
         Self {
-            profile: RuntimeProfile::HeadlessServer,
+            profile: RuntimeProfile::Headless,
             renderer_backend: RendererBackend::Headless,
             ..Default::default()
         }
@@ -203,23 +161,9 @@ impl RuntimeConfig {
         }
     }
 
-    pub fn shipping() -> Self {
+    pub fn game() -> Self {
         Self {
-            profile: RuntimeProfile::Shipping,
-            ..Default::default()
-        }
-    }
-
-    pub fn low_spec() -> Self {
-        Self {
-            profile: RuntimeProfile::LowSpec,
-            ..Default::default()
-        }
-    }
-
-    pub fn debug_tools() -> Self {
-        Self {
-            profile: RuntimeProfile::DebugTools,
+            profile: RuntimeProfile::Game,
             ..Default::default()
         }
     }

@@ -274,7 +274,17 @@ impl BallisticsSystem {
             let v_rel = v - wind;
             let speed_rel = v_rel.length();
             let drag_force = -drag * rho * speed_rel * v_rel;
-            let accel = self.gravity + drag_force / mass;
+            let mut drag_accel = drag_force / mass;
+            // Numerical guard: drag should decelerate, not reverse velocity in one coarse step.
+            // This keeps analytical preview paths directionally stable under large drag inputs.
+            if speed_rel > 0.0 {
+                let max_drag_accel = (speed_rel / coarse_dt) * 0.95;
+                let drag_accel_mag = drag_accel.length();
+                if drag_accel_mag > max_drag_accel {
+                    drag_accel *= max_drag_accel / drag_accel_mag;
+                }
+            }
+            let accel = self.gravity + drag_accel;
             v += accel * coarse_dt;
             let prev = pos;
             pos += v * coarse_dt;

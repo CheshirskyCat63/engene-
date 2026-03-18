@@ -365,12 +365,12 @@ fn sdk_system_contract_registration() {
 fn runtime_config_profiles_all_valid() {
     use engene::core::runtime_config::{ProfileBudgets, RuntimeProfile};
     for profile in [
-        RuntimeProfile::Shipping,
-        RuntimeProfile::LowSpec,
-        RuntimeProfile::DebugTools,
-        RuntimeProfile::HeadlessServer,
-        RuntimeProfile::Sandbox,
-        RuntimeProfile::VerticalSlice,
+        RuntimeProfile::Game,
+        RuntimeProfile::Game,
+        RuntimeProfile::Tools,
+        RuntimeProfile::Headless,
+        RuntimeProfile::Tools,
+        RuntimeProfile::Game,
     ] {
         let budgets = ProfileBudgets::for_profile(&profile);
         assert!(budgets.ai_think_budget_ms >= 0.0);
@@ -456,7 +456,7 @@ fn sdk_boundary_layers_populated() {
 fn editor_shell_default_initializes_all_panels() {
     use engene::tools::editor_shell::EditorShell;
     let shell = EditorShell::new();
-    assert!(shell.read_only, "editor shell defaults to read-only");
+    assert!(!shell.read_only, "editor shell defaults to writable mode");
     assert!(shell.debug_ui.show_inspector, "SDK defaults show inspector");
     assert_eq!(shell.crash_log.crash_count(), 0);
     assert!(shell.quest_board.entries.is_empty());

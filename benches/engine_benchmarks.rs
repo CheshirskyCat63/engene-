@@ -204,8 +204,20 @@ fn bench_world_tick_100_entities() {
     let player_y = 1000.0;
     let start = Instant::now();
     let iterations = 1000;
-    for _ in 0..iterations {
-        engene::simulation::activation::update_simulation_levels(&mut ecs, player_x, player_y);
+    let mut deferred_queue = engine_runtime::simulation_core::DeferredTransitionQueue::with_policy(
+        engine_runtime::simulation_core::DeferredTransitionPolicy::default(),
+    );
+    let mut transition_batch = Vec::with_capacity(deferred_queue.policy().max_queue_capacity);
+    for i in 0..iterations {
+        let _ = engene::simulation::activation::update_simulation_levels(
+            &mut ecs,
+            player_x,
+            player_y,
+            i as u64,
+            i as u64,
+            &mut deferred_queue,
+            &mut transition_batch,
+        );
     }
     let elapsed = start.elapsed();
     println!(
