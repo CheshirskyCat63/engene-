@@ -161,15 +161,28 @@ PY
 
 gate_from_existing() {
   local fail=0
+  local missing=()
 
   for bench in "${!COUNTS[@]}"; do
     local criterion_key="${bench//\//_}"
     local json_path="target/criterion/${criterion_key}/new/estimates.json"
     if [[ ! -f "$json_path" ]]; then
-      echo "CRITICAL_FAILURE: missing benchmark estimate: $json_path" >&2
-      fail=1
-      continue
+      missing+=("$json_path")
     fi
+  done
+
+  if [[ "${#missing[@]}" -ne 0 ]]; then
+    echo "CRITICAL_FAILURE: --from-existing requires precomputed criterion estimates; missing ${#missing[@]} file(s)." >&2
+    for path in "${missing[@]}"; do
+      echo "  - $path" >&2
+    done
+    echo "Run without --from-existing to regenerate estimates, then rerun --from-existing." >&2
+    exit 1
+  fi
+
+  for bench in "${!COUNTS[@]}"; do
+    local criterion_key="${bench//\//_}"
+    local json_path="target/criterion/${criterion_key}/new/estimates.json"
 
     local mean_ns mean_ms tps
     mean_ns="$(mean_from_json "$json_path")"
