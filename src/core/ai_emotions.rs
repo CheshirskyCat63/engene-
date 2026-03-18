@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::world::components::{NpcTraits, MonsterTraits};
+use crate::world::components::{MonsterTraits, NpcTraits};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Emotions {
@@ -15,7 +15,15 @@ pub struct Emotions {
 
 impl Emotions {
     pub fn new() -> Self {
-        Self { anger: 0.0, grief: 0.0, joy: 0.0, fear: 0.0, disgust: 0.0, surprise: 0.0, longing: 0.0 }
+        Self {
+            anger: 0.0,
+            grief: 0.0,
+            joy: 0.0,
+            fear: 0.0,
+            disgust: 0.0,
+            surprise: 0.0,
+            longing: 0.0,
+        }
     }
 
     pub fn decay(&mut self, delta: f32) {
@@ -78,15 +86,35 @@ impl std::fmt::Display for DominantEmotion {
     }
 }
 
-pub fn apply_npc_personality(emo: &mut Emotions, traits: &NpcTraits, raw_anger: f32, raw_fear: f32, raw_grief: f32, raw_joy: f32) {
-    emo.anger = (emo.anger + raw_anger * traits.aggressiveness * (1.0 - traits.stress_resistance * 0.5)).min(1.0);
-    emo.fear = (emo.fear + raw_fear * (1.0 - traits.bravery) * (1.0 - traits.stress_resistance * 0.3)).min(1.0);
+pub fn apply_npc_personality(
+    emo: &mut Emotions,
+    traits: &NpcTraits,
+    raw_anger: f32,
+    raw_fear: f32,
+    raw_grief: f32,
+    raw_joy: f32,
+) {
+    emo.anger = (emo.anger
+        + raw_anger * traits.aggressiveness * (1.0 - traits.stress_resistance * 0.5))
+        .min(1.0);
+    emo.fear = (emo.fear
+        + raw_fear * (1.0 - traits.bravery) * (1.0 - traits.stress_resistance * 0.3))
+        .min(1.0);
     emo.grief = (emo.grief + raw_grief * traits.sociality).min(1.0);
     emo.joy = (emo.joy + raw_joy * (0.5 + traits.sociality * 0.5)).min(1.0);
 }
 
-pub fn apply_monster_personality(emo: &mut Emotions, traits: &MonsterTraits, raw_anger: f32, raw_fear: f32, raw_grief: f32, raw_joy: f32) {
-    emo.anger = (emo.anger + raw_anger * traits.aggressiveness * (1.0 - traits.stress_tolerance * 0.3)).min(1.0);
+pub fn apply_monster_personality(
+    emo: &mut Emotions,
+    traits: &MonsterTraits,
+    raw_anger: f32,
+    raw_fear: f32,
+    raw_grief: f32,
+    raw_joy: f32,
+) {
+    emo.anger = (emo.anger
+        + raw_anger * traits.aggressiveness * (1.0 - traits.stress_tolerance * 0.3))
+        .min(1.0);
     emo.fear = (emo.fear + raw_fear * traits.caution * (1.0 - traits.bravery * 0.5)).min(1.0);
     emo.grief = (emo.grief + raw_grief * traits.pack_mentality).min(1.0);
     emo.joy = (emo.joy + raw_joy * 0.5).min(1.0);

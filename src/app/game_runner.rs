@@ -11,8 +11,15 @@ use winit::window::{CursorGrabMode, Window};
 
 use crate::app::runtime_assembly::RuntimeAssembly;
 use crate::audio::audio::AudioEngine;
+use crate::core::build_manifest::BuildManifest;
+use crate::core::crash_telemetry;
 use crate::core::engine::Engine;
+use crate::core::query::WithMonster;
+use crate::game::ai::body as ai_body;
 use crate::game::economy::resource_flow;
+use crate::game::hud::{HudState, NotificationKind};
+use crate::game::player::PlayerController;
+use crate::game::player_save::{PlayerInventory, PlayerSave};
 use crate::graphics::camera::FlyCamera;
 use crate::graphics::lod::{LodConfig, LodLevel};
 use crate::graphics::mesh::EntityInstance;
@@ -21,19 +28,12 @@ use crate::graphics::visibility::Frustum;
 use crate::input::input::InputState;
 use crate::memory::asset_manager::AssetManager;
 use crate::tools::doctor;
-use crate::game::hud::{HudState, NotificationKind};
-use crate::game::player::PlayerController;
-use crate::game::player_save::{PlayerInventory, PlayerSave};
 use crate::world::chunk_persistence::ChunkPersistenceService;
 use crate::world::components::*;
 use crate::world::heightmap::Heightmap;
 use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
 use crate::world::streaming::WorldStreamer;
 use crate::world::world::WorldGrid;
-use crate::game::ai::body as ai_body;
-use crate::core::build_manifest::BuildManifest;
-use crate::core::crash_telemetry;
-use crate::core::query::WithMonster;
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -211,19 +211,23 @@ impl ApplicationHandler for GameApp {
                     match key {
                         KeyCode::Digit1 => {
                             self.player.switch_weapon(0);
-                            self.hud.push_notification("Weapon: Makarov", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Weapon: Makarov", NotificationKind::Info);
                         }
                         KeyCode::Digit2 => {
                             self.player.switch_weapon(1);
-                            self.hud.push_notification("Weapon: AK74", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Weapon: AK74", NotificationKind::Info);
                         }
                         KeyCode::Digit3 => {
                             self.player.switch_weapon(2);
-                            self.hud.push_notification("Weapon: Shotgun", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Weapon: Shotgun", NotificationKind::Info);
                         }
                         KeyCode::KeyG => {
                             self.player.switch_weapon(3);
-                            self.hud.push_notification("Weapon: Grenade", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Weapon: Grenade", NotificationKind::Info);
                         }
                         _ => {}
                     }
@@ -309,14 +313,16 @@ impl ApplicationHandler for GameApp {
                 // Handle death/respawn at Rookie Camp per WORLD_SLICE_SPEC
                 if self.player.state == crate::game::player::PlayerState::Dead {
                     if self.input.was_key_pressed(KeyCode::KeyR) {
-                        let respawn = if parse_layout().as_deref() == Some("destruction_sandbox_50x50") {
-                            [25.0, 2.0, 25.0]
-                        } else {
-                            [500.0, 50.0, 500.0]
-                        };
+                        let respawn =
+                            if parse_layout().as_deref() == Some("destruction_sandbox_50x50") {
+                                [25.0, 2.0, 25.0]
+                            } else {
+                                [500.0, 50.0, 500.0]
+                            };
                         self.player.respawn(respawn);
                         self.camera.position = glam::Vec3::new(respawn[0], respawn[1], respawn[2]);
-                        self.hud.push_notification("Respawned", NotificationKind::Info);
+                        self.hud
+                            .push_notification("Respawned", NotificationKind::Info);
                     }
                 }
 
@@ -332,7 +338,9 @@ impl ApplicationHandler for GameApp {
                         self.engine.time.month,
                     );
                     match save.save_to_file("game/saves/quicksave.json") {
-                        Ok(()) => self.hud.push_notification("Game saved", NotificationKind::Info),
+                        Ok(()) => self
+                            .hud
+                            .push_notification("Game saved", NotificationKind::Info),
                         Err(e) => self.hud.push_notification(
                             &format!("Save failed: {}", e),
                             NotificationKind::Warning,
@@ -349,7 +357,8 @@ impl ApplicationHandler for GameApp {
                                 self.player.position[1],
                                 self.player.position[2],
                             );
-                            self.hud.push_notification("Game loaded", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Game loaded", NotificationKind::Info);
                         }
                         Err(e) => self.hud.push_notification(
                             &format!("Load failed: {}", e),
@@ -410,7 +419,9 @@ impl ApplicationHandler for GameApp {
                             if saved > 0 {
                                 tracing::info!(
                                     "streamer: unloaded chunk ({},{}) — {} entities saved",
-                                    coord.x, coord.z, saved
+                                    coord.x,
+                                    coord.z,
+                                    saved
                                 );
                             }
                         }
@@ -420,7 +431,9 @@ impl ApplicationHandler for GameApp {
                             if loaded > 0 {
                                 tracing::info!(
                                     "streamer: loaded chunk ({},{}) — {} entities restored",
-                                    coord.x, coord.z, loaded
+                                    coord.x,
+                                    coord.z,
+                                    loaded
                                 );
                             }
                         }
@@ -430,11 +443,12 @@ impl ApplicationHandler for GameApp {
 
                 // Rebuild hierarchical spatial index (C.2: use rebuild() instead of clear()+loop)
                 // Uses query API instead of direct ECS access (A.2)
-                if let Some(spatial) =
-                    self.engine.resources.get_mut::<HierarchicalSpatialIndex>()
-                {
+                if let Some(spatial) = self.engine.resources.get_mut::<HierarchicalSpatialIndex>() {
                     // Collect all entities once, then rebuild in bulk
-                    let entities: Vec<_> = self.engine.ecs.entities_with_transform()
+                    let entities: Vec<_> = self
+                        .engine
+                        .ecs
+                        .entities_with_transform()
                         .map(|(e, t)| (e, t.x, t.y))
                         .collect();
                     spatial.rebuild(&entities);
@@ -566,7 +580,7 @@ fn collect_entity_instances(
     let lod_config = LodConfig::default();
     let cam = glam::Vec3::from(camera_pos);
     let mut out = Vec::with_capacity(ecs.alive.len());
-    
+
     // Use iter_transform_kind() query instead of manual iteration
     for (_entity, transform, kind) in ecs.iter_transform_kind() {
         let y = heightmap.sample(transform.x, transform.y) + 1.0;
@@ -595,7 +609,7 @@ fn collect_entity_instances(
 fn print_economy(engine: &Engine) {
     // Uses query API instead of direct ECS access (A.2)
     println!("--- NPCs ({}) ---", engine.ecs.count_npcs());
-    
+
     // Use iter_npcs() query instead of manual iteration
     for npc in engine.ecs.iter_npcs() {
         let name = npc.name.0.as_str();
@@ -609,7 +623,11 @@ fn print_economy(engine: &Engine) {
 
         println!(
             "  {} | {} | hp:{:.0}% hunger:{:.0}% ${:.0}",
-            name, goal, hp * 100.0, hunger * 100.0, money,
+            name,
+            goal,
+            hp * 100.0,
+            hunger * 100.0,
+            money,
         );
     }
 }

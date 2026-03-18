@@ -1,7 +1,7 @@
 //! Need components for NPC and monster behavior.
 
-use serde::{Deserialize, Serialize};
 use super::entity_kind::MonsterSpecies;
+use serde::{Deserialize, Serialize};
 
 /// Personal needs shared by NPCs and monsters.
 #[derive(Clone, Debug, Serialize, Deserialize)]

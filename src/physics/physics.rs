@@ -3,11 +3,11 @@ use std::sync::Arc;
 use crate::core::mutation_policy::*;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
+use crate::physics::cloth::ClothWorld;
 use crate::physics::fire::FireGrid;
 use crate::physics::rapier_world::RapierPhysics;
 use crate::physics::sim_lod;
 use crate::physics::water::WaterGrid;
-use crate::physics::cloth::ClothWorld;
 use crate::world::heightmap::Heightmap;
 
 pub struct PhysicsSystem {
@@ -61,12 +61,8 @@ impl EngineSystem for PhysicsSystem {
 
         let world_center_x = crate::world::cell::WORLD_SIZE * 0.5;
         let world_center_z = crate::world::cell::WORLD_SIZE * 0.5;
-        let region_level = sim_lod::region_sim_level(
-            self.cam_x,
-            self.cam_z,
-            world_center_x,
-            world_center_z,
-        );
+        let region_level =
+            sim_lod::region_sim_level(self.cam_x, self.cam_z, world_center_x, world_center_z);
 
         let dt = 1.0 / 20.0;
         self.fire.update(dt, region_level);

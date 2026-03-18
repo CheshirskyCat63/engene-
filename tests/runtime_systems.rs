@@ -9,12 +9,15 @@ use engene::core::system::EngineSystem;
 use engene::game::economy::trader_economy::TraderState;
 use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
-use engene::simulation::simulation_level::{level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L2_RADIUS, L1_TICK_INTERVAL, L2_TICK_INTERVAL};
+use engene::simulation::simulation_level::{
+    level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L1_TICK_INTERVAL, L2_RADIUS,
+    L2_TICK_INTERVAL,
+};
 use engene::simulation::world_milestones::WorldMilestoneTracker;
 use engene::world::biome::Biome;
 use engene::world::components::*;
-use engene::world::world::WorldGrid;
 use engene::world::heightmap::Heightmap;
+use engene::world::world::WorldGrid;
 use std::sync::Arc;
 
 // =============================================================================
@@ -30,7 +33,10 @@ fn engine_boots_sandbox() {
 #[test]
 fn engine_sandbox_has_resources() {
     let engine = RuntimeAssembly::sandbox();
-    assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_some());
 }
 
 #[test]
@@ -91,7 +97,10 @@ fn engine_headless_has_resources() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_some());
 }
 
 #[test]
@@ -235,7 +244,10 @@ fn engine_vertical_slice_has_quality_governor() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::quality_governor::QualityGovernor>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::quality_governor::QualityGovernor>()
+        .is_some());
 }
 
 #[test]
@@ -244,7 +256,10 @@ fn engine_vertical_slice_has_budget_registry() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::budget_registry::BudgetRegistry>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::budget_registry::BudgetRegistry>()
+        .is_some());
 }
 
 // =============================================================================
@@ -407,14 +422,24 @@ fn personal_needs_default_monster_valid() {
 fn decide_npc_returns_goal() {
     use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
-        bravery: 0.5, aggressiveness: 0.3, work_ethic: 0.6, curiosity: 0.4,
-        honesty: 0.7, sociality: 0.5, autonomy: 0.5, materialism: 0.3,
-        risk_tolerance: 0.4, stress_resistance: 0.6,
+        bravery: 0.5,
+        aggressiveness: 0.3,
+        work_ethic: 0.6,
+        curiosity: 0.4,
+        honesty: 0.7,
+        sociality: 0.5,
+        autonomy: 0.5,
+        materialism: 0.3,
+        risk_tolerance: 0.4,
+        stress_resistance: 0.6,
     };
     let personal = PersonalNeeds::default_npc();
     let social = SocialNeeds::default();
     let economy = NpcEconomy {
-        money: 100.0, monthly_required: 50.0, job: Job::Resident, desperation: 0.2,
+        money: 100.0,
+        monthly_required: 50.0,
+        job: Job::Resident,
+        desperation: 0.2,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
     let _ = format!("{:?}", goal);
@@ -424,9 +449,16 @@ fn decide_npc_returns_goal() {
 fn decide_monster_returns_goal() {
     use engene::game::ai::decision::decide_monster;
     let traits = MonsterTraits {
-        aggressiveness: 0.5, caution: 0.4, territoriality: 0.3, bravery: 0.5,
-        pack_mentality: 0.6, energy_level: 0.7, hoarding: 0.2,
-        curiosity: 0.3, adaptability: 0.5, stress_tolerance: 0.5,
+        aggressiveness: 0.5,
+        caution: 0.4,
+        territoriality: 0.3,
+        bravery: 0.5,
+        pack_mentality: 0.6,
+        energy_level: 0.7,
+        hoarding: 0.2,
+        curiosity: 0.3,
+        adaptability: 0.5,
+        stress_tolerance: 0.5,
     };
     let personal = PersonalNeeds::default_monster();
     let eco = EcosystemNeeds::for_species(MonsterSpecies::Wolf);
@@ -438,33 +470,56 @@ fn decide_monster_returns_goal() {
 fn decide_npc_high_hunger_seeks_food() {
     use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
-        bravery: 0.5, aggressiveness: 0.1, work_ethic: 0.3, curiosity: 0.2,
-        honesty: 0.8, sociality: 0.3, autonomy: 0.5, materialism: 0.2,
-        risk_tolerance: 0.2, stress_resistance: 0.6,
+        bravery: 0.5,
+        aggressiveness: 0.1,
+        work_ethic: 0.3,
+        curiosity: 0.2,
+        honesty: 0.8,
+        sociality: 0.3,
+        autonomy: 0.5,
+        materialism: 0.2,
+        risk_tolerance: 0.2,
+        stress_resistance: 0.6,
     };
     let mut personal = PersonalNeeds::default_npc();
     personal.hunger = 0.9;
     let social = SocialNeeds::default();
     let economy = NpcEconomy {
-        money: 50.0, monthly_required: 50.0, job: Job::Resident, desperation: 0.1,
+        money: 50.0,
+        monthly_required: 50.0,
+        job: Job::Resident,
+        desperation: 0.1,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
-    assert!(matches!(goal, Goal::SeekFood | Goal::Hunt | Goal::Rest | Goal::Work | Goal::SeekWater));
+    assert!(matches!(
+        goal,
+        Goal::SeekFood | Goal::Hunt | Goal::Rest | Goal::Work | Goal::SeekWater
+    ));
 }
 
 #[test]
 fn decide_monster_high_fear_flees() {
     use engene::game::ai::decision::decide_monster;
     let traits = MonsterTraits {
-        aggressiveness: 0.2, caution: 0.9, territoriality: 0.3, bravery: 0.1,
-        pack_mentality: 0.5, energy_level: 0.6, hoarding: 0.2,
-        curiosity: 0.2, adaptability: 0.5, stress_tolerance: 0.4,
+        aggressiveness: 0.2,
+        caution: 0.9,
+        territoriality: 0.3,
+        bravery: 0.1,
+        pack_mentality: 0.5,
+        energy_level: 0.6,
+        hoarding: 0.2,
+        curiosity: 0.2,
+        adaptability: 0.5,
+        stress_tolerance: 0.4,
     };
     let mut personal = PersonalNeeds::default_monster();
     personal.fear = 0.95;
     let eco = EcosystemNeeds::for_species(MonsterSpecies::Wolf);
     let goal = decide_monster(&traits, &personal, &eco);
-    assert!(matches!(goal, Goal::Flee | Goal::Rest | Goal::FollowPack | Goal::Hunt));
+    assert!(matches!(
+        goal,
+        Goal::Flee | Goal::Rest | Goal::FollowPack | Goal::Hunt
+    ));
 }
 
 #[test]
@@ -472,7 +527,15 @@ fn perception_cache_build_empty_ecs() {
     use engene::game::ai::perception::PerceptionCache;
     let mut ecs = Ecs::new();
     let (entity, _) = ecs.spawn_new();
-    ecs.transforms.insert(entity, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        entity,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(entity, EntityKind::Npc);
     ecs.rebuild_spatial();
     let cache = PerceptionCache::build(&ecs, entity);
@@ -490,17 +553,21 @@ fn memory_new_empty() {
 
 #[test]
 fn memory_record_event() {
-    use engene::game::ai::memory::{Memory, EventMemory, EventKind};
+    use engene::game::ai::memory::{EventKind, EventMemory, Memory};
     let mut mem = Memory::new();
     mem.record_event(EventMemory {
-        tick: 0, kind: EventKind::AllyDied, location: (0, 0), other: None, emotional_impact: 0.2,
+        tick: 0,
+        kind: EventKind::AllyDied,
+        location: (0, 0),
+        other: None,
+        emotional_impact: 0.2,
     });
     assert_eq!(mem.events.len(), 1);
 }
 
 #[test]
 fn memory_mark_cell() {
-    use engene::game::ai::memory::{Memory, CellTag};
+    use engene::game::ai::memory::{CellTag, Memory};
     let mut mem = Memory::new();
     mem.mark_cell(5, 5, CellTag::Danger, 0.8);
     assert!(mem.cell_danger(5, 5) > 0.0);
@@ -566,7 +633,15 @@ fn game_time_new_month_event() {
 fn engine_ecs_alive_non_null_after_spawn() {
     let mut engine = RuntimeAssembly::sandbox();
     let (e, _) = engine.ecs.spawn_new();
-    engine.ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    engine.ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     assert!(engine.ecs.is_alive(e));
 }
 
@@ -606,14 +681,24 @@ fn engine_tick_parallel_100_ticks() {
 fn ai_decision_high_desperation_can_steal() {
     use engene::game::ai::decision::decide_npc;
     let traits = NpcTraits {
-        bravery: 0.7, aggressiveness: 0.6, work_ethic: 0.2, curiosity: 0.3,
-        honesty: 0.2, sociality: 0.3, autonomy: 0.7, materialism: 0.5,
-        risk_tolerance: 0.8, stress_resistance: 0.4,
+        bravery: 0.7,
+        aggressiveness: 0.6,
+        work_ethic: 0.2,
+        curiosity: 0.3,
+        honesty: 0.2,
+        sociality: 0.3,
+        autonomy: 0.7,
+        materialism: 0.5,
+        risk_tolerance: 0.8,
+        stress_resistance: 0.4,
     };
     let personal = PersonalNeeds::default_npc();
     let social = SocialNeeds::default();
     let economy = NpcEconomy {
-        money: 0.0, monthly_required: 100.0, job: Job::Unemployed, desperation: 0.95,
+        money: 0.0,
+        monthly_required: 100.0,
+        job: Job::Unemployed,
+        desperation: 0.95,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
     let _ = goal;
@@ -626,7 +711,10 @@ fn ai_decision_high_desperation_can_steal() {
 #[test]
 fn sandbox_has_resource_grid() {
     let engine = RuntimeAssembly::sandbox();
-    assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_some());
 }
 
 #[test]
@@ -634,7 +722,10 @@ fn headless_has_resource_grid() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_some());
 }
 
 #[test]
@@ -650,7 +741,10 @@ fn headless_has_world_streamer() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::world::streaming::WorldStreamer>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::streaming::WorldStreamer>()
+        .is_some());
 }
 
 #[test]
@@ -666,7 +760,10 @@ fn headless_has_item_registry() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::game::economy::item_registry::ItemRegistry>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::game::economy::item_registry::ItemRegistry>()
+        .is_some());
 }
 
 #[test]
@@ -683,7 +780,10 @@ fn vertical_slice_has_quality_governor() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::quality_governor::QualityGovernor>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::quality_governor::QualityGovernor>()
+        .is_some());
 }
 
 #[test]
@@ -692,7 +792,10 @@ fn vertical_slice_has_budget_registry() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::budget_registry::BudgetRegistry>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::budget_registry::BudgetRegistry>()
+        .is_some());
 }
 
 #[test]
@@ -701,7 +804,10 @@ fn vertical_slice_has_sim_bus() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::events::sim_bus::SimBus>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::events::sim_bus::SimBus>()
+        .is_some());
 }
 
 #[test]
@@ -710,7 +816,10 @@ fn vertical_slice_has_terrain_truth() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::world::terrain_truth::TerrainTruth>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::terrain_truth::TerrainTruth>()
+        .is_some());
 }
 
 #[test]
@@ -719,7 +828,10 @@ fn vertical_slice_has_surface_state_store() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::world::surface_state::SurfaceStateStore>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::surface_state::SurfaceStateStore>()
+        .is_some());
 }
 
 #[test]
@@ -728,7 +840,10 @@ fn vertical_slice_has_prefab_registry() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::content::prefabs::prefab_registry::PrefabRegistry>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::content::prefabs::prefab_registry::PrefabRegistry>()
+        .is_some());
 }
 
 #[test]
@@ -737,7 +852,10 @@ fn vertical_slice_has_faction_relations() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::game::gameplay::factions::FactionRelations>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::game::gameplay::factions::FactionRelations>()
+        .is_some());
 }
 
 #[test]
@@ -765,7 +883,9 @@ fn item_registry_by_category() {
 #[test]
 fn no_duplicate_resource_grid() {
     let engine = RuntimeAssembly::sandbox();
-    let r1 = engine.resources.get::<engene::world::resources::ResourceGrid>();
+    let r1 = engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>();
     assert!(r1.is_some());
 }
 
@@ -774,7 +894,10 @@ fn headless_has_destruction_system() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::physics::destruction::DestructionSystem>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::physics::destruction::DestructionSystem>()
+        .is_some());
 }
 
 #[test]
@@ -782,7 +905,10 @@ fn headless_has_terrain_deformation() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let engine = RuntimeAssembly::headless(&biomes);
-    assert!(engine.resources.get::<engene::world::terrain_deformation::TerrainDeformationSystem>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::terrain_deformation::TerrainDeformationSystem>()
+        .is_some());
 }
 
 #[test]
@@ -791,7 +917,10 @@ fn vertical_slice_has_clip_map() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::animation::clip_map::ClipMap>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::animation::clip_map::ClipMap>()
+        .is_some());
 }
 
 #[test]
@@ -800,7 +929,10 @@ fn vertical_slice_has_schema_migration_registry() {
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let heightmap = Arc::new(Heightmap::generate(&biomes));
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
-    assert!(engine.resources.get::<engene::core::build_manifest::SchemaMigrationRegistry>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::core::build_manifest::SchemaMigrationRegistry>()
+        .is_some());
 }
 
 #[test]
@@ -877,13 +1009,15 @@ fn should_tick_l3_never() {
 
 #[test]
 fn sim_level_component() {
-    let level = SimLevel { level: SimulationLevel::L1 };
+    let level = SimLevel {
+        level: SimulationLevel::L1,
+    };
     assert_eq!(level.level, SimulationLevel::L1);
 }
 
 #[test]
 fn quality_governor_pressure_normal() {
-    use engene::core::quality_governor::{QualityGovernor, PressureLevel};
+    use engene::core::quality_governor::{PressureLevel, QualityGovernor};
     let gov = QualityGovernor::new(60);
     assert_eq!(gov.pressure_level, PressureLevel::Normal);
 }
@@ -927,7 +1061,7 @@ fn budget_registry_total_budget() {
 
 #[test]
 fn budget_registry_record_measurement() {
-    use engene::core::budget_registry::{BudgetRegistry, BudgetEntry, create_default_registry};
+    use engene::core::budget_registry::{create_default_registry, BudgetEntry, BudgetRegistry};
     let mut reg: BudgetRegistry = create_default_registry();
     reg.record_measurement("damage_pipeline", 100);
     let _entries: &[BudgetEntry] = reg.entries();
@@ -1027,7 +1161,15 @@ fn ecs_spawn_new_assigns_pid() {
 fn ecs_despawn_removes_from_alive() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     assert!(!ecs.is_alive(e));
 }
@@ -1036,7 +1178,15 @@ fn ecs_despawn_removes_from_alive() {
 fn ecs_rebuild_spatial() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.rebuild_spatial();
 }
 
@@ -1068,7 +1218,15 @@ fn engine_time_events_propagate() {
 fn ecs_components_apply() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 1.0, y: 2.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 1.0,
+            y: 2.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     assert!(ecs.transforms.get(&e).is_some());
     assert_eq!(ecs.transforms.get(&e).unwrap().x, 1.0);
@@ -1282,8 +1440,14 @@ fn role_behavior_medic() {
 #[test]
 fn role_behavior_all_nine_roles() {
     let roles = [
-        NpcRole::Guard, NpcRole::Hunter, NpcRole::Trader, NpcRole::Scavenger,
-        NpcRole::Courier, NpcRole::Bandit, NpcRole::IdleResident, NpcRole::Mechanic,
+        NpcRole::Guard,
+        NpcRole::Hunter,
+        NpcRole::Trader,
+        NpcRole::Scavenger,
+        NpcRole::Courier,
+        NpcRole::Bandit,
+        NpcRole::IdleResident,
+        NpcRole::Mechanic,
         NpcRole::Medic,
     ];
     for role in roles {
@@ -1331,7 +1495,9 @@ fn world_milestone_tracker_record_events() {
 #[test]
 fn world_milestone_tracker_check_milestones() {
     let mut tracker = WorldMilestoneTracker::new();
-    for _ in 0..3 { tracker.record_bankruptcy(); }
+    for _ in 0..3 {
+        tracker.record_bankruptcy();
+    }
     tracker.check_milestones(5);
     assert!(!tracker.milestones_achieved.is_empty() || tracker.months_tracked == 5);
 }
@@ -1352,11 +1518,17 @@ fn economy_system_name() {
 
 #[test]
 fn item_template_has_category() {
-    use engene::game::economy::item_registry::{ItemTemplate, ItemCategory, ItemRarity};
+    use engene::game::economy::item_registry::{ItemCategory, ItemRarity, ItemTemplate};
     let t = ItemTemplate {
-        id: "test".into(), name: "Test".into(), category: ItemCategory::Food,
-        rarity: ItemRarity::Common, base_value: 10.0, weight: 0.5,
-        max_stack: 5, max_durability: 1.0, description: "".into(),
+        id: "test".into(),
+        name: "Test".into(),
+        category: ItemCategory::Food,
+        rarity: ItemRarity::Common,
+        base_value: 10.0,
+        weight: 0.5,
+        max_stack: 5,
+        max_durability: 1.0,
+        description: "".into(),
     };
     assert_eq!(t.category, ItemCategory::Food);
 }
@@ -1387,21 +1559,29 @@ fn equipment_slots_default() {
 #[test]
 fn faction_membership_standing() {
     use engene::world::components::FactionMembership;
-    let fm = FactionMembership { faction: Faction::Loners, standing: 0.5 };
+    let fm = FactionMembership {
+        faction: Faction::Loners,
+        standing: 0.5,
+    };
     assert_eq!(fm.standing, 0.5);
 }
 
 #[test]
 fn npc_economy_desperation() {
     let econ = NpcEconomy {
-        money: 10.0, monthly_required: 100.0, job: Job::Unemployed, desperation: 0.8,
+        money: 10.0,
+        monthly_required: 100.0,
+        job: Job::Unemployed,
+        desperation: 0.8,
     };
     assert!(econ.desperation > 0.5);
 }
 
 #[test]
 fn sim_level_l2() {
-    let sl = SimLevel { level: SimulationLevel::L2 };
+    let sl = SimLevel {
+        level: SimulationLevel::L2,
+    };
     assert_eq!(sl.level, SimulationLevel::L2);
 }
 
@@ -1410,7 +1590,15 @@ fn perception_cache_entities_nearby() {
     use engene::game::ai::perception::PerceptionCache;
     let mut ecs = Ecs::new();
     let (entity, _) = ecs.spawn_new();
-    ecs.transforms.insert(entity, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        entity,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(entity, EntityKind::Npc);
     ecs.rebuild_spatial();
     let cache = PerceptionCache::build(&ecs, entity);
@@ -1419,8 +1607,8 @@ fn perception_cache_entities_nearby() {
 
 #[test]
 fn memory_opinion_of_unknown() {
-    use engene::game::ai::memory::Memory;
     use engene::core::persistent_id::PersistentEntityId;
+    use engene::game::ai::memory::Memory;
     let mem = Memory::new();
     let op = mem.opinion_of(PersistentEntityId(999));
     assert_eq!(op.trust, 0.0);
@@ -1445,7 +1633,15 @@ fn identity_registry_register_new() {
 fn identity_registry_resolve() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     assert_eq!(ecs.identity.resolve(pid), Some(e));
 }
 
@@ -1460,7 +1656,9 @@ fn entity_ref_is_dead_unknown() {
 
 #[test]
 fn build_manifest_schema_versions() {
-    use engene::core::build_manifest::{BuildManifest, SCHEMA_VERSION_SAVE, SCHEMA_VERSION_CHUNK, SCHEMA_VERSION_ENTITY};
+    use engene::core::build_manifest::{
+        BuildManifest, SCHEMA_VERSION_CHUNK, SCHEMA_VERSION_ENTITY, SCHEMA_VERSION_SAVE,
+    };
     let m = BuildManifest::current();
     assert_eq!(m.schema_version_save, SCHEMA_VERSION_SAVE);
     assert_eq!(m.schema_version_chunk, SCHEMA_VERSION_CHUNK);
@@ -1514,7 +1712,15 @@ fn spatial_index_candidates() {
     use engene::core::ecs::Ecs;
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.rebuild_spatial();
     let cands = ecs.spatial.candidates_in_radius(500.0, 500.0, 50.0);
     assert!(cands.len() >= 1);
@@ -1525,6 +1731,8 @@ fn engine_tick_headless_50() {
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let mut engine = RuntimeAssembly::headless(&biomes);
-    for _ in 0..50 { engine.tick(0.05); }
+    for _ in 0..50 {
+        engine.tick(0.05);
+    }
     assert_eq!(engine.time.tick_count, 50);
 }

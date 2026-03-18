@@ -88,8 +88,7 @@ impl RuntimeTruthDashboard {
             });
         }
 
-        self.persistence_stats.total_persistent_entities =
-            engine.ecs.alive.len() as u32;
+        self.persistence_stats.total_persistent_entities = engine.ecs.alive.len() as u32;
 
         self.event_bus_health.channels_active = engine.events.channel_count();
     }
@@ -260,37 +259,45 @@ impl RuntimeTruthDashboard {
 
 impl RuntimeTruthDashboard {
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("Runtime Truth").default_width(500.0).show(ctx, |ui| {
-            ui.heading(format!(
-                "Active: {}  Frozen: {}  Total: {}",
-                self.active_count(), self.frozen_count(), self.modules.len()
-            ));
-            ui.separator();
-            egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
-                for m in &self.modules {
-                    ui.horizontal(|ui| {
-                        let color = match m.status {
-                            ModuleStatus::Active => egui::Color32::GREEN,
-                            ModuleStatus::WiredPartial => egui::Color32::YELLOW,
-                            ModuleStatus::Frozen => egui::Color32::GRAY,
-                            ModuleStatus::EditorOnly => egui::Color32::LIGHT_BLUE,
-                            ModuleStatus::TestOnly => egui::Color32::LIGHT_GRAY,
-                            ModuleStatus::Declared => egui::Color32::from_rgb(255, 165, 0),
-                        };
-                        ui.colored_label(color, format!("[{}]", m.status));
-                        ui.label(&m.name);
-                        ui.weak(&m.notes);
+        egui::Window::new("Runtime Truth")
+            .default_width(500.0)
+            .show(ctx, |ui| {
+                ui.heading(format!(
+                    "Active: {}  Frozen: {}  Total: {}",
+                    self.active_count(),
+                    self.frozen_count(),
+                    self.modules.len()
+                ));
+                ui.separator();
+                egui::ScrollArea::vertical()
+                    .max_height(300.0)
+                    .show(ui, |ui| {
+                        for m in &self.modules {
+                            ui.horizontal(|ui| {
+                                let color = match m.status {
+                                    ModuleStatus::Active => egui::Color32::GREEN,
+                                    ModuleStatus::WiredPartial => egui::Color32::YELLOW,
+                                    ModuleStatus::Frozen => egui::Color32::GRAY,
+                                    ModuleStatus::EditorOnly => egui::Color32::LIGHT_BLUE,
+                                    ModuleStatus::TestOnly => egui::Color32::LIGHT_GRAY,
+                                    ModuleStatus::Declared => egui::Color32::from_rgb(255, 165, 0),
+                                };
+                                ui.colored_label(color, format!("[{}]", m.status));
+                                ui.label(&m.name);
+                                ui.weak(&m.notes);
+                            });
+                        }
                     });
-                }
+                ui.separator();
+                ui.label(format!(
+                    "Persistence: {} entities",
+                    self.persistence_stats.total_persistent_entities
+                ));
+                ui.label(format!(
+                    "EventBus: {} channels, {} dropped",
+                    self.event_bus_health.channels_active, self.event_bus_health.events_dropped
+                ));
             });
-            ui.separator();
-            ui.label(format!("Persistence: {} entities", self.persistence_stats.total_persistent_entities));
-            ui.label(format!(
-                "EventBus: {} channels, {} dropped",
-                self.event_bus_health.channels_active,
-                self.event_bus_health.events_dropped
-            ));
-        });
     }
 }
 

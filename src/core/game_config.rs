@@ -1,1853 +1,2101 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-pub const CANONICAL_CONFIG_FILES: [&str;16] = [
- "biomes.ron",
- "economy.ron",
- "food_chain.ron",
- "goals.ron",
- "jobs.ron",
- "materials.ron",
- "material_bridge.ron",
- "perception.ron",
- "population.ron",
- "rules.ron",
- "seasons.ron",
- "simulation.ron",
- "species.ron",
- "surfaces.ron",
- "tactics.ron",
- "weapons.ron",
+pub const CANONICAL_CONFIG_FILES: [&str; 16] = [
+    "biomes.ron",
+    "economy.ron",
+    "food_chain.ron",
+    "goals.ron",
+    "jobs.ron",
+    "materials.ron",
+    "material_bridge.ron",
+    "perception.ron",
+    "population.ron",
+    "rules.ron",
+    "seasons.ron",
+    "simulation.ron",
+    "species.ron",
+    "surfaces.ron",
+    "tactics.ron",
+    "weapons.ron",
 ];
 
 fn join_config_path(dir: &str, file: &str) -> String {
- format!("{}/{}", dir.trim_end_matches('/'), file)
+    format!("{}/{}", dir.trim_end_matches('/'), file)
 }
 
 fn push_err<T, E: std::fmt::Display>(res: Result<T, E>, path: &str, errors: &mut Vec<String>) {
- if let Err(e) = res {
- errors.push(format!("{}: {}", path, e));
- }
+    if let Err(e) = res {
+        errors.push(format!("{}: {}", path, e));
+    }
 }
 
 fn check_required_config_parsing(dir: &str) -> Vec<String> {
- use crate::core::config::{load_config, ConfigEnvelope};
+    use crate::core::config::{load_config, ConfigEnvelope};
 
- let mut errors = Vec::new();
+    let mut errors = Vec::new();
 
- let p = join_config_path(dir, "perception.ron");
- push_err(load_config::<ConfigEnvelope<PerceptionConfig>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "perception.ron");
+    push_err(
+        load_config::<ConfigEnvelope<PerceptionConfig>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "population.ron");
- push_err(load_config::<ConfigEnvelope<PopulationConfig>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "population.ron");
+    push_err(
+        load_config::<ConfigEnvelope<PopulationConfig>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "economy.ron");
- push_err(load_config::<ConfigEnvelope<EconomyConfig>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "economy.ron");
+    push_err(
+        load_config::<ConfigEnvelope<EconomyConfig>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "simulation.ron");
- push_err(load_config::<ConfigEnvelope<SimulationConfig>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "simulation.ron");
+    push_err(
+        load_config::<ConfigEnvelope<SimulationConfig>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "jobs.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, JobConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "jobs.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, JobConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "goals.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, GoalConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "goals.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, GoalConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "biomes.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, BiomeConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "biomes.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, BiomeConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "seasons.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, SeasonConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "seasons.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, SeasonConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "materials.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, MaterialConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "materials.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, MaterialConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "food_chain.ron");
- push_err(load_config::<ConfigEnvelope<FoodChainConfig>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "food_chain.ron");
+    push_err(
+        load_config::<ConfigEnvelope<FoodChainConfig>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "tactics.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, TacticsConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "tactics.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, TacticsConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "rules.ron");
- push_err(load_config::<ConfigEnvelope<RulesData>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "rules.ron");
+    push_err(
+        load_config::<ConfigEnvelope<RulesData>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "weapons.ron");
- push_err(load_config::<ConfigEnvelope<HashMap<String, WeaponConfig>>>(&p), &p, &mut errors);
+    let p = join_config_path(dir, "weapons.ron");
+    push_err(
+        load_config::<ConfigEnvelope<HashMap<String, WeaponConfig>>>(&p),
+        &p,
+        &mut errors,
+    );
 
- let p = join_config_path(dir, "species.ron");
- push_err(load_species_config(&p), &p, &mut errors);
+    let p = join_config_path(dir, "species.ron");
+    push_err(load_species_config(&p), &p, &mut errors);
 
- let p = join_config_path(dir, "surfaces.ron");
- push_err(load_surfaces_config(&p), &p, &mut errors);
+    let p = join_config_path(dir, "surfaces.ron");
+    push_err(load_surfaces_config(&p), &p, &mut errors);
 
- let p = join_config_path(dir, "material_bridge.ron");
- push_err(load_material_bridge_config(&p), &p, &mut errors);
+    let p = join_config_path(dir, "material_bridge.ron");
+    push_err(load_material_bridge_config(&p), &p, &mut errors);
 
- errors
+    errors
 }
 
 fn check_required_config_presence(dir: &str) -> Vec<String> {
- CANONICAL_CONFIG_FILES
- .iter()
- .map(|f| join_config_path(dir, f))
- .filter(|p| !std::path::Path::new(p).exists())
- .collect()
+    CANONICAL_CONFIG_FILES
+        .iter()
+        .map(|f| join_config_path(dir, f))
+        .filter(|p| !std::path::Path::new(p).exists())
+        .collect()
 }
 
 pub fn canonical_config_paths(dir: &str) -> Vec<String> {
- CANONICAL_CONFIG_FILES
- .iter()
- .map(|f| join_config_path(dir, f))
- .collect()
+    CANONICAL_CONFIG_FILES
+        .iter()
+        .map(|f| join_config_path(dir, f))
+        .collect()
 }
 
 pub fn validate_required_configs(dir: &str) -> Result<(), Vec<String>> {
- let mut errors = Vec::new();
+    let mut errors = Vec::new();
 
- for missing in check_required_config_presence(dir) {
- errors.push(format!("{}: file not found", missing));
- }
+    for missing in check_required_config_presence(dir) {
+        errors.push(format!("{}: file not found", missing));
+    }
 
- errors.extend(check_required_config_parsing(dir));
+    errors.extend(check_required_config_parsing(dir));
 
- if errors.is_empty() {
- Ok(())
- } else {
- Err(errors)
- }
+    if errors.is_empty() {
+        Ok(())
+    } else {
+        Err(errors)
+    }
 }
 
 pub fn canonical_config_files() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn required_config_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn required_config_dir() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn required_config_paths() -> Vec<String> {
- canonical_config_paths(required_config_dir())
+    canonical_config_paths(required_config_dir())
 }
 
 pub fn validate_required_configs_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs(required_config_dir())
+    validate_required_configs(required_config_dir())
 }
 
 pub fn is_required_config_file(file_name: &str) -> bool {
- CANONICAL_CONFIG_FILES.contains(&file_name)
+    CANONICAL_CONFIG_FILES.contains(&file_name)
 }
 
 pub fn required_config_file_set() -> std::collections::HashSet<&'static str> {
- CANONICAL_CONFIG_FILES.iter().copied().collect()
+    CANONICAL_CONFIG_FILES.iter().copied().collect()
 }
 
 pub fn required_config_file_names_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn required_config_file_names_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn required_config_file_names_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn validate_required_configs_for_doctor() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_file_count() -> usize {
- required_config_count()
+    required_config_count()
 }
 
 pub fn canonical_config_file_list() -> &'static [&'static str] {
- canonical_config_files()
+    canonical_config_files()
 }
 
 pub fn canonical_config_file_list_pretty() -> String {
- required_config_file_names_pretty()
+    required_config_file_names_pretty()
 }
 
 pub fn canonical_config_file_list_csv() -> String {
- required_config_file_names_csv()
+    required_config_file_names_csv()
 }
 
 pub fn canonical_config_dir() -> &'static str {
- required_config_dir()
+    required_config_dir()
 }
 
 pub fn canonical_config_default_paths() -> Vec<String> {
- required_config_paths()
+    required_config_paths()
 }
 
 pub fn validate_canonical_configs_default() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn validate_canonical_configs(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_contains(file_name: &str) -> bool {
- is_required_config_file(file_name)
+    is_required_config_file(file_name)
 }
 
 pub fn canonical_config_names_vec() -> Vec<&'static str> {
- required_config_file_names_vec()
+    required_config_file_names_vec()
 }
 
 pub fn canonical_config_names_pretty() -> String {
- required_config_file_names_pretty()
+    required_config_file_names_pretty()
 }
 
 pub fn canonical_config_names_csv() -> String {
- required_config_file_names_csv()
+    required_config_file_names_csv()
 }
 
 pub fn canonical_config_expected_total() -> usize {
- required_config_count()
+    required_config_count()
 }
 
 pub fn canonical_config_expected_dir() -> &'static str {
- required_config_dir()
+    required_config_dir()
 }
 
 pub fn canonical_config_expected_paths() -> Vec<String> {
- required_config_paths()
+    required_config_paths()
 }
 
 pub fn canonical_config_verify_default() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_verify(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_validate_for_runtime() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_doctor() -> Result<(), Vec<String>> {
- validate_required_configs_for_doctor()
+    validate_required_configs_for_doctor()
 }
 
 pub fn canonical_config_validate_for_ci() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_tools() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_startup() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_shipping() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_release() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_scope_lock() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_blockers() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_matrix() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_audit() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_docs() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_dev() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_strict() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_advisory() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_tests() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_runtime_manifest() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_healthcheck() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_boot() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_init() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_engine() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_game() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_editor() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_launcher() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_packaging() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_distribution() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_profile() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_debug() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_prod() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_rc() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_v1() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_v1_scope() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_release_blockers() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_runtime_truth() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_doctor_strict() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_doctor_advisory() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_first_run() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_ci_gate() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_release_gate() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_scope_gate() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_truth_alignment() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_phase0() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_phase2() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_phase3() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_phase4() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_phase5() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_for_all() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_paths_default() -> Vec<String> {
- required_config_paths()
+    required_config_paths()
 }
 
 pub fn canonical_config_paths_for(dir: &str) -> Vec<String> {
- canonical_config_paths(dir)
+    canonical_config_paths(dir)
 }
 
 pub fn canonical_config_validate_paths(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_has(file_name: &str) -> bool {
- is_required_config_file(file_name)
+    is_required_config_file(file_name)
 }
 
 pub fn canonical_config_total() -> usize {
- required_config_count()
+    required_config_count()
 }
 
 pub fn canonical_config_dir_default() -> &'static str {
- required_config_dir()
+    required_config_dir()
 }
 
 pub fn canonical_config_entries() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_entries_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_entries_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_entries_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_status_report() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_status_report_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_ok() -> bool {
- validate_required_configs_default_dir().is_ok()
+    validate_required_configs_default_dir().is_ok()
 }
 
 pub fn canonical_config_ok_for(dir: &str) -> bool {
- validate_required_configs(dir).is_ok()
+    validate_required_configs(dir).is_ok()
 }
 
 pub fn canonical_config_errors() -> Vec<String> {
- validate_required_configs_default_dir().err().unwrap_or_default()
+    validate_required_configs_default_dir()
+        .err()
+        .unwrap_or_default()
 }
 
 pub fn canonical_config_errors_for(dir: &str) -> Vec<String> {
- validate_required_configs(dir).err().unwrap_or_default()
+    validate_required_configs(dir).err().unwrap_or_default()
 }
 
 pub fn canonical_config_missing_files(dir: &str) -> Vec<String> {
- check_required_config_presence(dir)
+    check_required_config_presence(dir)
 }
 
 pub fn canonical_config_parse_errors(dir: &str) -> Vec<String> {
- check_required_config_parsing(dir)
+    check_required_config_parsing(dir)
 }
 
 pub fn canonical_config_missing_files_default() -> Vec<String> {
- check_required_config_presence(required_config_dir())
+    check_required_config_presence(required_config_dir())
 }
 
 pub fn canonical_config_parse_errors_default() -> Vec<String> {
- check_required_config_parsing(required_config_dir())
+    check_required_config_parsing(required_config_dir())
 }
 
 pub fn canonical_config_healthcheck() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_healthcheck_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_diagnostics() -> (Vec<String>, Vec<String>) {
- (
- check_required_config_presence(required_config_dir()),
- check_required_config_parsing(required_config_dir()),
- )
+    (
+        check_required_config_presence(required_config_dir()),
+        check_required_config_parsing(required_config_dir()),
+    )
 }
 
 pub fn canonical_config_diagnostics_for(dir: &str) -> (Vec<String>, Vec<String>) {
- (
- check_required_config_presence(dir),
- check_required_config_parsing(dir),
- )
+    (
+        check_required_config_presence(dir),
+        check_required_config_parsing(dir),
+    )
 }
 
 pub fn canonical_config_all_good() -> bool {
- let (missing, parse) = canonical_config_diagnostics();
- missing.is_empty() && parse.is_empty()
+    let (missing, parse) = canonical_config_diagnostics();
+    missing.is_empty() && parse.is_empty()
 }
 
 pub fn canonical_config_all_good_for(dir: &str) -> bool {
- let (missing, parse) = canonical_config_diagnostics_for(dir);
- missing.is_empty() && parse.is_empty()
+    let (missing, parse) = canonical_config_diagnostics_for(dir);
+    missing.is_empty() && parse.is_empty()
 }
 
 pub fn canonical_config_required_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_required_files() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_required_paths(dir: &str) -> Vec<String> {
- canonical_config_paths(dir)
+    canonical_config_paths(dir)
 }
 
 pub fn canonical_config_required_paths_default() -> Vec<String> {
- required_config_paths()
+    required_config_paths()
 }
 
 pub fn canonical_config_required_dir() -> &'static str {
- required_config_dir()
+    required_config_dir()
 }
 
 pub fn canonical_config_required_valid() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_required_valid_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_validate_required() -> Result<(), Vec<String>> {
- validate_required_configs_default_dir()
+    validate_required_configs_default_dir()
 }
 
 pub fn canonical_config_validate_required_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_required_summary() -> String {
- format!(
- "{} files in {}: {}",
- required_config_count(),
- required_config_dir(),
- required_config_file_names_pretty()
- )
+    format!(
+        "{} files in {}: {}",
+        required_config_count(),
+        required_config_dir(),
+        required_config_file_names_pretty()
+    )
 }
 
 pub fn canonical_config_required_summary_for(dir: &str) -> String {
- format!(
- "{} files in {}: {}",
- required_config_count(),
- dir,
- required_config_file_names_pretty()
- )
+    format!(
+        "{} files in {}: {}",
+        required_config_count(),
+        dir,
+        required_config_file_names_pretty()
+    )
 }
 
 pub fn canonical_config_summary() -> String {
- canonical_config_required_summary()
+    canonical_config_required_summary()
 }
 
 pub fn canonical_config_summary_for(dir: &str) -> String {
- canonical_config_required_summary_for(dir)
+    canonical_config_required_summary_for(dir)
 }
 
 pub fn canonical_config_files_slice() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_files_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_files_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_files_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_dir_name() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_validate_in_dir(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_validate_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_exists(file_name: &str) -> bool {
- CANONICAL_CONFIG_FILES.contains(&file_name)
+    CANONICAL_CONFIG_FILES.contains(&file_name)
 }
 
 pub fn canonical_config_set() -> std::collections::HashSet<&'static str> {
- CANONICAL_CONFIG_FILES.iter().copied().collect()
+    CANONICAL_CONFIG_FILES.iter().copied().collect()
 }
 
 pub fn canonical_config_debug_dump() -> String {
- format!(
- "dir={} count={} files=[{}]",
- canonical_config_dir_name(),
- canonical_config_count(),
- canonical_config_files_pretty()
- )
+    format!(
+        "dir={} count={} files=[{}]",
+        canonical_config_dir_name(),
+        canonical_config_count(),
+        canonical_config_files_pretty()
+    )
 }
 
 pub fn canonical_config_doctor_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_engine_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_ci_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_release_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_audit_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_runtime_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_scope_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_source() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_source_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_source_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_source_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_source_dir() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_source_paths() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
 pub fn canonical_config_truth_validate() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_validate_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_truth_check() -> bool {
- validate_required_configs("game/data").is_ok()
+    validate_required_configs("game/data").is_ok()
 }
 
 pub fn canonical_config_truth_errors() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
 pub fn canonical_config_truth_missing() -> Vec<String> {
- check_required_config_presence("game/data")
+    check_required_config_presence("game/data")
 }
 
 pub fn canonical_config_truth_parse_errors() -> Vec<String> {
- check_required_config_parsing("game/data")
+    check_required_config_parsing("game/data")
 }
 
 pub fn canonical_config_truth_report() -> String {
- let missing = canonical_config_truth_missing();
- let parse = canonical_config_truth_parse_errors();
- format!(
- "missing={} parse_errors={} count={}",
- missing.len(),
- parse.len(),
- CANONICAL_CONFIG_FILES.len()
- )
+    let missing = canonical_config_truth_missing();
+    let parse = canonical_config_truth_parse_errors();
+    format!(
+        "missing={} parse_errors={} count={}",
+        missing.len(),
+        parse.len(),
+        CANONICAL_CONFIG_FILES.len()
+    )
 }
 
 pub fn canonical_config_truth_report_verbose() -> String {
- let missing = canonical_config_truth_missing();
- let parse = canonical_config_truth_parse_errors();
- format!(
- "files=[{}]; missing=[{}]; parse_errors=[{}]",
- CANONICAL_CONFIG_FILES.join(", "),
- missing.join(", "),
- parse.join(" | ")
- )
+    let missing = canonical_config_truth_missing();
+    let parse = canonical_config_truth_parse_errors();
+    format!(
+        "files=[{}]; missing=[{}]; parse_errors=[{}]",
+        CANONICAL_CONFIG_FILES.join(", "),
+        missing.join(", "),
+        parse.join(" | ")
+    )
 }
 
 pub fn canonical_config_truth_ready() -> bool {
- canonical_config_truth_missing().is_empty() && canonical_config_truth_parse_errors().is_empty()
+    canonical_config_truth_missing().is_empty() && canonical_config_truth_parse_errors().is_empty()
 }
 
 pub fn canonical_config_truth_required_files() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_required_paths() -> Vec<String> {
- canonical_config_truth_source_paths()
+    canonical_config_truth_source_paths()
 }
 
 pub fn canonical_config_truth_required_dir() -> &'static str {
- canonical_config_truth_source_dir()
+    canonical_config_truth_source_dir()
 }
 
 pub fn canonical_config_truth_required_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_required_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_required_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_validate_required() -> Result<(), Vec<String>> {
- canonical_config_truth_validate()
+    canonical_config_truth_validate()
 }
 
 pub fn canonical_config_truth_validate_required_for(dir: &str) -> Result<(), Vec<String>> {
- canonical_config_truth_validate_for(dir)
+    canonical_config_truth_validate_for(dir)
 }
 
 pub fn canonical_config_truth_is_required(file_name: &str) -> bool {
- CANONICAL_CONFIG_FILES.contains(&file_name)
+    CANONICAL_CONFIG_FILES.contains(&file_name)
 }
 
 pub fn canonical_config_truth_required_set() -> std::collections::HashSet<&'static str> {
- CANONICAL_CONFIG_FILES.iter().copied().collect()
+    CANONICAL_CONFIG_FILES.iter().copied().collect()
 }
 
 pub fn canonical_config_truth_paths_for(dir: &str) -> Vec<String> {
- canonical_config_paths(dir)
+    canonical_config_paths(dir)
 }
 
 pub fn canonical_config_truth_parse_for(dir: &str) -> Vec<String> {
- check_required_config_parsing(dir)
+    check_required_config_parsing(dir)
 }
 
 pub fn canonical_config_truth_missing_for(dir: &str) -> Vec<String> {
- check_required_config_presence(dir)
+    check_required_config_presence(dir)
 }
 
 pub fn canonical_config_truth_all_good_for(dir: &str) -> bool {
- check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
+    check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
 }
 
 pub fn canonical_config_truth_all_good_default() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_done() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_done_for(dir: &str) -> bool {
- canonical_config_truth_all_good_for(dir)
+    canonical_config_truth_all_good_for(dir)
 }
 
 pub fn canonical_config_truth_list() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_list_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_truth_list_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_list_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_list_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_dir_default() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_paths_default() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
 pub fn canonical_config_truth_validate_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_check_default_dir() -> bool {
- canonical_config_truth_validate_default_dir().is_ok()
+    canonical_config_truth_validate_default_dir().is_ok()
 }
 
 pub fn canonical_config_truth_errors_default_dir() -> Vec<String> {
- canonical_config_truth_validate_default_dir().err().unwrap_or_default()
+    canonical_config_truth_validate_default_dir()
+        .err()
+        .unwrap_or_default()
 }
 
 pub fn canonical_config_truth_missing_default_dir() -> Vec<String> {
- check_required_config_presence("game/data")
+    check_required_config_presence("game/data")
 }
 
 pub fn canonical_config_truth_parse_default_dir() -> Vec<String> {
- check_required_config_parsing("game/data")
+    check_required_config_parsing("game/data")
 }
 
 pub fn canonical_config_truth_gate() -> Result<(), Vec<String>> {
- canonical_config_truth_validate_default_dir()
+    canonical_config_truth_validate_default_dir()
 }
 
 pub fn canonical_config_truth_gate_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_truth_gate_ok() -> bool {
- canonical_config_truth_gate().is_ok()
+    canonical_config_truth_gate().is_ok()
 }
 
 pub fn canonical_config_truth_gate_errors() -> Vec<String> {
- canonical_config_truth_gate().err().unwrap_or_default()
+    canonical_config_truth_gate().err().unwrap_or_default()
 }
 
 pub fn canonical_config_truth_gate_missing() -> Vec<String> {
- canonical_config_truth_missing_default_dir()
+    canonical_config_truth_missing_default_dir()
 }
 
 pub fn canonical_config_truth_gate_parse() -> Vec<String> {
- canonical_config_truth_parse_default_dir()
+    canonical_config_truth_parse_default_dir()
 }
 
 pub fn canonical_config_truth_gate_summary() -> String {
- canonical_config_truth_report()
+    canonical_config_truth_report()
 }
 
 pub fn canonical_config_truth_gate_summary_verbose() -> String {
- canonical_config_truth_report_verbose()
+    canonical_config_truth_report_verbose()
 }
 
 pub fn canonical_config_truth_gate_ready() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_gate_required_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_gate_required_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_gate_required_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_gate_required_dir() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_gate_required_paths() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
 pub fn canonical_config_truth_gate_validate() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_gate_validate_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_truth_gate_is_required(file_name: &str) -> bool {
- CANONICAL_CONFIG_FILES.contains(&file_name)
+    CANONICAL_CONFIG_FILES.contains(&file_name)
 }
 
 pub fn canonical_config_truth_gate_set() -> std::collections::HashSet<&'static str> {
- CANONICAL_CONFIG_FILES.iter().copied().collect()
+    CANONICAL_CONFIG_FILES.iter().copied().collect()
 }
 
 pub fn canonical_config_truth_gate_paths_for(dir: &str) -> Vec<String> {
- canonical_config_paths(dir)
+    canonical_config_paths(dir)
 }
 
 pub fn canonical_config_truth_gate_parse_for(dir: &str) -> Vec<String> {
- check_required_config_parsing(dir)
+    check_required_config_parsing(dir)
 }
 
 pub fn canonical_config_truth_gate_missing_for(dir: &str) -> Vec<String> {
- check_required_config_presence(dir)
+    check_required_config_presence(dir)
 }
 
 pub fn canonical_config_truth_gate_ok_for(dir: &str) -> bool {
- check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
+    check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
 }
 
 pub fn canonical_config_truth_gate_ok_default() -> bool {
- canonical_config_truth_gate_ready()
+    canonical_config_truth_gate_ready()
 }
 
 pub fn canonical_config_truth_gate_done() -> bool {
- canonical_config_truth_gate_ready()
+    canonical_config_truth_gate_ready()
 }
 
 pub fn canonical_config_truth_gate_done_for(dir: &str) -> bool {
- canonical_config_truth_gate_ok_for(dir)
+    canonical_config_truth_gate_ok_for(dir)
 }
 
 pub fn canonical_config_truth_gate_list() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_gate_list_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_truth_gate_list_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_gate_list_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_gate_list_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_gate_dir_default() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_gate_paths_default() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
 pub fn canonical_config_truth_gate_validate_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_gate_check_default_dir() -> bool {
- canonical_config_truth_gate_validate_default_dir().is_ok()
+    canonical_config_truth_gate_validate_default_dir().is_ok()
 }
 
 pub fn canonical_config_truth_gate_errors_default_dir() -> Vec<String> {
- canonical_config_truth_gate_validate_default_dir().err().unwrap_or_default()
+    canonical_config_truth_gate_validate_default_dir()
+        .err()
+        .unwrap_or_default()
 }
 
 pub fn canonical_config_truth_gate_missing_default_dir() -> Vec<String> {
- check_required_config_presence("game/data")
+    check_required_config_presence("game/data")
 }
 
 pub fn canonical_config_truth_gate_parse_default_dir() -> Vec<String> {
- check_required_config_parsing("game/data")
+    check_required_config_parsing("game/data")
 }
 
 pub fn canonical_config_truth_gate_report() -> String {
- canonical_config_truth_report()
+    canonical_config_truth_report()
 }
 
 pub fn canonical_config_truth_gate_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+    canonical_config_truth_report_verbose()
 }
 
 pub fn canonical_config_truth_gate_all_good() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_slice() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_gate_required_files_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_truth_gate_required_files_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_gate_required_files_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_gate_required_files_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_gate_required_files_dir() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_gate_required_files_paths() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
 pub fn canonical_config_truth_gate_required_files_validate() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_validate_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+pub fn canonical_config_truth_gate_required_files_validate_for(
+    dir: &str,
+) -> Result<(), Vec<String>> {
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_is_required(file_name: &str) -> bool {
- CANONICAL_CONFIG_FILES.contains(&file_name)
+    CANONICAL_CONFIG_FILES.contains(&file_name)
 }
 
 pub fn canonical_config_truth_gate_required_files_set() -> std::collections::HashSet<&'static str> {
- CANONICAL_CONFIG_FILES.iter().copied().collect()
+    CANONICAL_CONFIG_FILES.iter().copied().collect()
 }
 
 pub fn canonical_config_truth_gate_required_files_paths_for(dir: &str) -> Vec<String> {
- canonical_config_paths(dir)
+    canonical_config_paths(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_parse_for(dir: &str) -> Vec<String> {
- check_required_config_parsing(dir)
+    check_required_config_parsing(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_missing_for(dir: &str) -> Vec<String> {
- check_required_config_presence(dir)
+    check_required_config_presence(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_ok_for(dir: &str) -> bool {
- check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
+    check_required_config_presence(dir).is_empty() && check_required_config_parsing(dir).is_empty()
 }
 
 pub fn canonical_config_truth_gate_required_files_ok_default() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_done() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_done_for(dir: &str) -> bool {
- canonical_config_truth_gate_required_files_ok_for(dir)
+    canonical_config_truth_gate_required_files_ok_for(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_list() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_gate_required_files_list_vec() -> Vec<&'static str> {
- CANONICAL_CONFIG_FILES.to_vec()
+    CANONICAL_CONFIG_FILES.to_vec()
 }
 
 pub fn canonical_config_truth_gate_required_files_list_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_gate_required_files_list_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_gate_required_files_list_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_gate_required_files_dir_default() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_gate_required_files_paths_default() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_validate_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_validate_default_dir() -> Result<(), Vec<String>>
+{
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_gate_required_files_check_default_dir() -> bool {
- canonical_config_truth_gate_required_files_validate_default_dir().is_ok()
+    canonical_config_truth_gate_required_files_validate_default_dir().is_ok()
 }
 
 pub fn canonical_config_truth_gate_required_files_errors_default_dir() -> Vec<String> {
- canonical_config_truth_gate_required_files_validate_default_dir().err().unwrap_or_default()
+    canonical_config_truth_gate_required_files_validate_default_dir()
+        .err()
+        .unwrap_or_default()
 }
 
 pub fn canonical_config_truth_gate_required_files_missing_default_dir() -> Vec<String> {
- check_required_config_presence("game/data")
+    check_required_config_presence("game/data")
 }
 
 pub fn canonical_config_truth_gate_required_files_parse_default_dir() -> Vec<String> {
- check_required_config_parsing("game/data")
+    check_required_config_parsing("game/data")
 }
 
 pub fn canonical_config_truth_gate_required_files_report() -> String {
- canonical_config_truth_report()
+    canonical_config_truth_report()
 }
 
 pub fn canonical_config_truth_gate_required_files_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+    canonical_config_truth_report_verbose()
 }
 
 pub fn canonical_config_truth_gate_required_files_all_good() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth() -> &'static [&'static str] {
- &CANONICAL_CONFIG_FILES
+    &CANONICAL_CONFIG_FILES
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_pretty() -> String {
- CANONICAL_CONFIG_FILES.join(", ")
+    CANONICAL_CONFIG_FILES.join(", ")
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_csv() -> String {
- CANONICAL_CONFIG_FILES.join(",")
+    CANONICAL_CONFIG_FILES.join(",")
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_count() -> usize {
- CANONICAL_CONFIG_FILES.len()
+    CANONICAL_CONFIG_FILES.len()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_dir() -> &'static str {
- "game/data"
+    "game/data"
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_paths() -> Vec<String> {
- canonical_config_paths("game/data")
+    canonical_config_paths("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_for(dir: &str) -> Result<(), Vec<String>> {
- validate_required_configs(dir)
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_for(
+    dir: &str,
+) -> Result<(), Vec<String>> {
+    validate_required_configs(dir)
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_ok() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_errors() -> Vec<String> {
- canonical_config_truth_errors()
+    canonical_config_truth_errors()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_missing() -> Vec<String> {
- canonical_config_truth_missing()
+    canonical_config_truth_missing()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_parse_errors() -> Vec<String> {
- canonical_config_truth_parse_errors()
+    canonical_config_truth_parse_errors()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_report() -> String {
- canonical_config_truth_report()
+    canonical_config_truth_report()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+    canonical_config_truth_report_verbose()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_all_good() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_dir() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_dir(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_errors() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_errors(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_missing() -> Vec<String> {
- check_required_config_presence("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_missing(
+) -> Vec<String> {
+    check_required_config_presence("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_parse_errors() -> Vec<String> {
- check_required_config_parsing("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_parse_errors(
+) -> Vec<String> {
+    check_required_config_parsing("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_report() -> String
+{
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_all_good() -> bool
+{
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_done() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_ready() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_status() -> bool
+{
+    canonical_config_truth_ready()
 }
 
 pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_pass() -> bool {
- canonical_config_truth_ready()
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_success() -> bool
+{
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_success() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_success(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result() -> Result<(), Vec<String>> {
- validate_required_configs("game/data")
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result(
+) -> Result<(), Vec<String>> {
+    validate_required_configs("game/data")
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_ok() -> bool {
- validate_required_configs("game/data").is_ok()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_ok(
+) -> bool {
+    validate_required_configs("game/data").is_ok()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_err() -> Vec<String> {
- validate_required_configs("game/data").err().unwrap_or_default()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_err(
+) -> Vec<String> {
+    validate_required_configs("game/data")
+        .err()
+        .unwrap_or_default()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_report() -> String {
- canonical_config_truth_report()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_report(
+) -> String {
+    canonical_config_truth_report()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_report_verbose() -> String {
- canonical_config_truth_report_verbose()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_report_verbose(
+) -> String {
+    canonical_config_truth_report_verbose()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_all_good() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_all_good(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_done() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_done(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_ready() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_ready(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_status() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_status(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_pass() -> bool {
- canonical_config_truth_ready()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_pass(
+) -> bool {
+    canonical_config_truth_ready()
 }
 
-pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_failures() -> Vec<String> {
- canonical_config_truth_errors()
+pub fn canonical_config_truth_gate_required_files_source_of_truth_validate_default_result_result_result_result_result_result_result_result_result_result_result_result_failures(
+) -> Vec<String> {
+    canonical_config_truth_errors()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -1901,16 +2149,20 @@ impl Default for PopulationConfig {
             min_bloodsuckers: 2,
             respawn_interval: 300.0,
             npc_names: vec![
-                "Viktor", "Elena", "Sasha", "Dmitri", "Irina",
-                "Andrei", "Natasha", "Boris", "Yuri", "Olga",
-                "Maxim", "Tatiana", "Sergei", "Anya", "Pavel",
-                "Ilya", "Marina", "Roman", "Vera", "Artem",
-            ].into_iter().map(String::from).collect(),
+                "Viktor", "Elena", "Sasha", "Dmitri", "Irina", "Andrei", "Natasha", "Boris",
+                "Yuri", "Olga", "Maxim", "Tatiana", "Sergei", "Anya", "Pavel", "Ilya", "Marina",
+                "Roman", "Vera", "Artem",
+            ]
+            .into_iter()
+            .map(String::from)
+            .collect(),
             child_names: vec![
-                "Alyosha", "Misha", "Katya", "Dasha", "Pasha",
-                "Kolya", "Vanya", "Sveta", "Zhenya", "Borya",
-                "Lena", "Grisha", "Tonya", "Nikita", "Oleg",
-            ].into_iter().map(String::from).collect(),
+                "Alyosha", "Misha", "Katya", "Dasha", "Pasha", "Kolya", "Vanya", "Sveta", "Zhenya",
+                "Borya", "Lena", "Grisha", "Tonya", "Nikita", "Oleg",
+            ]
+            .into_iter()
+            .map(String::from)
+            .collect(),
             npc_age_min: 80.0,
             npc_age_max: 200.0,
             npc_max_age_min: 350.0,
@@ -2030,7 +2282,9 @@ impl Default for FoodChainConfig {
                 ("Boar".into(), 1),
                 ("Wolf".into(), 2),
                 ("Bloodsucker".into(), 3),
-            ].into_iter().collect(),
+            ]
+            .into_iter()
+            .collect(),
         }
     }
 }
@@ -2196,7 +2450,9 @@ pub enum ResponseClass {
 }
 
 impl Default for ResponseClass {
-    fn default() -> Self { Self::Ite }
+    fn default() -> Self {
+        Self::Ite
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -2297,64 +2553,74 @@ impl GameConfig {
         let mut config = Self::default();
 
         // Existing loaders
-        if let Ok(p) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<PerceptionConfig>>(
-            &format!("{}/perception.ron", dir),
-        ) {
+        if let Ok(p) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<PerceptionConfig>,
+        >(&format!("{}/perception.ron", dir))
+        {
             config.perception = p.data;
         }
 
-        if let Ok(p) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<PopulationConfig>>(
-            &format!("{}/population.ron", dir),
-        ) {
+        if let Ok(p) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<PopulationConfig>,
+        >(&format!("{}/population.ron", dir))
+        {
             config.population = p.data;
         }
 
-        if let Ok(e) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<EconomyConfig>>(
-            &format!("{}/economy.ron", dir),
-        ) {
+        if let Ok(e) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<EconomyConfig>,
+        >(&format!("{}/economy.ron", dir))
+        {
             config.economy = e.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<SimulationConfig>>(
-            &format!("{}/simulation.ron", dir),
-        ) {
+        if let Ok(s) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<SimulationConfig>,
+        >(&format!("{}/simulation.ron", dir))
+        {
             config.simulation = s.data;
         }
 
-        if let Ok(j) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, JobConfig>>>(
-            &format!("{}/jobs.ron", dir),
-        ) {
+        if let Ok(j) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, JobConfig>>,
+        >(&format!("{}/jobs.ron", dir))
+        {
             config.jobs = j.data;
         }
 
-        if let Ok(g) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, GoalConfig>>>(
-            &format!("{}/goals.ron", dir),
-        ) {
+        if let Ok(g) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, GoalConfig>>,
+        >(&format!("{}/goals.ron", dir))
+        {
             config.goals = g.data;
         }
 
-        if let Ok(b) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>>(
-            &format!("{}/biomes.ron", dir),
-        ) {
+        if let Ok(b) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>,
+        >(&format!("{}/biomes.ron", dir))
+        {
             config.biomes = b.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>>(
-            &format!("{}/seasons.ron", dir),
-        ) {
+        if let Ok(s) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>,
+        >(&format!("{}/seasons.ron", dir))
+        {
             config.seasons = s.data;
         }
 
-        if let Ok(m) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, MaterialConfig>>>(
-            &format!("{}/materials.ron", dir),
-        ) {
+        if let Ok(m) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, MaterialConfig>>,
+        >(&format!("{}/materials.ron", dir))
+        {
             config.materials = m.data;
         }
 
         // NEW loaders
-        if let Ok(fc) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<FoodChainConfig>>(
-            &format!("{}/food_chain.ron", dir),
-        ) {
+        if let Ok(fc) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<FoodChainConfig>,
+        >(&format!("{}/food_chain.ron", dir))
+        {
             config.food_chain = fc.data;
         }
 
@@ -2362,21 +2628,24 @@ impl GameConfig {
             config.species = sp;
         }
 
-        if let Ok(t) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>>(
-            &format!("{}/tactics.ron", dir),
-        ) {
+        if let Ok(t) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>,
+        >(&format!("{}/tactics.ron", dir))
+        {
             config.tactics = t.data;
         }
 
-        if let Ok(r) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<RulesData>>(
-            &format!("{}/rules.ron", dir),
-        ) {
+        if let Ok(r) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<RulesData>,
+        >(&format!("{}/rules.ron", dir))
+        {
             config.rules.data = r.data;
         }
 
-        if let Ok(w) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>>(
-            &format!("{}/weapons.ron", dir),
-        ) {
+        if let Ok(w) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>,
+        >(&format!("{}/weapons.ron", dir))
+        {
             config.weapons = w.data;
         }
 
@@ -2403,23 +2672,29 @@ impl GameConfig {
 
         config
     }
-    
+
     /// Get predator-prey relationship
     pub fn is_predator_of(&self, predator: &str, prey: &str) -> bool {
-        self.food_chain.predator_prey.iter()
+        self.food_chain
+            .predator_prey
+            .iter()
             .any(|(p, pr)| p == predator && pr == prey)
     }
-    
+
     /// Get food chain rank for a species
     pub fn chain_rank(&self, species: &str) -> u32 {
-        self.food_chain.food_chain_rank.get(species).copied().unwrap_or(0)
+        self.food_chain
+            .food_chain_rank
+            .get(species)
+            .copied()
+            .unwrap_or(0)
     }
-    
+
     /// Get tactics for a species
     pub fn get_tactics(&self, species: &str) -> Option<&TacticsConfig> {
         self.tactics.get(species)
     }
-    
+
     /// Get weapon config
     pub fn get_weapon(&self, name: &str) -> Option<&WeaponConfig> {
         self.weapons.get(name)
@@ -2430,11 +2705,11 @@ impl GameConfig {
 fn load_species_config(path: &str) -> Result<SpeciesConfig, Box<dyn std::error::Error>> {
     use std::fs;
     use std::io::Read;
-    
+
     let mut file = fs::File::open(path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    
+
     // Parse the outer envelope
     #[derive(Deserialize)]
     struct SpeciesEnvelope {
@@ -2442,20 +2717,22 @@ fn load_species_config(path: &str) -> Result<SpeciesConfig, Box<dyn std::error::
         schema_version: u32,
         data: HashMap<String, SpeciesEntry>,
     }
-    
+
     let envelope: SpeciesEnvelope = ron::from_str(&content)?;
-    Ok(SpeciesConfig { species: envelope.data })
+    Ok(SpeciesConfig {
+        species: envelope.data,
+    })
 }
 
 /// Load surfaces config with special handling for the nested structure
 fn load_surfaces_config(path: &str) -> Result<SurfacesConfig, Box<dyn std::error::Error>> {
     use std::fs;
     use std::io::Read;
-    
+
     let mut file = fs::File::open(path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    
+
     // Parse the outer envelope
     #[derive(Deserialize)]
     struct SurfacesEnvelope {
@@ -2463,20 +2740,24 @@ fn load_surfaces_config(path: &str) -> Result<SurfacesConfig, Box<dyn std::error
         schema_version: u32,
         materials: Vec<SurfaceMaterial>,
     }
-    
+
     let envelope: SurfacesEnvelope = ron::from_str(&content)?;
-    Ok(SurfacesConfig { materials: envelope.materials })
+    Ok(SurfacesConfig {
+        materials: envelope.materials,
+    })
 }
 
 /// Load material bridge config
-fn load_material_bridge_config(path: &str) -> Result<MaterialBridgeConfig, Box<dyn std::error::Error>> {
+fn load_material_bridge_config(
+    path: &str,
+) -> Result<MaterialBridgeConfig, Box<dyn std::error::Error>> {
     use std::fs;
     use std::io::Read;
-    
+
     let mut file = fs::File::open(path)?;
     let mut content = String::new();
     file.read_to_string(&mut content)?;
-    
+
     let config: MaterialBridgeConfig = ron::from_str(&content)?;
     Ok(config)
 }
@@ -2507,7 +2788,9 @@ mod tests {
     fn test_economy_config_default() {
         let config = EconomyConfig::default();
         assert!(config.monthly_required > 0.0);
-        assert!(config.desperation_bandit_threshold > 0.0 && config.desperation_bandit_threshold < 1.0);
+        assert!(
+            config.desperation_bandit_threshold > 0.0 && config.desperation_bandit_threshold < 1.0
+        );
         assert!(config.desperation_force_bandit > config.desperation_bandit_threshold);
     }
 

@@ -365,19 +365,31 @@ pub fn authority_report() -> String {
     report.push_str(&format!("Total state categories: {}\n", matrix.len()));
     report.push_str(&format!(
         "  Entity-scoped: {}\n",
-        matrix.iter().filter(|e| e.save_scope == SaveScope::Entity).count()
+        matrix
+            .iter()
+            .filter(|e| e.save_scope == SaveScope::Entity)
+            .count()
     ));
     report.push_str(&format!(
         "  Chunk-scoped: {}\n",
-        matrix.iter().filter(|e| e.save_scope == SaveScope::Chunk).count()
+        matrix
+            .iter()
+            .filter(|e| e.save_scope == SaveScope::Chunk)
+            .count()
     ));
     report.push_str(&format!(
         "  Global: {}\n",
-        matrix.iter().filter(|e| e.save_scope == SaveScope::Global).count()
+        matrix
+            .iter()
+            .filter(|e| e.save_scope == SaveScope::Global)
+            .count()
     ));
     report.push_str(&format!(
         "  Derived: {}\n",
-        matrix.iter().filter(|e| e.save_scope == SaveScope::Derived).count()
+        matrix
+            .iter()
+            .filter(|e| e.save_scope == SaveScope::Derived)
+            .count()
     ));
     report.push_str(&format!("\nAuthority violations: {}\n", violations.len()));
     for v in &violations {

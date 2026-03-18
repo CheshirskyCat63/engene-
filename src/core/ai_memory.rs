@@ -34,7 +34,10 @@ impl Memory {
     }
 
     pub fn mark_cell(&mut self, cx: u32, cy: u32, tag: CellTag, strength: f32) {
-        let k = self.spatial.entry((cx, cy)).or_insert(CellKnowledge::default());
+        let k = self
+            .spatial
+            .entry((cx, cy))
+            .or_insert(CellKnowledge::default());
         match tag {
             CellTag::Food => k.food = (k.food + strength).min(1.0),
             CellTag::Danger => k.danger = (k.danger + strength).min(1.0),
@@ -59,8 +62,15 @@ impl Memory {
         self.entities.get(&other).unwrap_or(&DEFAULT)
     }
 
-    pub fn adjust_opinion(&mut self, other: PersistentEntityId, f: impl FnOnce(&mut EntityOpinion)) {
-        let op = self.entities.entry(other).or_insert(EntityOpinion::default());
+    pub fn adjust_opinion(
+        &mut self,
+        other: PersistentEntityId,
+        f: impl FnOnce(&mut EntityOpinion),
+    ) {
+        let op = self
+            .entities
+            .entry(other)
+            .or_insert(EntityOpinion::default());
         f(op);
         op.trust = op.trust.clamp(-1.0, 1.0);
         op.hostility = op.hostility.clamp(0.0, 1.0);
@@ -68,14 +78,19 @@ impl Memory {
     }
 
     pub fn best_ally(&self) -> Option<PersistentEntityId> {
-        self.entities.iter()
+        self.entities
+            .iter()
             .filter(|(_, op)| op.trust > 0.3)
             .max_by(|a, b| a.1.trust.total_cmp(&b.1.trust))
             .map(|(&e, _)| e)
     }
 
     pub fn record_lesson(&mut self, lesson: Lesson) {
-        if let Some(existing) = self.lessons.iter_mut().find(|l| l.action == lesson.action && l.context == lesson.context) {
+        if let Some(existing) = self
+            .lessons
+            .iter_mut()
+            .find(|l| l.action == lesson.action && l.context == lesson.context)
+        {
             existing.attempts += lesson.attempts;
             existing.successes += lesson.successes;
         } else {
@@ -87,10 +102,15 @@ impl Memory {
     }
 
     pub fn lesson_score(&self, action: LessonAction, context: LessonContext) -> f32 {
-        self.lessons.iter()
+        self.lessons
+            .iter()
             .find(|l| l.action == action && l.context == context)
             .map_or(0.5, |l| {
-                if l.attempts == 0 { 0.5 } else { l.successes as f32 / l.attempts as f32 }
+                if l.attempts == 0 {
+                    0.5
+                } else {
+                    l.successes as f32 / l.attempts as f32
+                }
             })
     }
 
@@ -101,9 +121,13 @@ impl Memory {
             k.ally_presence = (k.ally_presence - rate).max(0.0);
             k.shelter = (k.shelter - rate * 0.3).max(0.0);
         }
-        self.spatial.retain(|_, k| k.food > 0.01 || k.danger > 0.01 || k.ally_presence > 0.01 || k.shelter > 0.01);
+        self.spatial.retain(|_, k| {
+            k.food > 0.01 || k.danger > 0.01 || k.ally_presence > 0.01 || k.shelter > 0.01
+        });
         if self.spatial.len() > MAX_SPATIAL {
-            let to_remove: Vec<_> = self.spatial.iter()
+            let to_remove: Vec<_> = self
+                .spatial
+                .iter()
                 .map(|(&k, v)| (k, v.food + v.danger + v.ally_presence + v.shelter))
                 .collect();
             let mut sorted = to_remove;
@@ -213,7 +237,7 @@ mod tests {
     #[test]
     fn test_record_event() {
         let mut mem = Memory::new();
-        
+
         mem.record_event(EventMemory {
             tick: 1,
             kind: EventKind::KilledTarget,
@@ -221,14 +245,14 @@ mod tests {
             other: None,
             emotional_impact: 0.5,
         });
-        
+
         assert_eq!(mem.events.len(), 1);
     }
 
     #[test]
     fn test_event_capacity_limit() {
         let mut mem = Memory::new();
-        
+
         for i in 0..50 {
             mem.record_event(EventMemory {
                 tick: i,
@@ -238,20 +262,20 @@ mod tests {
                 emotional_impact: 0.1,
             });
         }
-        
+
         assert_eq!(mem.events.len(), MAX_EVENTS);
     }
 
     #[test]
     fn test_mark_cell() {
         let mut mem = Memory::new();
-        
+
         mem.mark_cell(5, 5, CellTag::Danger, 0.8);
         mem.mark_cell(5, 5, CellTag::Food, 0.5);
-        
+
         let danger = mem.cell_danger(5, 5);
         assert!((danger - 0.8).abs() < 0.01);
-        
+
         let knowledge = mem.spatial.get(&(5, 5)).unwrap();
         assert!((knowledge.food - 0.5).abs() < 0.01);
     }
@@ -260,17 +284,17 @@ mod tests {
     fn test_opinion_of() {
         let mut mem = Memory::new();
         let pid = make_pid(42);
-        
+
         // Default opinion
         let op = mem.opinion_of(pid);
         assert_eq!(op.trust, 0.0);
-        
+
         // Adjust opinion
         mem.adjust_opinion(pid, |o| {
             o.trust = 0.5;
             o.hostility = 0.2;
         });
-        
+
         let op = mem.opinion_of(pid);
         assert!((op.trust - 0.5).abs() < 0.01);
     }
@@ -279,11 +303,11 @@ mod tests {
     fn test_opinion_clamping() {
         let mut mem = Memory::new();
         let pid = make_pid(1);
-        
+
         mem.adjust_opinion(pid, |o| o.trust = 5.0);
         let op = mem.opinion_of(pid);
         assert_eq!(op.trust, 1.0); // Clamped to max
-        
+
         mem.adjust_opinion(pid, |o| o.trust = -5.0);
         let op = mem.opinion_of(pid);
         assert_eq!(op.trust, -1.0); // Clamped to min
@@ -292,17 +316,17 @@ mod tests {
     #[test]
     fn test_lesson_recording() {
         let mut mem = Memory::new();
-        
+
         mem.record_lesson(Lesson {
             action: LessonAction::SoloHunt,
             context: LessonContext::VsWolf,
             attempts: 1,
             successes: 1,
         });
-        
+
         let score = mem.lesson_score(LessonAction::SoloHunt, LessonContext::VsWolf);
         assert!((score - 1.0).abs() < 0.01);
-        
+
         // Record again - should aggregate
         mem.record_lesson(Lesson {
             action: LessonAction::SoloHunt,
@@ -310,7 +334,7 @@ mod tests {
             attempts: 1,
             successes: 0,
         });
-        
+
         let score = mem.lesson_score(LessonAction::SoloHunt, LessonContext::VsWolf);
         assert!((score - 0.5).abs() < 0.01); // 1 success / 2 attempts
     }
@@ -318,15 +342,15 @@ mod tests {
     #[test]
     fn test_best_ally() {
         let mut mem = Memory::new();
-        
+
         // No allies yet
         assert!(mem.best_ally().is_none());
-        
+
         // Add some entities with different trust
         mem.adjust_opinion(make_pid(1), |o| o.trust = 0.1); // Below threshold
         mem.adjust_opinion(make_pid(2), |o| o.trust = 0.5);
         mem.adjust_opinion(make_pid(3), |o| o.trust = 0.8);
-        
+
         let best = mem.best_ally();
         assert_eq!(best, Some(make_pid(3)));
     }
@@ -334,12 +358,12 @@ mod tests {
     #[test]
     fn test_decay_spatial() {
         let mut mem = Memory::new();
-        
+
         mem.mark_cell(0, 0, CellTag::Danger, 0.5);
         mem.mark_cell(1, 1, CellTag::Food, 0.01); // Will decay to near-zero
-        
+
         mem.decay_spatial(0.1);
-        
+
         let danger = mem.cell_danger(0, 0);
         assert!(danger < 0.5); // Should have decayed
         assert!(danger > 0.01); // But still present

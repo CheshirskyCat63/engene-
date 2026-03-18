@@ -187,10 +187,22 @@ pub fn net_report() -> String {
     report.push_str("=== Network State Markers Report ===\n");
     report.push_str(&format!("Total annotated states: {}\n", markers.len()));
 
-    let server_auth = markers.iter().filter(|m| m.authority == NetAuthority::ServerAuthoritative).count();
-    let client_local = markers.iter().filter(|m| m.authority == NetAuthority::ClientLocal).count();
-    let every_tick = markers.iter().filter(|m| m.priority == NetPriority::EveryTick).count();
-    let never = markers.iter().filter(|m| m.priority == NetPriority::Never).count();
+    let server_auth = markers
+        .iter()
+        .filter(|m| m.authority == NetAuthority::ServerAuthoritative)
+        .count();
+    let client_local = markers
+        .iter()
+        .filter(|m| m.authority == NetAuthority::ClientLocal)
+        .count();
+    let every_tick = markers
+        .iter()
+        .filter(|m| m.priority == NetPriority::EveryTick)
+        .count();
+    let never = markers
+        .iter()
+        .filter(|m| m.priority == NetPriority::Never)
+        .count();
 
     report.push_str(&format!("  Server-authoritative: {}\n", server_auth));
     report.push_str(&format!("  Client-local: {}\n", client_local));

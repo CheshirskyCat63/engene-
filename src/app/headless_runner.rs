@@ -31,17 +31,29 @@ impl SoakMetrics {
         }
     }
 
-    fn record(&mut self, tick: u64, entities: usize, npcs: usize, monsters: usize, money: f64, desperation: f64, bandits: u32) {
+    fn record(
+        &mut self,
+        tick: u64,
+        entities: usize,
+        npcs: usize,
+        monsters: usize,
+        money: f64,
+        desperation: f64,
+        bandits: u32,
+    ) {
         self.peak_entity_count = self.peak_entity_count.max(entities);
         self.min_entity_count = self.min_entity_count.min(entities);
         self.peak_npc_count = self.peak_npc_count.max(npcs);
         self.peak_monster_count = self.peak_monster_count.max(monsters);
         self.tick_count = tick;
-        self.economy_snapshots.push((tick, money, desperation, bandits));
+        self.economy_snapshots
+            .push((tick, money, desperation, bandits));
     }
 
     fn entity_stability(&self) -> f64 {
-        if self.initial_entity_count == 0 { return 1.0; }
+        if self.initial_entity_count == 0 {
+            return 1.0;
+        }
         let drift = (self.peak_entity_count as f64 - self.min_entity_count as f64)
             / self.initial_entity_count as f64;
         (1.0 - drift).max(0.0)
@@ -50,13 +62,23 @@ impl SoakMetrics {
     fn print_report(&self) {
         println!("\n=== SOAK TEST REPORT ===");
         println!("  Total ticks: {}", self.tick_count);
-        println!("  Entity count: initial={}, peak={}, min={}",
-            self.initial_entity_count, self.peak_entity_count, self.min_entity_count);
-        println!("  Entity stability: {:.1}%", self.entity_stability() * 100.0);
-        println!("  Peak NPCs: {}, Peak Monsters: {}", self.peak_npc_count, self.peak_monster_count);
+        println!(
+            "  Entity count: initial={}, peak={}, min={}",
+            self.initial_entity_count, self.peak_entity_count, self.min_entity_count
+        );
+        println!(
+            "  Entity stability: {:.1}%",
+            self.entity_stability() * 100.0
+        );
+        println!(
+            "  Peak NPCs: {}, Peak Monsters: {}",
+            self.peak_npc_count, self.peak_monster_count
+        );
         if let Some(last) = self.economy_snapshots.last() {
-            println!("  Final economy: ${:.0} total money, {:.2} avg desperation, {} bandits",
-                last.1, last.2, last.3);
+            println!(
+                "  Final economy: ${:.0} total money, {:.2} avg desperation, {} bandits",
+                last.1, last.2, last.3
+            );
         }
     }
 }
@@ -117,7 +139,10 @@ pub fn run_from_env_args() {
             let entities = engine.ecs.alive.len();
 
             soak.record(
-                tick_count, entities, npcs, monsters,
+                tick_count,
+                entities,
+                npcs,
+                monsters,
                 snap.total_npc_money as f64,
                 snap.average_desperation as f64,
                 snap.bandit_count,

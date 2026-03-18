@@ -1,6 +1,6 @@
 use crate::physics::damage_pipeline::response_aggregator::{DamageResponse, DecalType, SoundClass};
-use crate::physics::impact_event::{ImpactEvent, StressEvent};
 use crate::physics::damage_taxonomy::DamageClass;
+use crate::physics::impact_event::{ImpactEvent, StressEvent};
 use crate::world::surface_db::SurfaceDB;
 
 pub struct SurfaceResolver;

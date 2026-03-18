@@ -3,8 +3,8 @@
 //! Provides the player-facing interaction layer for trading, combat, and NPC communication.
 
 use crate::core::ecs::Ecs;
-use crate::world::components::*;
 use crate::game::economy::trading::TradeResult;
+use crate::world::components::*;
 
 /// Result of a player interaction attempt.
 #[derive(Debug, Clone)]
@@ -16,7 +16,7 @@ pub enum InteractionResult {
 }
 
 /// Player interaction system - handles all player-initiated actions.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub struct PlayerInteractionSystem {
     /// Currently targeted entity (if any)
@@ -92,9 +92,7 @@ impl PlayerInteractionSystem {
 
     /// Interact with an NPC (trade, talk, etc.)
     fn interact_with_npc(&self, ecs: &Ecs, target: u64) -> InteractionResult {
-        let name = ecs.get_name(target)
-            .map(|n| n.0.as_str())
-            .unwrap_or("NPC");
+        let name = ecs.get_name(target).map(|n| n.0.as_str()).unwrap_or("NPC");
 
         // Check if NPC has economy data
         if ecs.npc_economies.contains_key(&target) {
@@ -105,7 +103,12 @@ impl PlayerInteractionSystem {
     }
 
     /// Interact with a monster (combat or avoidance)
-    fn interact_with_monster(&self, ecs: &Ecs, target: u64, species: &MonsterSpecies) -> InteractionResult {
+    fn interact_with_monster(
+        &self,
+        ecs: &Ecs,
+        target: u64,
+        species: &MonsterSpecies,
+    ) -> InteractionResult {
         let species_name = match species {
             MonsterSpecies::Wolf => "Wolf",
             MonsterSpecies::Boar => "Boar",
@@ -119,7 +122,10 @@ impl PlayerInteractionSystem {
             }
         }
 
-        InteractionResult::Failed(format!("The {} is hostile! Combat initiated.", species_name))
+        InteractionResult::Failed(format!(
+            "The {} is hostile! Combat initiated.",
+            species_name
+        ))
     }
 
     /// Attempt to trade with current target.
@@ -165,9 +171,7 @@ impl PlayerInteractionSystem {
 
         // Check if target is hostile
         match ecs.get_kind(target) {
-            Some(EntityKind::Monster(_)) => {
-                InteractionResult::Success("Combat initiated!".into())
-            }
+            Some(EntityKind::Monster(_)) => InteractionResult::Success("Combat initiated!".into()),
             Some(EntityKind::Npc) => {
                 InteractionResult::NotAllowed("Cannot attack friendly NPCs".into())
             }
@@ -178,18 +182,18 @@ impl PlayerInteractionSystem {
     /// Get target info for UI display.
     pub fn get_target_info(&self, ecs: &Ecs) -> Option<TargetInfo> {
         let target = self.target_entity?;
-        
-        let name = ecs.get_name(target)
+
+        let name = ecs
+            .get_name(target)
             .map(|n| n.0.clone())
             .unwrap_or_else(|| "Unknown".into());
 
         let kind = ecs.get_kind(target).cloned();
-        
-        let health = ecs.get_needs(target)
-            .map(|n| n.health)
-            .unwrap_or(1.0);
 
-        let position = ecs.get_transform(target)
+        let health = ecs.get_needs(target).map(|n| n.health).unwrap_or(1.0);
+
+        let position = ecs
+            .get_transform(target)
             .map(|t| (t.x, t.y))
             .unwrap_or((0.0, 0.0));
 
@@ -220,7 +224,7 @@ mod tests {
     #[test]
     fn test_interaction_range() {
         let system = PlayerInteractionSystem::new();
-        
+
         assert!(system.is_in_range((0.0, 0.0), (10.0, 10.0), 20.0));
         assert!(!system.is_in_range((0.0, 0.0), (100.0, 100.0), 20.0));
     }
@@ -229,7 +233,7 @@ mod tests {
     fn test_no_target() {
         let system = PlayerInteractionSystem::new();
         let ecs = Ecs::new();
-        
+
         match system.try_interact(&ecs, (0.0, 0.0)) {
             InteractionResult::NotFound => {}
             _ => panic!("Expected NotFound"),
@@ -240,24 +244,34 @@ mod tests {
     fn test_npc_interaction() {
         let mut system = PlayerInteractionSystem::new();
         let mut ecs = Ecs::new();
-        
+
         let npc = ecs.spawn();
         ecs.set_kind(npc, EntityKind::Npc);
         ecs.set_name(npc, Name("Trader".into()));
-        ecs.set_transform(npc, Transform { x: 5.0, y: 5.0, cell_x: 0, cell_y: 0 });
-        ecs.set_npc_economy(npc, NpcEconomy { 
-            money: 100.0, 
-            monthly_required: 50.0,
-            job: Job::Trader,
-            desperation: 0.0 
-        });
-        
+        ecs.set_transform(
+            npc,
+            Transform {
+                x: 5.0,
+                y: 5.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
+        ecs.set_npc_economy(
+            npc,
+            NpcEconomy {
+                money: 100.0,
+                monthly_required: 50.0,
+                job: Job::Trader,
+                desperation: 0.0,
+            },
+        );
+
         system.set_target(Some(npc));
-        
+
         match system.try_interact(&ecs, (0.0, 0.0)) {
             InteractionResult::Success(msg) => assert!(msg.contains("trade")),
             _ => panic!("Expected Success"),
         }
     }
 }
-

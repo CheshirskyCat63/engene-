@@ -1,4 +1,4 @@
-use crate::game::ai::goals::{ScoredGoal, pick_best};
+use crate::game::ai::goals::{pick_best, ScoredGoal};
 use crate::world::components::*;
 
 pub fn decide_npc(
@@ -11,8 +11,7 @@ pub fn decide_npc(
 
     c.push(ScoredGoal {
         goal: Goal::SeekFood,
-        score: personal.hunger * 1.8
-            + personal.discomfort * 0.3,
+        score: personal.hunger * 1.8 + personal.discomfort * 0.3,
     });
     c.push(ScoredGoal {
         goal: Goal::SeekWater,
@@ -23,8 +22,7 @@ pub fn decide_npc(
         score: personal.sleep * 1.8
             + (1.0 - personal.energy) * 0.9
             + (1.0 - personal.health) * 1.5
-            + personal.discomfort * 0.5
-            * (1.0 - traits.stress_resistance),
+            + personal.discomfort * 0.5 * (1.0 - traits.stress_resistance),
     });
     c.push(ScoredGoal {
         goal: Goal::Work,
@@ -141,8 +139,7 @@ pub fn decide_monster(
     });
     c.push(ScoredGoal {
         goal: Goal::Explore,
-        score: traits.curiosity * personal.curiosity * 1.3
-            + traits.adaptability * 0.2,
+        score: traits.curiosity * personal.curiosity * 1.3 + traits.adaptability * 0.2,
     });
     c.push(ScoredGoal {
         goal: Goal::SeekFood,

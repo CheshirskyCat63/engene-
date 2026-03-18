@@ -22,7 +22,9 @@ impl WorkerPool {
         }
     }
 
-    pub fn worker_count(&self) -> usize { self.worker_count }
+    pub fn worker_count(&self) -> usize {
+        self.worker_count
+    }
 
     pub fn execute<F, R>(&self, func: F) -> R
     where
@@ -42,9 +44,13 @@ impl WorkerPool {
         self.pool.install(|| rayon::join(a, b))
     }
 
-    pub fn pool(&self) -> &rayon::ThreadPool { &self.pool }
+    pub fn pool(&self) -> &rayon::ThreadPool {
+        &self.pool
+    }
 }
 
 impl Default for WorkerPool {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

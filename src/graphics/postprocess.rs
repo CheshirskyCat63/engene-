@@ -47,12 +47,15 @@ impl HdrTarget {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
-                | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
         let view = texture.create_view(&wgpu::TextureViewDescriptor::default());
-        Self { texture, view, format }
+        Self {
+            texture,
+            view,
+            format,
+        }
     }
 
     pub fn resize(&mut self, device: &wgpu::Device, width: u32, height: u32) {
@@ -90,8 +93,7 @@ impl BloomPass {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Rgba16Float,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
-                | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
 
@@ -503,7 +505,8 @@ impl CameraSimulation {
         let speed = if measured_luminance > self.current_luminance {
             self.adaptation_speed_up.min(limits.adaptation_speed_up_max)
         } else {
-            self.adaptation_speed_down.min(limits.adaptation_speed_down_max)
+            self.adaptation_speed_down
+                .min(limits.adaptation_speed_down_max)
         };
 
         let alpha = 1.0 - (-speed * dt).exp();
@@ -536,9 +539,14 @@ impl Default for WorldLightingResponse {
 }
 
 impl WorldLightingResponse {
-    pub fn update_from_world(&mut self, humidity: f32, rain: bool, sun_angle: f32, day_progress: f32) {
-        self.fog_density = (humidity * 0.015 + if rain { 0.005 } else { 0.0 })
-            .clamp(0.001, 0.02);
+    pub fn update_from_world(
+        &mut self,
+        humidity: f32,
+        rain: bool,
+        sun_angle: f32,
+        day_progress: f32,
+    ) {
+        self.fog_density = (humidity * 0.015 + if rain { 0.005 } else { 0.0 }).clamp(0.001, 0.02);
 
         let sunset_factor = (1.0 - (sun_angle / 90.0).abs()).max(0.0);
         self.fog_color = [

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum SoundEvent {
@@ -127,60 +127,25 @@ impl SoundBank {
                 0.6,
                 false,
             ),
-            (
-                SoundEvent::NpcHurt,
-                "audio/npc_hurt.wav",
-                0.7,
-                false,
-            ),
-            (
-                SoundEvent::NpcDeath,
-                "audio/npc_death.wav",
-                0.8,
-                false,
-            ),
-            (
-                SoundEvent::AnomalyHum,
-                "audio/anomaly_hum.wav",
-                0.5,
-                true,
-            ),
-            (
-                SoundEvent::AmbientWind,
-                "audio/ambient_wind.wav",
-                0.3,
-                true,
-            ),
-            (
-                SoundEvent::AmbientRain,
-                "audio/ambient_rain.wav",
-                0.4,
-                true,
-            ),
+            (SoundEvent::NpcHurt, "audio/npc_hurt.wav", 0.7, false),
+            (SoundEvent::NpcDeath, "audio/npc_death.wav", 0.8, false),
+            (SoundEvent::AnomalyHum, "audio/anomaly_hum.wav", 0.5, true),
+            (SoundEvent::AmbientWind, "audio/ambient_wind.wav", 0.3, true),
+            (SoundEvent::AmbientRain, "audio/ambient_rain.wav", 0.4, true),
             (
                 SoundEvent::AmbientNight,
                 "audio/ambient_night.wav",
                 0.3,
                 true,
             ),
-            (
-                SoundEvent::AmbientCamp,
-                "audio/ambient_camp.wav",
-                0.4,
-                true,
-            ),
+            (SoundEvent::AmbientCamp, "audio/ambient_camp.wav", 0.4, true),
             (
                 SoundEvent::AmbientForest,
                 "audio/ambient_forest.wav",
                 0.3,
                 true,
             ),
-            (
-                SoundEvent::ItemPickup,
-                "audio/item_pickup.wav",
-                0.5,
-                false,
-            ),
+            (SoundEvent::ItemPickup, "audio/item_pickup.wav", 0.5, false),
             (
                 SoundEvent::TradeComplete,
                 "audio/trade_complete.wav",
@@ -236,13 +201,9 @@ impl SoundBank {
     }
 
     pub fn get_random(&self, event: &SoundEvent) -> Option<&SoundDef> {
-        self.sounds.get(event).and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(&v[0])
-            }
-        })
+        self.sounds
+            .get(event)
+            .and_then(|v| if v.is_empty() { None } else { Some(&v[0]) })
     }
 
     pub fn event_count(&self) -> usize {

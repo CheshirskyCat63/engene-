@@ -108,11 +108,7 @@ impl EngineSDK {
             });
         }
 
-        let game_systems = vec![
-            "EconomySystem",
-            "OcclusionWireSystem",
-            "GoreWireSystem",
-        ];
+        let game_systems = vec!["EconomySystem", "OcclusionWireSystem", "GoreWireSystem"];
 
         for name in &game_systems {
             self.register_system(SystemContract {
@@ -125,32 +121,100 @@ impl EngineSDK {
             });
         }
 
-        self.define_engine_boundary(
-            engine_systems.iter().map(|(n, ..)| n.to_string()).collect(),
-        );
-        self.define_game_boundary(
-            game_systems.iter().map(|n| n.to_string()).collect(),
-        );
+        self.define_engine_boundary(engine_systems.iter().map(|(n, ..)| n.to_string()).collect());
+        self.define_game_boundary(game_systems.iter().map(|n| n.to_string()).collect());
 
         self.populate_scripting_endpoints();
     }
 
     fn populate_scripting_endpoints(&mut self) {
         let endpoints = vec![
-            ("ecs.spawn", "Spawn a new entity", vec![("kind", "EntityKind")], "Entity", true),
-            ("ecs.despawn", "Remove entity from world", vec![("entity", "Entity")], "bool", true),
-            ("ecs.get_transform", "Get entity position", vec![("entity", "Entity")], "Transform?", false),
-            ("ecs.set_transform", "Set entity position", vec![("entity", "Entity"), ("x", "f32"), ("y", "f32")], "()", true),
-            ("ecs.alive_count", "Count alive entities", vec![], "usize", false),
+            (
+                "ecs.spawn",
+                "Spawn a new entity",
+                vec![("kind", "EntityKind")],
+                "Entity",
+                true,
+            ),
+            (
+                "ecs.despawn",
+                "Remove entity from world",
+                vec![("entity", "Entity")],
+                "bool",
+                true,
+            ),
+            (
+                "ecs.get_transform",
+                "Get entity position",
+                vec![("entity", "Entity")],
+                "Transform?",
+                false,
+            ),
+            (
+                "ecs.set_transform",
+                "Set entity position",
+                vec![("entity", "Entity"), ("x", "f32"), ("y", "f32")],
+                "()",
+                true,
+            ),
+            (
+                "ecs.alive_count",
+                "Count alive entities",
+                vec![],
+                "usize",
+                false,
+            ),
             ("time.day", "Get current day", vec![], "u32", false),
             ("time.month", "Get current month", vec![], "u32", false),
-            ("time.day_progress", "Get time of day 0..1", vec![], "f32", false),
-            ("quest.create", "Create a new quest", vec![("quest_type", "QuestType"), ("reward", "f32")], "u32", true),
-            ("quest.complete", "Mark quest completed", vec![("quest_id", "u32")], "bool", true),
-            ("audio.play_3d", "Play 3D sound", vec![("kind", "SoundKind"), ("pos", "Vec3"), ("vol", "f32")], "SoundHandle", true),
-            ("world.save_chunk", "Save chunk to disk", vec![("x", "i32"), ("z", "i32")], "usize", true),
-            ("world.load_chunk", "Load chunk from disk", vec![("x", "i32"), ("z", "i32")], "usize", true),
-            ("sim.set_speed", "Set simulation speed", vec![("speed", "f32")], "()", true),
+            (
+                "time.day_progress",
+                "Get time of day 0..1",
+                vec![],
+                "f32",
+                false,
+            ),
+            (
+                "quest.create",
+                "Create a new quest",
+                vec![("quest_type", "QuestType"), ("reward", "f32")],
+                "u32",
+                true,
+            ),
+            (
+                "quest.complete",
+                "Mark quest completed",
+                vec![("quest_id", "u32")],
+                "bool",
+                true,
+            ),
+            (
+                "audio.play_3d",
+                "Play 3D sound",
+                vec![("kind", "SoundKind"), ("pos", "Vec3"), ("vol", "f32")],
+                "SoundHandle",
+                true,
+            ),
+            (
+                "world.save_chunk",
+                "Save chunk to disk",
+                vec![("x", "i32"), ("z", "i32")],
+                "usize",
+                true,
+            ),
+            (
+                "world.load_chunk",
+                "Load chunk from disk",
+                vec![("x", "i32"), ("z", "i32")],
+                "usize",
+                true,
+            ),
+            (
+                "sim.set_speed",
+                "Set simulation speed",
+                vec![("speed", "f32")],
+                "()",
+                true,
+            ),
             ("sim.pause", "Pause simulation", vec![], "()", true),
             ("sim.resume", "Resume simulation", vec![], "()", true),
         ];
@@ -159,7 +223,10 @@ impl EngineSDK {
             self.register_scripting_endpoint(ScriptingEndpoint {
                 name: name.to_string(),
                 description: desc.to_string(),
-                parameters: params.into_iter().map(|(n, t)| (n.to_string(), t.to_string())).collect(),
+                parameters: params
+                    .into_iter()
+                    .map(|(n, t)| (n.to_string(), t.to_string()))
+                    .collect(),
                 return_type: ret.to_string(),
                 side_effects,
             });
@@ -199,7 +266,9 @@ impl EngineSDK {
 
         for plugin in &self.plugins {
             for req in &plugin.requires_systems {
-                let provided = self.plugins.iter()
+                let provided = self
+                    .plugins
+                    .iter()
                     .any(|p| p.provides_systems.contains(req));
                 let is_system = self.systems.contains_key(req);
                 if !provided && !is_system {
@@ -213,7 +282,10 @@ impl EngineSDK {
             for constraint in &plugin.ordering_constraints {
                 if constraint.kind == OrderingKind::Requires {
                     let exists = self.systems.contains_key(&constraint.target)
-                        || self.plugins.iter().any(|p| p.provides_systems.contains(&constraint.target));
+                        || self
+                            .plugins
+                            .iter()
+                            .any(|p| p.provides_systems.contains(&constraint.target));
                     if !exists {
                         issues.push(format!(
                             "Plugin '{}' system '{}' requires '{}' which doesn't exist",
@@ -237,13 +309,15 @@ impl EngineSDK {
     }
 
     pub fn engine_systems(&self) -> Vec<&SystemContract> {
-        self.systems.values()
+        self.systems
+            .values()
             .filter(|s| s.layer == BoundaryLayer::Engine)
             .collect()
     }
 
     pub fn game_systems(&self) -> Vec<&SystemContract> {
-        self.systems.values()
+        self.systems
+            .values()
             .filter(|s| s.layer == BoundaryLayer::Game)
             .collect()
     }
@@ -252,12 +326,19 @@ impl EngineSDK {
         &self.scripting_api
     }
 
-    pub fn plugin_count(&self) -> usize { self.plugins.len() }
-    pub fn system_count(&self) -> usize { self.systems.len() }
+    pub fn plugin_count(&self) -> usize {
+        self.plugins.len()
+    }
+    pub fn system_count(&self) -> usize {
+        self.systems.len()
+    }
 
     pub fn generate_api_reference(&self) -> String {
         let mut out = String::from("# ENGENE Scripting API Reference\n\n");
-        out.push_str(&format!("Generated from {} endpoints.\n\n", self.scripting_api.len()));
+        out.push_str(&format!(
+            "Generated from {} endpoints.\n\n",
+            self.scripting_api.len()
+        ));
 
         for ep in &self.scripting_api {
             out.push_str(&format!("## `{}`\n\n", ep.name));
@@ -281,5 +362,7 @@ impl EngineSDK {
 }
 
 impl Default for EngineSDK {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

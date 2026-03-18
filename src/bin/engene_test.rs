@@ -13,7 +13,12 @@ use winit::window::{CursorGrabMode, Window};
 
 use engene::app::runtime_assembly::RuntimeAssembly;
 use engene::audio::audio::AudioEngine;
+use engene::core::build_manifest::BuildManifest;
+use engene::core::crash_telemetry;
 use engene::core::engine::Engine;
+use engene::game::hud::{HudState, NotificationKind};
+use engene::game::player::PlayerController;
+use engene::game::player_save::{PlayerInventory, PlayerSave};
 use engene::graphics::camera::FlyCamera;
 use engene::graphics::lod::{LodConfig, LodLevel};
 use engene::graphics::mesh::EntityInstance;
@@ -23,16 +28,11 @@ use engene::input::input::InputState;
 use engene::memory::asset_manager::AssetManager;
 use engene::physics::ballistics::BallisticsSystem;
 use engene::tools::doctor;
-use engene::game::hud::{HudState, NotificationKind};
-use engene::game::player::PlayerController;
-use engene::game::player_save::{PlayerInventory, PlayerSave};
 use engene::world::chunk_persistence::ChunkPersistenceService;
 use engene::world::components::*;
 use engene::world::heightmap::Heightmap;
 use engene::world::hierarchical_spatial::HierarchicalSpatialIndex;
 use engene::world::streaming::WorldStreamer;
-use engene::core::build_manifest::BuildManifest;
-use engene::core::crash_telemetry;
 
 fn main() {
     if BuildManifest::handle_version_flag() {
@@ -143,7 +143,10 @@ struct TestApp {
 
 impl TestApp {
     fn weather_controller_coverage(&self) -> f32 {
-        self.renderer.as_ref().map(|r| r.weather_cloud_coverage()).unwrap_or(0.0)
+        self.renderer
+            .as_ref()
+            .map(|r| r.weather_cloud_coverage())
+            .unwrap_or(0.0)
     }
 }
 
@@ -206,23 +209,31 @@ impl ApplicationHandler for TestApp {
                     match key {
                         KeyCode::Digit1 => {
                             self.player.switch_weapon(0);
-                            self.hud.push_notification("[1] Makarov", NotificationKind::Info);
+                            self.hud
+                                .push_notification("[1] Makarov", NotificationKind::Info);
                             println!("[weapon] switched to Makarov");
                         }
                         KeyCode::Digit2 => {
                             self.player.switch_weapon(1);
-                            self.hud.push_notification("[2] AK74", NotificationKind::Info);
+                            self.hud
+                                .push_notification("[2] AK74", NotificationKind::Info);
                             println!("[weapon] switched to AK74");
                         }
                         KeyCode::Digit3 => {
                             self.player.switch_weapon(2);
-                            self.hud.push_notification("[3] Shotgun", NotificationKind::Info);
+                            self.hud
+                                .push_notification("[3] Shotgun", NotificationKind::Info);
                             println!("[weapon] switched to Shotgun");
                         }
                         KeyCode::KeyG => {
-                            println!("[grenade] thrown at ({:.1}, {:.1})",
-                                self.camera.position.x, self.camera.position.z);
-                            self.hud.push_notification(">> Grenade thrown! <<", NotificationKind::Warning);
+                            println!(
+                                "[grenade] thrown at ({:.1}, {:.1})",
+                                self.camera.position.x, self.camera.position.z
+                            );
+                            self.hud.push_notification(
+                                ">> Grenade thrown! <<",
+                                NotificationKind::Warning,
+                            );
                         }
                         KeyCode::KeyT => {
                             self.weather_cycle_index = (self.weather_cycle_index + 1) % 5;
@@ -274,17 +285,23 @@ impl ApplicationHandler for TestApp {
                 } else if self.player.can_fire() {
                     let origin = self.camera.position;
                     let dir = self.camera.forward();
-                    let weapon_name = self.player.current_weapon_name()
-                        .unwrap_or("Makarov").to_string();
+                    let weapon_name = self
+                        .player
+                        .current_weapon_name()
+                        .unwrap_or("Makarov")
+                        .to_string();
                     let (speed, mass, drag, fire_rate, wid, pellets) = match weapon_name.as_str() {
                         "Makarov" => (315.0_f32, 0.006, 0.0001, 4.0_f32, 0_u16, 1_u32),
-                        "AK74"    => (900.0, 0.0034, 0.00008, 10.0, 1, 1),
+                        "AK74" => (900.0, 0.0034, 0.00008, 10.0, 1, 1),
                         "Shotgun" => (400.0, 0.032, 0.0003, 1.0, 2, 8),
-                        _         => (400.0, 0.01, 0.0001, 2.0, 3, 1),
+                        _ => (400.0, 0.01, 0.0001, 2.0, 3, 1),
                     };
                     self.player.fire_cooldown = 1.0 / fire_rate;
                     let has_ballistics = self.engine.resources.contains::<BallisticsSystem>();
-                    println!("[FIRE] weapon={} speed={} pellets={} ballistics_exists={}", weapon_name, speed, pellets, has_ballistics);
+                    println!(
+                        "[FIRE] weapon={} speed={} pellets={} ballistics_exists={}",
+                        weapon_name, speed, pellets, has_ballistics
+                    );
                     if let Some(ballistics) = self.engine.resources.get_mut::<BallisticsSystem>() {
                         for p in 0..pellets {
                             let spread = if pellets > 1 {
@@ -295,9 +312,21 @@ impl ApplicationHandler for TestApp {
                             };
                             let shot_dir = (dir + spread).normalize();
                             self.fire_seed += 1;
-                            ballistics.fire(origin, shot_dir, speed, mass, drag, 0, wid, self.fire_seed);
+                            ballistics.fire(
+                                origin,
+                                shot_dir,
+                                speed,
+                                mass,
+                                drag,
+                                0,
+                                wid,
+                                self.fire_seed,
+                            );
                         }
-                        println!("[FIRE] projectiles_after_fire={}", ballistics.projectiles.len());
+                        println!(
+                            "[FIRE] projectiles_after_fire={}",
+                            ballistics.projectiles.len()
+                        );
                     } else {
                         println!("[FIRE] ERROR: BallisticsSystem not in resources!");
                     }
@@ -331,10 +360,18 @@ impl ApplicationHandler for TestApp {
                 let speed = if sprinting { 8.0_f32 } else { 4.0 };
                 let step = speed * dt;
 
-                if self.input.is_key_down(KeyCode::KeyW) { self.camera.position += flat_fwd * step; }
-                if self.input.is_key_down(KeyCode::KeyS) { self.camera.position -= flat_fwd * step; }
-                if self.input.is_key_down(KeyCode::KeyD) { self.camera.position += flat_right * step; }
-                if self.input.is_key_down(KeyCode::KeyA) { self.camera.position -= flat_right * step; }
+                if self.input.is_key_down(KeyCode::KeyW) {
+                    self.camera.position += flat_fwd * step;
+                }
+                if self.input.is_key_down(KeyCode::KeyS) {
+                    self.camera.position -= flat_fwd * step;
+                }
+                if self.input.is_key_down(KeyCode::KeyD) {
+                    self.camera.position += flat_right * step;
+                }
+                if self.input.is_key_down(KeyCode::KeyA) {
+                    self.camera.position -= flat_right * step;
+                }
 
                 // Player-object collision (push-back)
                 for &e in &self.engine.ecs.alive {
@@ -355,7 +392,9 @@ impl ApplicationHandler for TestApp {
                 // Clamp to sandbox and snap to terrain
                 self.camera.position.x = self.camera.position.x.clamp(0.5, 49.5);
                 self.camera.position.z = self.camera.position.z.clamp(0.5, 49.5);
-                let terrain_y = self.heightmap.sample(self.camera.position.x, self.camera.position.z);
+                let terrain_y = self
+                    .heightmap
+                    .sample(self.camera.position.x, self.camera.position.z);
                 self.camera.position.y = terrain_y + 1.7;
 
                 self.player.tick(dt, sprinting);
@@ -370,7 +409,8 @@ impl ApplicationHandler for TestApp {
                         let ry = self.heightmap.sample(25.0, 25.0) + 1.7;
                         self.player.respawn([25.0, ry, 25.0]);
                         self.camera.position = glam::Vec3::new(25.0, ry, 25.0);
-                        self.hud.push_notification("Respawned in sandbox", NotificationKind::Info);
+                        self.hud
+                            .push_notification("Respawned in sandbox", NotificationKind::Info);
                     }
                 }
 
@@ -385,7 +425,9 @@ impl ApplicationHandler for TestApp {
                         self.engine.time.month,
                     );
                     match save.save_to_file("game/saves/sandbox_quicksave.json") {
-                        Ok(()) => self.hud.push_notification("Sandbox saved", NotificationKind::Info),
+                        Ok(()) => self
+                            .hud
+                            .push_notification("Sandbox saved", NotificationKind::Info),
                         Err(e) => self.hud.push_notification(
                             &format!("Save failed: {}", e),
                             NotificationKind::Warning,
@@ -402,7 +444,8 @@ impl ApplicationHandler for TestApp {
                                 self.player.position[1],
                                 self.player.position[2],
                             );
-                            self.hud.push_notification("Sandbox loaded", NotificationKind::Info);
+                            self.hud
+                                .push_notification("Sandbox loaded", NotificationKind::Info);
                         }
                         Err(e) => self.hud.push_notification(
                             &format!("Load failed: {}", e),
@@ -436,7 +479,10 @@ impl ApplicationHandler for TestApp {
                                     let dz = proj.pos.z - t.y;
                                     let dist_sq = dx * dx + dy * dy + dz * dz;
                                     if dist_sq < 1.5 * 1.5 {
-                                        let name = self.engine.ecs.get_name(e)
+                                        let name = self
+                                            .engine
+                                            .ecs
+                                            .get_name(e)
                                             .map(|n| n.0.clone())
                                             .unwrap_or_default();
                                         hits.push((pi, e, [t.x, ey, t.y], name));
@@ -454,21 +500,31 @@ impl ApplicationHandler for TestApp {
                             for i in 0..4u32 {
                                 let angle = i as f32 * std::f32::consts::FRAC_PI_2;
                                 let debris = self.engine.ecs.spawn();
-                                self.engine.ecs.set_transform(debris, Transform {
-                                    x: pos[0] + angle.cos() * 0.6,
-                                    y: pos[2] + angle.sin() * 0.6,
-                                    cell_x: 0,
-                                    cell_y: 0,
-                                });
-                                self.engine.ecs.set_name(debris, Name(format!("debris_{}", name)));
+                                self.engine.ecs.set_transform(
+                                    debris,
+                                    Transform {
+                                        x: pos[0] + angle.cos() * 0.6,
+                                        y: pos[2] + angle.sin() * 0.6,
+                                        cell_x: 0,
+                                        cell_y: 0,
+                                    },
+                                );
+                                self.engine
+                                    .ecs
+                                    .set_name(debris, Name(format!("debris_{}", name)));
                             }
                             self.hud.push_notification(
                                 &format!("DESTROYED: {}", name),
                                 NotificationKind::Warning,
                             );
-                            println!("[hit] destroyed '{}' at ({:.1},{:.1},{:.1})", name, pos[0], pos[1], pos[2]);
+                            println!(
+                                "[hit] destroyed '{}' at ({:.1},{:.1},{:.1})",
+                                name, pos[0], pos[1], pos[2]
+                            );
                         }
-                        if let Some(ballistics) = self.engine.resources.get_mut::<BallisticsSystem>() {
+                        if let Some(ballistics) =
+                            self.engine.resources.get_mut::<BallisticsSystem>()
+                        {
                             proj_indices.sort_unstable();
                             proj_indices.dedup();
                             for &pi in proj_indices.iter().rev() {
@@ -520,9 +576,7 @@ impl ApplicationHandler for TestApp {
                     }
                 }
 
-                if let Some(spatial) =
-                    self.engine.resources.get_mut::<HierarchicalSpatialIndex>()
-                {
+                if let Some(spatial) = self.engine.resources.get_mut::<HierarchicalSpatialIndex>() {
                     spatial.clear();
                     for &e in &self.engine.ecs.alive {
                         if let Some(t) = self.engine.ecs.get_transform(e) {
@@ -537,8 +591,12 @@ impl ApplicationHandler for TestApp {
                 }
 
                 {
-                    let proj_count = self.engine.resources.get::<BallisticsSystem>()
-                        .map(|b| b.projectiles.len()).unwrap_or(0);
+                    let proj_count = self
+                        .engine
+                        .resources
+                        .get::<BallisticsSystem>()
+                        .map(|b| b.projectiles.len())
+                        .unwrap_or(0);
                     if self.frame % 300 == 0 {
                         let wname = self.player.current_weapon_name().unwrap_or("none");
                         println!(
@@ -684,7 +742,11 @@ fn prefab_color(name: Option<&str>) -> [f32; 3] {
         [0.3, 0.7, 0.9]
     } else if n.contains("steel") || n.contains("metal") || n.contains("cabinet") {
         [0.55, 0.56, 0.58]
-    } else if n.contains("table") || n.contains("chair") || n.contains("crate") || n.contains("wood") {
+    } else if n.contains("table")
+        || n.contains("chair")
+        || n.contains("crate")
+        || n.contains("wood")
+    {
         [0.55, 0.35, 0.15]
     } else if n.contains("barrel") {
         [0.35, 0.40, 0.30]

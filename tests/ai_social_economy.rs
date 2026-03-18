@@ -2,15 +2,21 @@
 //! 208 tests covering Perception, Memory, Emotions, Goals, Plans, Decisions,
 //! Groups, Camp simulation, Role simulation, Trader economy, and Item registry.
 
-use engene::game::ai::body::{is_night, time_of_day_mult, BodyState};
-use engene::game::ai::decision::{decide_monster, decide_npc};
-use engene::game::ai::emotions::{apply_monster_personality, apply_npc_personality, DominantEmotion, Emotions};
-use engene::game::ai::goals::{pick_best, ScoredGoal};
-use engene::game::ai::memory::{context_for_kind, CellTag, EventKind, EventMemory, Lesson, LessonAction, LessonContext, Memory};
-use engene::game::ai::perception::{find_allies, find_prey, find_predator, npcs_nearby, PerceptionCache, distance2};
-use engene::game::ai::plan::Plan;
 use engene::core::ecs::Ecs;
 use engene::core::persistent_id::PersistentEntityId;
+use engene::game::ai::body::{is_night, time_of_day_mult, BodyState};
+use engene::game::ai::decision::{decide_monster, decide_npc};
+use engene::game::ai::emotions::{
+    apply_monster_personality, apply_npc_personality, DominantEmotion, Emotions,
+};
+use engene::game::ai::goals::{pick_best, ScoredGoal};
+use engene::game::ai::memory::{
+    context_for_kind, CellTag, EventKind, EventMemory, Lesson, LessonAction, LessonContext, Memory,
+};
+use engene::game::ai::perception::{
+    distance2, find_allies, find_predator, find_prey, npcs_nearby, PerceptionCache,
+};
+use engene::game::ai::plan::Plan;
 use engene::game::economy::item_registry::{ItemCategory, ItemRarity, ItemRegistry, ItemTemplate};
 use engene::game::economy::resource_flow::snapshot;
 use engene::game::economy::trader_economy::{TraderInventorySlot, TraderState};
@@ -19,8 +25,8 @@ use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
 use engene::simulation::world_milestones::WorldMilestoneTracker;
 use engene::world::components::{
-    EcosystemNeeds, EntityKind, Goal, Job, MonsterSpecies, NpcEconomy, NpcTraits,
-    PersonalNeeds, SocialNeeds, MonsterTraits, Transform,
+    EcosystemNeeds, EntityKind, Goal, Job, MonsterSpecies, MonsterTraits, NpcEconomy, NpcTraits,
+    PersonalNeeds, SocialNeeds, Transform,
 };
 
 // =============================================================================
@@ -395,7 +401,11 @@ fn memory_lesson_merge_same_action_context() {
         attempts: 4,
         successes: 2,
     });
-    let count = mem.lessons.iter().filter(|l| l.action == LessonAction::GroupHunt && l.context == LessonContext::General).count();
+    let count = mem
+        .lessons
+        .iter()
+        .filter(|l| l.action == LessonAction::GroupHunt && l.context == LessonContext::General)
+        .count();
     assert_eq!(count, 1);
 }
 
@@ -1043,8 +1053,24 @@ fn perception_find_allies_ecs_with_ally() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 10.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 10.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e1, EntityKind::Npc);
     ecs.kinds.insert(e2, EntityKind::Npc);
     ecs.rebuild_spatial();
@@ -1057,8 +1083,24 @@ fn perception_npcs_nearby_with_npcs() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 50.0, y: 50.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 60.0, y: 50.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 50.0,
+            y: 50.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 60.0,
+            y: 50.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e1, EntityKind::Npc);
     ecs.kinds.insert(e2, EntityKind::Npc);
     ecs.rebuild_spatial();
@@ -1071,8 +1113,24 @@ fn perception_distance2() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 3.0, y: 4.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 3.0,
+            y: 4.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let d2 = distance2(&ecs, e1, e2);
     assert!((d2 - 25.0).abs() < 0.1);
 }
@@ -1199,10 +1257,28 @@ fn perception_find_prey_wolf_sees_boar() {
     let mut ecs = Ecs::new();
     let (wolf, _) = ecs.spawn_new();
     let (boar, _) = ecs.spawn_new();
-    ecs.transforms.insert(wolf, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(boar, Transform { x: 20.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(wolf, EntityKind::Monster(MonsterSpecies::Wolf));
-    ecs.kinds.insert(boar, EntityKind::Monster(MonsterSpecies::Boar));
+    ecs.transforms.insert(
+        wolf,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        boar,
+        Transform {
+            x: 20.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(wolf, EntityKind::Monster(MonsterSpecies::Wolf));
+    ecs.kinds
+        .insert(boar, EntityKind::Monster(MonsterSpecies::Boar));
     ecs.rebuild_spatial();
     let prey = find_prey(&ecs, wolf);
     assert!(prey.is_some());
@@ -1213,10 +1289,28 @@ fn perception_find_predator_boar_sees_wolf() {
     let mut ecs = Ecs::new();
     let (wolf, _) = ecs.spawn_new();
     let (boar, _) = ecs.spawn_new();
-    ecs.transforms.insert(wolf, Transform { x: 10.0, y: 10.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(boar, Transform { x: 15.0, y: 10.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(wolf, EntityKind::Monster(MonsterSpecies::Wolf));
-    ecs.kinds.insert(boar, EntityKind::Monster(MonsterSpecies::Boar));
+    ecs.transforms.insert(
+        wolf,
+        Transform {
+            x: 10.0,
+            y: 10.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        boar,
+        Transform {
+            x: 15.0,
+            y: 10.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(wolf, EntityKind::Monster(MonsterSpecies::Wolf));
+    ecs.kinds
+        .insert(boar, EntityKind::Monster(MonsterSpecies::Boar));
     ecs.rebuild_spatial();
     let pred = find_predator(&ecs, boar);
     assert!(pred.is_some());
@@ -1241,7 +1335,15 @@ fn ecs_alive_contains_spawned() {
 fn ecs_transforms_insert_get() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 1.0, y: 2.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 1.0,
+            y: 2.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let t = ecs.transforms.get(&e).unwrap();
     assert_eq!(t.x, 1.0);
     assert_eq!(t.y, 2.0);
@@ -1291,7 +1393,8 @@ fn ecs_npc_economies_insert() {
 fn ecs_inventories_insert() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.inventories.insert(e, engene::world::components::Inventory { items: vec![] });
+    ecs.inventories
+        .insert(e, engene::world::components::Inventory { items: vec![] });
     assert!(ecs.inventories.get(&e).is_some());
 }
 
@@ -1318,7 +1421,8 @@ fn ecs_kinds_insert() {
 fn ecs_names_insert() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.names.insert(e, engene::world::components::Name("Test".into()));
+    ecs.names
+        .insert(e, engene::world::components::Name("Test".into()));
     assert!(ecs.names.get(&e).is_some());
 }
 
@@ -2179,8 +2283,24 @@ fn perception_distance2_same_pos() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 10.0, y: 10.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 10.0, y: 10.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 10.0,
+            y: 10.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 10.0,
+            y: 10.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let d2 = distance2(&ecs, e1, e2);
     assert!(d2 < 0.1);
 }
@@ -2190,8 +2310,24 @@ fn perception_distance2_far_apart() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let d2 = distance2(&ecs, e1, e2);
     assert!(d2 > 5000.0);
 }
@@ -2200,7 +2336,15 @@ fn perception_distance2_far_apart() {
 fn perception_cache_entities_nearby_count() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e1, EntityKind::Npc);
     ecs.rebuild_spatial();
     let cache = PerceptionCache::build(&ecs, e1);
@@ -2226,8 +2370,24 @@ fn perception_npcs_nearby_with_radius() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 50.0, y: 50.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, Transform { x: 55.0, y: 50.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 50.0,
+            y: 50.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        Transform {
+            x: 55.0,
+            y: 50.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e1, EntityKind::Npc);
     ecs.kinds.insert(e2, EntityKind::Npc);
     ecs.rebuild_spatial();
@@ -2246,7 +2406,15 @@ fn perception_distance2_entity_without_transform() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let d2 = distance2(&ecs, e1, e2);
     assert!(d2 > 1e20);
 }
@@ -2333,9 +2501,18 @@ fn scored_goal_construction() {
 #[test]
 fn pick_best_returns_highest_score() {
     let candidates = [
-        ScoredGoal { goal: Goal::Rest, score: 0.3 },
-        ScoredGoal { goal: Goal::Hunt, score: 0.9 },
-        ScoredGoal { goal: Goal::SeekFood, score: 0.5 },
+        ScoredGoal {
+            goal: Goal::Rest,
+            score: 0.3,
+        },
+        ScoredGoal {
+            goal: Goal::Hunt,
+            score: 0.9,
+        },
+        ScoredGoal {
+            goal: Goal::SeekFood,
+            score: 0.5,
+        },
     ];
     let best = pick_best(&candidates);
     assert!(matches!(best, Goal::Hunt));
@@ -2388,7 +2565,9 @@ fn decide_monster_hunt_high_hunger() {
     personal.hunger = 0.95;
     let eco = EcosystemNeeds::for_species(MonsterSpecies::Wolf);
     let goal = decide_monster(&traits, &personal, &eco);
-    assert!(matches!(goal, Goal::Hunt) || matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Rest));
+    assert!(
+        matches!(goal, Goal::Hunt) || matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Rest)
+    );
 }
 
 #[test]
@@ -2436,7 +2615,9 @@ fn decide_npc_seek_food_hunger() {
         desperation: 0.2,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
-    assert!(matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Hunt) || matches!(goal, Goal::Rest));
+    assert!(
+        matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Hunt) || matches!(goal, Goal::Rest)
+    );
 }
 
 #[test]
@@ -2462,7 +2643,9 @@ fn decide_npc_work_desperation() {
         desperation: 0.9,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
-    assert!(matches!(goal, Goal::Work) || matches!(goal, Goal::Trade) || matches!(goal, Goal::SeekFood));
+    assert!(
+        matches!(goal, Goal::Work) || matches!(goal, Goal::Trade) || matches!(goal, Goal::SeekFood)
+    );
 }
 
 #[test]
@@ -2531,9 +2714,16 @@ fn decide_monster_returns_valid_goal() {
     let personal = PersonalNeeds::default_monster();
     let eco = EcosystemNeeds::for_species(MonsterSpecies::Bloodsucker);
     let goal = decide_monster(&traits, &personal, &eco);
-    assert!(matches!(goal, Goal::Hunt) || matches!(goal, Goal::Rest) || matches!(goal, Goal::Flee)
-        || matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Explore) || matches!(goal, Goal::Migrate)
-        || matches!(goal, Goal::DefendTerritory) || matches!(goal, Goal::FollowPack));
+    assert!(
+        matches!(goal, Goal::Hunt)
+            || matches!(goal, Goal::Rest)
+            || matches!(goal, Goal::Flee)
+            || matches!(goal, Goal::SeekFood)
+            || matches!(goal, Goal::Explore)
+            || matches!(goal, Goal::Migrate)
+            || matches!(goal, Goal::DefendTerritory)
+            || matches!(goal, Goal::FollowPack)
+    );
 }
 
 #[test]
@@ -2559,9 +2749,17 @@ fn decide_npc_returns_valid_goal() {
         desperation: 0.3,
     };
     let goal = decide_npc(&traits, &personal, &social, &economy);
-    assert!(matches!(goal, Goal::SeekFood) || matches!(goal, Goal::Rest) || matches!(goal, Goal::Work)
-        || matches!(goal, Goal::Trade) || matches!(goal, Goal::Hunt) || matches!(goal, Goal::Socialize)
-        || matches!(goal, Goal::Explore) || matches!(goal, Goal::Flee) || matches!(goal, Goal::SeekWater));
+    assert!(
+        matches!(goal, Goal::SeekFood)
+            || matches!(goal, Goal::Rest)
+            || matches!(goal, Goal::Work)
+            || matches!(goal, Goal::Trade)
+            || matches!(goal, Goal::Hunt)
+            || matches!(goal, Goal::Socialize)
+            || matches!(goal, Goal::Explore)
+            || matches!(goal, Goal::Flee)
+            || matches!(goal, Goal::SeekWater)
+    );
 }
 
 #[test]
@@ -2769,18 +2967,24 @@ fn attempt_trade_transfers_money() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 25.0);
     assert!(ok);
     assert!((ecs.npc_economies.get(&buyer).unwrap().money - 75.0).abs() < 0.01);
@@ -2791,18 +2995,24 @@ fn attempt_trade_fails_insufficient() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 5.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 5.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 100.0);
     assert!(!ok);
 }
@@ -2812,18 +3022,24 @@ fn attempt_trade_exact_amount() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 0.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 0.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 50.0);
     assert!(ok);
     assert!(ecs.npc_economies.get(&buyer).unwrap().money < 0.01);
@@ -2834,18 +3050,24 @@ fn attempt_trade_zero_price() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 0.0);
     assert!(ok);
 }
@@ -2855,18 +3077,24 @@ fn attempt_trade_seller_gains() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 200.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 10.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 200.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 10.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let _ = attempt_trade(&mut ecs, buyer, seller, 50.0);
     assert!(ecs.npc_economies.get(&seller).unwrap().money > 10.0);
 }
@@ -2876,12 +3104,15 @@ fn attempt_trade_no_buyer_economy() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 10.0);
     assert!(!ok);
 }
@@ -2891,18 +3122,24 @@ fn attempt_trade_small_amount() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 1.0);
     assert!(ok);
 }
@@ -2912,18 +3149,24 @@ fn attempt_trade_large_amount() {
     let mut ecs = Ecs::new();
     let (buyer, _) = ecs.spawn_new();
     let (seller, _) = ecs.spawn_new();
-    ecs.npc_economies.insert(buyer, NpcEconomy {
-        money: 1000.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(seller, NpcEconomy {
-        money: 0.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        buyer,
+        NpcEconomy {
+            money: 1000.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        seller,
+        NpcEconomy {
+            money: 0.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let ok = attempt_trade(&mut ecs, buyer, seller, 500.0);
     assert!(ok);
 }
@@ -3072,12 +3315,15 @@ fn snapshot_average_desperation() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     ecs.kinds.insert(e1, EntityKind::Npc);
-    ecs.npc_economies.insert(e1, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.5,
-    });
+    ecs.npc_economies.insert(
+        e1,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.5,
+        },
+    );
     let snap = snapshot(&ecs);
     assert!(snap.average_desperation >= 0.0 && snap.average_desperation <= 1.0);
 }
@@ -3088,12 +3334,15 @@ fn snapshot_bandit_count_multiple() {
     for _ in 0..3 {
         let (e, _) = ecs.spawn_new();
         ecs.kinds.insert(e, EntityKind::Npc);
-        ecs.npc_economies.insert(e, NpcEconomy {
-            money: 10.0,
-            monthly_required: 50.0,
-            job: Job::Bandit,
-            desperation: 0.9,
-        });
+        ecs.npc_economies.insert(
+            e,
+            NpcEconomy {
+                money: 10.0,
+                monthly_required: 50.0,
+                job: Job::Bandit,
+                desperation: 0.9,
+            },
+        );
     }
     let snap = snapshot(&ecs);
     assert_eq!(snap.bandit_count, 3);
@@ -3106,18 +3355,24 @@ fn snapshot_total_money_sum() {
     let (e2, _) = ecs.spawn_new();
     ecs.kinds.insert(e1, EntityKind::Npc);
     ecs.kinds.insert(e2, EntityKind::Npc);
-    ecs.npc_economies.insert(e1, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.0,
-    });
-    ecs.npc_economies.insert(e2, NpcEconomy {
-        money: 200.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        e1,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.0,
+        },
+    );
+    ecs.npc_economies.insert(
+        e2,
+        NpcEconomy {
+            money: 200.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let snap = snapshot(&ecs);
     assert!((snap.total_npc_money - 300.0).abs() < 0.01);
 }
@@ -3127,12 +3382,15 @@ fn snapshot_no_bandits() {
     let mut ecs = Ecs::new();
     let (e1, _) = ecs.spawn_new();
     ecs.kinds.insert(e1, EntityKind::Npc);
-    ecs.npc_economies.insert(e1, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        e1,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
     let snap = snapshot(&ecs);
     assert_eq!(snap.bandit_count, 0);
 }

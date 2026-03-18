@@ -18,12 +18,7 @@ impl SpatialAudioSystem {
         }
     }
 
-    pub fn update(
-        &mut self,
-        engine: &mut AudioEngine,
-        ecs: &Ecs,
-        dt: f32,
-    ) {
+    pub fn update(&mut self, engine: &mut AudioEngine, ecs: &Ecs, dt: f32) {
         self.timer += dt;
         if self.timer < self.cooldown {
             return;

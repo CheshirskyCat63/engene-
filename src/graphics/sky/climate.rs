@@ -63,7 +63,9 @@ impl ClimateSystem {
 
         for zone in &self.zones {
             let dist = (pos - zone.center).length();
-            if dist > zone.radius { continue; }
+            if dist > zone.radius {
+                continue;
+            }
             let w = 1.0 - dist / zone.radius;
             let w = w * w;
             humidity += zone.base_humidity * w;
@@ -78,7 +80,11 @@ impl ClimateSystem {
             fog_mult /= total_weight + 1.0;
         }
 
-        ClimateBlend { humidity, temperature, fog_mult }
+        ClimateBlend {
+            humidity,
+            temperature,
+            fog_mult,
+        }
     }
 }
 

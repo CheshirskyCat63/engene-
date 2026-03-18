@@ -1,6 +1,6 @@
-﻿use glam::Vec2;
 use crate::core::ecs::{Ecs, Entity};
 use crate::game::ai::combat_tactics::tactics::Tactic;
+use glam::Vec2;
 
 #[derive(Clone, Debug)]
 pub struct GroupRole {
@@ -76,8 +76,12 @@ pub fn find_group_members(ecs: &Ecs, leader: Entity, radius: f32) -> Vec<Entity>
 
     let mut members = vec![leader];
     for &e in &ecs.alive {
-        if e == leader { continue; }
-        if ecs.get_kind(e) != leader_kind { continue; }
+        if e == leader {
+            continue;
+        }
+        if ecs.get_kind(e) != leader_kind {
+            continue;
+        }
         if let Some(t) = ecs.get_transform(e) {
             let dx = t.x - leader_pos.0;
             let dy = t.y - leader_pos.1;

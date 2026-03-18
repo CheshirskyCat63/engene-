@@ -1,5 +1,5 @@
-use glam::Vec3;
 use crate::physics::damage_pipeline::response_aggregator::BodyZone;
+use glam::Vec3;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum BloodLod {

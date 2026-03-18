@@ -13,7 +13,11 @@ impl Heightmap {
         let resolution = 128u32;
         let n = (resolution + 1) as usize;
         let data = vec![0.0f32; n * n];
-        Self { data, resolution, world_size }
+        Self {
+            data,
+            resolution,
+            world_size,
+        }
     }
 
     pub fn generate(biomes: &[Biome]) -> Self {
@@ -51,13 +55,19 @@ impl Heightmap {
             }
         }
 
-        Self { data, resolution, world_size }
+        Self {
+            data,
+            resolution,
+            world_size,
+        }
     }
 
     pub fn sample(&self, x: f32, z: f32) -> f32 {
         let n = self.resolution + 1;
-        let sx = (x / self.world_size * self.resolution as f32).clamp(0.0, (self.resolution - 1) as f32);
-        let sz = (z / self.world_size * self.resolution as f32).clamp(0.0, (self.resolution - 1) as f32);
+        let sx =
+            (x / self.world_size * self.resolution as f32).clamp(0.0, (self.resolution - 1) as f32);
+        let sz =
+            (z / self.world_size * self.resolution as f32).clamp(0.0, (self.resolution - 1) as f32);
 
         let ix = sx as u32;
         let iz = sz as u32;
@@ -94,7 +104,9 @@ impl Heightmap {
 }
 
 fn hash2d(ix: i32, iy: i32) -> f32 {
-    let mut n = ix.wrapping_mul(374761393).wrapping_add(iy.wrapping_mul(668265263));
+    let mut n = ix
+        .wrapping_mul(374761393)
+        .wrapping_add(iy.wrapping_mul(668265263));
     n = (n ^ (n >> 13)).wrapping_mul(1274126177);
     n = n ^ (n >> 16);
     (n & 0x7fffffff) as f32 / 0x7fffffff as f32

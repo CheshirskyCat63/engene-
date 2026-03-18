@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AnimationQuality {
@@ -23,24 +23,40 @@ impl AnimationLadder {
     pub fn for_quality(quality: AnimationQuality) -> Self {
         match quality {
             AnimationQuality::Full => Self {
-                quality, max_blended_layers: 4, micro_motion_enabled: true,
-                foot_ik_enabled: true, procedural_overlays: true,
-                ragdoll_near_only: false, update_rate_hz: 60,
+                quality,
+                max_blended_layers: 4,
+                micro_motion_enabled: true,
+                foot_ik_enabled: true,
+                procedural_overlays: true,
+                ragdoll_near_only: false,
+                update_rate_hz: 60,
             },
             AnimationQuality::Reduced => Self {
-                quality, max_blended_layers: 2, micro_motion_enabled: true,
-                foot_ik_enabled: true, procedural_overlays: false,
-                ragdoll_near_only: true, update_rate_hz: 30,
+                quality,
+                max_blended_layers: 2,
+                micro_motion_enabled: true,
+                foot_ik_enabled: true,
+                procedural_overlays: false,
+                ragdoll_near_only: true,
+                update_rate_hz: 30,
             },
             AnimationQuality::Minimal => Self {
-                quality, max_blended_layers: 1, micro_motion_enabled: false,
-                foot_ik_enabled: false, procedural_overlays: false,
-                ragdoll_near_only: true, update_rate_hz: 15,
+                quality,
+                max_blended_layers: 1,
+                micro_motion_enabled: false,
+                foot_ik_enabled: false,
+                procedural_overlays: false,
+                ragdoll_near_only: true,
+                update_rate_hz: 15,
             },
             AnimationQuality::Off => Self {
-                quality, max_blended_layers: 0, micro_motion_enabled: false,
-                foot_ik_enabled: false, procedural_overlays: false,
-                ragdoll_near_only: true, update_rate_hz: 0,
+                quality,
+                max_blended_layers: 0,
+                micro_motion_enabled: false,
+                foot_ik_enabled: false,
+                procedural_overlays: false,
+                ragdoll_near_only: true,
+                update_rate_hz: 0,
             },
         }
     }
@@ -59,5 +75,7 @@ impl AnimationLadder {
 }
 
 impl Default for AnimationLadder {
-    fn default() -> Self { Self::for_quality(AnimationQuality::Full) }
+    fn default() -> Self {
+        Self::for_quality(AnimationQuality::Full)
+    }
 }

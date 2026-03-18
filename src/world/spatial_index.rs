@@ -1,5 +1,5 @@
 use crate::core::ecs::Entity;
-use crate::world::cell::{GRID_SIZE, CELL_SIZE};
+use crate::world::cell::{CELL_SIZE, GRID_SIZE};
 
 pub struct SpatialIndex {
     cells: Vec<Vec<Entity>>,

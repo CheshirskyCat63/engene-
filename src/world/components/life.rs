@@ -1,7 +1,7 @@
 //! Life cycle components.
 
-use serde::{Deserialize, Serialize};
 use super::entity_kind::MonsterSpecies;
+use serde::{Deserialize, Serialize};
 
 /// Life stage enumeration.
 #[derive(Clone, Debug, PartialEq, Copy)]
@@ -13,15 +13,27 @@ pub enum LifeStage {
 
 impl LifeStage {
     pub fn speed_mult(&self) -> f32 {
-        match self { Self::Young => 1.2, Self::Adult => 1.0, Self::Old => 0.7 }
+        match self {
+            Self::Young => 1.2,
+            Self::Adult => 1.0,
+            Self::Old => 0.7,
+        }
     }
 
     pub fn combat_mult(&self) -> f32 {
-        match self { Self::Young => 0.7, Self::Adult => 1.0, Self::Old => 0.8 }
+        match self {
+            Self::Young => 0.7,
+            Self::Adult => 1.0,
+            Self::Old => 0.8,
+        }
     }
 
     pub fn learning_mult(&self) -> f32 {
-        match self { Self::Young => 1.5, Self::Adult => 1.0, Self::Old => 0.5 }
+        match self {
+            Self::Young => 1.5,
+            Self::Adult => 1.0,
+            Self::Old => 0.5,
+        }
     }
 }
 
@@ -36,7 +48,12 @@ pub struct LifeInfo {
 
 impl LifeInfo {
     pub fn new_npc(max_age: f32) -> Self {
-        Self { age: max_age * 0.25, max_age, last_mate_day: 0, mate_cooldown_days: 60 }
+        Self {
+            age: max_age * 0.25,
+            max_age,
+            last_mate_day: 0,
+            mate_cooldown_days: 60,
+        }
     }
 
     pub fn new_monster(species: MonsterSpecies) -> Self {
@@ -45,14 +62,23 @@ impl LifeInfo {
             MonsterSpecies::Boar => (180.0, 45),
             MonsterSpecies::Bloodsucker => (500.0, 90),
         };
-        Self { age: max_age * 0.3, max_age, last_mate_day: 0, mate_cooldown_days: cooldown }
+        Self {
+            age: max_age * 0.3,
+            max_age,
+            last_mate_day: 0,
+            mate_cooldown_days: cooldown,
+        }
     }
 
     pub fn life_stage(&self) -> LifeStage {
         let ratio = self.age / self.max_age;
-        if ratio < 0.2 { LifeStage::Young }
-        else if ratio < 0.7 { LifeStage::Adult }
-        else { LifeStage::Old }
+        if ratio < 0.2 {
+            LifeStage::Young
+        } else if ratio < 0.7 {
+            LifeStage::Adult
+        } else {
+            LifeStage::Old
+        }
     }
 
     pub fn can_mate(&self, current_day: u32) -> bool {

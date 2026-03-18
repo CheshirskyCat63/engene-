@@ -1,11 +1,11 @@
 //! AI Tick Staggering (Phase C.3)
-//! 
+//!
 //! Provides budget-aware AI processing with priority-based scheduling.
 //! Guarantees each entity is ticked at least once every N frames.
 
-use std::collections::HashMap;
 use crate::core::ecs::Entity;
 use crate::world::components::{AiState, Goal, PersonalNeeds, SimulationLevel};
+use std::collections::HashMap;
 
 /// Default AI budget as percentage of frame time (25% of 16.6ms = ~4ms)
 pub const DEFAULT_AI_BUDGET_US: u64 = 4000;
@@ -88,7 +88,9 @@ impl AiScheduler {
             match state {
                 AiState::Executing(goal) => match goal {
                     Goal::Flee | Goal::Hunt | Goal::DefendTerritory => return AiPriority::Critical,
-                    Goal::SeekFood | Goal::SeekWater | Goal::SeekShelter => return AiPriority::Urgent,
+                    Goal::SeekFood | Goal::SeekWater | Goal::SeekShelter => {
+                        return AiPriority::Urgent
+                    }
                     _ => {}
                 },
                 AiState::Idle => {}
@@ -114,7 +116,7 @@ impl AiScheduler {
         sim_level: SimulationLevel,
     ) {
         let priority = Self::compute_priority(ai_state, needs, sim_level);
-        
+
         self.schedules
             .entry(entity)
             .and_modify(|s| s.priority = priority)
@@ -134,7 +136,7 @@ impl AiScheduler {
     /// Returns true if: (1) budget allows, (2) priority is high, or (3) max skip reached
     pub fn should_tick(&mut self, entity: Entity, elapsed_us: u64) -> bool {
         let schedule = self.schedules.get_mut(&entity);
-        
+
         // Unknown entity - tick it
         let schedule = match schedule {
             Some(s) => s,
@@ -242,21 +244,13 @@ mod tests {
         let mut needs = PersonalNeeds::default_npc();
         needs.hunger = 0.8;
 
-        let priority = AiScheduler::compute_priority(
-            None,
-            Some(&needs),
-            SimulationLevel::L0,
-        );
+        let priority = AiScheduler::compute_priority(None, Some(&needs), SimulationLevel::L0);
         assert_eq!(priority, AiPriority::Urgent);
     }
 
     #[test]
     fn test_priority_idle_l2() {
-        let priority = AiScheduler::compute_priority(
-            None,
-            None,
-            SimulationLevel::L2,
-        );
+        let priority = AiScheduler::compute_priority(None, None, SimulationLevel::L2);
         assert_eq!(priority, AiPriority::Idle);
     }
 
@@ -264,17 +258,17 @@ mod tests {
     fn test_forced_tick_after_max_skip() {
         let mut scheduler = AiScheduler::new();
         let entity: Entity = 1;
-        
+
         scheduler.update_entity(entity, None, None, SimulationLevel::L0);
-        
+
         // Skip MAX_SKIP_FRAMES times
         for _ in 0..MAX_SKIP_FRAMES {
             scheduler.mark_skipped(entity);
         }
-        
+
         // Should force tick
         assert!(scheduler.should_tick(entity, 0));
-        
+
         let stats = scheduler.stats();
         assert_eq!(stats.forced_ticks, 1);
     }
@@ -283,13 +277,13 @@ mod tests {
     fn test_budget_miss() {
         let mut scheduler = AiScheduler::new();
         scheduler.set_budget(100); // Very small budget
-        
+
         let entity: Entity = 1;
         scheduler.update_entity(entity, None, None, SimulationLevel::L0);
-        
+
         // Budget exceeded
         assert!(!scheduler.should_tick(entity, 200));
-        
+
         let stats = scheduler.stats();
         assert_eq!(stats.budget_misses, 1);
     }

@@ -1,0 +1,22 @@
+[package]
+name = "engine_core"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+physics = []
+render = []
+ai = []
+audio = []
+debug_ui = []
+headless = []
+sdk_tools = []
+low_spec = []
+networking = []
+body_sim = []
+audio_playback = []
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+ron = "0.8"
+puffin = "0.19"

@@ -157,10 +157,13 @@ mod tests {
         // Backup should exist after second write
         let bak_path = test_path.with_extension("bak");
         assert!(bak_path.exists(), "backup should exist after overwrite");
-        
+
         // Verify backup contains v1
         let backup_content = fs::read(&bak_path).expect("read backup failed");
-        assert_eq!(backup_content, data_v1, "backup should contain previous version");
+        assert_eq!(
+            backup_content, data_v1,
+            "backup should contain previous version"
+        );
 
         // Cleanup
         let _ = fs::remove_file(&test_path);

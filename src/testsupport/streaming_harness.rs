@@ -86,10 +86,9 @@ pub fn run_multi_region_test(
             }
             crate::core::persistent_id::EntityPresence::Dead => {
                 report.identity_preserved = false;
-                report.details.push(format!(
-                    "FAIL: PersistentId {:?} is dead after reload",
-                    pid
-                ));
+                report
+                    .details
+                    .push(format!("FAIL: PersistentId {:?} is dead after reload", pid));
             }
         }
     }
@@ -125,10 +124,7 @@ impl MigrationService {
         to_promote
     }
 
-    pub fn check_demotions(
-        ecs: &Ecs,
-        streamer: &WorldStreamer,
-    ) -> Vec<(PersistentEntityId, u64)> {
+    pub fn check_demotions(ecs: &Ecs, streamer: &WorldStreamer) -> Vec<(PersistentEntityId, u64)> {
         let mut to_demote = Vec::new();
         for &entity in &ecs.alive {
             if let Some(transform) = ecs.get_transform(entity) {

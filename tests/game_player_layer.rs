@@ -6,8 +6,7 @@ use engene::game::hud::{HudState, NotificationKind};
 use engene::game::player::{CameraMode, PlayerController, PlayerState};
 use engene::game::player_save::{PlayerInventory, PlayerItem, PlayerItemType, PlayerSave};
 use engene::world::components::{
-    base_power, food_value, is_prey_for, EntityKind, EquipmentSlots, MonsterSpecies,
-    PersonalNeeds,
+    base_power, food_value, is_prey_for, EntityKind, EquipmentSlots, MonsterSpecies, PersonalNeeds,
 };
 
 // =============================================================================
@@ -810,15 +809,7 @@ fn player_item_type_tool() {
 fn player_save_from_state_creates_save() {
     let controller = PlayerController::new([1.0, 2.0, 3.0]);
     let inventory = PlayerInventory::new();
-    let save = PlayerSave::from_state(
-        &controller,
-        &inventory,
-        vec![1, 2],
-        vec![3],
-        3600.0,
-        15,
-        6,
-    );
+    let save = PlayerSave::from_state(&controller, &inventory, vec![1, 2], vec![3], 3600.0, 15, 6);
     assert_eq!(save.position, [1.0, 2.0, 3.0]);
 }
 

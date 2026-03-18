@@ -83,7 +83,10 @@ fn event_bus_clear_removes_frame_events_not_sticky() {
     bus.clear();
 
     assert_eq!(bus.count::<u32>(), 0);
-    assert_eq!(bus.get_sticky::<String>(), Some(&String::from("persistent")));
+    assert_eq!(
+        bus.get_sticky::<String>(),
+        Some(&String::from("persistent"))
+    );
 }
 
 #[test]
@@ -101,7 +104,7 @@ fn runtime_manifest_feature_toggle() {
 
 #[test]
 fn runtime_config_profiles() {
-    use engene::core::runtime_config::{RuntimeConfig, RuntimeProfile, RendererBackend};
+    use engene::core::runtime_config::{RendererBackend, RuntimeConfig, RuntimeProfile};
 
     let sandbox = RuntimeConfig::sandbox();
     assert_eq!(sandbox.profile, RuntimeProfile::Sandbox);
@@ -152,7 +155,7 @@ fn parallel_validator_no_conflicts_for_disjoint() {
 
 #[test]
 fn debug_registry_categories() {
-    use engene::core::debug::debug_registry::{DebugRegistry, DebugCategory};
+    use engene::core::debug::debug_registry::{DebugCategory, DebugRegistry};
 
     let mut reg = DebugRegistry::new();
     reg.register_view("nav_mesh", DebugCategory::World);
@@ -167,17 +170,23 @@ fn debug_registry_categories() {
 
 #[test]
 fn frame_recorder_capacity_and_freeze() {
-    use engene::core::debug::frame_recorder::{FrameRecorder, DebugFrameSnapshot};
+    use engene::core::debug::frame_recorder::{DebugFrameSnapshot, FrameRecorder};
 
     let mut recorder = FrameRecorder::new(3);
     for i in 0..5 {
-        recorder.record(DebugFrameSnapshot { tick: i, data: vec![] });
+        recorder.record(DebugFrameSnapshot {
+            tick: i,
+            data: vec![],
+        });
     }
     assert_eq!(recorder.len(), 3);
     assert_eq!(recorder.latest().unwrap().tick, 4);
 
     recorder.freeze();
-    recorder.record(DebugFrameSnapshot { tick: 99, data: vec![] });
+    recorder.record(DebugFrameSnapshot {
+        tick: 99,
+        data: vec![],
+    });
     assert_eq!(recorder.len(), 3);
 }
 
@@ -250,8 +259,8 @@ fn e2e_deferred_events_reach_bus() {
 
 #[test]
 fn e2e_canonical_events_emitted_and_consumed() {
-    use engene::core::events::EventBus;
     use engene::core::events::canonical::*;
+    use engene::core::events::EventBus;
     use glam::Vec3;
 
     let mut bus = EventBus::new();
@@ -277,12 +286,28 @@ fn e2e_canonical_events_emitted_and_consumed() {
         volume: 1.0,
     });
 
-    assert_eq!(bus.read::<ImpactEvent>().len(), 1, "ImpactEvent should be readable");
-    assert_eq!(bus.read::<WorldTopologyChanged>().len(), 1, "WorldTopologyChanged should be readable");
-    assert_eq!(bus.read::<SoundTrigger>().len(), 1, "SoundTrigger should be readable");
+    assert_eq!(
+        bus.read::<ImpactEvent>().len(),
+        1,
+        "ImpactEvent should be readable"
+    );
+    assert_eq!(
+        bus.read::<WorldTopologyChanged>().len(),
+        1,
+        "WorldTopologyChanged should be readable"
+    );
+    assert_eq!(
+        bus.read::<SoundTrigger>().len(),
+        1,
+        "SoundTrigger should be readable"
+    );
 
     bus.clear();
-    assert_eq!(bus.read::<ImpactEvent>().len(), 0, "clear should remove frame events");
+    assert_eq!(
+        bus.read::<ImpactEvent>().len(),
+        0,
+        "clear should remove frame events"
+    );
 }
 
 #[test]
@@ -337,7 +362,10 @@ fn persistent_identity_despawn_marks_dead() {
     let mut ecs = Ecs::new();
     let (entity, pid) = ecs.spawn_new();
 
-    assert!(matches!(ecs.identity.presence(pid), EntityPresence::Live(_)));
+    assert!(matches!(
+        ecs.identity.presence(pid),
+        EntityPresence::Live(_)
+    ));
     ecs.despawn(entity);
     assert_eq!(ecs.identity.presence(pid), EntityPresence::Dead);
     assert_eq!(ecs.identity.persistent_id_of(entity), None);
@@ -351,8 +379,13 @@ fn persistent_identity_spawn_restored_reuses_pid() {
     let mut ecs = Ecs::new();
     let pid = PersistentEntityId(42);
 
-    let entity = ecs.spawn_restored(pid).expect("first restore should succeed");
-    assert!(matches!(ecs.identity.presence(pid), EntityPresence::Live(_)));
+    let entity = ecs
+        .spawn_restored(pid)
+        .expect("first restore should succeed");
+    assert!(matches!(
+        ecs.identity.presence(pid),
+        EntityPresence::Live(_)
+    ));
     assert_eq!(ecs.identity.resolve(pid), Some(entity));
 }
 
@@ -381,12 +414,18 @@ fn persistent_identity_tombstone_gc() {
     assert_eq!(ecs.identity.presence(pid), EntityPresence::Dead);
 
     ecs.identity.gc_tombstones(200, 50);
-    assert_eq!(ecs.identity.presence(pid), EntityPresence::Dead,
-        "tombstone should survive within max_age");
+    assert_eq!(
+        ecs.identity.presence(pid),
+        EntityPresence::Dead,
+        "tombstone should survive within max_age"
+    );
 
     ecs.identity.gc_tombstones(300, 50);
-    assert_eq!(ecs.identity.presence(pid), EntityPresence::Dead,
-        "tombstone collected after max_age");
+    assert_eq!(
+        ecs.identity.presence(pid),
+        EntityPresence::Dead,
+        "tombstone collected after max_age"
+    );
 }
 
 // ── Wave 1: Reference Hygiene (A0.1.5) ────────────────────────
@@ -441,11 +480,17 @@ fn authority_matrix_covers_all_state_categories() {
     use engene::core::world_state_authority::{authority_matrix, SaveScope};
 
     let matrix = authority_matrix();
-    assert!(matrix.len() >= 15, "authority matrix should cover at least 15 state categories, got {}", matrix.len());
+    assert!(
+        matrix.len() >= 15,
+        "authority matrix should cover at least 15 state categories, got {}",
+        matrix.len()
+    );
 
     let has_transform = matrix.iter().any(|e| e.state_name == "Entity Transform");
     let has_health = matrix.iter().any(|e| e.state_name == "Personal Needs");
-    let has_destruction = matrix.iter().any(|e| e.state_name == "Destruction Topology");
+    let has_destruction = matrix
+        .iter()
+        .any(|e| e.state_name == "Destruction Topology");
     let has_economy = matrix.iter().any(|e| e.state_name == "Economy Global");
     let has_spatial = matrix.iter().any(|e| e.state_name == "Spatial Index");
 
@@ -455,9 +500,18 @@ fn authority_matrix_covers_all_state_categories() {
     assert!(has_economy, "missing Economy Global");
     assert!(has_spatial, "missing Spatial Index");
 
-    let entity_scoped = matrix.iter().filter(|e| e.save_scope == SaveScope::Entity).count();
-    let derived = matrix.iter().filter(|e| e.save_scope == SaveScope::Derived).count();
-    assert!(entity_scoped >= 5, "should have at least 5 entity-scoped states");
+    let entity_scoped = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Entity)
+        .count();
+    let derived = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Derived)
+        .count();
+    assert!(
+        entity_scoped >= 5,
+        "should have at least 5 entity-scoped states"
+    );
     assert!(derived >= 3, "should have at least 3 derived states");
 }
 
@@ -467,8 +521,10 @@ fn authority_enforcement_no_false_positives() {
 
     let violations = enforce_authority_rules();
     for v in &violations {
-        assert_ne!(v.state_name, "Entity Transform",
-            "entity transform should not have authority violations");
+        assert_ne!(
+            v.state_name, "Entity Transform",
+            "entity transform should not have authority violations"
+        );
     }
 }
 
@@ -477,9 +533,16 @@ fn derived_state_rebuild_all_pass() {
     use engene::core::world_state_authority::validate_derived_state_rebuild;
 
     let tests = validate_derived_state_rebuild();
-    assert!(tests.len() >= 3, "should have at least 3 derived rebuild tests");
+    assert!(
+        tests.len() >= 3,
+        "should have at least 3 derived rebuild tests"
+    );
     for t in &tests {
-        assert!(t.passed, "derived rebuild '{}' should pass: {}", t.state_name, t.details);
+        assert!(
+            t.passed,
+            "derived rebuild '{}' should pass: {}",
+            t.state_name, t.details
+        );
     }
 }
 
@@ -490,7 +553,11 @@ fn field_invariant_table_completeness() {
     use engene::simulation::abstraction_invariants::{field_invariant_table, FieldPreservation};
 
     let table = field_invariant_table();
-    assert!(table.len() >= 10, "invariant table should have at least 10 entries, got {}", table.len());
+    assert!(
+        table.len() >= 10,
+        "invariant table should have at least 10 entries, got {}",
+        table.len()
+    );
 
     let has_pid = table.iter().any(|f| f.field_name == "persistent_id");
     let has_position = table.iter().any(|f| f.field_name.contains("position"));
@@ -500,9 +567,15 @@ fn field_invariant_table_completeness() {
     assert!(has_position, "missing position invariant");
     assert!(has_health, "missing health invariant");
 
-    let pid_entry = table.iter().find(|f| f.field_name == "persistent_id").unwrap();
-    assert_eq!(pid_entry.preservation, FieldPreservation::PreserveExact,
-        "persistent_id must be PreserveExact");
+    let pid_entry = table
+        .iter()
+        .find(|f| f.field_name == "persistent_id")
+        .unwrap();
+    assert_eq!(
+        pid_entry.preservation,
+        FieldPreservation::PreserveExact,
+        "persistent_id must be PreserveExact"
+    );
 }
 
 // ── Wave 1: Network Markers (A0.4) ───────────────────────────
@@ -513,15 +586,25 @@ fn net_state_markers_cover_critical_states() {
     use engene::network::net_markers::{net_state_markers, NetAuthority, NetPriority};
 
     let markers = net_state_markers();
-    assert!(markers.len() >= 10, "should annotate at least 10 state types");
+    assert!(
+        markers.len() >= 10,
+        "should annotate at least 10 state types"
+    );
 
-    let transform = markers.iter().find(|m| m.state_name == "Transform").unwrap();
+    let transform = markers
+        .iter()
+        .find(|m| m.state_name == "Transform")
+        .unwrap();
     assert_eq!(transform.authority, NetAuthority::ServerAuthoritative);
     assert_eq!(transform.priority, NetPriority::EveryTick);
     assert!(transform.interpolatable);
 
     let memory = markers.iter().find(|m| m.state_name == "Memory").unwrap();
-    assert_eq!(memory.priority, NetPriority::Never, "AI memory should never be replicated");
+    assert_eq!(
+        memory.priority,
+        NetPriority::Never,
+        "AI memory should never be replicated"
+    );
 
     let sim_level = markers.iter().find(|m| m.state_name == "SimLevel").unwrap();
     assert_eq!(sim_level.authority, NetAuthority::ClientLocal);
@@ -553,11 +636,15 @@ fn editor_safe_mode_disables_after_repeated_panics() {
     esm.register_panel("broken_panel");
 
     for _ in 0..3 {
-        let _ = esm.draw_panel("broken_panel", || { panic!("intentional test panic"); });
+        let _ = esm.draw_panel("broken_panel", || {
+            panic!("intentional test panic");
+        });
     }
 
-    assert!(!esm.is_panel_enabled("broken_panel"),
-        "panel should be disabled after 3 consecutive panics");
+    assert!(
+        !esm.is_panel_enabled("broken_panel"),
+        "panel should be disabled after 3 consecutive panics"
+    );
 }
 
 #[test]
@@ -568,7 +655,9 @@ fn editor_safe_mode_recovery() {
     esm.register_panel("recoverable");
 
     for _ in 0..3 {
-        let _ = esm.draw_panel("recoverable", || { panic!("test"); });
+        let _ = esm.draw_panel("recoverable", || {
+            panic!("test");
+        });
     }
     assert!(!esm.is_panel_enabled("recoverable"));
 
@@ -586,8 +675,10 @@ fn editor_safe_mode_global_activation() {
 
     esm.end_frame(100.0); // way over budget
     assert!(esm.is_safe_mode());
-    assert!(!esm.is_panel_enabled("inspector"),
-        "all panels disabled in safe mode");
+    assert!(
+        !esm.is_panel_enabled("inspector"),
+        "all panels disabled in safe mode"
+    );
 
     esm.exit_safe_mode();
     assert!(!esm.is_safe_mode());
@@ -608,13 +699,17 @@ fn all_gameplay_entities_have_persistent_ids() {
     let total_alive = ecs.alive.len();
     assert!(total_alive > 0, "should have spawned entities");
 
-    let with_pid = ecs.alive.iter()
+    let with_pid = ecs
+        .alive
+        .iter()
         .filter(|&&e| ecs.identity.persistent_id_of(e).is_some())
         .count();
 
-    assert_eq!(with_pid, total_alive,
+    assert_eq!(
+        with_pid, total_alive,
         "all {} gameplay entities should have PersistentEntityId, but only {} do",
-        total_alive, with_pid);
+        total_alive, with_pid
+    );
 }
 
 // ── Wave 2: Chunk Persistence (A.1) ──────────────────────────
@@ -631,12 +726,21 @@ fn chunk_persistence_save_and_load_cycle() {
 
     let mut ecs = Ecs::new();
     let (e1, pid1) = ecs.spawn_new();
-    ecs.transforms.insert(e1, engene::world::components::Transform {
-        x: 500.0, y: 500.0, cell_x: 0, cell_y: 0,
-    });
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
-    ecs.names.insert(e1, engene::world::components::Name("TestNPC".into()));
-    ecs.personal_needs.insert(e1, engene::world::components::PersonalNeeds::default_npc());
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.names
+        .insert(e1, engene::world::components::Name("TestNPC".into()));
+    ecs.personal_needs
+        .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -644,8 +748,10 @@ fn chunk_persistence_save_and_load_cycle() {
     let saved = persistence.save_and_unload(coord, &mut ecs, 100);
     assert_eq!(saved, 1, "should save 1 entity");
     assert_eq!(ecs.alive.len(), 0, "entity should be removed from ECS");
-    assert!(matches!(ecs.identity.presence(pid1), EntityPresence::Unloaded),
-        "entity should be marked Unloaded, not Dead");
+    assert!(
+        matches!(ecs.identity.presence(pid1), EntityPresence::Unloaded),
+        "entity should be marked Unloaded, not Dead"
+    );
 
     let loaded = persistence.load_chunk_entities(coord, &mut ecs);
     assert_eq!(loaded, 1, "should load 1 entity");
@@ -665,11 +771,19 @@ fn chunk_persistence_identity_survives_cycle() {
 
     let mut ecs = Ecs::new();
     let (e1, pid1) = ecs.spawn_new();
-    ecs.transforms.insert(e1, engene::world::components::Transform {
-        x: 100.0, y: 100.0, cell_x: 0, cell_y: 0,
-    });
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
-    ecs.personal_needs.insert(e1, engene::world::components::PersonalNeeds::default_npc());
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.personal_needs
+        .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -677,9 +791,14 @@ fn chunk_persistence_identity_survives_cycle() {
     persistence.save_and_unload(coord, &mut ecs, 50);
     persistence.load_chunk_entities(coord, &mut ecs);
 
-    let restored_entity = ecs.identity.resolve(pid1)
+    let restored_entity = ecs
+        .identity
+        .resolve(pid1)
         .expect("pid should resolve after reload");
-    assert!(ecs.is_alive(restored_entity), "restored entity should be alive");
+    assert!(
+        ecs.is_alive(restored_entity),
+        "restored entity should be alive"
+    );
 
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -697,11 +816,19 @@ fn relink_report_clean_after_simple_cycle() {
 
     let mut ecs = Ecs::new();
     let (e1, _pid1) = ecs.spawn_new();
-    ecs.transforms.insert(e1, engene::world::components::Transform {
-        x: 200.0, y: 200.0, cell_x: 0, cell_y: 0,
-    });
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
-    ecs.personal_needs.insert(e1, engene::world::components::PersonalNeeds::default_npc());
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 200.0,
+            y: 200.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.personal_needs
+        .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -711,7 +838,11 @@ fn relink_report_clean_after_simple_cycle() {
 
     assert_eq!(report.entities_restored, 1);
     assert_eq!(report.duplicates_skipped, 0);
-    assert!(report.is_clean(), "relink should be clean: {}", report.summary());
+    assert!(
+        report.is_clean(),
+        "relink should be clean: {}",
+        report.summary()
+    );
 
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -772,37 +903,52 @@ fn nightly_streaming_4_region_cycle() {
     use engene::testsupport::streaming_harness::golden_scenarios;
 
     let scenarios = golden_scenarios();
-    assert!(scenarios.len() >= 4, "should have at least 4 golden scenarios");
+    assert!(
+        scenarios.len() >= 4,
+        "should have at least 4 golden scenarios"
+    );
 }
 
 // ── Wave 3: Runtime Profiles ─────────────────────────────────
 
 #[test]
 fn runtime_profiles_have_correct_budgets() {
-    use engene::core::runtime_config::{RuntimeConfig, QualityTier};
+    use engene::core::runtime_config::{QualityTier, RuntimeConfig};
 
     let low = RuntimeConfig::low_spec();
     let budgets = low.budgets();
     assert_eq!(budgets.quality, QualityTier::Low);
     assert!(!budgets.enable_ssao, "low spec should disable SSAO");
-    assert!(!budgets.enable_volumetrics, "low spec should disable volumetrics");
+    assert!(
+        !budgets.enable_volumetrics,
+        "low spec should disable volumetrics"
+    );
     assert!(budgets.max_visible_npcs <= 50, "low spec should cap NPCs");
 
     let shipping = RuntimeConfig::shipping();
     let budgets = shipping.budgets();
     assert_eq!(budgets.quality, QualityTier::High);
     assert!(budgets.enable_ssao, "shipping should enable SSAO");
-    assert!(budgets.max_visible_npcs >= 200, "shipping should support many NPCs");
+    assert!(
+        budgets.max_visible_npcs >= 200,
+        "shipping should support many NPCs"
+    );
 
     let headless = RuntimeConfig::headless();
     let budgets = headless.budgets();
-    assert_eq!(budgets.render_budget_ms, 0.0, "headless should have no render budget");
-    assert!(!budgets.enable_debug_ui, "headless should not enable debug UI");
+    assert_eq!(
+        budgets.render_budget_ms, 0.0,
+        "headless should have no render budget"
+    );
+    assert!(
+        !budgets.enable_debug_ui,
+        "headless should not enable debug UI"
+    );
 }
 
 #[test]
 fn all_profiles_produce_valid_budgets() {
-    use engene::core::runtime_config::{RuntimeProfile, ProfileBudgets};
+    use engene::core::runtime_config::{ProfileBudgets, RuntimeProfile};
 
     let profiles = [
         RuntimeProfile::Shipping,
@@ -815,9 +961,21 @@ fn all_profiles_produce_valid_budgets() {
 
     for profile in &profiles {
         let budgets = ProfileBudgets::for_profile(profile);
-        assert!(budgets.ai_think_budget_ms >= 0.0, "{:?} has negative AI budget", profile);
-        assert!(budgets.render_budget_ms >= 0.0, "{:?} has negative render budget", profile);
-        assert!(budgets.max_particles <= 100_000, "{:?} has unreasonable particle cap", profile);
+        assert!(
+            budgets.ai_think_budget_ms >= 0.0,
+            "{:?} has negative AI budget",
+            profile
+        );
+        assert!(
+            budgets.render_budget_ms >= 0.0,
+            "{:?} has negative render budget",
+            profile
+        );
+        assert!(
+            budgets.max_particles <= 100_000,
+            "{:?} has unreasonable particle cap",
+            profile
+        );
     }
 }
 
@@ -828,12 +986,19 @@ fn degradation_order_has_never_cut_entries() {
     use engene::core::quality_governor::{degradation_order, DegradationPriority};
 
     let order = degradation_order();
-    assert!(order.len() >= 10, "should have at least 10 degradation entries");
+    assert!(
+        order.len() >= 10,
+        "should have at least 10 degradation entries"
+    );
 
-    let never_cut: Vec<_> = order.iter()
+    let never_cut: Vec<_> = order
+        .iter()
         .filter(|e| e.priority == DegradationPriority::NeverCut)
         .collect();
-    assert!(never_cut.len() >= 4, "should have at least 4 never-cut systems");
+    assert!(
+        never_cut.len() >= 4,
+        "should have at least 4 never-cut systems"
+    );
 
     let never_cut_names: Vec<&str> = never_cut.iter().map(|e| e.subsystem).collect();
     assert!(never_cut_names.contains(&"Collision Detection"));
@@ -849,16 +1014,22 @@ fn degradation_low_disables_cosmetics() {
 
     let disabled = systems_to_disable(QualityTier::Low);
     assert!(disabled.contains(&"SSAO"), "SSAO should be disabled at Low");
-    assert!(disabled.contains(&"Volumetric Lighting"), "Volumetrics should be disabled at Low");
-    assert!(disabled.contains(&"Detailed Decals"), "Detailed decals should be disabled at Low");
+    assert!(
+        disabled.contains(&"Volumetric Lighting"),
+        "Volumetrics should be disabled at Low"
+    );
+    assert!(
+        disabled.contains(&"Detailed Decals"),
+        "Detailed decals should be disabled at Low"
+    );
 }
 
 // ── Wave 3: Doctor Integration ───────────────────────────────
 
 #[test]
 fn doctor_reports_identity_and_authority() {
-    use engene::tools::doctor::{run_doctor, DoctorMode};
     use engene::core::engine::Engine;
+    use engene::tools::doctor::{run_doctor, DoctorMode};
     use engene::world::biome::Biome;
     use engene::world::resources::ResourceGrid;
 
@@ -867,19 +1038,21 @@ fn doctor_reports_identity_and_authority() {
 
     let report = run_doctor(&engine, DoctorMode::Advisory);
 
-    let has_identity_diag = report.diagnostics.iter()
-        .any(|d| d.category == "identity");
-    let has_authority_diag = report.diagnostics.iter()
-        .any(|d| d.category == "authority");
-    let has_network_diag = report.diagnostics.iter()
-        .any(|d| d.category == "network");
-    let has_degradation_diag = report.diagnostics.iter()
+    let has_identity_diag = report.diagnostics.iter().any(|d| d.category == "identity");
+    let has_authority_diag = report.diagnostics.iter().any(|d| d.category == "authority");
+    let has_network_diag = report.diagnostics.iter().any(|d| d.category == "network");
+    let has_degradation_diag = report
+        .diagnostics
+        .iter()
         .any(|d| d.category == "degradation");
 
     assert!(has_identity_diag, "doctor should check identity health");
     assert!(has_authority_diag, "doctor should check authority matrix");
     assert!(has_network_diag, "doctor should check net markers");
-    assert!(has_degradation_diag, "doctor should check degradation order");
+    assert!(
+        has_degradation_diag,
+        "doctor should check degradation order"
+    );
 }
 
 // ===== Block 2: Authority Enforcement Tests =====
@@ -888,13 +1061,25 @@ fn doctor_reports_identity_and_authority() {
 fn authority_matrix_covers_critical_state() {
     use engene::core::world_state_authority::{authority_matrix, SaveScope};
     let matrix = authority_matrix();
-    assert!(matrix.len() >= 15, "authority matrix should cover all critical state categories");
+    assert!(
+        matrix.len() >= 15,
+        "authority matrix should cover all critical state categories"
+    );
 
-    let entity_scoped: Vec<_> = matrix.iter().filter(|e| e.save_scope == SaveScope::Entity).collect();
+    let entity_scoped: Vec<_> = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Entity)
+        .collect();
     assert!(entity_scoped.len() >= 8, "should have entity-scoped entries for transform, kind, needs, memory, emotions, economy, inventory, body");
 
-    let chunk_scoped: Vec<_> = matrix.iter().filter(|e| e.save_scope == SaveScope::Chunk).collect();
-    assert!(chunk_scoped.len() >= 3, "should have chunk-scoped entries for destruction, surface, fire");
+    let chunk_scoped: Vec<_> = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Chunk)
+        .collect();
+    assert!(
+        chunk_scoped.len() >= 3,
+        "should have chunk-scoped entries for destruction, surface, fire"
+    );
 }
 
 #[test]
@@ -910,15 +1095,24 @@ fn authority_enforce_rules_detects_policy_violations() {
 fn authority_derived_state_rebuild_passes() {
     use engene::core::world_state_authority::validate_derived_state_rebuild;
     let tests = validate_derived_state_rebuild();
-    assert!(tests.len() >= 4, "should test nav dirty, cover map, spatial index, sim level");
+    assert!(
+        tests.len() >= 4,
+        "should test nav dirty, cover map, spatial index, sim level"
+    );
     for t in &tests {
-        assert!(t.passed, "derived state rebuild for '{}' should pass: {}", t.state_name, t.details);
+        assert!(
+            t.passed,
+            "derived state rebuild for '{}' should pass: {}",
+            t.state_name, t.details
+        );
     }
 }
 
 #[test]
 fn ownership_map_validates() {
-    use engene::core::ownership_map::{OwnershipMap, ResourceOwnership, MutationTiming, ThreadSafety};
+    use engene::core::ownership_map::{
+        MutationTiming, OwnershipMap, ResourceOwnership, ThreadSafety,
+    };
     let mut map = OwnershipMap::new();
     map.register_resource(ResourceOwnership {
         resource_name: "TestRes".into(),
@@ -931,7 +1125,10 @@ fn ownership_map_validates() {
         notes: String::new(),
     });
     let issues = map.validate();
-    assert!(issues.is_empty(), "valid ownership should produce no issues");
+    assert!(
+        issues.is_empty(),
+        "valid ownership should produce no issues"
+    );
     assert_eq!(map.resource_count(), 1);
     assert_eq!(map.resources_owned_by("TestSys").len(), 1);
 }
@@ -940,9 +1137,9 @@ fn ownership_map_validates() {
 
 #[test]
 fn event_multi_bus_architecture() {
-    use engene::core::events::sim_bus::SimBus;
-    use engene::core::events::render_bus::RenderBus;
     use engene::core::events::debug_bus::DebugBus;
+    use engene::core::events::render_bus::RenderBus;
+    use engene::core::events::sim_bus::SimBus;
 
     let mut sim = SimBus::new();
     let mut render = RenderBus::new();

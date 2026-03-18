@@ -14,16 +14,38 @@ pub struct EventTracer {
 
 impl EventTracer {
     pub fn new() -> Self {
-        Self { traces: Vec::new(), enabled: false }
+        Self {
+            traces: Vec::new(),
+            enabled: false,
+        }
     }
 
-    pub fn enable(&mut self) { self.enabled = true; }
-    pub fn disable(&mut self) { self.enabled = false; }
-    pub fn is_enabled(&self) -> bool { self.enabled }
+    pub fn enable(&mut self) {
+        self.enabled = true;
+    }
+    pub fn disable(&mut self) {
+        self.enabled = false;
+    }
+    pub fn is_enabled(&self) -> bool {
+        self.enabled
+    }
 
-    pub fn record(&mut self, event_type: TypeId, event_name: &'static str, tick: u64, count: usize) {
-        if !self.enabled { return; }
-        self.traces.push(EventTrace { event_type, event_name, tick, count });
+    pub fn record(
+        &mut self,
+        event_type: TypeId,
+        event_name: &'static str,
+        tick: u64,
+        count: usize,
+    ) {
+        if !self.enabled {
+            return;
+        }
+        self.traces.push(EventTrace {
+            event_type,
+            event_name,
+            tick,
+            count,
+        });
     }
 
     pub fn drain(&mut self) -> Vec<EventTrace> {
@@ -32,5 +54,7 @@ impl EventTracer {
 }
 
 impl Default for EventTracer {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

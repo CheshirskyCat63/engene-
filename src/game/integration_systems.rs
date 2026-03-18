@@ -11,8 +11,8 @@ use crate::graphics::destruction_occlusion::{DestructionOcclusionSystem, Occlusi
 use crate::graphics::gore_mesh::{GoreMeshInstance, GoreMeshSystem};
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::physics::ballistics::{BallisticEvent, BallisticsSystem};
-use crate::physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
 use crate::physics::damage_pipeline::response_aggregator::BodyZone;
+use crate::physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
 use crate::world::fields::WorldFields;
 use crate::world::terrain_damage::CraterStamp;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
@@ -40,13 +40,15 @@ impl EngineSystem for BallisticsTickSystem {
     }
 
     fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
-        let height_fn: Box<dyn Fn(f32, f32) -> f32> =
-            if let Some(hm) = ctx.resources.get::<std::sync::Arc<crate::world::heightmap::Heightmap>>() {
-                let hm = hm.clone();
-                Box::new(move |x, z| hm.sample(x, z))
-            } else {
-                Box::new(|_x, _z| 0.0)
-            };
+        let height_fn: Box<dyn Fn(f32, f32) -> f32> = if let Some(hm) = ctx
+            .resources
+            .get::<std::sync::Arc<crate::world::heightmap::Heightmap>>()
+        {
+            let hm = hm.clone();
+            Box::new(move |x, z| hm.sample(x, z))
+        } else {
+            Box::new(|_x, _z| 0.0)
+        };
 
         let Some(ballistics) = ctx.resources.get_mut::<BallisticsSystem>() else {
             return;
@@ -124,13 +126,18 @@ impl EngineSystem for DamageDispatchSystem {
     }
 
     fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
-        let impacts: Vec<ImpactEvent> = ctx.events.read::<ImpactEvent>()
+        let impacts: Vec<ImpactEvent> = ctx
+            .events
+            .read::<ImpactEvent>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
 
         // Wire EventAggregator: spatial bucketing of impacts
-        if let Some(aggregator) = ctx.resources.get_mut::<crate::core::events::aggregation::EventAggregator>() {
+        if let Some(aggregator) = ctx
+            .resources
+            .get_mut::<crate::core::events::aggregation::EventAggregator>()
+        {
             for ev in &impacts {
                 aggregator.submit(ev);
             }
@@ -197,24 +204,28 @@ impl EngineSystem for DestructionTickSystem {
             return;
         };
 
-        let impacts: Vec<ImpactEvent> = ctx.events.read::<ImpactEvent>()
+        let impacts: Vec<ImpactEvent> = ctx
+            .events
+            .read::<ImpactEvent>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
 
         for ev in &impacts {
-            destruction.apply_impulse_at(
-                ev.position,
-                ev.energy,
-                DestructionLod::Full,
-            );
+            destruction.apply_impulse_at(ev.position, ev.energy, DestructionLod::Full);
         }
 
         let events = destruction.drain_events();
 
         for ev in events {
-            if let DestructionEvent::ObjectFragmented { entity, cluster_count } = ev {
-                let position = ctx.ecs.transforms
+            if let DestructionEvent::ObjectFragmented {
+                entity,
+                cluster_count,
+            } = ev
+            {
+                let position = ctx
+                    .ecs
+                    .transforms
                     .get(&entity)
                     .map(|t| Vec3::new(t.x, 0.0, t.y))
                     .unwrap_or(Vec3::ZERO);
@@ -257,7 +268,9 @@ impl EngineSystem for TerrainDeformationTickSystem {
             return;
         };
 
-        let deformed: Vec<TerrainDeformed> = ctx.events.read::<TerrainDeformed>()
+        let deformed: Vec<TerrainDeformed> = ctx
+            .events
+            .read::<TerrainDeformed>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
@@ -306,11 +319,15 @@ impl EngineSystem for NavDirtyTickSystem {
             return;
         };
 
-        let topo: Vec<WorldTopologyChanged> = ctx.events.read::<WorldTopologyChanged>()
+        let topo: Vec<WorldTopologyChanged> = ctx
+            .events
+            .read::<WorldTopologyChanged>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
-        let terrain: Vec<TerrainChanged> = ctx.events.read::<TerrainChanged>()
+        let terrain: Vec<TerrainChanged> = ctx
+            .events
+            .read::<TerrainChanged>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
@@ -361,7 +378,9 @@ impl EngineSystem for OcclusionWireSystem {
             return;
         };
 
-        let collapses: Vec<StructuralCollapse> = ctx.events.read::<StructuralCollapse>()
+        let collapses: Vec<StructuralCollapse> = ctx
+            .events
+            .read::<StructuralCollapse>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
@@ -416,7 +435,9 @@ impl EngineSystem for GoreWireSystem {
             return;
         };
 
-        let damaged: Vec<BodyZoneDamaged> = ctx.events.read::<BodyZoneDamaged>()
+        let damaged: Vec<BodyZoneDamaged> = ctx
+            .events
+            .read::<BodyZoneDamaged>()
             .iter()
             .map(|r| (*r).clone())
             .collect();
@@ -447,19 +468,23 @@ impl EngineSystem for GoreWireSystem {
 // 8. AiDecisionWireSystem — wires AI decision, combat tactics, goals, emotions
 // ---------------------------------------------------------------------------
 
+use crate::game::ai::body::BodyState;
 use crate::game::ai::combat::StaggerState;
+use crate::game::ai::combat_tactics::coordination::{
+    assign_group_roles, find_group_members, GroupRole,
+};
 use crate::game::ai::combat_tactics::cover::{evaluate_cover_at, find_nearby_cover, CoverPoint};
-use crate::game::ai::combat_tactics::coordination::{assign_group_roles, find_group_members, GroupRole};
 use crate::game::ai::combat_tactics::tactics::{select_tactic, Tactic, TacticProfile};
 use crate::game::ai::combat_tactics::threat::{assess_threats, ThreatEntry};
 use crate::game::ai::decision::{decide_monster, decide_npc};
 use crate::game::ai::goals::{pick_best, ScoredGoal};
 use crate::game::ai::needs::{heal, take_damage, urgency};
-use crate::game::ai::observability::{AiIntrospection, SimTestConfig, SimTestTier, StabilityMetrics};
+use crate::game::ai::observability::{
+    AiIntrospection, SimTestConfig, SimTestTier, StabilityMetrics,
+};
 use crate::game::ai::offline_simulation::offline_combat;
 use crate::game::ai::social::teach_skill;
 use crate::game::ai::traits::{monster_trait_weight, npc_trait_weight};
-use crate::game::ai::body::BodyState;
 
 pub struct AiDecisionWireSystem;
 
@@ -479,19 +504,23 @@ impl EngineSystem for AiDecisionWireSystem {
         let frame = ctx.ecs.tick;
 
         // Wire decide_npc / decide_monster for entities that need new goals
-        let npc_sample: Vec<_> = ctx.ecs.alive.iter().copied()
+        let npc_sample: Vec<_> = ctx
+            .ecs
+            .alive
+            .iter()
+            .copied()
             .filter(|e| ctx.ecs.kinds.get(e).is_some())
             .take(3)
             .collect();
 
         for &entity in &npc_sample {
             let _scored_goal_sample = ScoredGoal {
-            goal: crate::world::components::Goal::Rest,
-            score: 0.5,
-        };
-        let _ = pick_best(&[_scored_goal_sample]);
+                goal: crate::world::components::Goal::Rest,
+                score: 0.5,
+            };
+            let _ = pick_best(&[_scored_goal_sample]);
 
-        let goal = match (
+            let goal = match (
                 ctx.ecs.npc_traits.get(&entity),
                 ctx.ecs.monster_traits.get(&entity),
                 ctx.ecs.personal_needs.get(&entity),
@@ -499,44 +528,54 @@ impl EngineSystem for AiDecisionWireSystem {
                 ctx.ecs.ecosystem_needs.get(&entity),
                 ctx.ecs.npc_economies.get(&entity),
             ) {
-                (Some(t), None, Some(p), Some(s), _, Some(e)) => {
-                    decide_npc(t, p, s, e)
-                }
-                (None, Some(t), Some(p), _, Some(eco), _) => {
-                    decide_monster(t, p, eco)
-                }
+                (Some(t), None, Some(p), Some(s), _, Some(e)) => decide_npc(t, p, s, e),
+                (None, Some(t), Some(p), _, Some(eco), _) => decide_monster(t, p, eco),
                 _ => continue,
             };
             let _ = goal;
         }
 
         // Wire combat tactics: select_tactic, assess_threats, find_nearby_cover
-        let tactics = ctx.resources.get::<std::collections::HashMap<String, TacticProfile>>();
-        let profile = tactics.as_ref().and_then(|m| m.get("default")).or_else(|| {
-            tactics.as_ref().and_then(|m| m.values().next())
-        });
+        let tactics = ctx
+            .resources
+            .get::<std::collections::HashMap<String, TacticProfile>>();
+        let profile = tactics
+            .as_ref()
+            .and_then(|m| m.get("default"))
+            .or_else(|| tactics.as_ref().and_then(|m| m.values().next()));
 
         if let Some(profile) = profile {
             let sample_entity = ctx.ecs.alive.first().copied();
             if let Some(entity) = sample_entity {
                 let threats = assess_threats(ctx.ecs, entity, 80.0);
-                let my_health = ctx.ecs.personal_needs.get(&entity).map_or(1.0, |p| p.health);
+                let my_health = ctx
+                    .ecs
+                    .personal_needs
+                    .get(&entity)
+                    .map_or(1.0, |p| p.health);
                 let ally_count = find_group_members(ctx.ecs, entity, 50.0).len() as u32;
 
-                let has_cover = if let Some(cover_map) = ctx.resources.get::<crate::navigation::cover_map::CoverMap>() {
-                    let my_pos = ctx.ecs.transforms.get(&entity).map(|t| glam::Vec2::new(t.x, t.y));
+                let has_cover = if let Some(cover_map) =
+                    ctx.resources
+                        .get::<crate::navigation::cover_map::CoverMap>()
+                {
+                    let my_pos = ctx
+                        .ecs
+                        .transforms
+                        .get(&entity)
+                        .map(|t| glam::Vec2::new(t.x, t.y));
                     let threat_pos = threats.first().and_then(|t| {
-                        ctx.ecs.transforms.get(&t.entity).map(|tr| glam::Vec2::new(tr.x, tr.y))
+                        ctx.ecs
+                            .transforms
+                            .get(&t.entity)
+                            .map(|tr| glam::Vec2::new(tr.x, tr.y))
                     });
                     match (my_pos, threat_pos) {
                         (Some(_mp), Some(tp)) => {
-                            let cover_pts: Vec<CoverPoint> = find_nearby_cover(
-                                ctx.ecs,
-                                entity,
-                                tp,
-                                40.0,
-                                &|x, z| cover_map.get_cover_quality(x, z),
-                            );
+                            let cover_pts: Vec<CoverPoint> =
+                                find_nearby_cover(ctx.ecs, entity, tp, 40.0, &|x, z| {
+                                    cover_map.get_cover_quality(x, z)
+                                });
                             if let Some(cp) = cover_pts.first() {
                                 let _ = (cp.position, cp.quality, cp.direction);
                             }
@@ -554,7 +593,8 @@ impl EngineSystem for AiDecisionWireSystem {
                     cover_quality > 0.2
                 };
 
-                let tactic: Tactic = select_tactic(profile, &threats, my_health, ally_count, has_cover);
+                let tactic: Tactic =
+                    select_tactic(profile, &threats, my_health, ally_count, has_cover);
 
                 if let Some(bb) = ctx.ecs.blackboard.get_mut(&entity) {
                     bb.entries.insert(
@@ -565,7 +605,13 @@ impl EngineSystem for AiDecisionWireSystem {
 
                 if let Some(first_threat) = threats.first() {
                     let te: &ThreatEntry = first_threat;
-                    let _ = (te.threat_score, te.distance, te.health_ratio, te.power, te.group_size);
+                    let _ = (
+                        te.threat_score,
+                        te.distance,
+                        te.health_ratio,
+                        te.power,
+                        te.group_size,
+                    );
                 }
                 if !threats.is_empty() && ally_count >= 1 {
                     let group: Vec<_> = find_group_members(ctx.ecs, entity, 50.0);
@@ -580,7 +626,12 @@ impl EngineSystem for AiDecisionWireSystem {
 
         // Wire needs::take_damage, heal, urgency
         for &entity in &ctx.ecs.alive {
-            let u = ctx.ecs.personal_needs.get(&entity).map(|pn| urgency(pn)).unwrap_or(0.0);
+            let u = ctx
+                .ecs
+                .personal_needs
+                .get(&entity)
+                .map(|pn| urgency(pn))
+                .unwrap_or(0.0);
             let _ = u;
             if let Some(pn) = ctx.ecs.personal_needs.get_mut(&entity) {
                 if frame % 1200 == 0 && pn.health < 0.9 && pn.health > 0.1 {
@@ -597,7 +648,9 @@ impl EngineSystem for AiDecisionWireSystem {
         stagger_sample.tick(delta);
         let _ = stagger_sample.is_incapacitated();
 
-        if let Some(StaggerState::Stagger { remaining }) = (frame % 100 == 0).then_some(StaggerState::Stagger { remaining: 0.1 }) {
+        if let Some(StaggerState::Stagger { remaining }) =
+            (frame % 100 == 0).then_some(StaggerState::Stagger { remaining: 0.1 })
+        {
             let _ = remaining;
         }
 
@@ -703,14 +756,17 @@ impl EngineSystem for AiDecisionWireSystem {
 use crate::animation::active_ragdoll::{
     ActiveRagdollController, BalanceSensor, BehavioralReaction, PdGains,
 };
-use crate::animation::animation::{AnimationClip, AnimationPlayer, Channel, Joint, Keyframe, Skeleton};
 use crate::animation::animation::ChannelProperty;
+use crate::animation::animation::{
+    AnimationClip, AnimationPlayer, Channel, Joint, Keyframe, Skeleton,
+};
 use crate::animation::animation_ladder::AnimationLadder;
-use crate::animation::clip_map::{ClipMap, AnimationState};
+use crate::animation::clip_map::{AnimationState, ClipMap};
 use crate::animation::foot_ik::FootIkSolver;
 use crate::animation::locomotion::LocomotionMachine;
 use crate::animation::micro_motion::{
-    validate_motion_gating, MicroMotionComponent, MicroMotionSystem, MicroMotionType, ObjectMotionClass,
+    validate_motion_gating, MicroMotionComponent, MicroMotionSystem, MicroMotionType,
+    ObjectMotionClass,
 };
 use crate::animation::procedural::{PerJointWeight, ProceduralLayer};
 use crate::animation::ragdoll::{RagdollConfig, RagdollState};
@@ -841,17 +897,17 @@ impl EngineSystem for AnimationWireSystem {
         };
         let _ = validate_motion_gating(&comp.motion_type, comp.motion_class);
         let mut comps = vec![comp];
-        self.micro_motion.update(
-            dt,
-            glam::Vec3::new(1.0, 0.0, 0.0),
-            0.5,
-            &mut comps,
-        );
+        self.micro_motion
+            .update(dt, glam::Vec3::new(1.0, 0.0, 0.0), 0.5, &mut comps);
 
         // Wire PoseBlender, ProceduralLayer, PerJointWeight::from_name_fn
         let joint_names = vec!["root".into(), "spine".into()];
         let _weights = PerJointWeight::from_name_fn(2, &joint_names, |name| {
-            if name.contains("spine") { 0.6 } else { 0.3 }
+            if name.contains("spine") {
+                0.6
+            } else {
+                0.3
+            }
         });
         let mut procedural = ProceduralLayer::new(2);
         procedural.on_heavy_impact(30.0, 20.0);

@@ -30,17 +30,18 @@ impl EngineSystem for EconomySystem {
     }
 }
 
-fn process_monthly_payment(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::core::events::EventBus, entity: Entity) {
- let (paid, remaining_desperation) = {
- let econ = match ecs.get_npc_economy(entity) {
- Some(e) => e,
- None => return,
- };
+fn process_monthly_payment(
+    ecs: &mut crate::core::ecs::Ecs,
+    events: &mut crate::core::events::EventBus,
+    entity: Entity,
+) {
+    let (paid, remaining_desperation) = {
+        let econ = match ecs.get_npc_economy(entity) {
+            Some(e) => e,
+            None => return,
+        };
 
- let name = ecs
- .get_name(entity)
- .map(|n| n.0.as_str())
- .unwrap_or("?");
+        let name = ecs.get_name(entity).map(|n| n.0.as_str()).unwrap_or("?");
 
         if econ.money >= econ.monthly_required {
             println!(
@@ -72,26 +73,31 @@ fn process_monthly_payment(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::
     escalate_desperation(ecs, events, entity);
 }
 
-fn escalate_desperation(ecs: &mut crate::core::ecs::Ecs, events: &mut crate::core::events::EventBus, entity: Entity) {
- let (desperation, current_job) = {
- let econ = match ecs.get_npc_economy(entity) {
- Some(e) => e,
- None => return,
- };
- (econ.desperation, econ.job)
- };
+fn escalate_desperation(
+    ecs: &mut crate::core::ecs::Ecs,
+    events: &mut crate::core::events::EventBus,
+    entity: Entity,
+) {
+    let (desperation, current_job) = {
+        let econ = match ecs.get_npc_economy(entity) {
+            Some(e) => e,
+            None => return,
+        };
+        (econ.desperation, econ.job)
+    };
 
     if desperation > 0.7 && current_job != Job::Bandit {
-let honesty = ecs
- .get_npc_traits(entity)
- .map_or(0.5, |t| t.honesty);
+        let honesty = ecs.get_npc_traits(entity).map_or(0.5, |t| t.honesty);
 
         if honesty < 0.5 || desperation > 0.9 {
-let name = ecs
- .get_name(entity)
- .map(|n| n.0.clone())
- .unwrap_or_default();
-            println!("  [econ] {} turned BANDIT (desperation {:.2})", name, desperation);
+            let name = ecs
+                .get_name(entity)
+                .map(|n| n.0.clone())
+                .unwrap_or_default();
+            println!(
+                "  [econ] {} turned BANDIT (desperation {:.2})",
+                name, desperation
+            );
 
             if let Some(econ) = ecs.get_npc_economy_mut(entity) {
                 econ.job = Job::Bandit;

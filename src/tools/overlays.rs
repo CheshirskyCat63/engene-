@@ -1,4 +1,3 @@
-
 pub struct OverlayState {
     pub nav_mesh: bool,
     pub cover_map: bool,

@@ -97,7 +97,6 @@ impl AuthoredChunk {
 
     pub fn load(path: &str) -> Result<Self, std::io::Error> {
         let data = std::fs::read_to_string(path)?;
-        ron::from_str(&data)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+        ron::from_str(&data).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
 }

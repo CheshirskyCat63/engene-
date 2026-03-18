@@ -7,7 +7,9 @@ pub struct PerfCounters {
 
 impl PerfCounters {
     pub fn new() -> Self {
-        Self { counters: HashMap::new() }
+        Self {
+            counters: HashMap::new(),
+        }
     }
 
     pub fn increment(&self, name: &'static str) {
@@ -23,11 +25,15 @@ impl PerfCounters {
     }
 
     pub fn register(&mut self, name: &'static str) {
-        self.counters.entry(name).or_insert_with(|| AtomicU64::new(0));
+        self.counters
+            .entry(name)
+            .or_insert_with(|| AtomicU64::new(0));
     }
 
     pub fn read(&self, name: &str) -> u64 {
-        self.counters.get(name).map_or(0, |c| c.load(Ordering::Relaxed))
+        self.counters
+            .get(name)
+            .map_or(0, |c| c.load(Ordering::Relaxed))
     }
 
     pub fn reset_all(&self) {
@@ -38,5 +44,7 @@ impl PerfCounters {
 }
 
 impl Default for PerfCounters {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

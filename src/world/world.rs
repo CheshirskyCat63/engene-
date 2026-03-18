@@ -15,16 +15,17 @@ impl WorldGrid {
         for y in 0..GRID_SIZE {
             for x in 0..GRID_SIZE {
                 let center = GRID_SIZE / 2;
-                let biome = if x >= center - 1 && x <= center + 1 && y >= center - 1 && y <= center + 1 {
-                    Biome::Settlement
-                } else {
-                    match rng.gen_range(0u8..10) {
-                        0..=3 => Biome::Forest,
-                        4..=6 => Biome::Plains,
-                        7..=8 => Biome::Hills,
-                        _ => Biome::Swamp,
-                    }
-                };
+                let biome =
+                    if x >= center - 1 && x <= center + 1 && y >= center - 1 && y <= center + 1 {
+                        Biome::Settlement
+                    } else {
+                        match rng.gen_range(0u8..10) {
+                            0..=3 => Biome::Forest,
+                            4..=6 => Biome::Plains,
+                            7..=8 => Biome::Hills,
+                            _ => Biome::Swamp,
+                        }
+                    };
                 cells.push(Cell::new(x, y, biome));
             }
         }

@@ -32,7 +32,13 @@ impl Plan {
             Goal::RepairEquipment => 80.0,
             Goal::BuySupplies => 80.0,
         };
-        Self { goal, target_pos: target, started_tick: tick, max_duration, elapsed: 0.0 }
+        Self {
+            goal,
+            target_pos: target,
+            started_tick: tick,
+            max_duration,
+            elapsed: 0.0,
+        }
     }
 
     pub fn is_expired(&self) -> bool {

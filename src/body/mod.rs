@@ -10,11 +10,13 @@
 #[cfg(feature = "body_sim")]
 pub mod anatomy;
 #[cfg(feature = "body_sim")]
+pub mod blood;
+#[cfg(feature = "body_sim")]
+pub mod body_damage;
+#[cfg(feature = "body_sim")]
 pub mod body_response;
 #[cfg(feature = "body_sim")]
 pub mod body_store;
-#[cfg(feature = "body_sim")]
-pub mod body_damage;
 #[cfg(feature = "body_sim")]
 pub mod body_system;
 #[cfg(feature = "body_sim")]
@@ -23,8 +25,6 @@ pub mod death_pipeline;
 pub mod dismemberment;
 #[cfg(feature = "body_sim")]
 pub mod gore;
-#[cfg(feature = "body_sim")]
-pub mod blood;
 
 /// Stub for non-body_sim builds.
 #[cfg(not(feature = "body_sim"))]

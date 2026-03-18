@@ -27,12 +27,18 @@ impl SimTelemetry {
 
     pub fn record_birth(&mut self, species: &str) {
         self.entity_births += 1;
-        *self.per_species_births.entry(species.to_string()).or_default() += 1;
+        *self
+            .per_species_births
+            .entry(species.to_string())
+            .or_default() += 1;
     }
 
     pub fn record_death(&mut self, species: &str) {
         self.entity_deaths += 1;
-        *self.per_species_deaths.entry(species.to_string()).or_default() += 1;
+        *self
+            .per_species_deaths
+            .entry(species.to_string())
+            .or_default() += 1;
     }
 
     pub fn record_combat(&mut self) {

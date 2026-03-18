@@ -1,10 +1,10 @@
+use crate::core::mutation_policy::*;
+use crate::core::system::EngineSystem;
+use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::game::ai::groups;
 use crate::game::ai::monster_ai;
 use crate::game::ai::npc_ai;
 use crate::game::ai::social;
-use crate::core::mutation_policy::*;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::game::ecosystem::territory;
 use crate::simulation::simulation_level;
 use crate::world::components::*;
@@ -18,7 +18,10 @@ pub struct AiSystem {
 
 impl AiSystem {
     pub fn new() -> Self {
-        Self { respawn_timer: 0.0, territory_cooldown: 0 }
+        Self {
+            respawn_timer: 0.0,
+            territory_cooldown: 0,
+        }
     }
 }
 
@@ -35,7 +38,10 @@ impl EngineSystem for AiSystem {
     }
 
     fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
-        let resources = ctx.resources.get_mut::<ResourceGrid>().expect("ResourceGrid missing");
+        let resources = ctx
+            .resources
+            .get_mut::<ResourceGrid>()
+            .expect("ResourceGrid missing");
         let resources_ptr = resources as *mut ResourceGrid;
 
         ctx.ecs.tick += 1;
@@ -53,11 +59,16 @@ impl EngineSystem for AiSystem {
         let entity_count = ctx.ecs.alive.len();
 
         for idx in 0..entity_count {
-            if idx >= ctx.ecs.alive.len() { break; }
+            if idx >= ctx.ecs.alive.len() {
+                break;
+            }
             let entity = ctx.ecs.alive[idx];
-            if !ctx.ecs.is_alive(entity) { continue; }
+            if !ctx.ecs.is_alive(entity) {
+                continue;
+            }
 
-            let sim_level = ctx.ecs
+            let sim_level = ctx
+                .ecs
                 .get_sim_level(entity)
                 .map(|s| s.level)
                 .unwrap_or(SimulationLevel::L0);
@@ -77,10 +88,24 @@ impl EngineSystem for AiSystem {
             let resources = unsafe { &mut *resources_ptr };
             match ctx.ecs.get_kind(entity) {
                 Some(EntityKind::Npc) => {
-                    npc_ai::tick_npc(ctx.ecs, ctx.events, resources, entity, tick_delta, day_progress);
+                    npc_ai::tick_npc(
+                        ctx.ecs,
+                        ctx.events,
+                        resources,
+                        entity,
+                        tick_delta,
+                        day_progress,
+                    );
                 }
                 Some(EntityKind::Monster(_)) => {
-                    monster_ai::tick_monster(ctx.ecs, ctx.events, resources, entity, tick_delta, day_progress);
+                    monster_ai::tick_monster(
+                        ctx.ecs,
+                        ctx.events,
+                        resources,
+                        entity,
+                        tick_delta,
+                        day_progress,
+                    );
                 }
                 None => {}
             }
@@ -93,7 +118,11 @@ impl EngineSystem for AiSystem {
 
         // Wire social interactions: group formation and trade for L0 NPCs
         if frame % 100 == 0 {
-            let npc_entities: Vec<_> = ctx.ecs.alive.iter().copied()
+            let npc_entities: Vec<_> = ctx
+                .ecs
+                .alive
+                .iter()
+                .copied()
                 .filter(|e| matches!(ctx.ecs.get_kind(*e), Some(EntityKind::Npc)))
                 .collect();
             for &npc in &npc_entities {
@@ -107,7 +136,10 @@ impl EngineSystem for AiSystem {
             }
         }
 
-        let resources = ctx.resources.get_mut::<ResourceGrid>().expect("ResourceGrid missing");
+        let resources = ctx
+            .resources
+            .get_mut::<ResourceGrid>()
+            .expect("ResourceGrid missing");
         collect_dead(ctx.ecs, resources);
         age_entities(ctx.ecs, delta);
 
@@ -120,7 +152,10 @@ impl EngineSystem for AiSystem {
 }
 
 fn collect_dead(ecs: &mut crate::core::ecs::Ecs, resources: &mut ResourceGrid) {
-    let dead: Vec<_> = ecs.alive.iter().copied()
+    let dead: Vec<_> = ecs
+        .alive
+        .iter()
+        .copied()
         .filter(|e| ecs.get_needs(*e).map_or(false, |pn| pn.health <= 0.0))
         .collect();
 
@@ -168,17 +203,23 @@ fn respawn_monsters_if_needed(ecs: &mut crate::core::ecs::Ecs) {
 
     if wolves < MIN_WOLVES {
         let n = MIN_WOLVES - wolves;
-        for _ in 0..n { population::spawn_single_monster(ecs, MonsterSpecies::Wolf, &mut rng); }
+        for _ in 0..n {
+            population::spawn_single_monster(ecs, MonsterSpecies::Wolf, &mut rng);
+        }
         println!("    [spawn] +{} wolves migrated into the zone", n);
     }
     if boars < MIN_BOARS {
         let n = MIN_BOARS - boars;
-        for _ in 0..n { population::spawn_single_monster(ecs, MonsterSpecies::Boar, &mut rng); }
+        for _ in 0..n {
+            population::spawn_single_monster(ecs, MonsterSpecies::Boar, &mut rng);
+        }
         println!("    [spawn] +{} boars migrated into the zone", n);
     }
     if bloods < MIN_BLOODSUCKERS {
         let n = MIN_BLOODSUCKERS - bloods;
-        for _ in 0..n { population::spawn_single_monster(ecs, MonsterSpecies::Bloodsucker, &mut rng); }
+        for _ in 0..n {
+            population::spawn_single_monster(ecs, MonsterSpecies::Bloodsucker, &mut rng);
+        }
         println!("    [spawn] +{} bloodsuckers appeared from the depths", n);
     }
 }

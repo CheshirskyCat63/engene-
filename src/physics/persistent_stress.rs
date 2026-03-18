@@ -32,7 +32,8 @@ impl PersistentStressSystem {
     }
 
     pub fn remove_contact(&mut self, target: Entity, class: DamageClass) {
-        self.contacts.retain(|c| !(c.target_entity == target && c.damage_class == class));
+        self.contacts
+            .retain(|c| !(c.target_entity == target && c.damage_class == class));
     }
 
     pub fn suspend_distant(&mut self, camera_pos_sq: f32, threshold_sq: f32) {

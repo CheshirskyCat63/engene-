@@ -51,7 +51,8 @@ impl EditorSafeMode {
     }
 
     pub fn register_panel(&mut self, name: &str) {
-        self.panels.entry(name.to_string())
+        self.panels
+            .entry(name.to_string())
             .or_insert_with(|| PanelHealth::new(name));
     }
 
@@ -91,7 +92,9 @@ impl EditorSafeMode {
                     if elapsed_ms > health.budget_ms {
                         tracing::warn!(
                             "panel '{}' exceeded budget: {:.2}ms > {:.2}ms",
-                            name, elapsed_ms, health.budget_ms
+                            name,
+                            elapsed_ms,
+                            health.budget_ms
                         );
                     }
                     true
@@ -101,7 +104,9 @@ impl EditorSafeMode {
                     health.total_failures += 1;
                     tracing::error!(
                         "panel '{}' panicked ({}/{})",
-                        name, health.consecutive_failures, MAX_CONSECUTIVE_FAILURES
+                        name,
+                        health.consecutive_failures,
+                        MAX_CONSECUTIVE_FAILURES
                     );
                     if health.consecutive_failures >= MAX_CONSECUTIVE_FAILURES {
                         health.enabled = false;
@@ -126,7 +131,8 @@ impl EditorSafeMode {
             self.safe_mode_active = true;
             tracing::error!(
                 "editor safe mode ACTIVATED: frame took {:.2}ms (budget: {:.2}ms)",
-                total_editor_ms, self.total_editor_budget_ms
+                total_editor_ms,
+                self.total_editor_budget_ms
             );
         }
     }
@@ -173,18 +179,12 @@ impl EditorSafeMode {
 
     /// Get total failures for a specific panel
     pub fn panel_total_failures(&self, name: &str) -> u32 {
-        self.panels
-            .get(name)
-            .map(|p| p.total_failures)
-            .unwrap_or(0)
+        self.panels.get(name).map(|p| p.total_failures).unwrap_or(0)
     }
 
     /// Check if panel was disabled
     pub fn is_panel_disabled(&self, name: &str) -> bool {
-        self.panels
-            .get(name)
-            .map(|p| !p.enabled)
-            .unwrap_or(false)
+        self.panels.get(name).map(|p| !p.enabled).unwrap_or(false)
     }
 
     /// Get disabled reason for a panel
@@ -197,27 +197,42 @@ impl EditorSafeMode {
     pub fn panel_report(&self) -> String {
         let mut report = String::new();
         report.push_str("=== Editor Panel Health Report ===\n");
-        report.push_str(&format!("Safe mode: {}\n", if self.safe_mode_active { "ACTIVE" } else { "off" }));
-        report.push_str(&format!("Last frame editor cost: {:.2}ms / {:.2}ms budget\n",
-            self.last_frame_editor_ms, self.total_editor_budget_ms));
+        report.push_str(&format!(
+            "Safe mode: {}\n",
+            if self.safe_mode_active {
+                "ACTIVE"
+            } else {
+                "off"
+            }
+        ));
+        report.push_str(&format!(
+            "Last frame editor cost: {:.2}ms / {:.2}ms budget\n",
+            self.last_frame_editor_ms, self.total_editor_budget_ms
+        ));
 
         let mut panels: Vec<_> = self.panels.values().collect();
         panels.sort_by(|a, b| a.name.cmp(&b.name));
 
         for p in panels {
             let status = if !p.enabled {
-                format!("DISABLED ({})", p.disabled_reason.as_deref().unwrap_or("unknown"))
+                format!(
+                    "DISABLED ({})",
+                    p.disabled_reason.as_deref().unwrap_or("unknown")
+                )
             } else {
                 format!("ok ({:.2}ms / {:.2}ms)", p.last_draw_ms, p.budget_ms)
             };
-            report.push_str(&format!("  [{}] {} — failures: {}\n",
-                p.name, status, p.total_failures));
+            report.push_str(&format!(
+                "  [{}] {} — failures: {}\n",
+                p.name, status, p.total_failures
+            ));
         }
         report
     }
 
     pub fn panel_budgets(&self) -> Vec<(&str, f64, f64)> {
-        self.panels.values()
+        self.panels
+            .values()
             .map(|p| (p.name.as_str(), p.last_draw_ms, p.budget_ms))
             .collect()
     }

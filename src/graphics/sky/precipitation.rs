@@ -148,11 +148,7 @@ impl PrecipitationSystem {
         }
     }
 
-    pub fn update(
-        &self,
-        queue: &wgpu::Queue,
-        params: PrecipitationParams,
-    ) {
+    pub fn update(&self, queue: &wgpu::Queue, params: PrecipitationParams) {
         queue.write_buffer(&self.params_buffer, 0, bytemuck::bytes_of(&params));
     }
 

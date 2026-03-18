@@ -1,4 +1,4 @@
-use crate::world::components::{NpcTraits, MonsterTraits};
+use crate::world::components::{MonsterTraits, NpcTraits};
 
 pub fn npc_trait_weight(traits: &NpcTraits, index: usize) -> f32 {
     match index {

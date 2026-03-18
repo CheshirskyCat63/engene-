@@ -105,9 +105,7 @@ impl RapierPhysics {
                     .translation(Vec3::new(t.x, y, t.y))
                     .build();
                 let handle = self.bodies.insert(body);
-                let collider = ColliderBuilder::capsule_y(0.5, 0.5)
-                    .friction(0.5)
-                    .build();
+                let collider = ColliderBuilder::capsule_y(0.5, 0.5).friction(0.5).build();
                 self.colliders
                     .insert_with_parent(collider, handle, &mut self.bodies);
                 self.entity_handles.insert(e, handle);

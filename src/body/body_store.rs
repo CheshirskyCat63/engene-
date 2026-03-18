@@ -78,7 +78,8 @@ impl BodyStateStore {
             }
             body.blood_level = (body.blood_level - total_bleed * dt * 0.01).max(0.0);
             body.pain = (body.pain - dt * 0.02).max(0.0);
-            body.bleed_points.retain(|bp| bp.rate > 0.001 && bp.time_active < 300.0);
+            body.bleed_points
+                .retain(|bp| bp.rate > 0.001 && bp.time_active < 300.0);
         }
     }
 

@@ -7,7 +7,7 @@ use crate::world::components::*;
 use crate::world::world::WorldGrid;
 
 /// Process monster migration based on ecosystem needs.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub fn process_migration(ecs: &mut Ecs, events: &mut EventBus, grid: &WorldGrid) {
     let monsters: Vec<_> = ecs.monsters();

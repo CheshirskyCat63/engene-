@@ -1,5 +1,5 @@
 //! Hot Reload System for Shaders and Configs (Phase D.1/D.2)
-//! 
+//!
 //! Provides file watching and hot reload capabilities for development.
 
 use std::collections::HashMap;
@@ -36,7 +36,7 @@ pub struct HotReloadManager {
 impl HotReloadManager {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel();
-        
+
         Self {
             watched_paths: HashMap::new(),
             sender,
@@ -74,7 +74,9 @@ impl HotReloadManager {
         let mut events = Vec::new();
 
         // Collect paths first to avoid borrow conflicts
-        let shader_paths: Vec<PathBuf> = self.shader_dirs.iter()
+        let shader_paths: Vec<PathBuf> = self
+            .shader_dirs
+            .iter()
             .flat_map(|dir| {
                 std::fs::read_dir(dir)
                     .into_iter()
@@ -85,27 +87,36 @@ impl HotReloadManager {
             })
             .collect();
 
-        let config_paths: Vec<PathBuf> = self.config_dirs.iter()
+        let config_paths: Vec<PathBuf> = self
+            .config_dirs
+            .iter()
             .flat_map(|dir| {
                 std::fs::read_dir(dir)
                     .into_iter()
                     .flatten()
                     .flatten()
                     .map(|e| e.path())
-                    .filter(|p| p.extension().map_or(false, |ext| ext == "ron" || ext == "json"))
+                    .filter(|p| {
+                        p.extension()
+                            .map_or(false, |ext| ext == "ron" || ext == "json")
+                    })
             })
             .collect();
 
         // Check shader files
         for path in shader_paths {
-            if let Some(event) = self.check_file(&path, HotReloadEvent::ShaderChanged { path: path.clone() }) {
+            if let Some(event) =
+                self.check_file(&path, HotReloadEvent::ShaderChanged { path: path.clone() })
+            {
                 events.push(event);
             }
         }
 
         // Check config files
         for path in config_paths {
-            if let Some(event) = self.check_file(&path, HotReloadEvent::ConfigChanged { path: path.clone() }) {
+            if let Some(event) =
+                self.check_file(&path, HotReloadEvent::ConfigChanged { path: path.clone() })
+            {
                 events.push(event);
             }
         }
@@ -122,7 +133,7 @@ impl HotReloadManager {
         let metadata = std::fs::metadata(path).ok()?;
         let modified = metadata.modified().ok()?;
         let instant = Instant::now() - modified.elapsed().ok()?;
-        
+
         let last_modified = self.watched_paths.get(path).copied();
         self.watched_paths.insert(path.to_path_buf(), instant);
 
@@ -187,13 +198,14 @@ impl ShaderHotReloader {
         label: Option<&str>,
     ) -> wgpu::ShaderModule {
         let source = self.load_shader(path).expect("Failed to load shader");
-        
+
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor {
             label,
             source: wgpu::ShaderSource::Wgsl(source.into()),
         });
 
-        self.compiled_modules.insert(path.to_path_buf(), module.clone());
+        self.compiled_modules
+            .insert(path.to_path_buf(), module.clone());
         module
     }
 
@@ -252,21 +264,27 @@ impl ConfigHotReloader {
     }
 
     /// Parse config as RON
-    pub fn load_ron<T: serde::de::DeserializeOwned>(&mut self, path: &Path) -> Result<T, Box<dyn std::error::Error>> {
+    pub fn load_ron<T: serde::de::DeserializeOwned>(
+        &mut self,
+        path: &Path,
+    ) -> Result<T, Box<dyn std::error::Error>> {
         let data = self.load_config(path)?;
         let config: T = ron::de::from_bytes(&data)?;
         Ok(config)
     }
 
     /// Parse config as JSON (requires serde_json)
-    pub fn load_json<T: serde::de::DeserializeOwned>(&mut self, path: &Path) -> Result<T, Box<dyn std::error::Error>> {
+    pub fn load_json<T: serde::de::DeserializeOwned>(
+        &mut self,
+        path: &Path,
+    ) -> Result<T, Box<dyn std::error::Error>> {
         let data = self.load_config(path)?;
-        
+
         // Try JSON first, fall back to RON
         if let Ok(config) = serde_json::from_slice::<T>(&data) {
             return Ok(config);
         }
-        
+
         // Try RON as fallback
         let config: T = ron::de::from_bytes(&data)?;
         Ok(config)
@@ -312,7 +330,10 @@ impl HotReloadSystem {
     }
 
     /// Handle a hot reload event
-    pub fn handle_event(&mut self, event: &HotReloadEvent) -> Result<(), Box<dyn std::error::Error>> {
+    pub fn handle_event(
+        &mut self,
+        event: &HotReloadEvent,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         match event {
             HotReloadEvent::ShaderChanged { path } => {
                 self.shaders.reload_shader(path)?;
@@ -349,7 +370,7 @@ mod tests {
     #[test]
     fn test_shader_hot_reloader() {
         let mut reloader = ShaderHotReloader::new();
-        
+
         // Non-existent file
         let result = reloader.load_shader(Path::new("nonexistent.wgsl"));
         assert!(result.is_err());
@@ -358,7 +379,7 @@ mod tests {
     #[test]
     fn test_config_hot_reloader() {
         let mut reloader = ConfigHotReloader::new();
-        
+
         // Non-existent file
         let result = reloader.load_config(Path::new("nonexistent.ron"));
         assert!(result.is_err());

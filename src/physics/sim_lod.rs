@@ -48,12 +48,7 @@ impl PhysicsLod {
     }
 }
 
-pub fn region_sim_level(
-    cam_x: f32,
-    cam_z: f32,
-    region_x: f32,
-    region_z: f32,
-) -> SimulationLevel {
+pub fn region_sim_level(cam_x: f32, cam_z: f32, region_x: f32, region_z: f32) -> SimulationLevel {
     let dx = cam_x - region_x;
     let dz = cam_z - region_z;
     let dist = (dx * dx + dz * dz).sqrt();

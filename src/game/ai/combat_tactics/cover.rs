@@ -1,5 +1,5 @@
-use glam::Vec2;
 use crate::core::ecs::{Ecs, Entity};
+use glam::Vec2;
 
 #[derive(Clone, Debug)]
 pub struct CoverPoint {
@@ -29,10 +29,10 @@ pub fn find_nearby_cover(
     search_radius: f32,
     terrain_height_fn: &dyn Fn(f32, f32) -> f32,
 ) -> Vec<CoverPoint> {
-let my_pos = match ecs.get_transform(entity) {
- Some(t) => Vec2::new(t.x, t.y),
- None => return Vec::new(),
-};
+    let my_pos = match ecs.get_transform(entity) {
+        Some(t) => Vec2::new(t.x, t.y),
+        None => return Vec::new(),
+    };
 
     let threat_dir = (threat_pos - my_pos).normalize_or_zero();
     let mut points = Vec::new();
@@ -43,7 +43,9 @@ let my_pos = match ecs.get_transform(entity) {
         for dy in -steps..=steps {
             let candidate = my_pos + Vec2::new(dx as f32 * step, dy as f32 * step);
             let dist = (candidate - my_pos).length();
-            if dist > search_radius || dist < 5.0 { continue; }
+            if dist > search_radius || dist < 5.0 {
+                continue;
+            }
 
             let quality = evaluate_cover_at(candidate, threat_dir, terrain_height_fn);
             if quality > 0.2 {
@@ -56,7 +58,11 @@ let my_pos = match ecs.get_transform(entity) {
         }
     }
 
-    points.sort_by(|a, b| b.quality.partial_cmp(&a.quality).unwrap_or(std::cmp::Ordering::Equal));
+    points.sort_by(|a, b| {
+        b.quality
+            .partial_cmp(&a.quality)
+            .unwrap_or(std::cmp::Ordering::Equal)
+    });
     points.truncate(5);
     points
 }

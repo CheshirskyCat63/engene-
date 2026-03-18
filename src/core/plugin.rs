@@ -70,7 +70,10 @@ impl EngineBuilder {
     pub fn add_plugin<P: Plugin>(&mut self, plugin: P) {
         let plugin_name = plugin.name().to_string();
         if self.installed_plugins.contains(&plugin_name) {
-            println!("[builder] plugin '{}' already installed, skipping", plugin_name);
+            println!(
+                "[builder] plugin '{}' already installed, skipping",
+                plugin_name
+            );
             return;
         }
 
@@ -95,7 +98,9 @@ impl EngineBuilder {
 
         self.resources.freeze();
 
-        let descriptors: Vec<SystemDescriptor> = self.systems.iter()
+        let descriptors: Vec<SystemDescriptor> = self
+            .systems
+            .iter()
             .map(|(sys, _)| sys.descriptor())
             .collect();
 
@@ -104,13 +109,15 @@ impl EngineBuilder {
 
         let sorted_indices = topological_sort(&descriptors);
 
-        let mut indexed_systems: Vec<(usize, Box<dyn EngineSystem>, SystemMeta)> = self.systems
+        let mut indexed_systems: Vec<(usize, Box<dyn EngineSystem>, SystemMeta)> = self
+            .systems
             .into_iter()
             .enumerate()
             .map(|(i, (sys, meta))| (i, sys, meta))
             .collect();
 
-        let mut sorted_systems: Vec<Box<dyn EngineSystem>> = Vec::with_capacity(indexed_systems.len());
+        let mut sorted_systems: Vec<Box<dyn EngineSystem>> =
+            Vec::with_capacity(indexed_systems.len());
         for idx in sorted_indices {
             let pos = indexed_systems.iter().position(|(i, _, _)| *i == idx);
             if let Some(pos) = pos {
@@ -122,7 +129,10 @@ impl EngineBuilder {
             sorted_systems.push(sys);
         }
 
-        println!("[builder] {} systems built, order validated", sorted_systems.len());
+        println!(
+            "[builder] {} systems built, order validated",
+            sorted_systems.len()
+        );
         (sorted_systems, self.resources)
     }
 }
@@ -133,19 +143,26 @@ fn validate_dependency_graph(descriptors: &[SystemDescriptor]) {
     for desc in descriptors {
         for &before in &desc.ordering.before {
             if !names.contains(before) {
-                println!("[builder] warning: system '{}' declares before '{}' which doesn't exist", desc.name, before);
+                println!(
+                    "[builder] warning: system '{}' declares before '{}' which doesn't exist",
+                    desc.name, before
+                );
             }
         }
         for &after in &desc.ordering.after {
             if !names.contains(after) {
-                println!("[builder] warning: system '{}' declares after '{}' which doesn't exist", desc.name, after);
+                println!(
+                    "[builder] warning: system '{}' declares after '{}' which doesn't exist",
+                    desc.name, after
+                );
             }
         }
         for &req in &desc.ordering.requires {
             assert!(
                 names.contains(req),
                 "System '{}' requires '{}' which is not registered",
-                desc.name, req
+                desc.name,
+                req
             );
         }
     }
@@ -154,7 +171,9 @@ fn validate_dependency_graph(descriptors: &[SystemDescriptor]) {
 fn validate_parallel_safety(descriptors: &[SystemDescriptor]) {
     for (i, a) in descriptors.iter().enumerate() {
         for b in descriptors.iter().skip(i + 1) {
-            if !a.parallel_safe || !b.parallel_safe { continue; }
+            if !a.parallel_safe || !b.parallel_safe {
+                continue;
+            }
 
             for w in &a.writes_components {
                 if b.writes_components.contains(w) {
@@ -200,7 +219,8 @@ fn validate_parallel_safety(descriptors: &[SystemDescriptor]) {
 }
 
 fn topological_sort(descriptors: &[SystemDescriptor]) -> Vec<usize> {
-    let name_to_idx: HashMap<&str, usize> = descriptors.iter()
+    let name_to_idx: HashMap<&str, usize> = descriptors
+        .iter()
         .enumerate()
         .map(|(i, d)| (d.name, i))
         .collect();
@@ -240,7 +260,8 @@ fn topological_sort(descriptors: &[SystemDescriptor]) -> Vec<usize> {
     if result.len() != n {
         panic!(
             "[builder] FATAL: cycle detected in system dependency graph! Sorted {} of {} systems.",
-            result.len(), n
+            result.len(),
+            n
         );
     }
 

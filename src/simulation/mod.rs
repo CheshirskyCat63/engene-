@@ -11,11 +11,11 @@
 
 pub mod abstraction_invariants;
 pub mod activation;
-pub mod social_propagation;
 pub mod camp_simulation;
 pub mod role_simulation;
 pub mod simulation;
 pub mod simulation_level;
+pub mod social_propagation;
 pub mod world_milestones;
 
 pub mod time_events;

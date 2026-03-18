@@ -17,9 +17,8 @@ const SANDBOX_PREFAB_TYPES: &[&str] = &[
 ];
 
 const MATERIAL_PRESETS: &[&str] = &[
-    "Wood", "Cloth", "Thatch", "Stone", "Metal", "Flesh", "Earth",
-    "Tile", "Concrete", "Brick", "Glass", "Steel", "Sand", "Gravel",
-    "Rubber", "Plastic",
+    "Wood", "Cloth", "Thatch", "Stone", "Metal", "Flesh", "Earth", "Tile", "Concrete", "Brick",
+    "Glass", "Steel", "Sand", "Gravel", "Rubber", "Plastic",
 ];
 
 pub struct PrefabPlacerState {
@@ -158,7 +157,11 @@ pub fn draw_prefab_placer(
                 ui.label("Count:");
                 ui.add(egui::DragValue::new(&mut state.group_count).range(1..=20));
                 ui.label("Spacing:");
-                ui.add(egui::DragValue::new(&mut state.group_spacing).speed(0.1).suffix("m"));
+                ui.add(
+                    egui::DragValue::new(&mut state.group_spacing)
+                        .speed(0.1)
+                        .suffix("m"),
+                );
             });
 
             ui.separator();

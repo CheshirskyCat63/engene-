@@ -23,11 +23,13 @@ impl Plugin for StalkerPlugin {
         let config = GameConfig::load_from_dir(&self.data_dir);
         let rules = GameRules::default();
 
-        println!("[stalker] loaded {} system entries from rules", rules.systems.len());
-        println!("[stalker] L0 radius: {}, L1: {}, L2: {}",
-            rules.simulation_radii.l0,
-            rules.simulation_radii.l1,
-            rules.simulation_radii.l2,
+        println!(
+            "[stalker] loaded {} system entries from rules",
+            rules.systems.len()
+        );
+        println!(
+            "[stalker] L0 radius: {}, L1: {}, L2: {}",
+            rules.simulation_radii.l0, rules.simulation_radii.l1, rules.simulation_radii.l2,
         );
 
         builder.insert_resource(config);

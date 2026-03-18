@@ -73,7 +73,12 @@ impl ApplicationHandler for GameApp {
                 }
             }
             WindowEvent::KeyboardInput {
-                event: KeyEvent { physical_key: PhysicalKey::Code(key), state, .. },
+                event:
+                    KeyEvent {
+                        physical_key: PhysicalKey::Code(key),
+                        state,
+                        ..
+                    },
                 ..
             } => match state {
                 ElementState::Pressed => {
@@ -92,7 +97,11 @@ impl ApplicationHandler for GameApp {
                 }
                 ElementState::Released => self.input.key_released(key),
             },
-            WindowEvent::MouseInput { state: ElementState::Pressed, button: MouseButton::Left, .. } => {
+            WindowEvent::MouseInput {
+                state: ElementState::Pressed,
+                button: MouseButton::Left,
+                ..
+            } => {
                 if !self.input.mouse_captured {
                     if let Some(w) = &self.window {
                         let _ = w.set_cursor_grab(CursorGrabMode::Confined);
@@ -108,7 +117,12 @@ impl ApplicationHandler for GameApp {
         }
     }
 
-    fn device_event(&mut self, _event_loop: &winit::event_loop::ActiveEventLoop, _device_id: DeviceId, event: DeviceEvent) {
+    fn device_event(
+        &mut self,
+        _event_loop: &winit::event_loop::ActiveEventLoop,
+        _device_id: DeviceId,
+        event: DeviceEvent,
+    ) {
         if let DeviceEvent::MouseMotion { delta } = event {
             self.input.accumulate_mouse(delta.0, delta.1);
         }
@@ -124,7 +138,10 @@ impl ApplicationHandler for GameApp {
 impl GameApp {
     pub fn tick_frame(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
         let now = std::time::Instant::now();
-        let dt = self.last_frame.map(|lf| now.duration_since(lf).as_secs_f32()).unwrap_or(1.0 / 60.0);
+        let dt = self
+            .last_frame
+            .map(|lf| now.duration_since(lf).as_secs_f32())
+            .unwrap_or(1.0 / 60.0);
         self.last_frame = Some(now);
 
         self.camera.update(&self.input, dt);
@@ -145,7 +162,11 @@ impl GameApp {
         let month = self.engine.time.month;
         if month != self.last_report_month {
             self.last_report_month = month;
-            println!("\n========== MONTH {} ({}) ==========", month, self.engine.time.season());
+            println!(
+                "\n========== MONTH {} ({}) ==========",
+                month,
+                self.engine.time.season()
+            );
             super::debug_output::print_economy(&self.engine);
         }
 
@@ -179,13 +200,23 @@ impl GameApp {
             for coord in &to_unload {
                 let saved = persistence.save_and_unload(*coord, &mut self.engine.ecs, tick);
                 if saved > 0 {
-                    tracing::info!("streamer: unloaded chunk ({},{}) — {} entities saved", coord.x, coord.z, saved);
+                    tracing::info!(
+                        "streamer: unloaded chunk ({},{}) — {} entities saved",
+                        coord.x,
+                        coord.z,
+                        saved
+                    );
                 }
             }
             for coord in &to_load {
                 let loaded = persistence.load_chunk_entities(*coord, &mut self.engine.ecs);
                 if loaded > 0 {
-                    tracing::info!("streamer: loaded chunk ({},{}) — {} entities restored", coord.x, coord.z, loaded);
+                    tracing::info!(
+                        "streamer: loaded chunk ({},{}) — {} entities restored",
+                        coord.x,
+                        coord.z,
+                        loaded
+                    );
                 }
             }
             self.engine.resources.insert_runtime(persistence);
@@ -211,9 +242,15 @@ impl GameApp {
     }
 
     fn render_frame(&mut self, event_loop: &winit::event_loop::ActiveEventLoop) {
-        let Some(r) = self.renderer.as_mut() else { return };
+        let Some(r) = self.renderer.as_mut() else {
+            return;
+        };
 
-        if let Some(am) = self.engine.resources.get_mut::<std::sync::Mutex<AssetManager>>() {
+        if let Some(am) = self
+            .engine
+            .resources
+            .get_mut::<std::sync::Mutex<AssetManager>>()
+        {
             if let Ok(mut am) = am.lock() {
                 am.poll();
             }

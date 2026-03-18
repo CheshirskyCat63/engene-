@@ -81,8 +81,24 @@ fn ecs_sparse_set_integrity_after_insert_remove() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e1 = ecs.spawn();
     let e2 = ecs.spawn();
-    ecs.transforms.insert(e1, engene::world::components::Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, engene::world::components::Transform { x: 1.0, y: 1.0, cell_x: 1, cell_y: 1 });
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        engene::world::components::Transform {
+            x: 1.0,
+            y: 1.0,
+            cell_x: 1,
+            cell_y: 1,
+        },
+    );
     assert_eq!(ecs.transforms.len(), 2);
     ecs.transforms.remove(&e1);
     assert_eq!(ecs.transforms.len(), 1);
@@ -138,7 +154,8 @@ fn ecs_transform_crud() {
 fn ecs_kind_crud() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e = ecs.spawn();
-    ecs.kinds.insert(e, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e, engene::world::components::EntityKind::Npc);
     assert!(matches!(
         ecs.kinds.get(&e),
         Some(engene::world::components::EntityKind::Npc)
@@ -161,9 +178,11 @@ fn ecs_kind_crud() {
 fn ecs_name_crud() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e = ecs.spawn();
-    ecs.names.insert(e, engene::world::components::Name("TestNPC".into()));
+    ecs.names
+        .insert(e, engene::world::components::Name("TestNPC".into()));
     assert_eq!(ecs.names.get(&e).unwrap().0, "TestNPC");
-    ecs.names.insert(e, engene::world::components::Name("Renamed".into()));
+    ecs.names
+        .insert(e, engene::world::components::Name("Renamed".into()));
     assert_eq!(ecs.names.get(&e).unwrap().0, "Renamed");
 }
 
@@ -291,7 +310,8 @@ fn ecs_npcs_filter() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e1 = ecs.spawn();
     let e2 = ecs.spawn();
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
     ecs.kinds.insert(
         e2,
         engene::world::components::EntityKind::Monster(
@@ -308,7 +328,8 @@ fn ecs_monsters_filter() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e1 = ecs.spawn();
     let e2 = ecs.spawn();
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
     ecs.kinds.insert(
         e2,
         engene::world::components::EntityKind::Monster(
@@ -359,8 +380,10 @@ fn ecs_count_npcs() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e1 = ecs.spawn();
     let e2 = ecs.spawn();
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
-    ecs.kinds.insert(e2, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e2, engene::world::components::EntityKind::Npc);
     assert_eq!(ecs.count_npcs(), 2);
 }
 
@@ -416,8 +439,10 @@ fn ecs_despawn_cleans_all_components() {
             cell_y: 0,
         },
     );
-    ecs.kinds.insert(e, engene::world::components::EntityKind::Npc);
-    ecs.names.insert(e, engene::world::components::Name("X".into()));
+    ecs.kinds
+        .insert(e, engene::world::components::EntityKind::Npc);
+    ecs.names
+        .insert(e, engene::world::components::Name("X".into()));
     ecs.despawn(e);
     assert!(!ecs.transforms.contains_key(&e));
     assert!(!ecs.kinds.contains_key(&e));
@@ -459,9 +484,33 @@ fn ecs_sparse_set_swap_remove_integrity() {
     let e1 = ecs.spawn();
     let e2 = ecs.spawn();
     let e3 = ecs.spawn();
-    ecs.transforms.insert(e1, engene::world::components::Transform { x: 1.0, y: 1.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, engene::world::components::Transform { x: 2.0, y: 2.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e3, engene::world::components::Transform { x: 3.0, y: 3.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 1.0,
+            y: 1.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        engene::world::components::Transform {
+            x: 2.0,
+            y: 2.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e3,
+        engene::world::components::Transform {
+            x: 3.0,
+            y: 3.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.transforms.remove(&e2);
     assert_eq!(ecs.transforms.len(), 2);
     assert_eq!(ecs.transforms.get(&e1).unwrap().x, 1.0);
@@ -498,14 +547,20 @@ fn ecs_npc_economy_insert() {
         },
     );
     assert_eq!(ecs.npc_economies.get(&e).unwrap().money, 100.0);
-    assert_eq!(ecs.npc_economies.get(&e).unwrap().job, engene::world::components::Job::Trader);
+    assert_eq!(
+        ecs.npc_economies.get(&e).unwrap().job,
+        engene::world::components::Job::Trader
+    );
 }
 
 #[test]
 fn ecs_equipment_component() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let e = ecs.spawn();
-    ecs.equipment.insert(e, engene::world::components::EquipmentSlots::default_stalker());
+    ecs.equipment.insert(
+        e,
+        engene::world::components::EquipmentSlots::default_stalker(),
+    );
     let eq = ecs.equipment.get(&e).unwrap();
     assert!(eq.weapon_condition > 0.0);
     assert!(eq.medkits >= 1);
@@ -619,7 +674,8 @@ fn pid_relink_report_counts() {
             cell_y: 0,
         },
     );
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
     ecs.personal_needs
         .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
@@ -647,14 +703,16 @@ fn pid_survives_roundtrip() {
             cell_y: 0,
         },
     );
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
     ecs.personal_needs
         .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
     let pid_val = pid.0;
     ecs.despawn(e1);
 
-    let e2 = ecs.spawn_restored(engene::core::persistent_id::PersistentEntityId(pid_val))
+    let e2 = ecs
+        .spawn_restored(engene::core::persistent_id::PersistentEntityId(pid_val))
         .expect("restore after dead should work");
     assert_eq!(ecs.identity.persistent_id_of(e2).unwrap().0, pid_val);
 }
@@ -678,7 +736,8 @@ fn pid_chunk_unload_preserves_pid() {
             cell_y: 0,
         },
     );
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
     ecs.personal_needs
         .insert(e1, engene::world::components::PersonalNeeds::default_npc());
 
@@ -686,10 +745,16 @@ fn pid_chunk_unload_preserves_pid() {
     let coord = ChunkCoord { x: 0, z: 0 };
     persistence.save_and_unload(coord, &mut ecs, 50);
 
-    assert_eq!(ecs.identity.presence(pid), engene::core::persistent_id::EntityPresence::Unloaded);
+    assert_eq!(
+        ecs.identity.presence(pid),
+        engene::core::persistent_id::EntityPresence::Unloaded
+    );
 
     persistence.load_chunk_entities(coord, &mut ecs);
-    let restored = ecs.identity.resolve(pid).expect("pid resolves after reload");
+    let restored = ecs
+        .identity
+        .resolve(pid)
+        .expect("pid resolves after reload");
     assert!(ecs.is_alive(restored));
 
     let _ = std::fs::remove_dir_all(&dir);
@@ -716,18 +781,40 @@ fn pid_cross_chunk_relink_after_load() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let (e1, pid1) = ecs.spawn_new();
     let (e2, _) = ecs.spawn_new();
-    ecs.transforms.insert(e1, engene::world::components::Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(e2, engene::world::components::Transform { x: 600.0, y: 600.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e1, engene::world::components::EntityKind::Npc);
-    ecs.kinds.insert(e2, engene::world::components::EntityKind::Npc);
-    ecs.personal_needs.insert(e1, engene::world::components::PersonalNeeds::default_npc());
-    ecs.personal_needs.insert(e2, engene::world::components::PersonalNeeds::default_npc());
+    ecs.transforms.insert(
+        e1,
+        engene::world::components::Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        e2,
+        engene::world::components::Transform {
+            x: 600.0,
+            y: 600.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e1, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e2, engene::world::components::EntityKind::Npc);
+    ecs.personal_needs
+        .insert(e1, engene::world::components::PersonalNeeds::default_npc());
+    ecs.personal_needs
+        .insert(e2, engene::world::components::PersonalNeeds::default_npc());
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     persistence.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
     persistence.load_chunk_entities(ChunkCoord { x: 0, z: 0 }, &mut ecs);
 
-    let ctx = engene::core::persistent_id::RelinkContext { registry: &ecs.identity };
+    let ctx = engene::core::persistent_id::RelinkContext {
+        registry: &ecs.identity,
+    };
     assert!(ctx.resolve_persistent(pid1).is_some());
 
     let _ = std::fs::remove_dir_all(&dir);
@@ -737,8 +824,10 @@ fn pid_cross_chunk_relink_after_load() {
 fn pid_player_persistence() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.kinds.insert(e, engene::world::components::EntityKind::Npc);
-    ecs.names.insert(e, engene::world::components::Name("Player".into()));
+    ecs.kinds
+        .insert(e, engene::world::components::EntityKind::Npc);
+    ecs.names
+        .insert(e, engene::world::components::Name("Player".into()));
     assert_eq!(ecs.identity.persistent_id_of(e), Some(pid));
     ecs.despawn(e);
     let e2 = ecs.spawn_restored(pid).expect("player restore");
@@ -749,7 +838,8 @@ fn pid_player_persistence() {
 fn pid_trader_persistence() {
     let mut ecs = engene::core::ecs::Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.kinds.insert(e, engene::world::components::EntityKind::Npc);
+    ecs.kinds
+        .insert(e, engene::world::components::EntityKind::Npc);
     ecs.npc_economies.insert(
         e,
         engene::world::components::NpcEconomy {
@@ -759,10 +849,15 @@ fn pid_trader_persistence() {
             desperation: 0.0,
         },
     );
-    assert_eq!(ecs.npc_economies.get(&e).unwrap().job, engene::world::components::Job::Trader);
+    assert_eq!(
+        ecs.npc_economies.get(&e).unwrap().job,
+        engene::world::components::Job::Trader
+    );
     let pid_val = pid.0;
     ecs.despawn(e);
-    let e2 = ecs.spawn_restored(engene::core::persistent_id::PersistentEntityId(pid_val)).unwrap();
+    let e2 = ecs
+        .spawn_restored(engene::core::persistent_id::PersistentEntityId(pid_val))
+        .unwrap();
     ecs.npc_economies.insert(
         e2,
         engene::world::components::NpcEconomy {
@@ -812,7 +907,10 @@ fn pid_gc_tombstones_removes_old() {
     let before = ecs.identity.tombstone_count();
     assert!(before >= 1);
     ecs.identity.gc_tombstones(2000, 500);
-    assert_eq!(ecs.identity.presence(pid), engene::core::persistent_id::EntityPresence::Dead);
+    assert_eq!(
+        ecs.identity.presence(pid),
+        engene::core::persistent_id::EntityPresence::Dead
+    );
 }
 
 #[test]
@@ -838,7 +936,9 @@ fn pid_live_count_matches_alive() {
 #[test]
 fn pid_next_id_advances_after_restore() {
     let mut ecs = engene::core::ecs::Ecs::new();
-    let _ = ecs.spawn_restored(engene::core::persistent_id::PersistentEntityId(999)).unwrap();
+    let _ = ecs
+        .spawn_restored(engene::core::persistent_id::PersistentEntityId(999))
+        .unwrap();
     let (_, pid2) = ecs.spawn_new();
     assert!(pid2.0 >= 1000);
 }
@@ -851,7 +951,8 @@ fn pid_presence_live() {
         ecs.identity.presence(pid),
         engene::core::persistent_id::EntityPresence::Live(_)
     ));
-    if let engene::core::persistent_id::EntityPresence::Live(resolved) = ecs.identity.presence(pid) {
+    if let engene::core::persistent_id::EntityPresence::Live(resolved) = ecs.identity.presence(pid)
+    {
         assert_eq!(resolved, e);
     }
 }
@@ -899,9 +1000,19 @@ fn pid_chunk_save_restore_cycle() {
 
     let mut ecs = engene::core::ecs::Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, engene::world::components::Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e, engene::world::components::EntityKind::Npc);
-    ecs.personal_needs.insert(e, engene::world::components::PersonalNeeds::default_npc());
+    ecs.transforms.insert(
+        e,
+        engene::world::components::Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e, engene::world::components::EntityKind::Npc);
+    ecs.personal_needs
+        .insert(e, engene::world::components::PersonalNeeds::default_npc());
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -932,7 +1043,10 @@ fn pid_tombstone_kept_after_despawn() {
     let (e, pid) = ecs.spawn_new();
     ecs.despawn(e);
     assert_eq!(ecs.identity.tombstone_count(), 1);
-    assert_eq!(ecs.identity.presence(pid), engene::core::persistent_id::EntityPresence::Dead);
+    assert_eq!(
+        ecs.identity.presence(pid),
+        engene::core::persistent_id::EntityPresence::Dead
+    );
 }
 
 #[test]
@@ -958,7 +1072,10 @@ fn pid_total_count_includes_dead() {
     let (e, _pid) = ecs.spawn_new();
     let total_before = ecs.identity.total_count();
     ecs.despawn(e);
-    assert!(ecs.identity.total_count() >= total_before, "total_count preserves dead entries until gc");
+    assert!(
+        ecs.identity.total_count() >= total_before,
+        "total_count preserves dead entries until gc"
+    );
 }
 
 #[test]
@@ -1054,9 +1171,9 @@ fn event_command_buffer_deferred() {
 
 #[test]
 fn event_multi_bus_sim_render_debug() {
-    use engene::core::events::sim_bus::SimBus;
-    use engene::core::events::render_bus::RenderBus;
     use engene::core::events::debug_bus::DebugBus;
+    use engene::core::events::render_bus::RenderBus;
+    use engene::core::events::sim_bus::SimBus;
 
     let mut sim = SimBus::new();
     let mut render = RenderBus::new();
@@ -1411,13 +1528,18 @@ fn authority_matrix_coverage() {
     assert!(has_transform);
     assert!(has_personal);
 
-    let entity_scoped = matrix.iter().filter(|e| e.save_scope == SaveScope::Entity).count();
+    let entity_scoped = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Entity)
+        .count();
     assert!(entity_scoped >= 5);
 }
 
 #[test]
 fn authority_ownership_map() {
-    use engene::core::ownership_map::{OwnershipMap, ResourceOwnership, MutationTiming, ThreadSafety};
+    use engene::core::ownership_map::{
+        MutationTiming, OwnershipMap, ResourceOwnership, ThreadSafety,
+    };
 
     let mut map = OwnershipMap::new();
     map.register_resource(ResourceOwnership {
@@ -1448,7 +1570,10 @@ fn authority_contract_violations_detected() {
 fn authority_spawn_policy_entity_scoped() {
     use engene::core::world_state_authority::{authority_matrix, SaveScope};
     let matrix = authority_matrix();
-    let entity_states: Vec<_> = matrix.iter().filter(|e| e.save_scope == SaveScope::Entity).collect();
+    let entity_states: Vec<_> = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Entity)
+        .collect();
     assert!(entity_states.len() >= 5);
 }
 
@@ -1475,7 +1600,9 @@ fn authority_derived_state_rebuild() {
 
 #[test]
 fn authority_ownership_map_resources_owned_by() {
-    use engene::core::ownership_map::{OwnershipMap, ResourceOwnership, MutationTiming, ThreadSafety};
+    use engene::core::ownership_map::{
+        MutationTiming, OwnershipMap, ResourceOwnership, ThreadSafety,
+    };
 
     let mut map = OwnershipMap::new();
     map.register_resource(ResourceOwnership {
@@ -1494,7 +1621,9 @@ fn authority_ownership_map_resources_owned_by() {
 
 #[test]
 fn authority_ownership_map_validate_empty_owner_fails() {
-    use engene::core::ownership_map::{OwnershipMap, ResourceOwnership, MutationTiming, ThreadSafety};
+    use engene::core::ownership_map::{
+        MutationTiming, OwnershipMap, ResourceOwnership, ThreadSafety,
+    };
 
     let mut map = OwnershipMap::new();
     map.register_resource(ResourceOwnership {
@@ -1515,7 +1644,10 @@ fn authority_ownership_map_validate_empty_owner_fails() {
 fn authority_matrix_has_global_scope() {
     use engene::core::world_state_authority::{authority_matrix, SaveScope};
     let matrix = authority_matrix();
-    let global = matrix.iter().filter(|e| e.save_scope == SaveScope::Global).count();
+    let global = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Global)
+        .count();
     assert!(global >= 1);
 }
 
@@ -1523,7 +1655,10 @@ fn authority_matrix_has_global_scope() {
 fn authority_matrix_has_derived_scope() {
     use engene::core::world_state_authority::{authority_matrix, SaveScope};
     let matrix = authority_matrix();
-    let derived = matrix.iter().filter(|e| e.save_scope == SaveScope::Derived).count();
+    let derived = matrix
+        .iter()
+        .filter(|e| e.save_scope == SaveScope::Derived)
+        .count();
     assert!(derived >= 2);
 }
 
@@ -1551,8 +1686,12 @@ fn authority_system_descriptor_component_access() {
     let desc = SystemDescriptor::new("Test")
         .reads_component::<CompA>()
         .writes_component::<CompB>();
-    assert!(desc.reads_components.contains(&std::any::TypeId::of::<CompA>()));
-    assert!(desc.writes_components.contains(&std::any::TypeId::of::<CompB>()));
+    assert!(desc
+        .reads_components
+        .contains(&std::any::TypeId::of::<CompA>()));
+    assert!(desc
+        .writes_components
+        .contains(&std::any::TypeId::of::<CompB>()));
 }
 
 #[test]

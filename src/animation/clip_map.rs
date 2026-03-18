@@ -1,5 +1,5 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use serde::{Serialize, Deserialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimationClip {
@@ -97,7 +97,8 @@ impl ClipMap {
     }
 
     pub fn clip_for_state(&self, state: &AnimationState) -> Option<&AnimationClip> {
-        self.state_bindings.get(state)
+        self.state_bindings
+            .get(state)
             .and_then(|name| self.clips.get(name))
     }
 
@@ -115,5 +116,7 @@ impl ClipMap {
 }
 
 impl Default for ClipMap {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

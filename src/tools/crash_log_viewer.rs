@@ -53,21 +53,25 @@ impl CrashLogViewer {
 
 impl CrashLogViewer {
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("Crash Logs").default_width(500.0).show(ctx, |ui| {
-            ui.label(format!("Recent crashes: {}", self.crash_count()));
-            ui.separator();
-            egui::ScrollArea::vertical().max_height(300.0).show(ui, |ui| {
-                for entry in &self.recent_crashes {
-                    ui.group(|ui| {
-                        ui.label(format!("Time: {}", entry.timestamp));
-                        ui.colored_label(egui::Color32::RED, &entry.message);
-                        if let Some(loc) = &entry.location {
-                            ui.weak(loc);
+        egui::Window::new("Crash Logs")
+            .default_width(500.0)
+            .show(ctx, |ui| {
+                ui.label(format!("Recent crashes: {}", self.crash_count()));
+                ui.separator();
+                egui::ScrollArea::vertical()
+                    .max_height(300.0)
+                    .show(ui, |ui| {
+                        for entry in &self.recent_crashes {
+                            ui.group(|ui| {
+                                ui.label(format!("Time: {}", entry.timestamp));
+                                ui.colored_label(egui::Color32::RED, &entry.message);
+                                if let Some(loc) = &entry.location {
+                                    ui.weak(loc);
+                                }
+                            });
                         }
                     });
-                }
             });
-        });
     }
 }
 

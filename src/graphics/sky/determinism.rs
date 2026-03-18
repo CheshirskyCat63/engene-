@@ -7,7 +7,10 @@ pub struct WeatherDeterminism {
 
 impl WeatherDeterminism {
     pub fn new(seed: u64) -> Self {
-        Self { master_seed: seed, state: seed }
+        Self {
+            master_seed: seed,
+            state: seed,
+        }
     }
 
     pub fn next_u64(&mut self) -> u64 {

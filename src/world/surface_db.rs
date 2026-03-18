@@ -1,7 +1,9 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
-use crate::world::damage_profiles::{DecalProfileId, DebrisProfileId, FracturePatternId, GoreResponseId};
+use crate::world::damage_profiles::{
+    DebrisProfileId, DecalProfileId, FracturePatternId, GoreResponseId,
+};
 
 pub type MaterialId = u16;
 
@@ -20,7 +22,10 @@ pub enum ResponseClass {
 
 impl ResponseClass {
     pub fn is_stone_like(self) -> bool {
-        matches!(self, Self::BrittleCeramic | Self::Ite | Self::LayeredMasonry)
+        matches!(
+            self,
+            Self::BrittleCeramic | Self::Ite | Self::LayeredMasonry
+        )
     }
 
     pub fn is_biological(self) -> bool {
@@ -69,10 +74,7 @@ pub struct SurfaceDB {
 
 impl SurfaceDB {
     pub fn new(materials: Vec<SurfaceMaterial>) -> Self {
-        let name_to_id = materials
-            .iter()
-            .map(|m| (m.name.clone(), m.id))
-            .collect();
+        let name_to_id = materials.iter().map(|m| (m.name.clone(), m.id)).collect();
         Self {
             materials,
             name_to_id,
@@ -84,9 +86,7 @@ impl SurfaceDB {
     }
 
     pub fn get_by_name(&self, name: &str) -> Option<&SurfaceMaterial> {
-        self.name_to_id
-            .get(name)
-            .and_then(|id| self.get(*id))
+        self.name_to_id.get(name).and_then(|id| self.get(*id))
     }
 
     pub fn id_by_name(&self, name: &str) -> Option<MaterialId> {

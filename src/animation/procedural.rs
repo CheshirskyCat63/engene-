@@ -43,11 +43,7 @@ impl PoseBlender {
         }
     }
 
-    pub fn blend_poses(
-        &self,
-        animation_pose: &[Mat4],
-        physics_pose: &[Mat4],
-    ) -> Vec<Mat4> {
+    pub fn blend_poses(&self, animation_pose: &[Mat4], physics_pose: &[Mat4]) -> Vec<Mat4> {
         let n = animation_pose.len().min(physics_pose.len());
         let mut result = Vec::with_capacity(n);
 
@@ -121,20 +117,19 @@ impl ProceduralLayer {
         }
     }
 
-    pub fn compute_final_pose(
-        &self,
-        animation_pose: &[Mat4],
-        physics_pose: &[Mat4],
-    ) -> Vec<Mat4> {
+    pub fn compute_final_pose(&self, animation_pose: &[Mat4], physics_pose: &[Mat4]) -> Vec<Mat4> {
         self.blender.blend_poses(animation_pose, physics_pose)
     }
 
     pub fn configure_upper_lower_split(&mut self, joint_names: &[String]) {
         for (i, name) in joint_names.iter().enumerate() {
             let lower = name.to_lowercase();
-            let w = if lower.contains("leg") || lower.contains("hip")
-                || lower.contains("knee") || lower.contains("ankle")
-                || lower.contains("foot") || lower.contains("toe")
+            let w = if lower.contains("leg")
+                || lower.contains("hip")
+                || lower.contains("knee")
+                || lower.contains("ankle")
+                || lower.contains("foot")
+                || lower.contains("toe")
             {
                 1.0
             } else if lower.contains("spine") || lower.contains("pelvis") {

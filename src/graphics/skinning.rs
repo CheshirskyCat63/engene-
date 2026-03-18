@@ -15,10 +15,26 @@ pub struct SkinVertex {
 impl SkinVertex {
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         static ATTRS: &[wgpu::VertexAttribute] = &[
-            wgpu::VertexAttribute { offset: 0, shader_location: 0, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 12, shader_location: 1, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 24, shader_location: 2, format: wgpu::VertexFormat::Uint32x4 },
-            wgpu::VertexAttribute { offset: 40, shader_location: 3, format: wgpu::VertexFormat::Float32x4 },
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 1,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 24,
+                shader_location: 2,
+                format: wgpu::VertexFormat::Uint32x4,
+            },
+            wgpu::VertexAttribute {
+                offset: 40,
+                shader_location: 3,
+                format: wgpu::VertexFormat::Float32x4,
+            },
         ];
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<SkinVertex>() as wgpu::BufferAddress,

@@ -1,0 +1,11 @@
+[package]
+name = "app_engene_sdk"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+engene = { path = "../.." }
+
+[[bin]]
+name = "app_engene_sdk"
+path = "src/main.rs"

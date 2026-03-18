@@ -1,12 +1,13 @@
 //! End-to-End and Regression tests — 101 tests covering integration of all major subsystems.
 
 use engene::app::runtime_assembly::RuntimeAssembly;
+use engene::audio::audio::AudioEngine;
 use engene::body::body_response::BodyPhysicalResponseCache;
 use engene::body::body_store::BodyStateStore;
 use engene::body::death_pipeline::CorpseManager;
 use engene::core::build_manifest::{BuildManifest, SaveCompatibility, SchemaMigrationRegistry};
 use engene::core::ecs::Ecs;
-use engene::game::economy::item_registry::{ItemRegistry, ItemCategory};
+use engene::game::economy::item_registry::{ItemCategory, ItemRegistry};
 use engene::game::economy::trader_economy::TraderState;
 use engene::game::hud::{HudState, NotificationKind};
 use engene::game::player::PlayerController;
@@ -15,7 +16,6 @@ use engene::navigation::world_graph::WorldGraph;
 use engene::physics::ballistics::BallisticsSystem;
 use engene::physics::destruction::DestructionSystem;
 use engene::physics::fire::FireGrid;
-use engene::audio::audio::AudioEngine;
 use engene::simulation::camp_simulation::CampState;
 use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
 use engene::simulation::world_milestones::WorldMilestoneTracker;
@@ -23,7 +23,7 @@ use engene::tools::console::EngineConsole;
 use engene::tools::doctor::{run_doctor, DoctorMode};
 use engene::tools::editor_safe_mode::EditorSafeMode;
 use engene::world::chunk_persistence::ChunkPersistenceService;
-use engene::world::components::{EntityKind, NpcEconomy, PersonalNeeds, Transform, Job};
+use engene::world::components::{EntityKind, Job, NpcEconomy, PersonalNeeds, Transform};
 use engene::world::heightmap::Heightmap;
 use engene::world::streaming::{ChunkCoord, WorldStreamer};
 use engene::world::world::WorldGrid;
@@ -96,7 +96,10 @@ fn e2e_engine_shutdown() {
 #[test]
 fn e2e_engine_has_ecs_and_resources() {
     let engine = RuntimeAssembly::sandbox();
-    assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
+    assert!(engine
+        .resources
+        .get::<engene::world::resources::ResourceGrid>()
+        .is_some());
 }
 
 // =============================================================================
@@ -114,8 +117,14 @@ fn e2e_build_manifest_current() {
 #[test]
 fn e2e_build_manifest_schema_versions() {
     let m = BuildManifest::current();
-    assert_eq!(m.schema_version_save, engene::core::build_manifest::SCHEMA_VERSION_SAVE);
-    assert_eq!(m.schema_version_chunk, engene::core::build_manifest::SCHEMA_VERSION_CHUNK);
+    assert_eq!(
+        m.schema_version_save,
+        engene::core::build_manifest::SCHEMA_VERSION_SAVE
+    );
+    assert_eq!(
+        m.schema_version_chunk,
+        engene::core::build_manifest::SCHEMA_VERSION_CHUNK
+    );
 }
 
 #[test]
@@ -152,7 +161,15 @@ fn e2e_build_manifest_ensure_data_dirs() {
 fn e2e_ecs_spawn_integration() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 200.0, cell_x: 1, cell_y: 2 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 200.0,
+            cell_x: 1,
+            cell_y: 2,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     assert!(ecs.is_alive(e));
     assert_eq!(ecs.transforms.get(&e).unwrap().x, 100.0);
@@ -163,7 +180,15 @@ fn e2e_ecs_spawn_integration() {
 fn e2e_ecs_despawn_integration() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     assert!(!ecs.is_alive(e));
     assert!(ecs.transforms.get(&e).is_none());
@@ -173,7 +198,12 @@ fn e2e_ecs_despawn_integration() {
 fn e2e_ecs_components_roundtrip_transform() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    let t = Transform { x: 42.0, y: 99.0, cell_x: 3, cell_y: 4 };
+    let t = Transform {
+        x: 42.0,
+        y: 99.0,
+        cell_x: 3,
+        cell_y: 4,
+    };
     ecs.transforms.insert(e, t.clone());
     let got = ecs.transforms.get(&e).unwrap();
     assert_eq!(got.x, 42.0);
@@ -184,7 +214,10 @@ fn e2e_ecs_components_roundtrip_transform() {
 fn e2e_ecs_components_roundtrip_kind() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.kinds.insert(e, EntityKind::Monster(engene::world::components::MonsterSpecies::Wolf));
+    ecs.kinds.insert(
+        e,
+        EntityKind::Monster(engene::world::components::MonsterSpecies::Wolf),
+    );
     assert!(matches!(ecs.kinds.get(&e), Some(EntityKind::Monster(_))));
 }
 
@@ -201,12 +234,15 @@ fn e2e_ecs_identity_spawn_new() {
 fn e2e_ecs_npc_economy_component() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 250.0,
-        monthly_required: 80.0,
-        job: Job::Trader,
-        desperation: 0.1,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 250.0,
+            monthly_required: 80.0,
+            job: Job::Trader,
+            desperation: 0.1,
+        },
+    );
     assert_eq!(ecs.npc_economies.get(&e).unwrap().money, 250.0);
 }
 
@@ -233,7 +269,15 @@ fn e2e_ecs_batch_spawn_despawn() {
 fn e2e_ecs_spatial_rebuild() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 600.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 600.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.rebuild_spatial();
     let cand = ecs.spatial.candidates_in_radius(500.0, 600.0, 50.0);
     assert!(cand.contains(&e));
@@ -287,7 +331,15 @@ fn e2e_chunk_persistence_save_and_unload() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
 
@@ -305,7 +357,15 @@ fn e2e_chunk_persistence_load() {
 
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
 
@@ -325,7 +385,15 @@ fn e2e_chunk_persistence_has_save() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
 
@@ -379,7 +447,6 @@ fn e2e_doctor_vertical_slice_zero_errors() {
     let report = run_doctor(&engine, DoctorMode::Advisory);
     assert_eq!(report.error_count(), 0);
 }
-
 
 // =============================================================================
 // 6. SIMULATION (10 tests)
@@ -535,12 +602,15 @@ fn e2e_trader_state_effective_prices() {
 fn e2e_npc_economy_via_ecs() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Hunter,
-        desperation: 0.3,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Hunter,
+            desperation: 0.3,
+        },
+    );
     let eco = ecs.npc_economies.get(&e).unwrap();
     assert_eq!(eco.job, Job::Hunter);
 }
@@ -775,7 +845,10 @@ fn e2e_body_physical_response_healthy() {
 #[test]
 fn e2e_body_physical_response_compute() {
     let cache = BodyPhysicalResponseCache::compute_from_health(1.0, 1.0, 0.0);
-    assert_eq!(cache.response_tier, engene::body::body_response::PhysicalResponseTier::Healthy);
+    assert_eq!(
+        cache.response_tier,
+        engene::body::body_response::PhysicalResponseTier::Healthy
+    );
 }
 
 #[test]
@@ -880,7 +953,6 @@ fn e2e_destruction_register_object() {
     sys.register_object(obj);
     assert_eq!(sys.objects.len(), 1);
 }
-
 
 // =============================================================================
 // 13. NAVIGATION (5 tests)
@@ -1023,15 +1095,26 @@ fn e2e_golden_chunk_save_load_ecs() {
 
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.0,
+        },
+    );
 
     let mut persistence = ChunkPersistenceService::new(&dir);
     let coord = ChunkCoord { x: 0, z: 0 };

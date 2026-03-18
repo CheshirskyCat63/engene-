@@ -10,7 +10,7 @@ pub struct Group {
 }
 
 /// Find or form a group for the given entity.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub fn find_or_form_group(ecs: &Ecs, entity: Entity) -> Option<Group> {
     let kind = ecs.get_kind(entity)?;
@@ -20,13 +20,23 @@ pub fn find_or_form_group(ecs: &Ecs, entity: Entity) -> Option<Group> {
 
     let mut candidates: Vec<(Entity, f32)> = Vec::new();
     for e in ecs.spatial.candidates_in_radius(et.x, et.y, 100.0) {
-        if e == entity { continue; }
-        if !same_kind(kind, ecs.get_kind(e)) { continue; }
-        let Some(t) = ecs.get_transform(e) else { continue };
+        if e == entity {
+            continue;
+        }
+        if !same_kind(kind, ecs.get_kind(e)) {
+            continue;
+        }
+        let Some(t) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (t.x - et.x).powi(2) + (t.y - et.y).powi(2);
-        if d2 > r2 { continue; }
+        if d2 > r2 {
+            continue;
+        }
 
-        let trust = ecs.identity.persistent_id_of(e)
+        let trust = ecs
+            .identity
+            .persistent_id_of(e)
             .and_then(|pid| mem.and_then(|m| m.entities.get(&pid)))
             .map_or(0.0, |op| op.trust);
         if trust > -0.2 {
@@ -34,19 +44,28 @@ pub fn find_or_form_group(ecs: &Ecs, entity: Entity) -> Option<Group> {
         }
     }
 
-    if candidates.is_empty() { return None; }
+    if candidates.is_empty() {
+        return None;
+    }
 
     candidates.sort_by(|a, b| b.1.partial_cmp(&a.1).unwrap());
     let member_entities: Vec<Entity> = candidates.into_iter().take(4).map(|(e, _)| e).collect();
-    let members: Vec<PersistentEntityId> = member_entities.iter()
+    let members: Vec<PersistentEntityId> = member_entities
+        .iter()
         .filter_map(|&e| ecs.identity.persistent_id_of(e))
         .collect();
-    if members.is_empty() { return None; }
+    if members.is_empty() {
+        return None;
+    }
 
     let leader_entity = pick_leader(ecs, entity, &member_entities);
     let leader = ecs.identity.persistent_id_of(leader_entity)?;
 
-    Some(Group { leader, members, formed_tick: ecs.tick })
+    Some(Group {
+        leader,
+        members,
+        formed_tick: ecs.tick,
+    })
 }
 
 fn pick_leader(ecs: &Ecs, self_entity: Entity, members: &[Entity]) -> Entity {
@@ -65,7 +84,9 @@ fn pick_leader(ecs: &Ecs, self_entity: Entity, members: &[Entity]) -> Entity {
 
 fn reputation_of(ecs: &Ecs, entity: Entity) -> f32 {
     ecs.get_social_needs(entity).map_or(0.0, |s| s.reputation)
-        + ecs.get_ecosystem_needs(entity).map_or(0.0, |e| e.food_chain_position * 0.5)
+        + ecs
+            .get_ecosystem_needs(entity)
+            .map_or(0.0, |e| e.food_chain_position * 0.5)
         + ecs.get_needs(entity).map_or(0.0, |p| p.health * 0.3)
 }
 

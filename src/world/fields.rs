@@ -166,7 +166,9 @@ impl AnomalyField {
                 let falloff = 1.0 - dist / zone.radius;
                 let force = match zone.force_type {
                     AnomalyForceType::Vortex => {
-                        Vec3::new(-delta.z, 0.0, delta.x).normalize_or_zero() * zone.force_strength * falloff
+                        Vec3::new(-delta.z, 0.0, delta.x).normalize_or_zero()
+                            * zone.force_strength
+                            * falloff
                     }
                     AnomalyForceType::Gravity => {
                         Vec3::new(0.0, -zone.force_strength * falloff, 0.0)
@@ -183,7 +185,10 @@ impl AnomalyField {
             }
         }
 
-        AnomalyForces { acceleration: accel, inside_anomaly: inside }
+        AnomalyForces {
+            acceleration: accel,
+            inside_anomaly: inside,
+        }
     }
 }
 

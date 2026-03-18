@@ -147,6 +147,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
+name = "app_engene_game"
+version = "0.1.0"
+dependencies = [
+ "engene",
+]
+
+[[package]]
+name = "app_engene_headless"
+version = "0.1.0"
+dependencies = [
+ "engene",
+]
+
+[[package]]
+name = "app_engene_sdk"
+version = "0.1.0"
+dependencies = [
+ "engene",
+]
+
+[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1029,6 +1050,10 @@ dependencies = [
  "egui",
  "egui-wgpu",
  "egui-winit",
+ "engine_content",
+ "engine_core",
+ "engine_ecs",
+ "engine_runtime",
  "glam 0.30.10",
  "glob",
  "gltf",
@@ -1051,6 +1076,76 @@ dependencies = [
  "walkdir",
  "wgpu",
  "winit",
+]
+
+[[package]]
+name = "engine_audio"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+]
+
+[[package]]
+name = "engine_content"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+ "ron",
+ "serde",
+ "tempfile",
+ "walkdir",
+]
+
+[[package]]
+name = "engine_core"
+version = "0.1.0"
+dependencies = [
+ "puffin",
+ "ron",
+ "serde",
+]
+
+[[package]]
+name = "engine_ecs"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+ "serde",
+]
+
+[[package]]
+name = "engine_physics"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+]
+
+[[package]]
+name = "engine_render"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+]
+
+[[package]]
+name = "engine_runtime"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+]
+
+[[package]]
+name = "engine_tools"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
+]
+
+[[package]]
+name = "engine_world"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
 ]
 
 [[package]]
@@ -1255,6 +1350,13 @@ dependencies = [
  "futures-task",
  "pin-project-lite",
  "slab",
+]
+
+[[package]]
+name = "game_framework"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
 ]
 
 [[package]]
@@ -3388,6 +3490,13 @@ dependencies = [
  "memmap2",
  "smithay-client-toolkit 0.19.2",
  "tiny-skia",
+]
+
+[[package]]
+name = "sdk_app"
+version = "0.1.0"
+dependencies = [
+ "engine_core",
 ]
 
 [[package]]

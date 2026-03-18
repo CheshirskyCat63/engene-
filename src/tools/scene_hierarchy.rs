@@ -32,14 +32,17 @@ impl SceneHierarchy {
         self.root_entities.clear();
 
         for (id, name, parent) in entities {
-            self.nodes.insert(*id, HierarchyNode {
-                entity_id: *id,
-                name: name.clone(),
-                children: Vec::new(),
-                parent: *parent,
-                visible: true,
-                selected: self.selected_entity == Some(*id),
-            });
+            self.nodes.insert(
+                *id,
+                HierarchyNode {
+                    entity_id: *id,
+                    name: name.clone(),
+                    children: Vec::new(),
+                    parent: *parent,
+                    visible: true,
+                    selected: self.selected_entity == Some(*id),
+                },
+            );
         }
 
         let ids: Vec<u32> = self.nodes.keys().copied().collect();
@@ -74,7 +77,8 @@ impl SceneHierarchy {
     pub fn set_filter(&mut self, filter: &str) {
         self.filter = filter.to_lowercase();
         for node in self.nodes.values_mut() {
-            node.visible = self.filter.is_empty() || node.name.to_lowercase().contains(&self.filter);
+            node.visible =
+                self.filter.is_empty() || node.name.to_lowercase().contains(&self.filter);
         }
     }
 
@@ -110,7 +114,9 @@ impl SceneHierarchy {
     #[cfg(feature = "debug_ui")]
     fn draw_node(&mut self, ui: &mut egui::Ui, id: u32, depth: usize) {
         let (visible, label, selected, children) = {
-            let Some(node) = self.nodes.get(&id) else { return };
+            let Some(node) = self.nodes.get(&id) else {
+                return;
+            };
             (
                 node.visible,
                 format!("{}{} [{}]", "  ".repeat(depth), node.name, id),
@@ -118,7 +124,9 @@ impl SceneHierarchy {
                 node.children.clone(),
             )
         };
-        if !visible { return; }
+        if !visible {
+            return;
+        }
 
         if ui.selectable_label(selected, &label).clicked() {
             self.select(id);
@@ -131,5 +139,7 @@ impl SceneHierarchy {
 }
 
 impl Default for SceneHierarchy {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

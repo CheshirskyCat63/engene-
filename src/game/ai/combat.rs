@@ -1,9 +1,9 @@
 use rand::Rng;
 
-use crate::game::ai::witness;
 use crate::core::ecs::{Ecs, Entity};
-use crate::core::events::EventBus;
 use crate::core::events::canonical::CombatHit;
+use crate::core::events::EventBus;
+use crate::game::ai::witness;
 use crate::game::ecosystem::food_chain;
 use crate::world::components::*;
 
@@ -60,11 +60,15 @@ impl StaggerState {
         match self {
             Self::Stagger { remaining } => {
                 *remaining -= dt;
-                if *remaining <= 0.0 { *self = Self::None; }
+                if *remaining <= 0.0 {
+                    *self = Self::None;
+                }
             }
             Self::Knockdown { remaining } => {
                 *remaining -= dt;
-                if *remaining <= 0.0 { *self = Self::None; }
+                if *remaining <= 0.0 {
+                    *self = Self::None;
+                }
             }
             Self::None => {}
         }
@@ -72,13 +76,18 @@ impl StaggerState {
 }
 
 /// Resolve combat between attacker and defender.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub fn resolve_combat(ecs: &mut Ecs, events: &mut EventBus, attacker: Entity, defender: Entity) {
     resolve_group_combat(ecs, events, &[attacker], defender);
 }
 
-pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[Entity], defender: Entity) {
+pub fn resolve_group_combat(
+    ecs: &mut Ecs,
+    events: &mut EventBus,
+    attackers: &[Entity],
+    defender: Entity,
+) {
     let mut rng = rand::thread_rng();
     let tick = ecs.tick;
 
@@ -86,12 +95,15 @@ pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[E
         witness::on_attacked(ecs, defender, a, tick);
     }
 
-    let atk_power: f32 = attackers.iter().map(|&a| {
-        let bp = ecs.get_kind(a).map_or(1.0, base_power);
-        let hp = ecs.get_needs(a).map_or(1.0, |p| p.health);
-        let energy = ecs.get_needs(a).map_or(0.5, |p| p.energy);
-        bp * hp * (0.7 + energy * 0.3)
-    }).sum();
+    let atk_power: f32 = attackers
+        .iter()
+        .map(|&a| {
+            let bp = ecs.get_kind(a).map_or(1.0, base_power);
+            let hp = ecs.get_needs(a).map_or(1.0, |p| p.health);
+            let energy = ecs.get_needs(a).map_or(0.5, |p| p.energy);
+            bp * hp * (0.7 + energy * 0.3)
+        })
+        .sum();
 
     let def_kind = ecs.get_kind(defender).cloned();
     let def_bp = def_kind.as_ref().map_or(1.0, base_power);
@@ -105,7 +117,10 @@ pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[E
     // Predator bonus: species higher on food chain deal more damage
     let predator_bonus = match (attackers.first().and_then(|&a| ecs.get_kind(a)), &def_kind) {
         (Some(EntityKind::Monster(atk_sp)), Some(EntityKind::Monster(def_sp)))
-            if food_chain::is_predator_of(*atk_sp, *def_sp) => 1.25,
+            if food_chain::is_predator_of(*atk_sp, *def_sp) =>
+        {
+            1.25
+        }
         _ => 1.0,
     };
     let effective_atk = atk_total * group_bonus * predator_bonus;
@@ -166,7 +181,9 @@ pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[E
                 pn.energy = (pn.energy + share_food * 0.3).min(1.0);
                 pn.ambitions = (pn.ambitions + 0.05).min(1.0);
             }
-            if let Some(econ) = ecs.get_npc_economy_mut(a) { econ.money += share_loot; }
+            if let Some(econ) = ecs.get_npc_economy_mut(a) {
+                econ.money += share_loot;
+            }
             if let Some(sn) = ecs.get_social_needs_mut(a) {
                 sn.reputation = (sn.reputation + 0.1).min(1.0);
             }
@@ -176,20 +193,37 @@ pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[E
             }
         }
 
-        let def_name = ecs.get_name(defender).map(|n| n.0.clone()).unwrap_or_default();
+        let def_name = ecs
+            .get_name(defender)
+            .map(|n| n.0.clone())
+            .unwrap_or_default();
         if attackers.len() > 1 {
-            let names: Vec<String> = attackers.iter()
-                .filter_map(|&a| ecs.get_name(a).map(|n| n.0.clone())).collect();
-            println!("    [GANG KILL] {} ({}) killed {}", names.join("+"), attackers.len(), def_name);
+            let names: Vec<String> = attackers
+                .iter()
+                .filter_map(|&a| ecs.get_name(a).map(|n| n.0.clone()))
+                .collect();
+            println!(
+                "    [GANG KILL] {} ({}) killed {}",
+                names.join("+"),
+                attackers.len(),
+                def_name
+            );
             witness::on_group_kill(ecs, attackers, defender, tick);
         } else {
-            let atk_name = attackers.first().and_then(|&a| ecs.get_name(a)).map(|n| n.0.clone()).unwrap_or_default();
+            let atk_name = attackers
+                .first()
+                .and_then(|&a| ecs.get_name(a))
+                .map(|n| n.0.clone())
+                .unwrap_or_default();
             println!("    [KILL] {} killed {}", atk_name, def_name);
             if let Some(&killer) = attackers.first() {
                 witness::on_kill(ecs, killer, defender, tick);
             }
         }
-        events.emit(EntityDied { entity: defender, killer: attackers.first().copied() });
+        events.emit(EntityDied {
+            entity: defender,
+            killer: attackers.first().copied(),
+        });
     } else {
         for &a in attackers {
             witness::on_hunt_failed(ecs, a, def_kind.as_ref(), attackers.len() > 1);
@@ -201,12 +235,20 @@ pub fn resolve_group_combat(ecs: &mut Ecs, events: &mut EventBus, attackers: &[E
         if attacker_dead {
             let atk_kind = ecs.get_kind(a).cloned();
             let food = atk_kind.as_ref().map_or(0.3, food_value);
-            if let Some(pn) = ecs.get_needs_mut(defender) { pn.hunger = (pn.hunger - food).max(0.0); }
+            if let Some(pn) = ecs.get_needs_mut(defender) {
+                pn.hunger = (pn.hunger - food).max(0.0);
+            }
             let atk_name = ecs.get_name(a).map(|n| n.0.clone()).unwrap_or_default();
-            let def_name = ecs.get_name(defender).map(|n| n.0.clone()).unwrap_or_default();
+            let def_name = ecs
+                .get_name(defender)
+                .map(|n| n.0.clone())
+                .unwrap_or_default();
             println!("    [KILL] {} died attacking {}", atk_name, def_name);
             witness::on_kill(ecs, defender, a, tick);
-            events.emit(EntityDied { entity: a, killer: Some(defender) });
+            events.emit(EntityDied {
+                entity: a,
+                killer: Some(defender),
+            });
         }
     }
 

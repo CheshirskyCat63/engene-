@@ -26,13 +26,7 @@ impl RvoSystem {
         self.agents.clear();
     }
 
-    pub fn add_agent(
-        &mut self,
-        entity: Entity,
-        pos: [f32; 2],
-        vel: [f32; 2],
-        pref_vel: [f32; 2],
-    ) {
+    pub fn add_agent(&mut self, entity: Entity, pos: [f32; 2], vel: [f32; 2], pref_vel: [f32; 2]) {
         self.agents.push(RvoAgent {
             entity,
             position: pos,
@@ -74,10 +68,8 @@ impl RvoSystem {
                     avoidance[1] += ny * push;
                     count += 1;
                 } else {
-                    let rel_vel_x =
-                        self.agents[i].velocity[0] - self.agents[j].velocity[0];
-                    let rel_vel_y =
-                        self.agents[i].velocity[1] - self.agents[j].velocity[1];
+                    let rel_vel_x = self.agents[i].velocity[0] - self.agents[j].velocity[0];
+                    let rel_vel_y = self.agents[i].velocity[1] - self.agents[j].velocity[1];
 
                     let t_closest = -(dx * rel_vel_x + dy * rel_vel_y)
                         / (rel_vel_x * rel_vel_x + rel_vel_y * rel_vel_y + 0.001);

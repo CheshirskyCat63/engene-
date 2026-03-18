@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 pub type AttrId = u16;
 
@@ -74,7 +74,11 @@ impl StatusEffects {
             existing.stacks = existing.stacks.saturating_add(stacks);
             existing.remaining = existing.remaining.max(duration);
         } else {
-            self.effects.push(StatusEffect { id, stacks, remaining: duration });
+            self.effects.push(StatusEffect {
+                id,
+                stacks,
+                remaining: duration,
+            });
         }
     }
 
@@ -90,7 +94,10 @@ impl StatusEffects {
     }
 
     pub fn stacks(&self, id: u16) -> u8 {
-        self.effects.iter().find(|e| e.id == id).map_or(0, |e| e.stacks)
+        self.effects
+            .iter()
+            .find(|e| e.id == id)
+            .map_or(0, |e| e.stacks)
     }
 }
 

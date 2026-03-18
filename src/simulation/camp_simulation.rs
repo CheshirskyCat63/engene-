@@ -15,19 +15,10 @@ pub struct CampState {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum CampService {
-    Trader {
-        name: String,
-        stock_value: f32,
-    },
-    Mechanic {
-        repair_quality: f32,
-    },
-    Medic {
-        heal_quality: f32,
-    },
-    BarKeep {
-        morale_boost: f32,
-    },
+    Trader { name: String, stock_value: f32 },
+    Mechanic { repair_quality: f32 },
+    Medic { heal_quality: f32 },
+    BarKeep { morale_boost: f32 },
 }
 
 impl CampState {

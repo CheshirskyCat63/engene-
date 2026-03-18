@@ -1,5 +1,5 @@
 //! Hot reload system for shaders and config files (Phase D.2)
-//! 
+//!
 //! Watches external files and triggers reload callbacks on change.
 
 use std::collections::HashMap;
@@ -67,7 +67,7 @@ impl HotReloadWatcher {
     /// Returns true if any files changed
     pub fn poll_changes(&mut self) -> bool {
         let mut changed = false;
-        
+
         for path in self.watched.keys() {
             if let Ok(metadata) = std::fs::metadata(path) {
                 if let Ok(modified) = metadata.modified() {
@@ -84,7 +84,7 @@ impl HotReloadWatcher {
                 }
             }
         }
-        
+
         changed
     }
 
@@ -150,10 +150,10 @@ mod tests {
     fn test_reload_context() {
         let mut ctx = ReloadContext::default();
         assert!(!ctx.has_pending());
-        
+
         ctx.queue_reload(PathBuf::from("test.wgsl"));
         assert!(ctx.has_pending());
-        
+
         ctx.clear_pending();
         assert!(!ctx.has_pending());
     }

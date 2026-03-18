@@ -17,6 +17,7 @@ use crate::tools::event_monitor::{draw_event_monitor, EventMonitorState};
 use crate::tools::inspector::{draw_inspector, InspectorEdit, InspectorState};
 use crate::tools::overlays::{draw_overlay_panel, OverlayState};
 use crate::tools::persistence_dashboard::PersistenceDashboard;
+use crate::tools::prefab_placer::{draw_prefab_placer, PrefabPlacerState};
 use crate::tools::profiler_dashboard::{draw_profiler, ProfilerState};
 use crate::tools::quest_board::QuestBoardPanel;
 use crate::tools::replay_browser::ReplayBrowser;
@@ -25,7 +26,6 @@ use crate::tools::scene_hierarchy::SceneHierarchy;
 use crate::tools::sim_metrics_dashboard::SimMetricsDashboard;
 use crate::tools::time_controls::{draw_time_controls, TimeControlState};
 use crate::tools::world_map::WorldMapPanel;
-use crate::tools::prefab_placer::{draw_prefab_placer, PrefabPlacerState};
 
 pub struct EditorShell {
     pub debug_ui: DebugUiState,
@@ -55,10 +55,23 @@ impl EditorShell {
     pub fn new() -> Self {
         let mut safe_mode = EditorSafeMode::new();
         let panel_names = [
-            "Inspector", "Overlays", "Profiler", "SceneHierarchy",
-            "EventMonitor", "TimeControls", "Doctor", "Console",
-            "AssetBrowser", "ReplayBrowser", "RuntimeTruth", "SimMetrics",
-            "Persistence", "WorldMap", "QuestBoard", "Economy", "CrashLog",
+            "Inspector",
+            "Overlays",
+            "Profiler",
+            "SceneHierarchy",
+            "EventMonitor",
+            "TimeControls",
+            "Doctor",
+            "Console",
+            "AssetBrowser",
+            "ReplayBrowser",
+            "RuntimeTruth",
+            "SimMetrics",
+            "Persistence",
+            "WorldMap",
+            "QuestBoard",
+            "Economy",
+            "CrashLog",
             "PrefabPlacer",
         ];
         for name in &panel_names {
@@ -90,12 +103,7 @@ impl EditorShell {
         }
     }
 
-    pub fn draw(
-        &mut self,
-        ctx: &egui::Context,
-        ecs: &Ecs,
-        telemetry: &Telemetry,
-    ) {
+    pub fn draw(&mut self, ctx: &egui::Context, ecs: &Ecs, telemetry: &Telemetry) {
         draw_main_menu(ctx, &mut self.debug_ui);
 
         if self.debug_ui.show_inspector {
@@ -142,19 +150,25 @@ impl EditorShell {
             }
         }
         if self.debug_ui.show_console {
-            egui::Window::new("Console").default_width(500.0).show(ctx, |ui| {
-                self.console.draw(ui);
-            });
+            egui::Window::new("Console")
+                .default_width(500.0)
+                .show(ctx, |ui| {
+                    self.console.draw(ui);
+                });
         }
         if self.debug_ui.show_asset_browser {
-            egui::Window::new("Asset Browser").default_width(400.0).show(ctx, |ui| {
-                self.asset_browser.draw(ui);
-            });
+            egui::Window::new("Asset Browser")
+                .default_width(400.0)
+                .show(ctx, |ui| {
+                    self.asset_browser.draw(ui);
+                });
         }
         if self.debug_ui.show_replay_browser {
-            egui::Window::new("Replay Browser").default_width(400.0).show(ctx, |ui| {
-                self.replay_browser.draw(ui);
-            });
+            egui::Window::new("Replay Browser")
+                .default_width(400.0)
+                .show(ctx, |ui| {
+                    self.replay_browser.draw(ui);
+                });
         }
         if self.debug_ui.show_runtime_truth {
             self.runtime_truth.draw_ui(ctx);
@@ -202,7 +216,8 @@ impl EditorShell {
         let telemetry = crate::core::perf::telemetry::Telemetry::new();
         self.runtime_truth.update_from_engine(engine, &telemetry);
 
-        self.sim_metrics.record_snapshot(ecs, engine.time.month, engine.time.day);
+        self.sim_metrics
+            .record_snapshot(ecs, engine.time.month, engine.time.day);
 
         self.economy.record_snapshot(ecs, engine.time.month);
 

@@ -54,8 +54,15 @@ impl DecalClass {
 
     /// Whether rain washes this decal away
     pub fn rain_washable(&self) -> bool {
-        matches!(self, Self::WetFootprint | Self::MudSplash | Self::DragMark
-            | Self::BloodTransfer | Self::DirtAccumulation | Self::Leak)
+        matches!(
+            self,
+            Self::WetFootprint
+                | Self::MudSplash
+                | Self::DragMark
+                | Self::BloodTransfer
+                | Self::DirtAccumulation
+                | Self::Leak
+        )
     }
 }
 
@@ -86,7 +93,14 @@ impl DecalSystemV2 {
     }
 
     /// Add a classified decal
-    pub fn add(&mut self, position: [f32; 3], normal: [f32; 3], size: f32, class: DecalClass, intensity: f32) {
+    pub fn add(
+        &mut self,
+        position: [f32; 3],
+        normal: [f32; 3],
+        size: f32,
+        class: DecalClass,
+        intensity: f32,
+    ) {
         let decal = ClassifiedDecal {
             position,
             normal,
@@ -113,13 +127,15 @@ impl DecalSystemV2 {
             }
         }
 
-        self.decals.retain(|d| {
-            d.age < d.lifetime && d.intensity > 0.01
-        });
+        self.decals
+            .retain(|d| d.age < d.lifetime && d.intensity > 0.01);
     }
 
     fn evict_lowest_priority(&mut self) {
-        if let Some(idx) = self.decals.iter().enumerate()
+        if let Some(idx) = self
+            .decals
+            .iter()
+            .enumerate()
             .min_by_key(|(_, d)| d.class.priority())
             .map(|(i, _)| i)
         {

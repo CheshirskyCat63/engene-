@@ -341,16 +341,14 @@ impl Renderer {
         }))
         .expect("no suitable GPU adapter");
 
-        let (device, queue) = pollster::block_on(adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                label: Some("device"),
-                required_features: wgpu::Features::empty(),
-                required_limits: wgpu::Limits::default(),
-                memory_hints: wgpu::MemoryHints::default(),
-                trace: wgpu::Trace::Off,
-                experimental_features: Default::default(),
-            },
-        ))
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            label: Some("device"),
+            required_features: wgpu::Features::empty(),
+            required_limits: wgpu::Limits::default(),
+            memory_hints: wgpu::MemoryHints::default(),
+            trace: wgpu::Trace::Off,
+            experimental_features: Default::default(),
+        }))
         .expect("failed to create device");
 
         let caps = surface.get_capabilities(&adapter);
@@ -436,7 +434,8 @@ impl Renderer {
             })
             .collect();
 
-        let entity_shadow_pipeline = CascadedShadowMap::create_entity_shadow_pipeline(&device, &camera_bgl);
+        let entity_shadow_pipeline =
+            CascadedShadowMap::create_entity_shadow_pipeline(&device, &camera_bgl);
 
         // ---- PBR pipeline layout (camera + light + shadow) ----
         let pbr_layout = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -547,8 +546,16 @@ impl Renderer {
                 array_stride: std::mem::size_of::<LineVertex>() as wgpu::BufferAddress,
                 step_mode: wgpu::VertexStepMode::Vertex,
                 attributes: &[
-                    wgpu::VertexAttribute { offset: 0, shader_location: 0, format: wgpu::VertexFormat::Float32x3 },
-                    wgpu::VertexAttribute { offset: 12, shader_location: 1, format: wgpu::VertexFormat::Float32x3 },
+                    wgpu::VertexAttribute {
+                        offset: 0,
+                        shader_location: 0,
+                        format: wgpu::VertexFormat::Float32x3,
+                    },
+                    wgpu::VertexAttribute {
+                        offset: 12,
+                        shader_location: 1,
+                        format: wgpu::VertexFormat::Float32x3,
+                    },
                 ],
             };
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
@@ -662,9 +669,18 @@ impl Renderer {
             label: Some("bloom_bg"),
             layout: &bloom.bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&hdr_target.view) },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&bloom.sampler) },
-                wgpu::BindGroupEntry { binding: 2, resource: bloom.params_buffer.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&hdr_target.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&bloom.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: bloom.params_buffer.as_entire_binding(),
+                },
             ],
         });
 
@@ -696,15 +712,19 @@ impl Renderer {
         let ibl = IblBindings::new(&device);
         let taa = TaaPass::new(&device, w, h, surface_format);
         let atmosphere = crate::graphics::atmosphere::AtmospherePass::new(&device, surface_format);
-        let contact_shadows = crate::graphics::contact_shadows::ContactShadowPass::new(&device, surface_format);
+        let contact_shadows =
+            crate::graphics::contact_shadows::ContactShadowPass::new(&device, surface_format);
         let bruneton = crate::graphics::sky::atmosphere::BrunetonAtmosphere::new(&device, &queue);
 
         let sky_lighting = crate::graphics::sky::sky_lighting::SkyLightingSystem::new();
-        let weather_controller = crate::graphics::sky::weather_controller::WeatherController::new(42);
+        let weather_controller =
+            crate::graphics::sky::weather_controller::WeatherController::new(42);
         let cloud_coverage = crate::graphics::sky::cloud_coverage::CloudCoveragePass::new(&device);
-        let cloud_noise = crate::graphics::sky::cloud_system::CloudNoiseTextures::new(&device, &queue);
-        let mut cloud_renderer = crate::graphics::sky::cloud_renderer::CloudRenderer::new(&device, &queue, HDR_FORMAT);
-        
+        let cloud_noise =
+            crate::graphics::sky::cloud_system::CloudNoiseTextures::new(&device, &queue);
+        let mut cloud_renderer =
+            crate::graphics::sky::cloud_renderer::CloudRenderer::new(&device, &queue, HDR_FORMAT);
+
         // Connect cloud noise textures to cloud renderer
         let cloud_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
             label: Some("cloud_sampler"),
@@ -728,13 +748,16 @@ impl Renderer {
         let star_field = crate::graphics::sky::sky_objects::StarField::new(&device, HDR_FORMAT);
         let lightning_system = crate::graphics::sky::lightning::LightningSystem::new();
         let fog_system = crate::graphics::sky::fog::FogSystem::new(&device, HDR_FORMAT);
-        let precipitation_system = crate::graphics::sky::precipitation::PrecipitationSystem::new(&device, HDR_FORMAT);
+        let precipitation_system =
+            crate::graphics::sky::precipitation::PrecipitationSystem::new(&device, HDR_FORMAT);
         let blue_noise = crate::graphics::sky::blue_noise::BlueNoiseSampler::new(&device, &queue);
         let weather_debug = crate::graphics::sky::debug_views::WeatherDebugState::default();
         let quality_profile = crate::graphics::sky::quality_profiles::SkyQualityProfile::high();
 
         // Particles (Phase B.4)
-        let particle_system = Some(crate::graphics::particles::ParticleSystem::new(&device, HDR_FORMAT));
+        let particle_system = Some(crate::graphics::particles::ParticleSystem::new(
+            &device, HDR_FORMAT,
+        ));
 
         let egui_ctx = egui::Context::default();
         let egui_renderer = egui_wgpu::Renderer::new(
@@ -861,7 +884,10 @@ impl Renderer {
     }
 
     /// Set sky quality profile
-    pub fn set_quality_profile(&mut self, profile: crate::graphics::sky::quality_profiles::SkyQualityProfile) {
+    pub fn set_quality_profile(
+        &mut self,
+        profile: crate::graphics::sky::quality_profiles::SkyQualityProfile,
+    ) {
         self.quality_profile = profile;
     }
 
@@ -886,15 +912,26 @@ impl Renderer {
         self.surface.configure(&self.device, &self.config);
         self.depth_view = Self::create_depth(&self.device, w, h);
         self.hdr_target.resize(&self.device, w, h);
-        self.tonemap_bg = self.tonemap.make_bind_group(&self.device, &self.hdr_target.view);
+        self.tonemap_bg = self
+            .tonemap
+            .make_bind_group(&self.device, &self.hdr_target.view);
         self.bloom = BloomPass::new(&self.device, w, h, HDR_FORMAT);
         self.bloom_bg = self.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("bloom_bg"),
             layout: &self.bloom.bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(&self.hdr_target.view) },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&self.bloom.sampler) },
-                wgpu::BindGroupEntry { binding: 2, resource: self.bloom.params_buffer.as_entire_binding() },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&self.hdr_target.view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&self.bloom.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: self.bloom.params_buffer.as_entire_binding(),
+                },
             ],
         });
         self.taa.resize(&self.device, w, h, self.config.format);
@@ -932,7 +969,9 @@ impl Renderer {
         self.queue.write_buffer(
             &self.camera_buf,
             0,
-            bytemuck::bytes_of(&CameraUniform { view_proj: cam.view_proj }),
+            bytemuck::bytes_of(&CameraUniform {
+                view_proj: cam.view_proj,
+            }),
         );
 
         let sun = SunLight::from_day_progress(cam.day_progress, cam.position);
@@ -945,8 +984,11 @@ impl Renderer {
         let cascade_vps = compute_cascade_vps(cam_pos, cam_fwd, sun_dir, cam.near, cam.far);
 
         for (i, vp) in cascade_vps.iter().enumerate() {
-            let u = CameraUniform { view_proj: vp.to_cols_array_2d() };
-            self.queue.write_buffer(&self.shadow_cam_bufs[i], 0, bytemuck::bytes_of(&u));
+            let u = CameraUniform {
+                view_proj: vp.to_cols_array_2d(),
+            };
+            self.queue
+                .write_buffer(&self.shadow_cam_bufs[i], 0, bytemuck::bytes_of(&u));
         }
 
         let shadow_uniforms = ShadowUniforms {
@@ -958,19 +1000,32 @@ impl Renderer {
                 cam.far,
             ],
         };
-        self.queue.write_buffer(&self.shadow_map.uniform_buffer, 0, bytemuck::bytes_of(&shadow_uniforms));
+        self.queue.write_buffer(
+            &self.shadow_map.uniform_buffer,
+            0,
+            bytemuck::bytes_of(&shadow_uniforms),
+        );
         self.ibl.update(&self.queue, cam.day_progress);
         self.taa.advance_frame();
 
         let inv_vp = Mat4::from_cols_array_2d(&cam.inv_view_proj);
-        self.skybox.update(&self.queue, inv_vp, [sun.direction[0], sun.direction[1], sun.direction[2]], cam.position);
+        self.skybox.update(
+            &self.queue,
+            inv_vp,
+            [sun.direction[0], sun.direction[1], sun.direction[2]],
+            cam.position,
+        );
 
         let output = self.surface.get_current_texture()?;
-        let swapchain_view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
+        let swapchain_view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
 
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("frame_encoder"),
-        });
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("frame_encoder"),
+            });
 
         // Shadow passes
         for i in 0..CASCADE_COUNT {
@@ -979,7 +1034,10 @@ impl Renderer {
                 color_attachments: &[],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: &self.shadow_map.views[i],
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.0), store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 ..Default::default()
@@ -1012,12 +1070,25 @@ impl Renderer {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("geometry_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &self.hdr_target.view, resolve_target: None, depth_slice: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 }), store: wgpu::StoreOp::Store },
+                    view: &self.hdr_target.view,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color {
+                            r: 0.0,
+                            g: 0.0,
+                            b: 0.0,
+                            a: 1.0,
+                        }),
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: &self.depth_view,
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Clear(1.0), store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(1.0),
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 ..Default::default()
@@ -1063,12 +1134,20 @@ impl Renderer {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("skybox_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &self.hdr_target.view, resolve_target: None, depth_slice: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                    view: &self.hdr_target.view,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                     view: &self.depth_view,
-                    depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store }),
+                    depth_ops: Some(wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    }),
                     stencil_ops: None,
                 }),
                 ..Default::default()
@@ -1083,8 +1162,13 @@ impl Renderer {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("tonemap_pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &swapchain_view, resolve_target: None, depth_slice: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::BLACK), store: wgpu::StoreOp::Store },
+                    view: &swapchain_view,
+                    resolve_target: None,
+                    depth_slice: None,
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: None,
                 ..Default::default()
@@ -1099,20 +1183,28 @@ impl Renderer {
         self.egui_ctx.begin_pass(raw_input);
         egui_draw_fn(&self.egui_ctx);
         let full_output = self.egui_ctx.end_pass();
-        self.egui_state.handle_platform_output(&self.window, full_output.platform_output.clone());
+        self.egui_state
+            .handle_platform_output(&self.window, full_output.platform_output.clone());
 
         for (id, image_delta) in &full_output.textures_delta.set {
-            self.egui_renderer.update_texture(&self.device, &self.queue, *id, image_delta);
+            self.egui_renderer
+                .update_texture(&self.device, &self.queue, *id, image_delta);
         }
 
-        let clipped_primitives = self.egui_ctx.tessellate(full_output.shapes, full_output.pixels_per_point);
+        let clipped_primitives = self
+            .egui_ctx
+            .tessellate(full_output.shapes, full_output.pixels_per_point);
         let screen_desc = egui_wgpu::ScreenDescriptor {
             size_in_pixels: [self.width, self.height],
             pixels_per_point: full_output.pixels_per_point,
         };
 
         let user_cmd_bufs = self.egui_renderer.update_buffers(
-            &self.device, &self.queue, &mut encoder, &clipped_primitives, &screen_desc,
+            &self.device,
+            &self.queue,
+            &mut encoder,
+            &clipped_primitives,
+            &screen_desc,
         );
 
         {
@@ -1122,12 +1214,19 @@ impl Renderer {
                     view: &swapchain_view,
                     resolve_target: None,
                     depth_slice: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Load,
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: None,
                 ..Default::default()
             });
-            self.egui_renderer.render(&mut egui_pass.forget_lifetime(), &clipped_primitives, &screen_desc);
+            self.egui_renderer.render(
+                &mut egui_pass.forget_lifetime(),
+                &clipped_primitives,
+                &screen_desc,
+            );
         }
 
         for id in &full_output.textures_delta.free {
@@ -1153,42 +1252,42 @@ impl Renderer {
             });
         }
         if count > 0 {
-            self.queue.write_buffer(
-                &self.instance_buf,
-                0,
-                bytemuck::cast_slice(instances),
-            );
+            self.queue
+                .write_buffer(&self.instance_buf, 0, bytemuck::cast_slice(instances));
         }
         self.instance_count = count as u32;
 
         // Update indirect draw args
         if let Some(cap) = &self.capsule {
             let args: [u32; 5] = [
-                cap.index_count,         // index_count
-                self.instance_count,     // instance_count
-                0,                       // first_index
-                0,                       // base_vertex
-                0,                       // first_instance
+                cap.index_count,     // index_count
+                self.instance_count, // instance_count
+                0,                   // first_index
+                0,                   // base_vertex
+                0,                   // first_instance
             ];
-            self.queue.write_buffer(&self.indirect_buf, 0, bytemuck::cast_slice(&args));
+            self.queue
+                .write_buffer(&self.indirect_buf, 0, bytemuck::cast_slice(&args));
         }
     }
 
     pub fn upload_skinned_mesh(&mut self, vertices: &[SkinVertex], indices: &[u32]) {
-        self.skinned_vb = Some(self.device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("skinned_vb"),
-                contents: bytemuck::cast_slice(vertices),
-                usage: wgpu::BufferUsages::VERTEX,
-            },
-        ));
-        self.skinned_ib = Some(self.device.create_buffer_init(
-            &wgpu::util::BufferInitDescriptor {
-                label: Some("skinned_ib"),
-                contents: bytemuck::cast_slice(indices),
-                usage: wgpu::BufferUsages::INDEX,
-            },
-        ));
+        self.skinned_vb = Some(
+            self.device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("skinned_vb"),
+                    contents: bytemuck::cast_slice(vertices),
+                    usage: wgpu::BufferUsages::VERTEX,
+                }),
+        );
+        self.skinned_ib = Some(
+            self.device
+                .create_buffer_init(&wgpu::util::BufferInitDescriptor {
+                    label: Some("skinned_ib"),
+                    contents: bytemuck::cast_slice(indices),
+                    usage: wgpu::BufferUsages::INDEX,
+                }),
+        );
         self.skinned_index_count = indices.len() as u32;
     }
 
@@ -1209,11 +1308,17 @@ impl Renderer {
                 view: color_view,
                 resolve_target: None,
                 depth_slice: None,
-                ops: wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store },
+                ops: wgpu::Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: wgpu::StoreOp::Store,
+                },
             })],
             depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
                 view: &self.depth_view,
-                depth_ops: Some(wgpu::Operations { load: wgpu::LoadOp::Load, store: wgpu::StoreOp::Store }),
+                depth_ops: Some(wgpu::Operations {
+                    load: wgpu::LoadOp::Load,
+                    store: wgpu::StoreOp::Store,
+                }),
                 stencil_ops: None,
             }),
             ..Default::default()
@@ -1231,7 +1336,9 @@ impl Renderer {
         self.queue.write_buffer(
             &self.camera_buf,
             0,
-            bytemuck::bytes_of(&CameraUniform { view_proj: cam.view_proj }),
+            bytemuck::bytes_of(&CameraUniform {
+                view_proj: cam.view_proj,
+            }),
         );
 
         let sun = SunLight::from_day_progress(cam.day_progress, cam.position);
@@ -1248,18 +1355,20 @@ impl Renderer {
             cam.position[1],
         );
         if !self.skybox.use_lut {
-            self.skybox.init_lut_pipeline(&self.device, HDR_FORMAT, &self.bruneton);
+            self.skybox
+                .init_lut_pipeline(&self.device, HDR_FORMAT, &self.bruneton);
         }
 
         // Compute cascade VP matrices
-        let cascade_vps = compute_cascade_vps(
-            cam_pos, cam_fwd, sun_dir, cam.near, cam.far,
-        );
+        let cascade_vps = compute_cascade_vps(cam_pos, cam_fwd, sun_dir, cam.near, cam.far);
 
         // Write cascade camera buffers (for shadow depth passes)
         for (i, vp) in cascade_vps.iter().enumerate() {
-            let u = CameraUniform { view_proj: vp.to_cols_array_2d() };
-            self.queue.write_buffer(&self.shadow_cam_bufs[i], 0, bytemuck::bytes_of(&u));
+            let u = CameraUniform {
+                view_proj: vp.to_cols_array_2d(),
+            };
+            self.queue
+                .write_buffer(&self.shadow_cam_bufs[i], 0, bytemuck::bytes_of(&u));
         }
 
         // Write shadow uniforms (for PBR fragment shader)
@@ -1395,7 +1504,8 @@ impl Renderer {
             let light_dir = sun_dir.normalize();
             let light_pos = cam_pos - light_dir * 10000.0;
             let cloud_shadow_view = Mat4::look_at_rh(light_pos, cam_pos, Vec3::Y);
-            let cloud_shadow_proj = Mat4::orthographic_rh(-5000.0, 5000.0, -5000.0, 5000.0, 0.1, 30000.0);
+            let cloud_shadow_proj =
+                Mat4::orthographic_rh(-5000.0, 5000.0, -5000.0, 5000.0, 0.1, 30000.0);
             let cloud_shadow_vp = cloud_shadow_proj * cloud_shadow_view;
             let shadow_params = crate::graphics::sky::cloud_shadows::CloudShadowParams {
                 light_view_proj: cloud_shadow_vp.to_cols_array_2d(),
@@ -1560,7 +1670,7 @@ impl Renderer {
             } else {
                 48 // fallback
             };
-            
+
             let cloud_params = crate::graphics::sky::cloud_renderer::CloudRenderParams {
                 inv_view_proj: inv_vp.to_cols_array_2d(),
                 sun_direction: [sun.direction[0], sun.direction[1], sun.direction[2], 0.0],
@@ -1803,7 +1913,9 @@ impl Renderer {
     }
 
     /// Get mutable particle system for advanced usage
-    pub fn particle_system_mut(&mut self) -> Option<&mut crate::graphics::particles::ParticleSystem> {
+    pub fn particle_system_mut(
+        &mut self,
+    ) -> Option<&mut crate::graphics::particles::ParticleSystem> {
         self.particle_system.as_mut()
     }
 
@@ -1816,8 +1928,12 @@ impl Renderer {
         camera_right: [f32; 3],
         camera_up: [f32; 3],
     ) {
-        let Some(ps) = &mut self.particle_system else { return };
-        let Some(emitter) = &self.particle_emitter else { return };
+        let Some(ps) = &mut self.particle_system else {
+            return;
+        };
+        let Some(emitter) = &self.particle_emitter else {
+            return;
+        };
 
         // Update particle simulation
         ps.dispatch_update(encoder, &self.queue, dt, emitter);
@@ -1913,12 +2029,12 @@ impl Renderer {
 
         // Adjust bloom threshold based on pressure level
         let bloom_threshold = match governor.pressure_level {
-            PressureLevel::Critical => 2.0,    // Higher threshold = less bloom
+            PressureLevel::Critical => 2.0, // Higher threshold = less bloom
             PressureLevel::High => 1.5,
             PressureLevel::Moderate => 1.2,
             PressureLevel::Normal => 1.0,
         };
-        
+
         // Update bloom params
         let mut params = crate::graphics::postprocess::PostProcessParams::default();
         params.bloom_threshold = bloom_threshold;
@@ -1926,7 +2042,10 @@ impl Renderer {
     }
 
     /// Get max particle count based on pressure level
-    pub fn max_particle_count(&self, governor: &crate::core::quality_governor::QualityGovernor) -> usize {
+    pub fn max_particle_count(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> usize {
         use crate::core::quality_governor::PressureLevel;
         match governor.pressure_level {
             PressureLevel::Normal => 10000,
@@ -1937,13 +2056,19 @@ impl Renderer {
     }
 
     /// Check if vegetation should be rendered
-    pub fn should_render_vegetation(&self, governor: &crate::core::quality_governor::QualityGovernor) -> bool {
+    pub fn should_render_vegetation(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> bool {
         use crate::core::quality_governor::PressureLevel;
         !matches!(governor.pressure_level, PressureLevel::Critical)
     }
 
     /// Get vegetation detail level (0.0 - 1.0)
-    pub fn vegetation_detail(&self, governor: &crate::core::quality_governor::QualityGovernor) -> f32 {
+    pub fn vegetation_detail(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> f32 {
         use crate::core::quality_governor::PressureLevel;
         match governor.pressure_level {
             PressureLevel::Normal => 1.0,
@@ -1954,19 +2079,28 @@ impl Renderer {
     }
 
     /// Check if clouds should be rendered
-    pub fn should_render_clouds(&self, governor: &crate::core::quality_governor::QualityGovernor) -> bool {
+    pub fn should_render_clouds(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> bool {
         use crate::core::quality_governor::PressureLevel;
         !matches!(governor.pressure_level, PressureLevel::Critical)
     }
 
     /// Check if fog should be rendered
-    pub fn should_render_fog(&self, governor: &crate::core::quality_governor::QualityGovernor) -> bool {
+    pub fn should_render_fog(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> bool {
         use crate::core::quality_governor::PressureLevel;
         !matches!(governor.pressure_level, PressureLevel::Critical)
     }
 
     /// Check if precipitation should be rendered
-    pub fn should_render_precipitation(&self, governor: &crate::core::quality_governor::QualityGovernor) -> bool {
+    pub fn should_render_precipitation(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> bool {
         use crate::core::quality_governor::PressureLevel;
         !matches!(governor.pressure_level, PressureLevel::Critical)
     }
@@ -1977,17 +2111,26 @@ impl Renderer {
     }
 
     /// Get max terrain rebuilds per frame from governor
-    pub fn max_terrain_rebuilds(&self, governor: &crate::core::quality_governor::QualityGovernor) -> usize {
+    pub fn max_terrain_rebuilds(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> usize {
         governor.max_terrain_rebuilds_per_frame()
     }
 
     /// Get max dirty surface uploads from governor
-    pub fn max_dirty_uploads(&self, governor: &crate::core::quality_governor::QualityGovernor) -> usize {
+    pub fn max_dirty_uploads(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> usize {
         governor.max_dirty_surface_uploads()
     }
 
     /// Get max chain reaction depth from governor
-    pub fn max_chain_depth(&self, governor: &crate::core::quality_governor::QualityGovernor) -> u32 {
+    pub fn max_chain_depth(
+        &self,
+        governor: &crate::core::quality_governor::QualityGovernor,
+    ) -> u32 {
         governor.max_chain_reaction_depth()
     }
 
@@ -1999,7 +2142,7 @@ impl Renderer {
     ) -> Result<(), wgpu::SurfaceError> {
         // Apply budget settings first
         self.apply_budget_settings(governor);
-        
+
         // Then render normally
         self.render(cam)
     }

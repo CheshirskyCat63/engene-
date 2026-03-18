@@ -18,9 +18,7 @@ pub struct RagdollConfig {
 impl RagdollConfig {
     pub fn from_skeleton(skeleton: &Skeleton) -> Self {
         let n = skeleton.joint_count();
-        let world = skeleton.compute_world_transforms(
-            &vec![Mat4::IDENTITY; n],
-        );
+        let world = skeleton.compute_world_transforms(&vec![Mat4::IDENTITY; n]);
 
         let mut bone_lengths = vec![0.3f32; n];
         let mut bone_radii = vec![0.06f32; n];
@@ -48,7 +46,10 @@ impl RagdollConfig {
                 (0.35, 0.3)
             } else if name_lower.contains("shoulder") || name_lower.contains("arm") {
                 (std::f32::consts::FRAC_PI_2, std::f32::consts::FRAC_PI_4)
-            } else if name_lower.contains("hip") || name_lower.contains("thigh") || name_lower.contains("leg") {
+            } else if name_lower.contains("hip")
+                || name_lower.contains("thigh")
+                || name_lower.contains("leg")
+            {
                 (std::f32::consts::FRAC_PI_3, 0.3)
             } else if name_lower.contains("knee") || name_lower.contains("elbow") {
                 (std::f32::consts::FRAC_PI_3, 0.1)
@@ -160,11 +161,7 @@ impl RagdollBody {
         }
     }
 
-    pub fn read_physics_transforms(
-        &self,
-        bodies: &RigidBodySet,
-        root_position: Vec3,
-    ) -> Vec<Mat4> {
+    pub fn read_physics_transforms(&self, bodies: &RigidBodySet, root_position: Vec3) -> Vec<Mat4> {
         self.body_handles
             .iter()
             .map(|&h| {
@@ -191,7 +188,14 @@ impl RagdollBody {
             impulse_joints.remove(jh, true);
         }
         for bh in self.body_handles {
-            bodies.remove(bh, islands, colliders, impulse_joints, multibody_joints, true);
+            bodies.remove(
+                bh,
+                islands,
+                colliders,
+                impulse_joints,
+                multibody_joints,
+                true,
+            );
         }
     }
 }

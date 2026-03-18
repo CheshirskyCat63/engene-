@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::core::ecs::Entity;
+use std::collections::HashMap;
 
 const LEVEL0_CELL: f32 = 10.0;
 const LEVEL1_CELL: f32 = 100.0;
@@ -35,7 +35,7 @@ impl SpatialLevel {
 
     fn insert(&mut self, entity: Entity, x: f32, z: f32) {
         let key = cell_key(x, z, self.cell_size);
-        
+
         // Remove from old cell if exists
         if let Some(old_key) = self.entity_cells.get(&entity) {
             if *old_key != key {
@@ -44,7 +44,7 @@ impl SpatialLevel {
                 }
             }
         }
-        
+
         // Insert into new cell
         self.cells.entry(key).or_default().push((entity, x, z));
         self.entity_cells.insert(entity, key);
@@ -61,7 +61,7 @@ impl SpatialLevel {
     fn update(&mut self, entity: Entity, old_x: f32, old_z: f32, new_x: f32, new_z: f32) {
         let old_key = cell_key(old_x, old_z, self.cell_size);
         let new_key = cell_key(new_x, new_z, self.cell_size);
-        
+
         if old_key == new_key {
             // Same cell, just update position
             if let Some(cell) = self.cells.get_mut(&old_key) {
@@ -78,7 +78,10 @@ impl SpatialLevel {
             if let Some(cell) = self.cells.get_mut(&old_key) {
                 cell.retain(|(e, _, _)| *e != entity);
             }
-            self.cells.entry(new_key).or_default().push((entity, new_x, new_z));
+            self.cells
+                .entry(new_key)
+                .or_default()
+                .push((entity, new_x, new_z));
             self.entity_cells.insert(entity, new_key);
         }
     }
@@ -217,10 +220,10 @@ mod tests {
         let mut index = HierarchicalSpatialIndex::new();
         let e1: Entity = 1;
         let e2: Entity = 2;
-        
+
         index.insert_new(e1, 5.0, 5.0);
         index.insert_new(e2, 15.0, 15.0);
-        
+
         let result = index.query_physics(5.0, 5.0, 10.0);
         assert!(result.contains(&e1));
         assert!(!result.contains(&e2));
@@ -230,10 +233,10 @@ mod tests {
     fn test_update_same_cell() {
         let mut index = HierarchicalSpatialIndex::new();
         let e: Entity = 1;
-        
+
         index.insert_new(e, 5.0, 5.0);
         index.update(e, 5.0, 5.0, 7.0, 7.0);
-        
+
         let result = index.query_physics(7.0, 7.0, 5.0);
         assert!(result.contains(&e));
     }
@@ -242,13 +245,13 @@ mod tests {
     fn test_update_different_cell() {
         let mut index = HierarchicalSpatialIndex::new();
         let e: Entity = 1;
-        
+
         index.insert_new(e, 5.0, 5.0);
         index.update(e, 5.0, 5.0, 25.0, 25.0);
-        
+
         let result = index.query_physics(25.0, 25.0, 5.0);
         assert!(result.contains(&e));
-        
+
         let old_result = index.query_physics(5.0, 5.0, 5.0);
         assert!(!old_result.contains(&e));
     }
@@ -257,10 +260,10 @@ mod tests {
     fn test_remove() {
         let mut index = HierarchicalSpatialIndex::new();
         let e: Entity = 1;
-        
+
         index.insert_new(e, 5.0, 5.0);
         index.remove(e);
-        
+
         let result = index.query_physics(5.0, 5.0, 10.0);
         assert!(!result.contains(&e));
     }
@@ -270,9 +273,9 @@ mod tests {
         let mut index = HierarchicalSpatialIndex::new();
         let e1: Entity = 1;
         let e2: Entity = 2;
-        
+
         index.rebuild(&[(e1, 10.0, 10.0), (e2, 20.0, 20.0)]);
-        
+
         let (c0, c1, c2) = index.entity_count();
         assert_eq!(c0, 2);
         assert_eq!(c1, 2);

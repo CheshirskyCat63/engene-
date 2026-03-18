@@ -2,10 +2,7 @@ use crate::physics::building::StructuralSection;
 
 const MAX_CASCADE_ITERATIONS: u32 = 8;
 
-pub fn redistribute_loads(
-    sections: &mut [StructuralSection],
-    collapsed_id: u32,
-) -> Vec<u32> {
+pub fn redistribute_loads(sections: &mut [StructuralSection], collapsed_id: u32) -> Vec<u32> {
     let mut newly_collapsed = Vec::new();
 
     let collapsed_load: f32 = {

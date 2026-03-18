@@ -10,5 +10,5 @@
 
 pub mod factions;
 pub mod gameplay;
-pub mod quests;
 pub mod quest_system;
+pub mod quests;

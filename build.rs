@@ -27,7 +27,10 @@ fn main() {
         }
     }
     features.sort();
-    println!("cargo:rustc-env=ENGENE_FEATURE_FLAGS={}", features.join(","));
+    println!(
+        "cargo:rustc-env=ENGENE_FEATURE_FLAGS={}",
+        features.join(",")
+    );
 
     println!("cargo:rerun-if-changed=.git/HEAD");
     println!("cargo:rerun-if-env-changed=PROFILE");

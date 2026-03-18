@@ -13,10 +13,14 @@ pub struct AsyncServiceHandle {
 
 impl AsyncServiceHandle {
     pub fn submit<F: FnOnce() + Send + 'static>(&self, task: F) -> bool {
-        self.sender.send(ServiceMessage::Task(Box::new(task))).is_ok()
+        self.sender
+            .send(ServiceMessage::Task(Box::new(task)))
+            .is_ok()
     }
 
-    pub fn name(&self) -> &str { &self.name }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 
     pub fn shutdown(&self) {
         let _ = self.sender.send(ServiceMessage::Shutdown);
@@ -29,7 +33,9 @@ pub struct AsyncServices {
 
 impl AsyncServices {
     pub fn new() -> Self {
-        Self { handles: Vec::new() }
+        Self {
+            handles: Vec::new(),
+        }
     }
 
     pub fn spawn_service(&mut self, name: &str) -> &AsyncServiceHandle {
@@ -39,12 +45,10 @@ impl AsyncServices {
 
         thread::Builder::new()
             .name(thread_name)
-            .spawn(move || {
-                loop {
-                    match rx.recv() {
-                        Ok(ServiceMessage::Task(task)) => task(),
-                        Ok(ServiceMessage::Shutdown) | Err(_) => break,
-                    }
+            .spawn(move || loop {
+                match rx.recv() {
+                    Ok(ServiceMessage::Task(task)) => task(),
+                    Ok(ServiceMessage::Shutdown) | Err(_) => break,
                 }
             })
             .expect("failed to spawn async service thread");
@@ -68,7 +72,9 @@ impl AsyncServices {
 }
 
 impl Default for AsyncServices {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Drop for AsyncServices {

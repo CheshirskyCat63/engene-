@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use pathfinding::directed::astar::astar;
+use std::collections::HashMap;
 
 pub type LocationId = u32;
 
@@ -50,8 +50,16 @@ impl WorldGraph {
 
     pub fn connect(&mut self, a: LocationId, b: LocationId) {
         let dist = self.distance_between(a, b);
-        self.edges.push(Edge { from: a, to: b, distance: dist });
-        self.edges.push(Edge { from: b, to: a, distance: dist });
+        self.edges.push(Edge {
+            from: a,
+            to: b,
+            distance: dist,
+        });
+        self.edges.push(Edge {
+            from: b,
+            to: a,
+            distance: dist,
+        });
     }
 
     pub fn neighbors(&self, id: LocationId) -> Vec<LocationId> {

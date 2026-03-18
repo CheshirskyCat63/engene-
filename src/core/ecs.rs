@@ -98,7 +98,10 @@ impl Ecs {
         self.alive.push(id);
         self.alive_set.insert(id);
         self.gen_alloc.insert(id);
-        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after spawn");
+        debug_assert!(
+            self.validate_invariants().is_ok(),
+            "ECS invariant violation after spawn"
+        );
         id
     }
 
@@ -111,10 +114,7 @@ impl Ecs {
 
     /// Restore an entity from persistence with its known PersistentEntityId.
     /// Returns `Err(DuplicateIdError)` if another live entity already claims this PID.
-    pub fn spawn_restored(
-        &mut self,
-        pid: PersistentEntityId,
-    ) -> Result<Entity, DuplicateIdError> {
+    pub fn spawn_restored(&mut self, pid: PersistentEntityId) -> Result<Entity, DuplicateIdError> {
         let entity = self.spawn();
         self.identity.register_restored(pid, entity)?;
         Ok(entity)
@@ -127,7 +127,10 @@ impl Ecs {
             self.identity.mark_unloaded(pid);
         }
         self.remove_entity_data(entity);
-        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after unload");
+        debug_assert!(
+            self.validate_invariants().is_ok(),
+            "ECS invariant violation after unload"
+        );
     }
 
     pub fn despawn(&mut self, entity: Entity) {
@@ -135,7 +138,10 @@ impl Ecs {
             self.identity.mark_dead(pid, self.tick);
         }
         self.remove_entity_data(entity);
-        debug_assert!(self.validate_invariants().is_ok(), "ECS invariant violation after despawn");
+        debug_assert!(
+            self.validate_invariants().is_ok(),
+            "ECS invariant violation after despawn"
+        );
     }
 
     pub fn validate_invariants(&self) -> Result<(), String> {
@@ -153,24 +159,45 @@ impl Ecs {
             }
         }
 
-        let check_storage = |name: &str, entities: &[u64], alive_set: &HashSet<u64>| -> Result<(), String> {
-            for &e in entities {
-                if !alive_set.contains(&e) {
-                    return Err(format!("storage '{name}' contains non-alive entity {e}"));
+        let check_storage =
+            |name: &str, entities: &[u64], alive_set: &HashSet<u64>| -> Result<(), String> {
+                for &e in entities {
+                    if !alive_set.contains(&e) {
+                        return Err(format!("storage '{name}' contains non-alive entity {e}"));
+                    }
                 }
-            }
-            Ok(())
-        };
+                Ok(())
+            };
 
         check_storage("transforms", self.transforms.entities(), &self.alive_set)?;
         check_storage("kinds", self.kinds.entities(), &self.alive_set)?;
         check_storage("names", self.names.entities(), &self.alive_set)?;
         check_storage("npc_traits", self.npc_traits.entities(), &self.alive_set)?;
-        check_storage("monster_traits", self.monster_traits.entities(), &self.alive_set)?;
-        check_storage("personal_needs", self.personal_needs.entities(), &self.alive_set)?;
-        check_storage("social_needs", self.social_needs.entities(), &self.alive_set)?;
-        check_storage("ecosystem_needs", self.ecosystem_needs.entities(), &self.alive_set)?;
-        check_storage("npc_economies", self.npc_economies.entities(), &self.alive_set)?;
+        check_storage(
+            "monster_traits",
+            self.monster_traits.entities(),
+            &self.alive_set,
+        )?;
+        check_storage(
+            "personal_needs",
+            self.personal_needs.entities(),
+            &self.alive_set,
+        )?;
+        check_storage(
+            "social_needs",
+            self.social_needs.entities(),
+            &self.alive_set,
+        )?;
+        check_storage(
+            "ecosystem_needs",
+            self.ecosystem_needs.entities(),
+            &self.alive_set,
+        )?;
+        check_storage(
+            "npc_economies",
+            self.npc_economies.entities(),
+            &self.alive_set,
+        )?;
         check_storage("sim_levels", self.sim_levels.entities(), &self.alive_set)?;
         check_storage("ai_states", self.ai_states.entities(), &self.alive_set)?;
         check_storage("inventories", self.inventories.entities(), &self.alive_set)?;
@@ -179,7 +206,11 @@ impl Ecs {
         check_storage("plans", self.plans.entities(), &self.alive_set)?;
         check_storage("life_info", self.life_info.entities(), &self.alive_set)?;
         check_storage("equipment", self.equipment.entities(), &self.alive_set)?;
-        check_storage("faction_memberships", self.faction_memberships.entities(), &self.alive_set)?;
+        check_storage(
+            "faction_memberships",
+            self.faction_memberships.entities(),
+            &self.alive_set,
+        )?;
         // Identity consistency: live identity mappings must point to alive entities and be bijective.
         let mut seen = HashSet::new();
         for (pid, entity) in self.identity.live_entities() {
@@ -190,7 +221,10 @@ impl Ecs {
                 return Err(format!("identity live entity {} not in alive_set", entity));
             }
             if self.identity.persistent_id_of(entity) != Some(pid) {
-                return Err(format!("identity reverse mapping mismatch for entity {}", entity));
+                return Err(format!(
+                    "identity reverse mapping mismatch for entity {}",
+                    entity
+                ));
             }
         }
 
@@ -259,15 +293,19 @@ impl Ecs {
     }
 
     pub fn count_species(&self, species: MonsterSpecies) -> usize {
-        self.alive.iter().filter(|&&e| {
-            matches!(self.kinds.get(&e), Some(EntityKind::Monster(s)) if *s == species)
-        }).count()
+        self.alive
+            .iter()
+            .filter(
+                |&&e| matches!(self.kinds.get(&e), Some(EntityKind::Monster(s)) if *s == species),
+            )
+            .count()
     }
 
     pub fn count_npcs(&self) -> usize {
-        self.alive.iter().filter(|&&e| {
-            matches!(self.kinds.get(&e), Some(EntityKind::Npc))
-        }).count()
+        self.alive
+            .iter()
+            .filter(|&&e| matches!(self.kinds.get(&e), Some(EntityKind::Npc)))
+            .count()
     }
 
     // ========================================================================
@@ -499,29 +537,29 @@ impl Ecs {
         self.inventories.get(&entity)
     }
 
- /// Get inventory mutable for an entity.
- #[inline]
- pub fn get_inventory_mut(&mut self, entity: Entity) -> Option<&mut Inventory> {
- self.inventories.get_mut(&entity)
- }
+    /// Get inventory mutable for an entity.
+    #[inline]
+    pub fn get_inventory_mut(&mut self, entity: Entity) -> Option<&mut Inventory> {
+        self.inventories.get_mut(&entity)
+    }
 
- /// Get simulation level for an entity.
- #[inline]
- pub fn get_sim_level(&self, entity: Entity) -> Option<&SimLevel> {
- self.sim_levels.get(&entity)
- }
+    /// Get simulation level for an entity.
+    #[inline]
+    pub fn get_sim_level(&self, entity: Entity) -> Option<&SimLevel> {
+        self.sim_levels.get(&entity)
+    }
 
- /// Get simulation level mutable for an entity.
- #[inline]
- pub fn get_sim_level_mut(&mut self, entity: Entity) -> Option<&mut SimLevel> {
- self.sim_levels.get_mut(&entity)
- }
+    /// Get simulation level mutable for an entity.
+    #[inline]
+    pub fn get_sim_level_mut(&mut self, entity: Entity) -> Option<&mut SimLevel> {
+        self.sim_levels.get_mut(&entity)
+    }
 
- /// Get NPC economy for an NPC.
- #[inline]
- pub fn get_npc_economy(&self, entity: Entity) -> Option<&NpcEconomy> {
- self.npc_economies.get(&entity)
- }
+    /// Get NPC economy for an NPC.
+    #[inline]
+    pub fn get_npc_economy(&self, entity: Entity) -> Option<&NpcEconomy> {
+        self.npc_economies.get(&entity)
+    }
 
     /// Get NPC economy mutable for an NPC.
     #[inline]
@@ -538,7 +576,10 @@ impl Ecs {
     /// Check if entity is a nocturnal monster (Bloodsucker).
     #[inline]
     pub fn is_nocturnal(&self, entity: Entity) -> bool {
-        matches!(self.kinds.get(&entity), Some(EntityKind::Monster(MonsterSpecies::Bloodsucker)))
+        matches!(
+            self.kinds.get(&entity),
+            Some(EntityKind::Monster(MonsterSpecies::Bloodsucker))
+        )
     }
 
     /// Get entity kind name for debugging.
@@ -563,7 +604,7 @@ mod tests {
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
         let e3 = ecs.spawn();
-        
+
         assert_ne!(e1, e2);
         assert_ne!(e2, e3);
         assert_ne!(e1, e3);
@@ -575,7 +616,7 @@ mod tests {
         let mut ecs = Ecs::new();
         let (e1, pid1) = ecs.spawn_new();
         let (e2, pid2) = ecs.spawn_new();
-        
+
         assert_ne!(pid1, pid2);
         assert_eq!(ecs.identity.persistent_id_of(e1), Some(pid1));
         assert_eq!(ecs.identity.persistent_id_of(e2), Some(pid2));
@@ -586,7 +627,7 @@ mod tests {
         let mut ecs = Ecs::new();
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
-        
+
         assert!(ecs.is_alive(e1));
         ecs.despawn(e1);
         assert!(!ecs.is_alive(e1));
@@ -598,21 +639,37 @@ mod tests {
     fn test_component_crud() {
         let mut ecs = Ecs::new();
         let e = ecs.spawn();
-        
+
         // Insert
-        ecs.transforms.insert(e, Transform { x: 10.0, y: 20.0, cell_x: 0, cell_y: 0 });
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: 10.0,
+                y: 20.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(e, EntityKind::Npc);
-        
+
         // Read
         let t = ecs.transforms.get(&e).unwrap();
         assert_eq!(t.x, 10.0);
         assert_eq!(t.y, 20.0);
-        
+
         // Update
-        ecs.transforms.insert(e, Transform { x: 30.0, y: 40.0, cell_x: 1, cell_y: 1 });
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: 30.0,
+                y: 40.0,
+                cell_x: 1,
+                cell_y: 1,
+            },
+        );
         let t2 = ecs.transforms.get(&e).unwrap();
         assert_eq!(t2.x, 30.0);
-        
+
         // Delete
         ecs.transforms.remove(&e);
         assert!(ecs.transforms.get(&e).is_none());
@@ -622,13 +679,21 @@ mod tests {
     fn test_despawn_removes_all_components() {
         let mut ecs = Ecs::new();
         let e = ecs.spawn();
-        
-        ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: 0.0,
+                y: 0.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(e, EntityKind::Npc);
         ecs.names.insert(e, Name("Test".into()));
-        
+
         ecs.despawn(e);
-        
+
         assert!(ecs.transforms.get(&e).is_none());
         assert!(ecs.kinds.get(&e).is_none());
         assert!(ecs.names.get(&e).is_none());
@@ -637,19 +702,21 @@ mod tests {
     #[test]
     fn test_npcs_and_monsters_filters() {
         let mut ecs = Ecs::new();
-        
+
         let npc1 = ecs.spawn();
         ecs.kinds.insert(npc1, EntityKind::Npc);
-        
+
         let npc2 = ecs.spawn();
         ecs.kinds.insert(npc2, EntityKind::Npc);
-        
+
         let monster1 = ecs.spawn();
-        ecs.kinds.insert(monster1, EntityKind::Monster(MonsterSpecies::Wolf));
-        
+        ecs.kinds
+            .insert(monster1, EntityKind::Monster(MonsterSpecies::Wolf));
+
         let monster2 = ecs.spawn();
-        ecs.kinds.insert(monster2, EntityKind::Monster(MonsterSpecies::Boar));
-        
+        ecs.kinds
+            .insert(monster2, EntityKind::Monster(MonsterSpecies::Boar));
+
         assert_eq!(ecs.npcs().len(), 2);
         assert_eq!(ecs.monsters().len(), 2);
         assert_eq!(ecs.count_npcs(), 2);
@@ -660,15 +727,31 @@ mod tests {
     #[test]
     fn test_rebuild_spatial() {
         let mut ecs = Ecs::new();
-        
+
         let e1 = ecs.spawn();
-        ecs.transforms.insert(e1, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
-        
+        ecs.transforms.insert(
+            e1,
+            Transform {
+                x: 100.0,
+                y: 100.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
+
         let e2 = ecs.spawn();
-        ecs.transforms.insert(e2, Transform { x: 200.0, y: 200.0, cell_x: 0, cell_y: 0 });
-        
+        ecs.transforms.insert(
+            e2,
+            Transform {
+                x: 200.0,
+                y: 200.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
+
         ecs.rebuild_spatial();
-        
+
         let near = ecs.spatial.candidates_in_radius(100.0, 100.0, 50.0);
         assert_eq!(near.len(), 1);
         assert!(near.contains(&e1));

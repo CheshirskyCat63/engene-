@@ -87,18 +87,28 @@ impl EconomyDashboard {
 
 impl EconomyDashboard {
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("Economy").default_width(400.0).show(ctx, |ui| {
-            if let Some(s) = self.latest() {
-                ui.label(format!("Month {}", s.month));
-                ui.separator();
-                ui.label(format!("NPCs: {}  Bankrupt: {}  Bandits: {}", s.npc_count, s.bankrupt_count, s.bandit_count));
-                ui.label(format!("Total money: {:.0}  Avg: {:.0}  Min: {:.0}  Max: {:.0}",
-                    s.total_money, s.average_money, s.min_money, s.max_money));
-                ui.label(format!("Monthly payments due: {:.0}", s.monthly_payments_due));
-            } else {
-                ui.label("No economy data yet.");
-            }
-        });
+        egui::Window::new("Economy")
+            .default_width(400.0)
+            .show(ctx, |ui| {
+                if let Some(s) = self.latest() {
+                    ui.label(format!("Month {}", s.month));
+                    ui.separator();
+                    ui.label(format!(
+                        "NPCs: {}  Bankrupt: {}  Bandits: {}",
+                        s.npc_count, s.bankrupt_count, s.bandit_count
+                    ));
+                    ui.label(format!(
+                        "Total money: {:.0}  Avg: {:.0}  Min: {:.0}  Max: {:.0}",
+                        s.total_money, s.average_money, s.min_money, s.max_money
+                    ));
+                    ui.label(format!(
+                        "Monthly payments due: {:.0}",
+                        s.monthly_payments_due
+                    ));
+                } else {
+                    ui.label("No economy data yet.");
+                }
+            });
     }
 }
 

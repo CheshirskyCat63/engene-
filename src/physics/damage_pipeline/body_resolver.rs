@@ -1,6 +1,6 @@
+use crate::body::body_store::BodyStateStore;
 use crate::physics::damage_pipeline::response_aggregator::{BodyZone, DamageResponse};
 use crate::physics::impact_event::ImpactEvent;
-use crate::body::body_store::BodyStateStore;
 
 pub struct BodyResolver;
 

@@ -78,7 +78,11 @@ impl IblBindings {
             }],
         });
 
-        Self { buffer, bind_group, layout }
+        Self {
+            buffer,
+            bind_group,
+            layout,
+        }
     }
 
     pub fn update(&self, queue: &wgpu::Queue, day_progress: f32) {

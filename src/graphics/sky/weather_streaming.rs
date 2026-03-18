@@ -38,11 +38,7 @@ impl WeatherStreamingManager {
         Self::default()
     }
 
-    pub fn on_chunk_load(
-        &mut self,
-        coord: (i32, i32),
-        _current_weather: (),
-    ) {
+    pub fn on_chunk_load(&mut self, coord: (i32, i32), _current_weather: ()) {
         self.chunks.insert(
             coord,
             ChunkWeatherData {
@@ -54,9 +50,7 @@ impl WeatherStreamingManager {
     }
 
     pub fn on_chunk_unload(&mut self, coord: (i32, i32)) -> ChunkWeatherData {
-        self.chunks
-            .remove(&coord)
-            .unwrap_or_default()
+        self.chunks.remove(&coord).unwrap_or_default()
     }
 
     pub fn get_chunk_data(&self, coord: (i32, i32)) -> Option<&ChunkWeatherData> {

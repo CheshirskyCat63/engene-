@@ -6,10 +6,14 @@ pub struct RenderBus {
 
 impl RenderBus {
     pub fn new() -> Self {
-        Self { bus: EventBus::with_capacity(1024) }
+        Self {
+            bus: EventBus::with_capacity(1024),
+        }
     }
 }
 
 impl Default for RenderBus {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

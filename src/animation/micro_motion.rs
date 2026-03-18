@@ -110,7 +110,8 @@ impl MicroMotionSystem {
                     phase,
                 } => {
                     let a = amplitude.min(self.limits.max_wind_amplitude);
-                    let f = frequency.clamp(self.limits.frequency_range.0, self.limits.frequency_range.1);
+                    let f = frequency
+                        .clamp(self.limits.frequency_range.0, self.limits.frequency_range.1);
                     let t = (self.wind_time * f + phase).sin();
                     comp.current_offset = wind_direction * t * a * wind_strength;
                 }
@@ -126,7 +127,8 @@ impl MicroMotionSystem {
                     frequency,
                 } => {
                     let a = amplitude.min(self.limits.max_oscillation_amplitude);
-                    let f = frequency.clamp(self.limits.frequency_range.0, self.limits.frequency_range.1);
+                    let f = frequency
+                        .clamp(self.limits.frequency_range.0, self.limits.frequency_range.1);
                     let t = (self.wind_time * f * std::f32::consts::TAU).sin();
                     comp.current_offset = *axis * t * a;
                 }

@@ -21,8 +21,13 @@ impl DeterminismAuditReport {
     }
 
     pub fn all_issues(&self) -> Vec<String> {
-        self.entries.iter()
-            .flat_map(|e| e.issues.iter().map(|i| format!("[{}] {}", e.system_name, i)))
+        self.entries
+            .iter()
+            .flat_map(|e| {
+                e.issues
+                    .iter()
+                    .map(|i| format!("[{}] {}", e.system_name, i))
+            })
             .collect()
     }
 }
@@ -41,7 +46,8 @@ pub fn audit_determinism_tiers(descriptors: &[SystemDescriptor]) -> DeterminismA
                 hard_count += 1;
                 if !desc.parallel_safe {
                     issues.push(
-                        "Hard-deterministic systems should be parallel-safe for replay consistency".into()
+                        "Hard-deterministic systems should be parallel-safe for replay consistency"
+                            .into(),
                     );
                 }
             }
@@ -54,7 +60,9 @@ pub fn audit_determinism_tiers(descriptors: &[SystemDescriptor]) -> DeterminismA
         }
 
         if desc.determinism == DeterminismTier::Hard && !desc.headless_compatible {
-            issues.push("Hard-deterministic systems should be headless-compatible for server replay".into());
+            issues.push(
+                "Hard-deterministic systems should be headless-compatible for server replay".into(),
+            );
         }
 
         entries.push(DeterminismAuditEntry {

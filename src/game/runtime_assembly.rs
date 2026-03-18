@@ -4,57 +4,57 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::game::ai::ai::AiSystem;
-use crate::game::ai::combat_tactics::tactics::TacticProfile;
 use crate::audio::audio::AudioEngine;
+use crate::content::asset_budget::AssetBudget;
+use crate::content::prefabs::prefab_registry::PrefabRegistry;
+use crate::core::budget_registry::create_default_registry;
 use crate::core::component_registry::ComponentRegistry;
 use crate::core::config::{load_config, ConfigEnvelope};
 use crate::core::ecs::Ecs;
 use crate::core::engine::Engine;
+use crate::core::events::aggregation::EventAggregator;
+use crate::core::events::debug_bus::DebugBus;
+use crate::core::events::render_bus::RenderBus;
+use crate::core::events::sim_bus::SimBus;
+use crate::core::events::sticky::StickyEvents;
+use crate::core::events::tracing_hooks::EventTracer;
 use crate::core::material_truth::MaterialTruthService;
+use crate::core::ownership_map::OwnershipMap;
 use crate::core::plugin::EngineBuilder;
+use crate::core::quality_governor::QualityGovernor;
+use crate::core::runtime_config::RuntimeConfig;
 use crate::core::runtime_config::RuntimeProfile;
-use crate::game::StalkerPlugin;
+use crate::core::sdk::EngineSDK;
+use crate::core::world_state_authority;
+use crate::game::ai::ai::AiSystem;
+use crate::game::ai::combat_tactics::tactics::TacticProfile;
+use crate::game::ai_config::AiConfigPlugin;
+use crate::game::combat_plugin::CombatPlugin;
+use crate::game::economy_plugin::EconomyPlugin;
+use crate::game::population_plugin::PopulationPlugin;
+use crate::game::runtime_world_tick::WorldTickSystem;
 use crate::game::weapons_plugin::WeaponsPlugin;
+use crate::game::StalkerPlugin;
 use crate::memory::asset_manager::AssetManager;
 use crate::navigation::cover_map::CoverMap;
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::navigation::hpa_star::HpaGraph;
+use crate::physics::damage_pipeline::DamageOrchestrator;
 use crate::physics::destruction::DestructionSystem;
 use crate::physics::physics::PhysicsSystem;
-use crate::core::events::sim_bus::SimBus;
-use crate::core::events::render_bus::RenderBus;
-use crate::core::events::debug_bus::DebugBus;
-use crate::core::events::sticky::StickyEvents;
-use crate::core::events::tracing_hooks::EventTracer;
-use crate::core::events::aggregation::EventAggregator;
-use crate::core::budget_registry::create_default_registry;
-use crate::core::quality_governor::QualityGovernor;
-use crate::core::runtime_config::RuntimeConfig;
-use crate::core::ownership_map::OwnershipMap;
-use crate::core::world_state_authority;
-use crate::core::sdk::EngineSDK;
-use crate::world::terrain_truth::TerrainTruth;
-use crate::world::surface_state::SurfaceStateStore;
-use crate::physics::damage_pipeline::DamageOrchestrator;
-use crate::content::prefabs::prefab_registry::PrefabRegistry;
-use crate::content::asset_budget::AssetBudget;
-use crate::world::authoring::WorldAuthoringDatabase;
-use crate::world::chunk_persistence::ChunkPersistenceService;
-use crate::game::combat_plugin::CombatPlugin;
-use crate::game::ai_config::AiConfigPlugin;
-use crate::game::economy_plugin::EconomyPlugin;
-use crate::game::population_plugin::PopulationPlugin;
 use crate::simulation::simulation::SimulationSystem;
-use crate::game::runtime_world_tick::WorldTickSystem;
+use crate::world::authoring::WorldAuthoringDatabase;
 use crate::world::cell::WORLD_SIZE;
+use crate::world::chunk_persistence::ChunkPersistenceService;
 use crate::world::fields::{AnomalyForceType, AnomalyZone, WorldFields};
 use crate::world::heightmap::Heightmap;
 use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
 use crate::world::origin_shift::OriginShift;
 use crate::world::resources::ResourceGrid;
 use crate::world::streaming::WorldStreamer;
+use crate::world::surface_state::SurfaceStateStore;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
+use crate::world::terrain_truth::TerrainTruth;
 use crate::world::world::WorldGrid;
 
 pub struct RuntimeAssembly {
@@ -100,11 +100,9 @@ impl RuntimeAssembly {
 
         {
             let hm_ref = heightmap.clone();
-            let cover_map = CoverMap::precompute(
-                crate::world::cell::WORLD_SIZE,
-                20.0,
-                &|x, z| hm_ref.sample(x, z),
-            );
+            let cover_map = CoverMap::precompute(crate::world::cell::WORLD_SIZE, 20.0, &|x, z| {
+                hm_ref.sample(x, z)
+            });
             builder.insert_resource(cover_map);
         }
 
@@ -116,11 +114,15 @@ impl RuntimeAssembly {
         builder.insert_resource(HpaGraph::build());
         builder.insert_resource(OriginShift::new());
         builder.insert_resource(NavDirtyTracker::new());
-        builder.insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
+        builder.insert_resource(
+            crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new(),
+        );
         builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
         builder.insert_resource(ComponentRegistry::default_registry());
         builder.insert_resource(MaterialTruthService::empty());
-        builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
+        builder.insert_resource(
+            crate::graphics::surface_state_render::SurfaceStateRenderSystem::new(),
+        );
 
         // Wired dormant systems
         builder.insert_resource(authority_entries);
@@ -147,14 +149,28 @@ impl RuntimeAssembly {
         builder.add_system_default(Box::new(SimulationSystem::new(center, center)));
         builder.add_system_default(Box::new(WorldTickSystem::new(grid)));
         builder.add_system_default(Box::new(AiSystem::new()));
-        builder.add_system_default(Box::new(crate::game::integration_systems::AiDecisionWireSystem));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::AiDecisionWireSystem,
+        ));
         builder.add_system_default(Box::new(PhysicsSystem::new(heightmap)));
-        builder.add_system_default(Box::new(crate::game::integration_systems::BallisticsTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DamageDispatchSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DestructionTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::TerrainDeformationTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::NavDirtyTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::OcclusionWireSystem));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::BallisticsTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DamageDispatchSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DestructionTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::TerrainDeformationTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::NavDirtyTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::OcclusionWireSystem,
+        ));
         builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
         builder.add_system_default(Box::new(
             crate::game::animation_integration::AnimationIntegrationSystem::new(),
@@ -169,12 +185,8 @@ impl RuntimeAssembly {
             crate::game::gameplay::quest_system::QuestSystem::new(),
         ));
         builder.add_system_default(Box::new(crate::body::body_system::BodySystem));
-        builder.add_system_default(Box::new(
-            crate::graphics::render_system::RenderSystem,
-        ));
-        builder.add_system_default(Box::new(
-            crate::audio::playback::AudioPlaybackBridge::new(),
-        ));
+        builder.add_system_default(Box::new(crate::graphics::render_system::RenderSystem));
+        builder.add_system_default(Box::new(crate::audio::playback::AudioPlaybackBridge::new()));
         builder.add_system_default(Box::new(
             crate::input::input_system::InputActionSystem::new(),
         ));
@@ -198,9 +210,12 @@ impl RuntimeAssembly {
         builder.insert_resource(crate::animation::clip_map::ClipMap::new());
         builder.insert_resource(crate::animation::animation_ladder::AnimationLadder::default());
         builder.insert_resource(crate::game::gameplay::factions::FactionRelations::new());
-        builder.insert_resource(crate::core::determinism_policy::DeterminismPolicyMatrix::build_default());
+        builder.insert_resource(
+            crate::core::determinism_policy::DeterminismPolicyMatrix::build_default(),
+        );
         builder.insert_resource(crate::core::build_manifest::SchemaMigrationRegistry::new());
-        builder.insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
+        builder
+            .insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
         builder.insert_resource(crate::core::perf::sim_telemetry::SimTelemetry::new());
         builder.insert_resource(crate::core::dirty_set::ChunkDirtySet::default());
         builder.insert_resource(crate::core::dirty_set::NavDirtySet::default());
@@ -252,11 +267,9 @@ impl RuntimeAssembly {
 
         {
             let hm_ref = heightmap.clone();
-            let cover_map = CoverMap::precompute(
-                crate::world::cell::WORLD_SIZE,
-                20.0,
-                &|x, z| hm_ref.sample(x, z),
-            );
+            let cover_map = CoverMap::precompute(crate::world::cell::WORLD_SIZE, 20.0, &|x, z| {
+                hm_ref.sample(x, z)
+            });
             builder.insert_resource(cover_map);
         }
 
@@ -268,11 +281,15 @@ impl RuntimeAssembly {
         builder.insert_resource(HpaGraph::build());
         builder.insert_resource(OriginShift::new());
         builder.insert_resource(NavDirtyTracker::new());
-        builder.insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
+        builder.insert_resource(
+            crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new(),
+        );
         builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
         builder.insert_resource(ComponentRegistry::default_registry());
         builder.insert_resource(MaterialTruthService::empty());
-        builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
+        builder.insert_resource(
+            crate::graphics::surface_state_render::SurfaceStateRenderSystem::new(),
+        );
 
         // Wired dormant systems
         builder.insert_resource(authority_entries);
@@ -299,14 +316,28 @@ impl RuntimeAssembly {
         builder.add_system_default(Box::new(SimulationSystem::new(center, center)));
         builder.add_system_default(Box::new(WorldTickSystem::new(grid)));
         builder.add_system_default(Box::new(AiSystem::new()));
-        builder.add_system_default(Box::new(crate::game::integration_systems::AiDecisionWireSystem));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::AiDecisionWireSystem,
+        ));
         builder.add_system_default(Box::new(PhysicsSystem::new(heightmap)));
-        builder.add_system_default(Box::new(crate::game::integration_systems::BallisticsTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DamageDispatchSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DestructionTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::TerrainDeformationTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::NavDirtyTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::OcclusionWireSystem));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::BallisticsTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DamageDispatchSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DestructionTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::TerrainDeformationTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::NavDirtyTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::OcclusionWireSystem,
+        ));
         builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
         builder.add_system_default(Box::new(
             crate::game::animation_integration::AnimationIntegrationSystem::new(),
@@ -344,7 +375,9 @@ impl RuntimeAssembly {
         builder.insert_resource(crate::animation::clip_map::ClipMap::new());
         builder.insert_resource(crate::animation::animation_ladder::AnimationLadder::default());
         builder.insert_resource(crate::game::gameplay::factions::FactionRelations::new());
-        builder.insert_resource(crate::core::determinism_policy::DeterminismPolicyMatrix::build_default());
+        builder.insert_resource(
+            crate::core::determinism_policy::DeterminismPolicyMatrix::build_default(),
+        );
         builder.insert_resource(crate::core::build_manifest::SchemaMigrationRegistry::new());
         builder.insert_resource(crate::core::perf::sim_telemetry::SimTelemetry::new());
         builder.insert_resource(crate::core::dirty_set::ChunkDirtySet::default());
@@ -405,21 +438,27 @@ impl RuntimeAssembly {
         builder.insert_resource(HpaGraph::build());
         builder.insert_resource(OriginShift::new());
         builder.insert_resource(NavDirtyTracker::new());
-        builder.insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
+        builder.insert_resource(
+            crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new(),
+        );
         builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
         builder.insert_resource(ComponentRegistry::default_registry());
         builder.insert_resource(MaterialTruthService::empty());
-        builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
+        builder.insert_resource(
+            crate::graphics::surface_state_render::SurfaceStateRenderSystem::new(),
+        );
 
         // Reverb zones: basement (Zone C) gets interior reverb
         let mut audio_occlusion = crate::audio::occlusion::OcclusionSystem::new();
-        audio_occlusion.zones.push(crate::audio::occlusion::ReverbZone {
-            center: glam::Vec3::new(40.0, 1.5, 12.5),
-            radius: 15.0,
-            reverb_time: 2.0,
-            early_reflections: 0.7,
-            density: 0.8,
-        });
+        audio_occlusion
+            .zones
+            .push(crate::audio::occlusion::ReverbZone {
+                center: glam::Vec3::new(40.0, 1.5, 12.5),
+                radius: 15.0,
+                reverb_time: 2.0,
+                early_reflections: 0.7,
+                density: 0.8,
+            });
         builder.insert_resource(audio_occlusion);
 
         builder.insert_resource(authority_entries);
@@ -445,12 +484,24 @@ impl RuntimeAssembly {
         let center = sandbox_size * 0.5;
         builder.add_system_default(Box::new(SimulationSystem::new(center, center)));
         builder.add_system_default(Box::new(PhysicsSystem::new(heightmap)));
-        builder.add_system_default(Box::new(crate::game::integration_systems::BallisticsTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DamageDispatchSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::DestructionTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::TerrainDeformationTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::NavDirtyTickSystem));
-        builder.add_system_default(Box::new(crate::game::integration_systems::OcclusionWireSystem));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::BallisticsTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DamageDispatchSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::DestructionTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::TerrainDeformationTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::NavDirtyTickSystem,
+        ));
+        builder.add_system_default(Box::new(
+            crate::game::integration_systems::OcclusionWireSystem,
+        ));
         builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
         builder.add_system_default(Box::new(
             crate::game::animation_integration::AnimationIntegrationSystem::new(),
@@ -463,9 +514,7 @@ impl RuntimeAssembly {
         ));
         builder.add_system_default(Box::new(crate::body::body_system::BodySystem));
         builder.add_system_default(Box::new(crate::graphics::render_system::RenderSystem));
-        builder.add_system_default(Box::new(
-            crate::audio::playback::AudioPlaybackBridge::new(),
-        ));
+        builder.add_system_default(Box::new(crate::audio::playback::AudioPlaybackBridge::new()));
         builder.add_system_default(Box::new(
             crate::input::input_system::InputActionSystem::new(),
         ));
@@ -479,9 +528,12 @@ impl RuntimeAssembly {
         builder.insert_resource(crate::animation::clip_map::ClipMap::new());
         builder.insert_resource(crate::animation::animation_ladder::AnimationLadder::default());
         builder.insert_resource(crate::game::gameplay::factions::FactionRelations::new());
-        builder.insert_resource(crate::core::determinism_policy::DeterminismPolicyMatrix::build_default());
+        builder.insert_resource(
+            crate::core::determinism_policy::DeterminismPolicyMatrix::build_default(),
+        );
         builder.insert_resource(crate::core::build_manifest::SchemaMigrationRegistry::new());
-        builder.insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
+        builder
+            .insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
         builder.insert_resource(crate::core::perf::sim_telemetry::SimTelemetry::new());
         builder.insert_resource(crate::core::dirty_set::ChunkDirtySet::default());
         builder.insert_resource(crate::core::dirty_set::NavDirtySet::default());
@@ -489,52 +541,61 @@ impl RuntimeAssembly {
         builder.insert_resource(crate::core::perf::low_spec_cert::LowSpecCertifier::default());
         builder.insert_resource(ChunkPersistenceService::new("game/saves/chunks"));
 
-        builder.add_init_fn(|ecs: &mut Ecs, _res: &mut crate::core::registry::Resources| {
-            let mut authoring = WorldAuthoringDatabase::new();
-            let chunk_path = std::path::Path::new("game/world/chunks/chunk_sandbox_main.ron");
-            if let Ok(contents) = std::fs::read_to_string(chunk_path) {
-                match ron::from_str::<crate::world::authoring::ChunkAuthoring>(&contents) {
-                    Ok(chunk) => { authoring.set_chunk(chunk); }
-                    Err(e) => { println!("[sandbox] ERROR parsing chunk RON: {}", e); }
+        builder.add_init_fn(
+            |ecs: &mut Ecs, _res: &mut crate::core::registry::Resources| {
+                let mut authoring = WorldAuthoringDatabase::new();
+                let chunk_path = std::path::Path::new("game/world/chunks/chunk_sandbox_main.ron");
+                if let Ok(contents) = std::fs::read_to_string(chunk_path) {
+                    match ron::from_str::<crate::world::authoring::ChunkAuthoring>(&contents) {
+                        Ok(chunk) => {
+                            authoring.set_chunk(chunk);
+                        }
+                        Err(e) => {
+                            println!("[sandbox] ERROR parsing chunk RON: {}", e);
+                        }
+                    }
+                } else {
+                    println!("[sandbox] WARNING: chunk file not found: {:?}", chunk_path);
                 }
-            } else {
-                println!("[sandbox] WARNING: chunk file not found: {:?}", chunk_path);
-            }
-            let chunk_count = authoring.chunk_count();
-            println!("[sandbox] loaded {} authored chunk(s)", chunk_count);
+                let chunk_count = authoring.chunk_count();
+                println!("[sandbox] loaded {} authored chunk(s)", chunk_count);
 
-            let mut spawned = 0u32;
-            let coords: Vec<_> = authoring.coords().cloned().collect();
-            for coord in coords {
-                if let Some(chunk) = authoring.get_chunk(&coord) {
-                    for spawn in &chunk.spawns {
-                        let (entity, _pid) = ecs.spawn_new();
-                        let world_x = spawn.position[0];
-                        let world_z = spawn.position[2];
+                let mut spawned = 0u32;
+                let coords: Vec<_> = authoring.coords().cloned().collect();
+                for coord in coords {
+                    if let Some(chunk) = authoring.get_chunk(&coord) {
+                        for spawn in &chunk.spawns {
+                            let (entity, _pid) = ecs.spawn_new();
+                            let world_x = spawn.position[0];
+                            let world_z = spawn.position[2];
 
-                        ecs.set_transform(
-                            entity,
-                            crate::world::components::Transform {
-                                x: world_x,
-                                y: world_z,
-                                cell_x: (world_x / 50.0) as u32,
-                                cell_y: (world_z / 50.0) as u32,
-                            },
-                        );
+                            ecs.set_transform(
+                                entity,
+                                crate::world::components::Transform {
+                                    x: world_x,
+                                    y: world_z,
+                                    cell_x: (world_x / 50.0) as u32,
+                                    cell_y: (world_z / 50.0) as u32,
+                                },
+                            );
 
-                        let label = spawn
-                            .overrides
-                            .get("label")
-                            .cloned()
-                            .unwrap_or_else(|| spawn.prefab_name.clone());
-                        ecs.set_name(entity, crate::world::components::Name(label));
+                            let label = spawn
+                                .overrides
+                                .get("label")
+                                .cloned()
+                                .unwrap_or_else(|| spawn.prefab_name.clone());
+                            ecs.set_name(entity, crate::world::components::Name(label));
 
-                        spawned += 1;
+                            spawned += 1;
+                        }
                     }
                 }
-            }
-            println!("[sandbox] spawned {} entities from authored content", spawned);
-        });
+                println!(
+                    "[sandbox] spawned {} entities from authored content",
+                    spawned
+                );
+            },
+        );
 
         let mut ecs = Ecs::new();
         let (systems, resources) = builder.build(&mut ecs);

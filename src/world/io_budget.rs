@@ -1,7 +1,7 @@
-use std::collections::BinaryHeap;
-use std::cmp::Ordering;
-use super::chunk_package::{StreamPriority, BundleKind};
+use super::chunk_package::{BundleKind, StreamPriority};
 use super::streaming::ChunkCoord;
+use std::cmp::Ordering;
+use std::collections::BinaryHeap;
 
 #[derive(Clone, Debug)]
 pub struct IoBudget {
@@ -57,9 +57,7 @@ impl Ord for StreamRequest {
     fn cmp(&self, other: &Self) -> Ordering {
         (other.priority as u8)
             .cmp(&(self.priority as u8))
-            .then_with(|| {
-                other.distance_sq.to_bits().cmp(&self.distance_sq.to_bits())
-            })
+            .then_with(|| other.distance_sq.to_bits().cmp(&self.distance_sq.to_bits()))
     }
 }
 

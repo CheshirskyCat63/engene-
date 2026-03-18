@@ -89,8 +89,16 @@ impl SimMetricsDashboard {
             let n = npc_count as f64;
             snap.total_npc_money = total_money;
             snap.average_wealth = total_money / n;
-            snap.min_wealth = if min_money == f64::MAX { 0.0 } else { min_money };
-            snap.max_wealth = if max_money == f64::MIN { 0.0 } else { max_money };
+            snap.min_wealth = if min_money == f64::MAX {
+                0.0
+            } else {
+                min_money
+            };
+            snap.max_wealth = if max_money == f64::MIN {
+                0.0
+            } else {
+                max_money
+            };
             snap.average_health = total_health / npc_count as f32;
             snap.average_hunger = total_hunger / npc_count as f32;
             snap.average_desperation = total_desperation / npc_count as f32;
@@ -112,31 +120,49 @@ impl SimMetricsDashboard {
             .rev()
             .take(last_n)
             .rev()
-            .map(|s| (s.stalker_count, s.wolf_count + s.boar_count + s.bloodsucker_count))
+            .map(|s| {
+                (
+                    s.stalker_count,
+                    s.wolf_count + s.boar_count + s.bloodsucker_count,
+                )
+            })
             .collect()
     }
 }
 
 impl SimMetricsDashboard {
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("Sim Metrics").default_width(420.0).show(ctx, |ui| {
-            if let Some(s) = self.latest() {
-                ui.heading(format!("Month {} Day {}", s.month, s.day));
-                ui.separator();
-                ui.label(format!("Stalkers: {}  Wolves: {}  Boars: {}  Bloodsuckers: {}",
-                    s.stalker_count, s.wolf_count, s.boar_count, s.bloodsucker_count));
-                ui.label(format!("Total alive: {}  Dead: {}", s.total_alive, s.dead_count));
-                ui.separator();
-                ui.label(format!("Avg wealth: {:.0}  Min: {:.0}  Max: {:.0}",
-                    s.average_wealth, s.min_wealth, s.max_wealth));
-                ui.label(format!("Quests active: {}  completed: {}  failed: {}",
-                    s.quests_active, s.quests_completed_total, s.quests_failed_total));
-                ui.label(format!("Avg health: {:.2}  hunger: {:.2}  desperation: {:.2}",
-                    s.average_health, s.average_hunger, s.average_desperation));
-            } else {
-                ui.label("No snapshots recorded yet.");
-            }
-        });
+        egui::Window::new("Sim Metrics")
+            .default_width(420.0)
+            .show(ctx, |ui| {
+                if let Some(s) = self.latest() {
+                    ui.heading(format!("Month {} Day {}", s.month, s.day));
+                    ui.separator();
+                    ui.label(format!(
+                        "Stalkers: {}  Wolves: {}  Boars: {}  Bloodsuckers: {}",
+                        s.stalker_count, s.wolf_count, s.boar_count, s.bloodsucker_count
+                    ));
+                    ui.label(format!(
+                        "Total alive: {}  Dead: {}",
+                        s.total_alive, s.dead_count
+                    ));
+                    ui.separator();
+                    ui.label(format!(
+                        "Avg wealth: {:.0}  Min: {:.0}  Max: {:.0}",
+                        s.average_wealth, s.min_wealth, s.max_wealth
+                    ));
+                    ui.label(format!(
+                        "Quests active: {}  completed: {}  failed: {}",
+                        s.quests_active, s.quests_completed_total, s.quests_failed_total
+                    ));
+                    ui.label(format!(
+                        "Avg health: {:.2}  hunger: {:.2}  desperation: {:.2}",
+                        s.average_health, s.average_hunger, s.average_desperation
+                    ));
+                } else {
+                    ui.label("No snapshots recorded yet.");
+                }
+            });
     }
 }
 

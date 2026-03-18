@@ -1,6 +1,6 @@
-use std::collections::HashSet;
 use crate::core::ecs::{Ecs, Entity};
 use crate::world::components::*;
+use std::collections::HashSet;
 
 pub const HUNT_RADIUS: f32 = 120.0;
 pub const FEAR_RADIUS: f32 = 150.0;
@@ -35,10 +35,16 @@ pub fn find_prey(ecs: &Ecs, hunter: Entity) -> Option<Entity> {
 
     let mut best: Option<(Entity, f32)> = None;
     for e in ecs.spatial.candidates_in_radius(ht.x, ht.y, HUNT_RADIUS) {
-        if e == hunter { continue; }
+        if e == hunter {
+            continue;
+        }
         let Some(ek) = ecs.get_kind(e) else { continue };
-        if !is_prey_for(hunter_kind, ek) { continue; }
-        let Some(et) = ecs.get_transform(e) else { continue };
+        if !is_prey_for(hunter_kind, ek) {
+            continue;
+        }
+        let Some(et) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (et.x - ht.x).powi(2) + (et.y - ht.y).powi(2);
         if d2 < r2 && best.map_or(true, |(_, bd)| d2 < bd) {
             best = Some((e, d2));
@@ -54,17 +60,25 @@ pub fn find_prey_selective(ecs: &Ecs, hunter: Entity, prefer_weakest: f32) -> Op
 
     let mut candidates: Vec<(Entity, f32, f32)> = Vec::new();
     for e in ecs.spatial.candidates_in_radius(ht.x, ht.y, HUNT_RADIUS) {
-        if e == hunter { continue; }
+        if e == hunter {
+            continue;
+        }
         let Some(ek) = ecs.get_kind(e) else { continue };
-        if !is_prey_for(hunter_kind, ek) { continue; }
-        let Some(et) = ecs.get_transform(e) else { continue };
+        if !is_prey_for(hunter_kind, ek) {
+            continue;
+        }
+        let Some(et) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (et.x - ht.x).powi(2) + (et.y - ht.y).powi(2);
         if d2 < r2 {
             let power = base_power(ek);
             candidates.push((e, d2, power));
         }
     }
-    if candidates.is_empty() { return None; }
+    if candidates.is_empty() {
+        return None;
+    }
 
     candidates.sort_by(|a, b| {
         let score_a = a.1 * (1.0 - prefer_weakest) + a.2 * prefer_weakest * 1000.0;
@@ -81,10 +95,16 @@ pub fn find_predator(ecs: &Ecs, prey: Entity) -> Option<Entity> {
 
     let mut best: Option<(Entity, f32)> = None;
     for e in ecs.spatial.candidates_in_radius(pt.x, pt.y, FEAR_RADIUS) {
-        if e == prey { continue; }
+        if e == prey {
+            continue;
+        }
         let Some(ek) = ecs.get_kind(e) else { continue };
-        if !is_prey_for(ek, prey_kind) { continue; }
-        let Some(et) = ecs.get_transform(e) else { continue };
+        if !is_prey_for(ek, prey_kind) {
+            continue;
+        }
+        let Some(et) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (et.x - pt.x).powi(2) + (et.y - pt.y).powi(2);
         if d2 < r2 && best.map_or(true, |(_, bd)| d2 < bd) {
             best = Some((e, d2));
@@ -104,26 +124,31 @@ pub fn find_allies(ecs: &Ecs, entity: Entity) -> Vec<Entity> {
     };
     let r2 = ALLY_RADIUS * ALLY_RADIUS;
 
-    ecs.spatial.candidates_in_radius(et.x, et.y, ALLY_RADIUS)
+    ecs.spatial
+        .candidates_in_radius(et.x, et.y, ALLY_RADIUS)
         .into_iter()
         .filter(|&e| {
-            if e == entity { return false; }
+            if e == entity {
+                return false;
+            }
             let same_kind = match (&kind, ecs.get_kind(e)) {
                 (EntityKind::Npc, Some(EntityKind::Npc)) => true,
                 (EntityKind::Monster(a), Some(EntityKind::Monster(b))) => a == b,
                 _ => false,
             };
-            if !same_kind { return false; }
-            ecs.get_transform(e).map_or(false, |t| {
-                (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2
-            })
+            if !same_kind {
+                return false;
+            }
+            ecs.get_transform(e)
+                .map_or(false, |t| (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2)
         })
         .collect()
 }
 
 pub fn find_group_target(ecs: &Ecs, group: &[Entity], leader: Entity) -> Option<Entity> {
     let group_set: HashSet<Entity> = group.iter().copied().collect();
-    let group_power: f32 = group.iter()
+    let group_power: f32 = group
+        .iter()
         .filter_map(|&e| ecs.get_kind(e))
         .map(base_power)
         .sum::<f32>()
@@ -134,11 +159,17 @@ pub fn find_group_target(ecs: &Ecs, group: &[Entity], leader: Entity) -> Option<
 
     let mut best: Option<(Entity, f32)> = None;
     for e in ecs.spatial.candidates_in_radius(lt.x, lt.y, HUNT_RADIUS) {
-        if e == leader || group_set.contains(&e) { continue; }
+        if e == leader || group_set.contains(&e) {
+            continue;
+        }
         let Some(ek) = ecs.get_kind(e) else { continue };
         let target_power = base_power(ek);
-        if target_power >= group_power { continue; }
-        let Some(et) = ecs.get_transform(e) else { continue };
+        if target_power >= group_power {
+            continue;
+        }
+        let Some(et) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (et.x - lt.x).powi(2) + (et.y - lt.y).powi(2);
         if d2 < r2 && best.map_or(true, |(_, bd)| d2 < bd) {
             best = Some((e, d2));
@@ -153,12 +184,14 @@ pub fn count_entities_nearby(ecs: &Ecs, entity: Entity, radius: f32) -> usize {
         None => return 0,
     };
     let r2 = radius * radius;
-    ecs.spatial.candidates_in_radius(et.x, et.y, radius)
+    ecs.spatial
+        .candidates_in_radius(et.x, et.y, radius)
         .iter()
         .filter(|&&e| {
-            e != entity && ecs.get_transform(e).map_or(false, |t| {
-                (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2
-            })
+            e != entity
+                && ecs
+                    .get_transform(e)
+                    .map_or(false, |t| (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2)
         })
         .count()
 }
@@ -169,14 +202,15 @@ pub fn npcs_nearby(ecs: &Ecs, entity: Entity, radius: f32) -> Vec<Entity> {
         None => return Vec::new(),
     };
     let r2 = radius * radius;
-    ecs.spatial.candidates_in_radius(et.x, et.y, radius)
+    ecs.spatial
+        .candidates_in_radius(et.x, et.y, radius)
         .into_iter()
         .filter(|&e| {
             e != entity
                 && matches!(ecs.get_kind(e), Some(EntityKind::Npc))
-                && ecs.get_transform(e).map_or(false, |t| {
-                    (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2
-                })
+                && ecs
+                    .get_transform(e)
+                    .map_or(false, |t| (t.x - et.x).powi(2) + (t.y - et.y).powi(2) < r2)
         })
         .collect()
 }
@@ -188,20 +222,35 @@ pub fn find_mate(ecs: &Ecs, entity: Entity) -> Option<Entity> {
 
     let mut best: Option<(Entity, f32)> = None;
     for e in ecs.spatial.candidates_in_radius(et.x, et.y, SOCIAL_RADIUS) {
-        if e == entity { continue; }
+        if e == entity {
+            continue;
+        }
         let same = match (kind, ecs.get_kind(e)) {
             (EntityKind::Npc, Some(EntityKind::Npc)) => true,
             (EntityKind::Monster(a), Some(EntityKind::Monster(b))) => a == b,
             _ => false,
         };
-        if !same { continue; }
-        let pn = match ecs.get_needs(e) { Some(p) => p, None => continue };
-        if pn.health < 0.5 || pn.hunger > 0.5 { continue; }
-        let trust = ecs.identity.persistent_id_of(e)
+        if !same {
+            continue;
+        }
+        let pn = match ecs.get_needs(e) {
+            Some(p) => p,
+            None => continue,
+        };
+        if pn.health < 0.5 || pn.hunger > 0.5 {
+            continue;
+        }
+        let trust = ecs
+            .identity
+            .persistent_id_of(e)
             .and_then(|pid| ecs.get_memory(entity).and_then(|m| m.entities.get(&pid)))
             .map_or(0.0, |op| op.trust);
-        if trust < 0.2 { continue; }
-        let Some(t) = ecs.get_transform(e) else { continue };
+        if trust < 0.2 {
+            continue;
+        }
+        let Some(t) = ecs.get_transform(e) else {
+            continue;
+        };
         let d2 = (t.x - et.x).powi(2) + (t.y - et.y).powi(2);
         if d2 < r2 && best.map_or(true, |(_, bd)| d2 < bd) {
             best = Some((e, d2));

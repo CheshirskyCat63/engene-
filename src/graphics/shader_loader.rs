@@ -1,5 +1,5 @@
 //! Shader loading and hot reload support (Phase D.1)
-//! 
+//!
 //! Provides external .wgsl shader loading from assets/shaders/
 //! with fallback to embedded shaders.
 
@@ -26,16 +26,19 @@ impl ShaderSources {
     /// Load all .wgsl files from a directory
     pub fn load_from_dir(dir: &Path) -> std::io::Result<Self> {
         let mut sources = Self::default();
-        
+
         if !dir.exists() {
-            tracing::info!("shader directory does not exist: {}, using embedded fallback", dir.display());
+            tracing::info!(
+                "shader directory does not exist: {}, using embedded fallback",
+                dir.display()
+            );
             return Ok(sources);
         }
 
         for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
-            
+
             if path.extension().and_then(|e| e.to_str()) == Some("wgsl") {
                 if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
                     let content = fs::read_to_string(&path)?;
@@ -44,7 +47,7 @@ impl ShaderSources {
                 }
             }
         }
-        
+
         tracing::info!("loaded {} external shaders", sources.shaders.len());
         Ok(sources)
     }
@@ -70,7 +73,7 @@ pub fn reload_shader(name: &str, path: &Path) -> std::io::Result<Option<String>>
     if !path.exists() {
         return Ok(None);
     }
-    
+
     let content = fs::read_to_string(path)?;
     tracing::info!("reloaded shader: {} from {}", name, path.display());
     Ok(Some(content))

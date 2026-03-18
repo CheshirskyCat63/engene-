@@ -47,7 +47,8 @@ impl TerrainMaskStore {
         for patch in self.patches.values_mut() {
             patch.wetness = (patch.wetness - dt * 0.005).max(0.0);
         }
-        self.patches.retain(|_, p| p.wetness > 0.001 || p.scorched > 0.001 || p.disturbed > 0.001);
+        self.patches
+            .retain(|_, p| p.wetness > 0.001 || p.scorched > 0.001 || p.disturbed > 0.001);
     }
 
     pub fn get(&self, cx: i32, cz: i32) -> Option<&TerrainMaskPatch> {

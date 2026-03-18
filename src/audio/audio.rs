@@ -48,7 +48,13 @@ impl AudioEngine {
         self.listener_forward = forward.normalize_or_zero();
     }
 
-    pub fn play_3d(&mut self, kind: SoundKind, position: Vec3, volume: f32, duration: f32) -> SoundHandle {
+    pub fn play_3d(
+        &mut self,
+        kind: SoundKind,
+        position: Vec3,
+        volume: f32,
+        duration: f32,
+    ) -> SoundHandle {
         let id = self.next_id;
         self.next_id += 1;
         self.active_sounds.push(ActiveSound {

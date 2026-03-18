@@ -13,7 +13,8 @@ fn ecs_spawn_despawn_lifecycle() {
     assert_eq!(ecs.alive.len(), 2);
 
     ecs.kinds.insert(e1, EntityKind::Npc);
-    ecs.kinds.insert(e2, EntityKind::Monster(MonsterSpecies::Wolf));
+    ecs.kinds
+        .insert(e2, EntityKind::Monster(MonsterSpecies::Wolf));
     assert_eq!(ecs.npcs().len(), 1);
     assert_eq!(ecs.monsters().len(), 1);
     assert_eq!(ecs.count_npcs(), 1);
@@ -32,7 +33,15 @@ fn ecs_spatial_rebuild() {
 
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 1, cell_y: 1 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 1,
+            cell_y: 1,
+        },
+    );
     ecs.rebuild_spatial();
 
     let candidates = ecs.spatial.candidates_in_radius(100.0, 100.0, 500.0);
@@ -48,10 +57,19 @@ fn base_power_and_prey_relationships() {
     assert_eq!(base_power(&EntityKind::Monster(MonsterSpecies::Wolf)), 3.0);
     assert_eq!(base_power(&EntityKind::Npc), 5.0);
     assert_eq!(base_power(&EntityKind::Monster(MonsterSpecies::Boar)), 7.0);
-    assert_eq!(base_power(&EntityKind::Monster(MonsterSpecies::Bloodsucker)), 10.0);
+    assert_eq!(
+        base_power(&EntityKind::Monster(MonsterSpecies::Bloodsucker)),
+        10.0
+    );
 
-    assert!(is_prey_for(&EntityKind::Npc, &EntityKind::Monster(MonsterSpecies::Wolf)));
-    assert!(!is_prey_for(&EntityKind::Monster(MonsterSpecies::Wolf), &EntityKind::Npc));
+    assert!(is_prey_for(
+        &EntityKind::Npc,
+        &EntityKind::Monster(MonsterSpecies::Wolf)
+    ));
+    assert!(!is_prey_for(
+        &EntityKind::Monster(MonsterSpecies::Wolf),
+        &EntityKind::Npc
+    ));
 }
 
 #[test]
@@ -207,9 +225,16 @@ fn apply_npc_personality_modulates_emotions() {
     use engene::world::components::NpcTraits;
 
     let traits = NpcTraits {
-        bravery: 0.1, aggressiveness: 0.9, work_ethic: 0.5, curiosity: 0.5,
-        honesty: 0.5, sociality: 0.8, autonomy: 0.5, materialism: 0.5,
-        risk_tolerance: 0.5, stress_resistance: 0.0,
+        bravery: 0.1,
+        aggressiveness: 0.9,
+        work_ethic: 0.5,
+        curiosity: 0.5,
+        honesty: 0.5,
+        sociality: 0.8,
+        autonomy: 0.5,
+        materialism: 0.5,
+        risk_tolerance: 0.5,
+        stress_resistance: 0.0,
     };
     let mut emo = Emotions::new();
     apply_npc_personality(&mut emo, &traits, 0.5, 0.5, 0.5, 0.5);
@@ -224,9 +249,16 @@ fn apply_monster_personality_modulates_emotions() {
     use engene::world::components::MonsterTraits;
 
     let traits = MonsterTraits {
-        aggressiveness: 0.9, caution: 0.8, territoriality: 0.5, bravery: 0.2,
-        pack_mentality: 0.9, energy_level: 0.7, hoarding: 0.3, curiosity: 0.4,
-        adaptability: 0.5, stress_tolerance: 0.1,
+        aggressiveness: 0.9,
+        caution: 0.8,
+        territoriality: 0.5,
+        bravery: 0.2,
+        pack_mentality: 0.9,
+        energy_level: 0.7,
+        hoarding: 0.3,
+        curiosity: 0.4,
+        adaptability: 0.5,
+        stress_tolerance: 0.1,
     };
     let mut emo = Emotions::new();
     apply_monster_personality(&mut emo, &traits, 0.5, 0.5, 0.5, 0.5);
@@ -269,18 +301,23 @@ fn memory_spatial_knowledge() {
 
 #[test]
 fn memory_entity_opinions() {
-    use engene::game::ai::memory::*;
     use engene::core::persistent_id::PersistentEntityId;
+    use engene::game::ai::memory::*;
 
     let pid = PersistentEntityId(42);
     let mut mem = Memory::new();
     assert_eq!(mem.opinion_of(pid).trust, 0.0);
 
-    mem.adjust_opinion(pid, |op| { op.trust = 0.8; op.familiarity = 0.5; });
+    mem.adjust_opinion(pid, |op| {
+        op.trust = 0.8;
+        op.familiarity = 0.5;
+    });
     assert!((mem.opinion_of(pid).trust - 0.8).abs() < 0.01);
     assert_eq!(mem.best_ally(), Some(pid));
 
-    mem.adjust_opinion(pid, |op| { op.trust = -0.5; });
+    mem.adjust_opinion(pid, |op| {
+        op.trust = -0.5;
+    });
     assert_eq!(mem.best_ally(), None);
 }
 
@@ -289,12 +326,25 @@ fn memory_lessons_learning() {
     use engene::game::ai::memory::*;
 
     let mut mem = Memory::new();
-    mem.record_lesson(Lesson { action: LessonAction::SoloHunt, context: LessonContext::VsWolf, attempts: 5, successes: 4 });
+    mem.record_lesson(Lesson {
+        action: LessonAction::SoloHunt,
+        context: LessonContext::VsWolf,
+        attempts: 5,
+        successes: 4,
+    });
     assert!((mem.lesson_score(LessonAction::SoloHunt, LessonContext::VsWolf) - 0.8).abs() < 0.01);
 
-    mem.record_lesson(Lesson { action: LessonAction::SoloHunt, context: LessonContext::VsWolf, attempts: 5, successes: 1 });
+    mem.record_lesson(Lesson {
+        action: LessonAction::SoloHunt,
+        context: LessonContext::VsWolf,
+        attempts: 5,
+        successes: 1,
+    });
     let score = mem.lesson_score(LessonAction::SoloHunt, LessonContext::VsWolf);
-    assert!((score - 0.5).abs() < 0.01, "5/10 should give 0.5, got {score}");
+    assert!(
+        (score - 0.5).abs() < 0.01,
+        "5/10 should give 0.5, got {score}"
+    );
 
     assert!((mem.lesson_score(LessonAction::Flee, LessonContext::General) - 0.5).abs() < 0.01);
 }
@@ -305,8 +355,14 @@ fn context_for_kind_mapping() {
     use engene::world::components::*;
 
     assert_eq!(context_for_kind(&EntityKind::Npc), LessonContext::VsNpc);
-    assert_eq!(context_for_kind(&EntityKind::Monster(MonsterSpecies::Wolf)), LessonContext::VsWolf);
-    assert_eq!(context_for_kind(&EntityKind::Monster(MonsterSpecies::Bloodsucker)), LessonContext::VsBloodsucker);
+    assert_eq!(
+        context_for_kind(&EntityKind::Monster(MonsterSpecies::Wolf)),
+        LessonContext::VsWolf
+    );
+    assert_eq!(
+        context_for_kind(&EntityKind::Monster(MonsterSpecies::Bloodsucker)),
+        LessonContext::VsBloodsucker
+    );
 }
 
 // ===== AI: Needs =====
@@ -390,11 +446,18 @@ fn body_state_healthy_adult() {
 #[test]
 fn body_state_exhausted_old() {
     use engene::game::ai::body::BodyState;
-    use engene::world::components::{PersonalNeeds, LifeStage};
+    use engene::world::components::{LifeStage, PersonalNeeds};
 
     let pn = PersonalNeeds {
-        hunger: 0.9, thirst: 0.9, sleep: 0.9, health: 0.3,
-        energy: 0.1, fear: 0.8, curiosity: 0.0, ambitions: 0.0, discomfort: 0.8,
+        hunger: 0.9,
+        thirst: 0.9,
+        sleep: 0.9,
+        health: 0.3,
+        energy: 0.1,
+        fear: 0.8,
+        curiosity: 0.0,
+        ambitions: 0.0,
+        discomfort: 0.8,
     };
     let body = BodyState::compute_with_stage(&pn, LifeStage::Old);
     assert!(body.move_speed_mult < 0.5);
@@ -450,19 +513,41 @@ fn decide_npc_hungry_seeks_food() {
     use engene::world::components::*;
 
     let traits = NpcTraits {
-        bravery: 0.5, aggressiveness: 0.3, work_ethic: 0.5, curiosity: 0.3,
-        honesty: 0.5, sociality: 0.5, autonomy: 0.5, materialism: 0.5,
-        risk_tolerance: 0.5, stress_resistance: 0.5,
+        bravery: 0.5,
+        aggressiveness: 0.3,
+        work_ethic: 0.5,
+        curiosity: 0.3,
+        honesty: 0.5,
+        sociality: 0.5,
+        autonomy: 0.5,
+        materialism: 0.5,
+        risk_tolerance: 0.5,
+        stress_resistance: 0.5,
     };
     let personal = PersonalNeeds {
-        hunger: 0.95, thirst: 0.1, sleep: 0.1, health: 1.0,
-        energy: 0.8, fear: 0.0, curiosity: 0.1, ambitions: 0.1, discomfort: 0.1,
+        hunger: 0.95,
+        thirst: 0.1,
+        sleep: 0.1,
+        health: 1.0,
+        energy: 0.8,
+        fear: 0.0,
+        curiosity: 0.1,
+        ambitions: 0.1,
+        discomfort: 0.1,
     };
     let social = SocialNeeds::default();
-    let economy = NpcEconomy { money: 100.0, monthly_required: 50.0, job: Job::Guard, desperation: 0.0 };
+    let economy = NpcEconomy {
+        money: 100.0,
+        monthly_required: 50.0,
+        job: Job::Guard,
+        desperation: 0.0,
+    };
 
     let goal = decide_npc(&traits, &personal, &social, &economy);
-    assert!(goal == Goal::SeekFood || goal == Goal::Hunt, "hungry NPC should seek food or hunt, got {goal}");
+    assert!(
+        goal == Goal::SeekFood || goal == Goal::Hunt,
+        "hungry NPC should seek food or hunt, got {goal}"
+    );
 }
 
 #[test]
@@ -471,13 +556,27 @@ fn decide_monster_scared_flees() {
     use engene::world::components::*;
 
     let traits = MonsterTraits {
-        aggressiveness: 0.1, caution: 0.9, territoriality: 0.1, bravery: 0.1,
-        pack_mentality: 0.3, energy_level: 0.5, hoarding: 0.2, curiosity: 0.2,
-        adaptability: 0.5, stress_tolerance: 0.2,
+        aggressiveness: 0.1,
+        caution: 0.9,
+        territoriality: 0.1,
+        bravery: 0.1,
+        pack_mentality: 0.3,
+        energy_level: 0.5,
+        hoarding: 0.2,
+        curiosity: 0.2,
+        adaptability: 0.5,
+        stress_tolerance: 0.2,
     };
     let personal = PersonalNeeds {
-        hunger: 0.2, thirst: 0.1, sleep: 0.1, health: 0.3,
-        energy: 0.5, fear: 0.95, curiosity: 0.0, ambitions: 0.0, discomfort: 0.5,
+        hunger: 0.2,
+        thirst: 0.1,
+        sleep: 0.1,
+        health: 0.3,
+        energy: 0.5,
+        fear: 0.95,
+        curiosity: 0.0,
+        ambitions: 0.0,
+        discomfort: 0.5,
     };
     let eco = EcosystemNeeds::for_species(MonsterSpecies::Boar);
 
@@ -505,7 +604,10 @@ fn food_chain_relationships() {
     use engene::world::components::MonsterSpecies;
 
     assert!(is_predator_of(MonsterSpecies::Wolf, MonsterSpecies::Boar));
-    assert!(is_predator_of(MonsterSpecies::Bloodsucker, MonsterSpecies::Wolf));
+    assert!(is_predator_of(
+        MonsterSpecies::Bloodsucker,
+        MonsterSpecies::Wolf
+    ));
     assert!(!is_predator_of(MonsterSpecies::Boar, MonsterSpecies::Wolf));
 
     assert_eq!(is_prey_of(MonsterSpecies::Boar), Some(MonsterSpecies::Wolf));
@@ -596,7 +698,10 @@ fn anomaly_field_forces() {
 
     let inside = field.sample(glam::Vec3::new(10.0, 5.0, 0.0));
     assert!(inside.inside_anomaly);
-    assert!(inside.acceleration.y < 0.0, "gravity anomaly should push down");
+    assert!(
+        inside.acceleration.y < 0.0,
+        "gravity anomaly should push down"
+    );
 }
 
 // ===== Sparse Set =====

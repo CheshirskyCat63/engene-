@@ -1,5 +1,5 @@
 //! Determinism Gate for Parallel Tick (Phase C.1)
-//! 
+//!
 //! Provides snapshot comparison between sequential and parallel tick modes.
 //! Used to verify that parallel execution produces identical results.
 
@@ -27,15 +27,15 @@ impl EcsSnapshot {
         let mut bytes = Vec::new();
         bytes.extend_from_slice(&self.tick.to_le_bytes());
         bytes.extend_from_slice(&self.entity_count.to_le_bytes());
-        
+
         let mut sorted_hashes: Vec<_> = self.component_hashes.iter().collect();
         sorted_hashes.sort_by_key(|(k, _)| *k);
-        
+
         for (name, hash) in sorted_hashes {
             bytes.extend_from_slice(name.as_bytes());
             bytes.extend_from_slice(&hash.to_le_bytes());
         }
-        
+
         bytes
     }
 }
@@ -78,7 +78,7 @@ impl DeterminismGate {
     /// Compare two snapshots and record any differences
     pub fn compare(&mut self, expected: &EcsSnapshot, actual: &EcsSnapshot) -> bool {
         self.divergences.clear();
-        
+
         if expected.tick != actual.tick {
             self.divergences.push(DivergenceInfo {
                 tick: expected.tick,
@@ -133,7 +133,7 @@ impl DeterminismGate {
         if self.tolerance <= 0.0 {
             return self.divergences.is_empty();
         }
-        
+
         let total_components = self.divergences.len();
         let allowed = (total_components as f32 * self.tolerance).ceil() as usize;
         self.divergences.len() <= allowed
@@ -148,9 +148,9 @@ impl Default for DeterminismGate {
 
 /// Simple hash function for component data
 pub fn hash_component_data(data: &[u8]) -> u64 {
-    use std::hash::{Hash, Hasher};
     use std::collections::hash_map::DefaultHasher;
-    
+    use std::hash::{Hash, Hasher};
+
     let mut hasher = DefaultHasher::new();
     data.hash(&mut hasher);
     hasher.finish()
@@ -164,8 +164,10 @@ mod tests {
     fn test_snapshot_to_bytes() {
         let mut snapshot = EcsSnapshot::new(42);
         snapshot.entity_count = 100;
-        snapshot.component_hashes.insert("transforms".to_string(), 12345);
-        
+        snapshot
+            .component_hashes
+            .insert("transforms".to_string(), 12345);
+
         let bytes = snapshot.to_bytes();
         assert!(!bytes.is_empty());
     }
@@ -173,13 +175,15 @@ mod tests {
     #[test]
     fn test_determinism_gate_identical() {
         let mut gate = DeterminismGate::new(100);
-        
+
         let mut expected = EcsSnapshot::new(10);
         expected.entity_count = 50;
-        expected.component_hashes.insert("transforms".to_string(), 100);
-        
+        expected
+            .component_hashes
+            .insert("transforms".to_string(), 100);
+
         let actual = expected.clone();
-        
+
         assert!(gate.compare(&expected, &actual));
         assert!(gate.passed());
     }
@@ -187,14 +191,18 @@ mod tests {
     #[test]
     fn test_determinism_gate_different() {
         let mut gate = DeterminismGate::new(100);
-        
+
         let mut expected = EcsSnapshot::new(10);
         expected.entity_count = 50;
-        expected.component_hashes.insert("transforms".to_string(), 100);
-        
+        expected
+            .component_hashes
+            .insert("transforms".to_string(), 100);
+
         let mut actual = expected.clone();
-        actual.component_hashes.insert("transforms".to_string(), 200);
-        
+        actual
+            .component_hashes
+            .insert("transforms".to_string(), 200);
+
         assert!(!gate.compare(&expected, &actual));
         assert!(!gate.passed());
         assert_eq!(gate.divergences().len(), 1);
@@ -205,11 +213,11 @@ mod tests {
         let data1 = b"test data";
         let data2 = b"test data";
         let data3 = b"different data";
-        
+
         let hash1 = hash_component_data(data1);
         let hash2 = hash_component_data(data2);
         let hash3 = hash_component_data(data3);
-        
+
         assert_eq!(hash1, hash2);
         assert_ne!(hash1, hash3);
     }

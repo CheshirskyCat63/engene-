@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE};
+use std::collections::HashMap;
 
 const CLUSTER_SIZE: u32 = 8;
 
@@ -18,8 +18,10 @@ pub struct BorderNode {
 
 impl BorderNode {
     pub fn world_pos(&self) -> (f32, f32) {
-        let wx = (self.cluster.cx * CLUSTER_SIZE + self.local_x) as f32 * CELL_SIZE + CELL_SIZE * 0.5;
-        let wy = (self.cluster.cy * CLUSTER_SIZE + self.local_y) as f32 * CELL_SIZE + CELL_SIZE * 0.5;
+        let wx =
+            (self.cluster.cx * CLUSTER_SIZE + self.local_x) as f32 * CELL_SIZE + CELL_SIZE * 0.5;
+        let wy =
+            (self.cluster.cy * CLUSTER_SIZE + self.local_y) as f32 * CELL_SIZE + CELL_SIZE * 0.5;
         (wx, wy)
     }
 }
@@ -46,9 +48,17 @@ impl HpaGraph {
                     let border_x = CLUSTER_SIZE - 1;
                     for ly in 0..CLUSTER_SIZE.min(GRID_SIZE - cy * CLUSTER_SIZE) {
                         let a = border_nodes.len();
-                        border_nodes.push(BorderNode { cluster, local_x: border_x, local_y: ly });
+                        border_nodes.push(BorderNode {
+                            cluster,
+                            local_x: border_x,
+                            local_y: ly,
+                        });
                         let b = border_nodes.len();
-                        border_nodes.push(BorderNode { cluster: right_cluster, local_x: 0, local_y: ly });
+                        border_nodes.push(BorderNode {
+                            cluster: right_cluster,
+                            local_x: 0,
+                            local_y: ly,
+                        });
                         edges.entry(a).or_default().push((b, CELL_SIZE));
                         edges.entry(b).or_default().push((a, CELL_SIZE));
                     }
@@ -58,9 +68,17 @@ impl HpaGraph {
                     let border_y = CLUSTER_SIZE - 1;
                     for lx in 0..CLUSTER_SIZE.min(GRID_SIZE - cx * CLUSTER_SIZE) {
                         let a = border_nodes.len();
-                        border_nodes.push(BorderNode { cluster, local_x: lx, local_y: border_y });
+                        border_nodes.push(BorderNode {
+                            cluster,
+                            local_x: lx,
+                            local_y: border_y,
+                        });
                         let b = border_nodes.len();
-                        border_nodes.push(BorderNode { cluster: bottom_cluster, local_x: lx, local_y: 0 });
+                        border_nodes.push(BorderNode {
+                            cluster: bottom_cluster,
+                            local_x: lx,
+                            local_y: 0,
+                        });
                         edges.entry(a).or_default().push((b, CELL_SIZE));
                         edges.entry(b).or_default().push((a, CELL_SIZE));
                     }
@@ -68,7 +86,12 @@ impl HpaGraph {
             }
         }
 
-        Self { clusters_w: cw, clusters_h: ch, border_nodes, edges }
+        Self {
+            clusters_w: cw,
+            clusters_h: ch,
+            border_nodes,
+            edges,
+        }
     }
 
     pub fn find_abstract_path(&self, start: (f32, f32), goal: (f32, f32)) -> Vec<(f32, f32)> {
@@ -82,7 +105,10 @@ impl HpaGraph {
             &start_node,
             |&n| {
                 self.edges.get(&n).map_or(Vec::new(), |neighbors| {
-                    neighbors.iter().map(|&(next, cost)| (next, (cost * 100.0) as u32)).collect()
+                    neighbors
+                        .iter()
+                        .map(|&(next, cost)| (next, (cost * 100.0) as u32))
+                        .collect()
                 })
             },
             |&n| {
@@ -96,9 +122,10 @@ impl HpaGraph {
         );
 
         match result {
-            Some((path, _cost)) => {
-                path.iter().map(|&n| self.border_nodes[n].world_pos()).collect()
-            }
+            Some((path, _cost)) => path
+                .iter()
+                .map(|&n| self.border_nodes[n].world_pos())
+                .collect(),
             None => vec![goal],
         }
     }

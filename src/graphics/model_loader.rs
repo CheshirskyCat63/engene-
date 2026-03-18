@@ -18,22 +18,13 @@ pub fn load_glb(path: &Path) -> Result<LoadedModel, String> {
     let (document, buffers, _images) =
         gltf::import(path).map_err(|e| format!("glTF load error: {e}"))?;
 
-    let mesh = document
-        .meshes()
-        .next()
-        .ok_or("no mesh in glTF")?;
+    let mesh = document.meshes().next().ok_or("no mesh in glTF")?;
 
-    let primitive = mesh
-        .primitives()
-        .next()
-        .ok_or("no primitive in mesh")?;
+    let primitive = mesh.primitives().next().ok_or("no primitive in mesh")?;
 
     let reader = primitive.reader(|b| Some(&buffers[b.index()]));
 
-    let positions: Vec<[f32; 3]> = reader
-        .read_positions()
-        .ok_or("no positions")?
-        .collect();
+    let positions: Vec<[f32; 3]> = reader.read_positions().ok_or("no positions")?.collect();
 
     let normals: Vec<[f32; 3]> = reader
         .read_normals()
@@ -78,15 +69,11 @@ pub fn load_glb(path: &Path) -> Result<LoadedModel, String> {
         let ibm_reader = skin.reader(|b| Some(&buffers[b.index()]));
         let ibms: Vec<Mat4> = ibm_reader
             .read_inverse_bind_matrices()
-            .map(|iter| {
-                iter.map(|m| Mat4::from_cols_array_2d(&m))
-                    .collect()
-            })
+            .map(|iter| iter.map(|m| Mat4::from_cols_array_2d(&m)).collect())
             .unwrap_or_default();
         skeleton.inverse_bind_matrices = ibms;
 
-        let joint_node_indices: Vec<usize> =
-            skin.joints().map(|j| j.index()).collect();
+        let joint_node_indices: Vec<usize> = skin.joints().map(|j| j.index()).collect();
 
         let mut parent_map: std::collections::HashMap<usize, usize> =
             std::collections::HashMap::new();
@@ -112,13 +99,11 @@ pub fn load_glb(path: &Path) -> Result<LoadedModel, String> {
                 Quat::from_array(r),
                 Vec3::from(t),
             );
-            let parent = parent_map
-                .get(&node.index())
-                .and_then(|&parent_node_idx| {
-                    joint_node_indices
-                        .iter()
-                        .position(|&ji| ji == parent_node_idx)
-                });
+            let parent = parent_map.get(&node.index()).and_then(|&parent_node_idx| {
+                joint_node_indices
+                    .iter()
+                    .position(|&ji| ji == parent_node_idx)
+            });
             skeleton.joints.push(Joint {
                 name: node.name().unwrap_or("joint").to_string(),
                 parent,
@@ -132,7 +117,10 @@ pub fn load_glb(path: &Path) -> Result<LoadedModel, String> {
         let mut channels = Vec::new();
         for channel in anim.channels() {
             let reader = channel.reader(|b| Some(&buffers[b.index()]));
-            let times: Vec<f32> = reader.read_inputs().map(|i| i.collect()).unwrap_or_default();
+            let times: Vec<f32> = reader
+                .read_inputs()
+                .map(|i| i.collect())
+                .unwrap_or_default();
             let target = channel.target();
             let joint_index = if let Some(ref skin) = skin {
                 skin.joints()

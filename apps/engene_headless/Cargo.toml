@@ -1,0 +1,11 @@
+[package]
+name = "app_engene_headless"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+engene = { path = "../.." }
+
+[[bin]]
+name = "app_engene_headless"
+path = "src/main.rs"

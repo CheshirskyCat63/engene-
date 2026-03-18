@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::fs;
 use std::path::Path;
-use std::fmt;
 
 use crate::core::ecs::{Ecs, Entity};
 use crate::world::components::*;
@@ -34,8 +34,14 @@ impl fmt::Display for PersistenceError {
         match self {
             Self::Io { op, path, source } => write!(f, "{} {}: {}", op, path, source),
             Self::Serialize { context, source } => write!(f, "serialize {}: {}", context, source),
-            Self::Deserialize { context, source } => write!(f, "deserialize {}: {}", context, source),
-            Self::SchemaVersion { kind, expected, found } => write!(
+            Self::Deserialize { context, source } => {
+                write!(f, "deserialize {}: {}", context, source)
+            }
+            Self::SchemaVersion {
+                kind,
+                expected,
+                found,
+            } => write!(
                 f,
                 "schema version mismatch for {}: expected {}, found {}",
                 kind, expected, found
@@ -413,7 +419,11 @@ pub fn load_world(path: &Path) -> Result<WorldSnapshot, PersistenceError> {
     Ok(snapshot)
 }
 
-pub fn save_chunk(dir: &Path, coord: ChunkCoord, entities: &[EntitySnapshot]) -> Result<(), PersistenceError> {
+pub fn save_chunk(
+    dir: &Path,
+    coord: ChunkCoord,
+    entities: &[EntitySnapshot],
+) -> Result<(), PersistenceError> {
     use crate::memory::atomic_saved::atomic_save;
 
     fs::create_dir_all(dir).map_err(|e| PersistenceError::Io {

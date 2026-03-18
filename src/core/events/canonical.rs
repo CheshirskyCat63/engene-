@@ -1,6 +1,6 @@
-use glam::Vec3;
 use crate::core::ecs::Entity;
 use crate::physics::ballistics::MaterialId;
+use glam::Vec3;
 
 // ---------------------------------------------------------------------------
 // Event Classification: A = Authoritative, B = Consequence

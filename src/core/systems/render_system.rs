@@ -38,9 +38,9 @@ impl RenderSystem {
         let cam_pos = camera.position;
         let vp = camera.view_projection();
         let frustum = Frustum::from_view_projection(&vp);
-        
+
         let mut instances = Vec::with_capacity(ecs.alive.len());
-        
+
         for &e in &ecs.alive {
             let t = match ecs.get_transform(e) {
                 Some(t) => t,

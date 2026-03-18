@@ -25,10 +25,7 @@ pub struct CascadedShadowMap {
 }
 
 impl CascadedShadowMap {
-    pub fn new(
-        device: &wgpu::Device,
-        camera_bgl: &wgpu::BindGroupLayout,
-    ) -> Self {
+    pub fn new(device: &wgpu::Device, camera_bgl: &wgpu::BindGroupLayout) -> Self {
         let texture = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("shadow_map"),
             size: wgpu::Extent3d {
@@ -40,8 +37,7 @@ impl CascadedShadowMap {
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Depth32Float,
-            usage: wgpu::TextureUsages::RENDER_ATTACHMENT
-                | wgpu::TextureUsages::TEXTURE_BINDING,
+            usage: wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING,
             view_formats: &[],
         });
 
@@ -217,9 +213,8 @@ impl CascadedShadowMap {
             let light_dir = sun_direction.normalize();
             let light_pos = center - light_dir * radius * 2.0;
             let light_view = Mat4::look_at_rh(light_pos, center, Vec3::Y);
-            let light_proj = Mat4::orthographic_rh(
-                -radius, radius, -radius, radius, 0.1, radius * 4.0,
-            );
+            let light_proj =
+                Mat4::orthographic_rh(-radius, radius, -radius, radius, 0.1, radius * 4.0);
 
             matrices[i] = (light_proj * light_view).to_cols_array_2d();
             prev_split = split_far;
@@ -288,12 +283,28 @@ impl CascadedShadowMap {
         });
 
         let vertex_attrs = [
-            wgpu::VertexAttribute { offset: 0, shader_location: 0, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 12, shader_location: 1, format: wgpu::VertexFormat::Float32x3 },
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 1,
+                format: wgpu::VertexFormat::Float32x3,
+            },
         ];
         let instance_attrs = [
-            wgpu::VertexAttribute { offset: 0, shader_location: 2, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 12, shader_location: 3, format: wgpu::VertexFormat::Float32x3 },
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 2,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 3,
+                format: wgpu::VertexFormat::Float32x3,
+            },
         ];
 
         device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {

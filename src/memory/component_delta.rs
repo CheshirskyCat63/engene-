@@ -1,7 +1,7 @@
-use serde::{Deserialize, Serialize};
 use crate::core::ecs::Entity;
 use crate::core::sparse_set::SparseSet;
 use crate::world::components::Transform;
+use serde::{Deserialize, Serialize};
 
 pub const COMP_TRANSFORM: u8 = 0;
 pub const NUM_COMPONENT_TYPES: usize = 18;
@@ -203,10 +203,7 @@ pub fn collect_transform_deltas(
     }
 }
 
-pub fn apply_transform_deltas(
-    delta: &ComponentDelta,
-    transforms: &mut SparseSet<Transform>,
-) {
+pub fn apply_transform_deltas(delta: &ComponentDelta, transforms: &mut SparseSet<Transform>) {
     let stride = 16;
     for (i, &entity) in delta.entity_ids.iter().enumerate() {
         let off = i * stride;
@@ -224,7 +221,15 @@ pub fn apply_transform_deltas(
             t.cell_x = cx;
             t.cell_y = cy;
         } else {
-            transforms.insert(entity, Transform { x, y, cell_x: cx, cell_y: cy });
+            transforms.insert(
+                entity,
+                Transform {
+                    x,
+                    y,
+                    cell_x: cx,
+                    cell_y: cy,
+                },
+            );
         }
     }
 }

@@ -1,5 +1,5 @@
-use std::collections::{HashMap, HashSet};
 use std::any::TypeId;
+use std::collections::{HashMap, HashSet};
 
 use crate::core::engine::Engine;
 use crate::core::runtime_config::RuntimeConfig;
@@ -37,11 +37,17 @@ pub struct DoctorReport {
 
 impl DoctorReport {
     pub fn error_count(&self) -> usize {
-        self.diagnostics.iter().filter(|d| matches!(d.severity, DiagnosticSeverity::Error)).count()
+        self.diagnostics
+            .iter()
+            .filter(|d| matches!(d.severity, DiagnosticSeverity::Error))
+            .count()
     }
 
     pub fn warning_count(&self) -> usize {
-        self.diagnostics.iter().filter(|d| matches!(d.severity, DiagnosticSeverity::Warning)).count()
+        self.diagnostics
+            .iter()
+            .filter(|d| matches!(d.severity, DiagnosticSeverity::Warning))
+            .count()
     }
 
     pub fn print(&self) {
@@ -143,7 +149,9 @@ pub fn run_doctor(engine: &Engine, mode: DoctorMode) -> DoctorReport {
 
 /// Check all .ron config files are loadable
 fn check_ron_configs(out: &mut Vec<Diagnostic>) {
-    use crate::core::game_config::{canonical_config_default_paths, validate_canonical_configs_default};
+    use crate::core::game_config::{
+        canonical_config_default_paths, validate_canonical_configs_default,
+    };
 
     let config_files = canonical_config_default_paths();
 
@@ -152,7 +160,10 @@ fn check_ron_configs(out: &mut Vec<Diagnostic>) {
             out.push(Diagnostic {
                 severity: DiagnosticSeverity::Info,
                 category: "config",
-                message: format!("all {} canonical configs present and parseable", config_files.len()),
+                message: format!(
+                    "all {} canonical configs present and parseable",
+                    config_files.len()
+                ),
             });
         }
         Err(errors) => {
@@ -193,8 +204,16 @@ fn check_shader_files(out: &mut Vec<Diagnostic>) {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info, // Info because shaders may be embedded
             category: "shaders",
-            message: format!("{} shader files not found (may use embedded fallback): {}", 
-                missing.len(), missing.iter().take(3).cloned().collect::<Vec<_>>().join(", ")),
+            message: format!(
+                "{} shader files not found (may use embedded fallback): {}",
+                missing.len(),
+                missing
+                    .iter()
+                    .take(3)
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ),
         });
     } else {
         out.push(Diagnostic {
@@ -208,7 +227,7 @@ fn check_shader_files(out: &mut Vec<Diagnostic>) {
 /// Check schema versions are defined
 fn check_schema_versions(out: &mut Vec<Diagnostic>) {
     use crate::core::build_manifest;
-    
+
     let save_version = build_manifest::SCHEMA_VERSION_SAVE;
     let chunk_version = build_manifest::SCHEMA_VERSION_CHUNK;
     let entity_version = build_manifest::SCHEMA_VERSION_ENTITY;
@@ -233,7 +252,9 @@ fn check_schema_versions(out: &mut Vec<Diagnostic>) {
 
 fn check_identity_health(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
     let total_alive = ecs.alive.len();
-    let with_pid = ecs.alive.iter()
+    let with_pid = ecs
+        .alive
+        .iter()
         .filter(|&&e| ecs.identity.persistent_id_of(e).is_some())
         .count();
     let without_pid = total_alive - with_pid;
@@ -243,7 +264,10 @@ fn check_identity_health(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>)
         category: "identity",
         message: format!(
             "entities: {} alive, {} with PID, {} without, {} tombstones",
-            total_alive, with_pid, without_pid, ecs.identity.tombstone_count()
+            total_alive,
+            with_pid,
+            without_pid,
+            ecs.identity.tombstone_count()
         ),
     });
 
@@ -255,7 +279,8 @@ fn check_identity_health(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>)
                 category: "identity",
                 message: format!(
                     "{} entities ({:.0}%) lack PersistentEntityId — may break on chunk unload",
-                    without_pid, ratio * 100.0
+                    without_pid,
+                    ratio * 100.0
                 ),
             });
         }
@@ -275,7 +300,10 @@ fn check_authority_matrix(out: &mut Vec<Diagnostic>) {
             out.push(Diagnostic {
                 severity: DiagnosticSeverity::Warning,
                 category: "authority",
-                message: format!("violation: {} (expected {}, got {})", v.state_name, v.expected_owner, v.actual_writer),
+                message: format!(
+                    "violation: {} (expected {}, got {})",
+                    v.state_name, v.expected_owner, v.actual_writer
+                ),
             });
         }
     }
@@ -284,13 +312,22 @@ fn check_authority_matrix(out: &mut Vec<Diagnostic>) {
 #[cfg(feature = "networking")]
 fn check_net_markers(out: &mut Vec<Diagnostic>) {
     let markers = crate::network::net_markers::net_state_markers();
-    let unassigned = markers.iter()
+    let unassigned = markers
+        .iter()
         .filter(|m| m.authority == crate::network::net_markers::NetAuthority::Unassigned)
         .count();
     out.push(Diagnostic {
-        severity: if unassigned > 0 { DiagnosticSeverity::Warning } else { DiagnosticSeverity::Info },
+        severity: if unassigned > 0 {
+            DiagnosticSeverity::Warning
+        } else {
+            DiagnosticSeverity::Info
+        },
         category: "network",
-        message: format!("net state markers: {} total, {} unassigned", markers.len(), unassigned),
+        message: format!(
+            "net state markers: {} total, {} unassigned",
+            markers.len(),
+            unassigned
+        ),
     });
 }
 
@@ -305,7 +342,8 @@ fn check_net_markers(out: &mut Vec<Diagnostic>) {
 
 fn check_degradation_order(out: &mut Vec<Diagnostic>) {
     let order = crate::core::quality_governor::degradation_order();
-    let never_cut = order.iter()
+    let never_cut = order
+        .iter()
         .filter(|e| e.priority == crate::core::quality_governor::DegradationPriority::NeverCut)
         .count();
     out.push(Diagnostic {
@@ -313,7 +351,8 @@ fn check_degradation_order(out: &mut Vec<Diagnostic>) {
         category: "degradation",
         message: format!(
             "degradation order: {} entries, {} never-cut (collision, identity, save, nav)",
-            order.len(), never_cut
+            order.len(),
+            never_cut
         ),
     });
 }
@@ -323,7 +362,11 @@ fn check_derived_rebuild_status(out: &mut Vec<Diagnostic>) {
     let passed = tests.iter().filter(|t| t.passed).count();
     let failed = tests.iter().filter(|t| !t.passed).count();
     out.push(Diagnostic {
-        severity: if failed > 0 { DiagnosticSeverity::Error } else { DiagnosticSeverity::Info },
+        severity: if failed > 0 {
+            DiagnosticSeverity::Error
+        } else {
+            DiagnosticSeverity::Info
+        },
         category: "derived_state",
         message: format!("derived state rebuild: {}/{} passed", passed, tests.len()),
     });
@@ -340,43 +383,75 @@ fn check_event_bus_health(engine: &Engine, out: &mut Vec<Diagnostic>) {
     let dropped = engine.events.total_dropped();
     let channels = engine.events.channel_count();
     out.push(Diagnostic {
-        severity: if dropped > 0 { DiagnosticSeverity::Warning } else { DiagnosticSeverity::Info },
+        severity: if dropped > 0 {
+            DiagnosticSeverity::Warning
+        } else {
+            DiagnosticSeverity::Info
+        },
         category: "events",
-        message: format!("event bus: {} channels, {} total dropped events", channels, dropped),
+        message: format!(
+            "event bus: {} channels, {} total dropped events",
+            channels, dropped
+        ),
     });
 
-    if engine.resources.get::<crate::core::events::sim_bus::SimBus>().is_some() {
+    if engine
+        .resources
+        .get::<crate::core::events::sim_bus::SimBus>()
+        .is_some()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "events",
             message: "SimBus: wired".into(),
         });
     }
-    if engine.resources.get::<crate::core::events::debug_bus::DebugBus>().is_some() {
+    if engine
+        .resources
+        .get::<crate::core::events::debug_bus::DebugBus>()
+        .is_some()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "events",
             message: "DebugBus: wired".into(),
         });
     }
-    if engine.resources.get::<crate::core::events::render_bus::RenderBus>().is_some() {
+    if engine
+        .resources
+        .get::<crate::core::events::render_bus::RenderBus>()
+        .is_some()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "events",
             message: "RenderBus: wired".into(),
         });
     }
-    if let Some(tracer) = engine.resources.get::<crate::core::events::tracing_hooks::EventTracer>() {
+    if let Some(tracer) = engine
+        .resources
+        .get::<crate::core::events::tracing_hooks::EventTracer>()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "events",
-            message: format!("EventTracer: {}", if tracer.is_enabled() { "enabled" } else { "disabled" }),
+            message: format!(
+                "EventTracer: {}",
+                if tracer.is_enabled() {
+                    "enabled"
+                } else {
+                    "disabled"
+                }
+            ),
         });
     }
 }
 
 fn check_quality_governor_status(engine: &Engine, out: &mut Vec<Diagnostic>) {
-    if let Some(gov) = engine.resources.get::<crate::core::quality_governor::QualityGovernor>() {
+    if let Some(gov) = engine
+        .resources
+        .get::<crate::core::quality_governor::QualityGovernor>()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "low_spec",
@@ -392,20 +467,29 @@ fn check_quality_governor_status(engine: &Engine, out: &mut Vec<Diagnostic>) {
             message: "QualityGovernor not wired as resource".into(),
         });
     }
-    if let Some(budget) = engine.resources.get::<crate::core::budget_registry::BudgetRegistry>() {
+    if let Some(budget) = engine
+        .resources
+        .get::<crate::core::budget_registry::BudgetRegistry>()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "low_spec",
             message: format!(
                 "budget registry: {} entries, total {}us, {} overruns",
-                budget.entries().len(), budget.total_budget_us(), budget.total_overruns()
+                budget.entries().len(),
+                budget.total_budget_us(),
+                budget.total_overruns()
             ),
         });
     }
 }
 
 fn check_content_pipeline_readiness(engine: &Engine, out: &mut Vec<Diagnostic>) {
-    if engine.resources.get::<crate::content::prefabs::prefab_registry::PrefabRegistry>().is_some() {
+    if engine
+        .resources
+        .get::<crate::content::prefabs::prefab_registry::PrefabRegistry>()
+        .is_some()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "content",
@@ -424,10 +508,20 @@ fn check_plugin_runtime_alignment(engine: &Engine, out: &mut Vec<Diagnostic>) {
     let descriptors = engine.system_descriptors();
     let system_names: Vec<&str> = descriptors.iter().map(|d| d.name).collect();
     let expected = [
-        "SimulationSystem", "WorldTickSystem", "AiSystem", "PhysicsSystem",
-        "EconomySystem", "BallisticsTick", "DamageDispatch", "DestructionTick",
-        "TerrainDeformation", "NavDirtyTick", "OcclusionWire", "GoreWire",
-        "AnimationIntegration", "AudioIntegration",
+        "SimulationSystem",
+        "WorldTickSystem",
+        "AiSystem",
+        "PhysicsSystem",
+        "EconomySystem",
+        "BallisticsTick",
+        "DamageDispatch",
+        "DestructionTick",
+        "TerrainDeformation",
+        "NavDirtyTick",
+        "OcclusionWire",
+        "GoreWire",
+        "AnimationIntegration",
+        "AudioIntegration",
     ];
     for name in &expected {
         if !system_names.iter().any(|s| s.contains(name)) {
@@ -441,7 +535,11 @@ fn check_plugin_runtime_alignment(engine: &Engine, out: &mut Vec<Diagnostic>) {
     out.push(Diagnostic {
         severity: DiagnosticSeverity::Info,
         category: "plugin_alignment",
-        message: format!("{} systems registered, {} expected", system_names.len(), expected.len()),
+        message: format!(
+            "{} systems registered, {} expected",
+            system_names.len(),
+            expected.len()
+        ),
     });
 }
 
@@ -556,7 +654,10 @@ fn check_system_ordering(descriptors: &[SystemDescriptor], out: &mut Vec<Diagnos
                 out.push(Diagnostic {
                     severity: DiagnosticSeverity::Warning,
                     category: "ordering",
-                    message: format!("'{}' declares before '{}' which doesn't exist", desc.name, before),
+                    message: format!(
+                        "'{}' declares before '{}' which doesn't exist",
+                        desc.name, before
+                    ),
                 });
             }
         }
@@ -565,7 +666,10 @@ fn check_system_ordering(descriptors: &[SystemDescriptor], out: &mut Vec<Diagnos
                 out.push(Diagnostic {
                     severity: DiagnosticSeverity::Warning,
                     category: "ordering",
-                    message: format!("'{}' declares after '{}' which doesn't exist", desc.name, after),
+                    message: format!(
+                        "'{}' declares after '{}' which doesn't exist",
+                        desc.name, after
+                    ),
                 });
             }
         }
@@ -604,7 +708,9 @@ fn check_manifest_sanity(
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Warning,
             category: "manifest",
-            message: "Gore is enabled but destruction is disabled -- gore effects may not work correctly".to_string(),
+            message:
+                "Gore is enabled but destruction is disabled -- gore effects may not work correctly"
+                    .to_string(),
         });
     }
 
@@ -612,7 +718,10 @@ fn check_manifest_sanity(
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Warning,
             category: "manifest",
-            message: format!("Governor aggressiveness is very high ({:.1}) -- may over-throttle systems", manifest.governor_aggressiveness),
+            message: format!(
+                "Governor aggressiveness is very high ({:.1}) -- may over-throttle systems",
+                manifest.governor_aggressiveness
+            ),
         });
     }
 }
@@ -624,9 +733,15 @@ fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
     let mut without_sim_level = 0;
 
     for &e in &ecs.alive {
-        if ecs.get_kind(e).is_none() { without_kind += 1; }
-        if ecs.get_transform(e).is_none() { without_transform += 1; }
-        if ecs.get_sim_level(e).is_none() { without_sim_level += 1; }
+        if ecs.get_kind(e).is_none() {
+            without_kind += 1;
+        }
+        if ecs.get_transform(e).is_none() {
+            without_transform += 1;
+        }
+        if ecs.get_sim_level(e).is_none() {
+            without_sim_level += 1;
+        }
     }
 
     if without_kind > 0 {
@@ -647,7 +762,10 @@ fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "spawn_policy",
-            message: format!("{}/{} entities lack SimLevel (assigned next tick)", without_sim_level, total),
+            message: format!(
+                "{}/{} entities lack SimLevel (assigned next tick)",
+                without_sim_level, total
+            ),
         });
     }
     if without_kind == 0 && without_transform == 0 {
@@ -712,8 +830,7 @@ fn check_orphan_resolution(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic
                 }
             }
             Some(crate::world::components::EntityKind::Monster(_)) => {
-                let has_needs = ecs.get_needs(e).is_some()
-                    || ecs.get_ecosystem_needs(e).is_some();
+                let has_needs = ecs.get_needs(e).is_some() || ecs.get_ecosystem_needs(e).is_some();
                 if !has_needs {
                     orphaned_monsters += 1;
                 }
@@ -726,14 +843,20 @@ fn check_orphan_resolution(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Warning,
             category: "orphan_resolution",
-            message: format!("{} NPCs missing required needs/economy components", orphaned_npcs),
+            message: format!(
+                "{} NPCs missing required needs/economy components",
+                orphaned_npcs
+            ),
         });
     }
     if orphaned_monsters > 0 {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Warning,
             category: "orphan_resolution",
-            message: format!("{} monsters missing required needs components", orphaned_monsters),
+            message: format!(
+                "{} monsters missing required needs components",
+                orphaned_monsters
+            ),
         });
     }
     if orphaned_npcs == 0 && orphaned_monsters == 0 {
@@ -755,7 +878,11 @@ fn check_world_budget(engine: &Engine, out: &mut Vec<Diagnostic>) {
 
     let entity_over = entity_count > MAX_ENTITIES;
     let npc_over = npc_count > MAX_NPCS;
-    let severity = if entity_over || npc_over { DiagnosticSeverity::Warning } else { DiagnosticSeverity::Info };
+    let severity = if entity_over || npc_over {
+        DiagnosticSeverity::Warning
+    } else {
+        DiagnosticSeverity::Info
+    };
     out.push(Diagnostic {
         severity,
         category: "world_budget",
@@ -765,17 +892,27 @@ fn check_world_budget(engine: &Engine, out: &mut Vec<Diagnostic>) {
         ),
     });
 
-    if let Some(streamer) = engine.resources.get::<crate::world::streaming::WorldStreamer>() {
+    if let Some(streamer) = engine
+        .resources
+        .get::<crate::world::streaming::WorldStreamer>()
+    {
         let loaded = streamer.loaded_chunk_count();
         const MAX_LOADED_CHUNKS: usize = 25;
         out.push(Diagnostic {
-            severity: if loaded > MAX_LOADED_CHUNKS { DiagnosticSeverity::Warning } else { DiagnosticSeverity::Info },
+            severity: if loaded > MAX_LOADED_CHUNKS {
+                DiagnosticSeverity::Warning
+            } else {
+                DiagnosticSeverity::Info
+            },
             category: "world_budget",
             message: format!("loaded chunks: {} (budget: {})", loaded, MAX_LOADED_CHUNKS),
         });
     }
 
-    if let Some(gov) = engine.resources.get::<crate::core::quality_governor::QualityGovernor>() {
+    if let Some(gov) = engine
+        .resources
+        .get::<crate::core::quality_governor::QualityGovernor>()
+    {
         out.push(Diagnostic {
             severity: DiagnosticSeverity::Info,
             category: "world_budget",
@@ -805,7 +942,9 @@ fn check_low_spec_policies(descriptors: &[SystemDescriptor], out: &mut Vec<Diagn
         category: "low_spec",
         message: format!(
             "low-spec policies: {}/{} systems declared, {} NeverCut",
-            has_policy, descriptors.len(), never_cut
+            has_policy,
+            descriptors.len(),
+            never_cut
         ),
     });
 }
@@ -818,10 +957,23 @@ fn check_editor_truth(out: &mut Vec<Diagnostic>) {
     });
 
     let panel_names = [
-        "Inspector", "Overlays", "Profiler", "SceneHierarchy",
-        "EventMonitor", "TimeControls", "Console", "AssetBrowser",
-        "ReplayBrowser", "RuntimeTruth", "SimMetrics", "Persistence",
-        "WorldMap", "QuestBoard", "Economy", "CrashLog", "Doctor",
+        "Inspector",
+        "Overlays",
+        "Profiler",
+        "SceneHierarchy",
+        "EventMonitor",
+        "TimeControls",
+        "Console",
+        "AssetBrowser",
+        "ReplayBrowser",
+        "RuntimeTruth",
+        "SimMetrics",
+        "Persistence",
+        "WorldMap",
+        "QuestBoard",
+        "Economy",
+        "CrashLog",
+        "Doctor",
     ];
     out.push(Diagnostic {
         severity: DiagnosticSeverity::Info,
@@ -854,11 +1006,20 @@ pub fn generate_runtime_truth_json(engine: &Engine) -> String {
   "time": {{ "month": {}, "day": {}, "tick": {} }}
 }}"#,
         env!("CARGO_PKG_VERSION"),
-        entity_count, npc_count, monster_count,
-        pid_live, pid_total, pid_tombstones,
-        snap.total_npc_money, snap.average_desperation, snap.bandit_count,
-        report.error_count(), report.warning_count(),
-        engine.time.month, engine.time.day, engine.time.tick_count,
+        entity_count,
+        npc_count,
+        monster_count,
+        pid_live,
+        pid_total,
+        pid_tombstones,
+        snap.total_npc_money,
+        snap.average_desperation,
+        snap.bandit_count,
+        report.error_count(),
+        report.warning_count(),
+        engine.time.month,
+        engine.time.day,
+        engine.time.tick_count,
     )
 }
 

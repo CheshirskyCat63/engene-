@@ -35,7 +35,8 @@ impl ReplayBrowser {
             for entry in entries.flatten() {
                 let path = entry.path();
                 if path.extension().map_or(false, |ext| ext == "replay") {
-                    let name = path.file_stem()
+                    let name = path
+                        .file_stem()
                         .map(|s| s.to_string_lossy().to_string())
                         .unwrap_or_default();
                     self.recordings.push(ReplayEntry {
@@ -79,7 +80,10 @@ impl ReplayBrowser {
 
         for (i, entry) in self.recordings.iter().enumerate() {
             let selected = self.selected == Some(i);
-            let label = format!("{} ({} frames, seed={})", entry.name, entry.frame_count, entry.header.seed);
+            let label = format!(
+                "{} ({} frames, seed={})",
+                entry.name, entry.frame_count, entry.header.seed
+            );
             if ui.selectable_label(selected, &label).clicked() {
                 self.selected = Some(i);
             }
@@ -94,5 +98,7 @@ impl ReplayBrowser {
 }
 
 impl Default for ReplayBrowser {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

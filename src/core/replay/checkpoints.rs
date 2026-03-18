@@ -40,5 +40,7 @@ impl CheckpointManager {
         self.checkpoints.last()
     }
 
-    pub fn count(&self) -> usize { self.checkpoints.len() }
+    pub fn count(&self) -> usize {
+        self.checkpoints.len()
+    }
 }

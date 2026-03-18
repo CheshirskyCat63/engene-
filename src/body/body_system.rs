@@ -11,7 +11,9 @@ use crate::body::body_response::BodyPhysicalResponseCache as BodyResponseCache;
 use crate::body::body_store::BodyStateStore;
 use crate::body::death_pipeline::CorpseManager;
 use crate::core::ecs::Entity;
-use crate::core::events::canonical::{BodyZoneDamaged, CombatHit, EntityDied, GoreMeshSpawn, SoundTrigger, SoundTriggerKind};
+use crate::core::events::canonical::{
+    BodyZoneDamaged, CombatHit, EntityDied, GoreMeshSpawn, SoundTrigger, SoundTriggerKind,
+};
 use crate::core::mutation_policy::FixedTickContext;
 use crate::core::registry::Resources;
 use crate::core::system::EngineSystem;
@@ -149,7 +151,11 @@ fn apply_healing_to_body(body: &mut BodyState, target_aggregate: f32) {
         return;
     }
     let heal_amount = target_aggregate - current;
-    let total_restorable = body.zones.iter().map(|z| (100.0 - z.integrity).max(0.0)).sum::<f32>()
+    let total_restorable = body
+        .zones
+        .iter()
+        .map(|z| (100.0 - z.integrity).max(0.0))
+        .sum::<f32>()
         + (1.0 - body.blood_level).max(0.0) * 50.0;
     if total_restorable < 0.01 {
         return;
@@ -188,9 +194,9 @@ impl BodySystem {
         }
         match sim_level.map(|s| s.level) {
             Some(SimulationLevel::L0) => 0, // L0: hit reactions, full
-            Some(SimulationLevel::L1) => 1,   // L1: injury-aware motion
-            Some(SimulationLevel::L2) => 2,  // L2: procedural balance
-            Some(SimulationLevel::L3) => 3,  // L3: death/ragdoll
+            Some(SimulationLevel::L1) => 1, // L1: injury-aware motion
+            Some(SimulationLevel::L2) => 2, // L2: procedural balance
+            Some(SimulationLevel::L3) => 3, // L3: death/ragdoll
             None => 0,
         }
     }
@@ -302,13 +308,17 @@ impl EngineSystem for BodySystem {
         // 4. Sync PersonalNeeds <-> BodyState, apply pain->fear, compute modifiers
         let entities: Vec<Entity> = ctx.ecs.alive.clone();
         for entity in entities {
-let (transform_x, transform_y) = ctx
- .ecs
- .get_transform(entity)
- .map(|t| (t.x, t.y))
+            let (transform_x, transform_y) = ctx
+                .ecs
+                .get_transform(entity)
+                .map(|t| (t.x, t.y))
                 .unwrap_or((0.0, 0.0));
 
-            let obs_pos = ObserverPosition { x: obs.0, y: obs.1, z: obs.2 };
+            let obs_pos = ObserverPosition {
+                x: obs.0,
+                y: obs.1,
+                z: obs.2,
+            };
             let dist = Self::distance_to_observer(transform_x, transform_y, &obs_pos);
             let in_range = dist <= FULL_RESPONSE_RADIUS;
 
@@ -338,7 +348,8 @@ let (transform_x, transform_y) = ctx
                         pn.health = agg;
                         // Pain > 0.7 -> increase fear for flee (Contract 6: NPC AI)
                         if body.pain > PAIN_FLEE_THRESHOLD {
-                            pn.fear = (pn.fear + PAIN_TO_FEAR_RATE * (body.pain - PAIN_FLEE_THRESHOLD))
+                            pn.fear = (pn.fear
+                                + PAIN_TO_FEAR_RATE * (body.pain - PAIN_FLEE_THRESHOLD))
                                 .min(1.0);
                         }
                     }
@@ -380,15 +391,15 @@ let (transform_x, transform_y) = ctx
         for &entity in &ctx.ecs.alive {
             if let Some(pn) = ctx.ecs.get_needs(entity) {
                 if pn.health <= 0.0 {
-let pos = ctx
- .ecs
- .get_transform(entity)
- .map(|t| [t.x, t.y])
+                    let pos = ctx
+                        .ecs
+                        .get_transform(entity)
+                        .map(|t| [t.x, t.y])
                         .unwrap_or([0.0, 0.0]);
-let items: Vec<String> = ctx
- .ecs
- .get_inventory(entity)
- .map(|inv| inv.items.iter().map(|it| it.name.clone()).collect())
+                    let items: Vec<String> = ctx
+                        .ecs
+                        .get_inventory(entity)
+                        .map(|inv| inv.items.iter().map(|it| it.name.clone()).collect())
                         .unwrap_or_default();
                     dead_entities.push((entity, pos, items));
                 }

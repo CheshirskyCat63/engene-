@@ -52,7 +52,11 @@ impl Engine {
         }
     }
 
-    pub fn from_builder(systems: Vec<Box<dyn EngineSystem>>, resources: Resources, ecs: Ecs) -> Self {
+    pub fn from_builder(
+        systems: Vec<Box<dyn EngineSystem>>,
+        resources: Resources,
+        ecs: Ecs,
+    ) -> Self {
         Self {
             ecs,
             events: EventBus::new(),
@@ -91,11 +95,15 @@ impl Engine {
     }
 
     pub fn resource_grid(&self) -> &ResourceGrid {
-        self.resources.get::<ResourceGrid>().expect("ResourceGrid not found in Resources")
+        self.resources
+            .get::<ResourceGrid>()
+            .expect("ResourceGrid not found in Resources")
     }
 
     pub fn resource_grid_mut(&mut self) -> &mut ResourceGrid {
-        self.resources.get_mut::<ResourceGrid>().expect("ResourceGrid not found in Resources")
+        self.resources
+            .get_mut::<ResourceGrid>()
+            .expect("ResourceGrid not found in Resources")
     }
 
     pub fn register(&mut self, system: Box<dyn EngineSystem>) {
@@ -128,23 +136,20 @@ impl Engine {
 
         self.systems = systems;
         self.running = true;
-        println!(
-            "[engine] ready — {} entities alive",
-            self.ecs.alive.len()
-        );
+        println!("[engine] ready — {} entities alive", self.ecs.alive.len());
     }
 
     pub fn tick(&mut self, real_delta: f32) {
         puffin::profile_function!();
         let frame_start = std::time::Instant::now();
-        
+
         // Use parallel tick if enabled, otherwise sequential
         if self.use_parallel_tick {
             self.tick_parallel(real_delta);
         } else {
             self.tick_sequential(real_delta);
         }
-        
+
         self.finalize_frame(frame_start);
     }
 
@@ -152,7 +157,7 @@ impl Engine {
     pub fn tick_sequential(&mut self, real_delta: f32) {
         puffin::profile_function!();
         let frame_start = std::time::Instant::now();
-        
+
         self.tick_time_advance(real_delta);
         self.phase_pre_tick();
         self.phase_fixed_tick_sequential();
@@ -168,7 +173,7 @@ impl Engine {
     pub fn tick_parallel(&mut self, real_delta: f32) {
         puffin::profile_function!();
         let frame_start = std::time::Instant::now();
-        
+
         self.tick_time_advance(real_delta);
         self.phase_pre_tick();
         self.phase_fixed_tick_parallel();
@@ -223,7 +228,10 @@ impl Engine {
             };
             sys.fixed_tick(&mut ctx);
             let sys_elapsed_us = sys_start.elapsed().as_micros() as u32;
-            if let Some(perf) = ctx.resources.get_mut::<crate::core::perf::perf_budget::PerfBudgetManager>() {
+            if let Some(perf) = ctx
+                .resources
+                .get_mut::<crate::core::perf::perf_budget::PerfBudgetManager>()
+            {
                 perf.record(sys.name(), sys_elapsed_us);
             }
         }
@@ -253,7 +261,10 @@ impl Engine {
             };
             sys.fixed_tick(&mut ctx);
             let sys_elapsed_us = sys_start.elapsed().as_micros() as u32;
-            if let Some(perf) = ctx.resources.get_mut::<crate::core::perf::perf_budget::PerfBudgetManager>() {
+            if let Some(perf) = ctx
+                .resources
+                .get_mut::<crate::core::perf::perf_budget::PerfBudgetManager>()
+            {
                 perf.record(sys.name(), sys_elapsed_us);
             }
         }
@@ -294,15 +305,24 @@ impl Engine {
 
     fn finalize_frame(&mut self, frame_start: std::time::Instant) {
         let frame_elapsed_us = frame_start.elapsed().as_micros() as u32;
-        
-        if let Some(gov) = self.resources.get_mut::<crate::core::quality_governor::QualityGovernor>() {
+
+        if let Some(gov) = self
+            .resources
+            .get_mut::<crate::core::quality_governor::QualityGovernor>()
+        {
             gov.update(frame_elapsed_us);
         }
-        if let Some(budget) = self.resources.get_mut::<crate::core::budget_registry::BudgetRegistry>() {
+        if let Some(budget) = self
+            .resources
+            .get_mut::<crate::core::budget_registry::BudgetRegistry>()
+        {
             budget.record_measurement("total_frame", frame_elapsed_us);
         }
 
-        if let Some(tracer) = self.resources.get_mut::<crate::core::events::tracing_hooks::EventTracer>() {
+        if let Some(tracer) = self
+            .resources
+            .get_mut::<crate::core::events::tracing_hooks::EventTracer>()
+        {
             if tracer.is_enabled() {
                 let tick = self.time.tick_count;
                 let total_channels = self.events.channel_count();
@@ -317,13 +337,22 @@ impl Engine {
             }
         }
 
-        if let Some(sim_bus) = self.resources.get_mut::<crate::core::events::sim_bus::SimBus>() {
+        if let Some(sim_bus) = self
+            .resources
+            .get_mut::<crate::core::events::sim_bus::SimBus>()
+        {
             sim_bus.bus.clear();
         }
-        if let Some(render_bus) = self.resources.get_mut::<crate::core::events::render_bus::RenderBus>() {
+        if let Some(render_bus) = self
+            .resources
+            .get_mut::<crate::core::events::render_bus::RenderBus>()
+        {
             render_bus.bus.clear();
         }
-        if let Some(debug_bus) = self.resources.get_mut::<crate::core::events::debug_bus::DebugBus>() {
+        if let Some(debug_bus) = self
+            .resources
+            .get_mut::<crate::core::events::debug_bus::DebugBus>()
+        {
             debug_bus.bus.clear();
         }
 
@@ -340,7 +369,11 @@ impl Engine {
 
         for op in self.commands.take_component_ops() {
             match op {
-                crate::core::commands::ComponentOp::Add { entity, type_name, data } => {
+                crate::core::commands::ComponentOp::Add {
+                    entity,
+                    type_name,
+                    data,
+                } => {
                     self.apply_component_add(entity, type_name, data);
                 }
                 crate::core::commands::ComponentOp::Remove { entity, type_name } => {
@@ -360,13 +393,17 @@ impl Engine {
         self.commands.clear();
     }
 
-    fn apply_spawned_component(&mut self, entity: crate::core::ecs::Entity, data: Box<dyn std::any::Any + Send + Sync>) {
-        use std::any::TypeId;
-        use crate::world::components::*;
-        use crate::world::extension_components::*;
+    fn apply_spawned_component(
+        &mut self,
+        entity: crate::core::ecs::Entity,
+        data: Box<dyn std::any::Any + Send + Sync>,
+    ) {
         use crate::core::ai_emotions::Emotions;
         use crate::core::ai_memory::Memory;
         use crate::core::ai_plan::Plan;
+        use crate::world::components::*;
+        use crate::world::extension_components::*;
+        use std::any::TypeId;
 
         let tid = (*data).type_id();
         macro_rules! try_insert {
@@ -405,36 +442,89 @@ impl Engine {
         try_insert!(FactionMembership, faction_memberships);
     }
 
-    fn apply_component_add(&mut self, entity: crate::core::ecs::Entity, _type_name: &str, data: Box<dyn std::any::Any + Send + Sync>) {
+    fn apply_component_add(
+        &mut self,
+        entity: crate::core::ecs::Entity,
+        _type_name: &str,
+        data: Box<dyn std::any::Any + Send + Sync>,
+    ) {
         self.apply_spawned_component(entity, data);
     }
 
     fn apply_component_remove(&mut self, entity: crate::core::ecs::Entity, type_name: &str) {
         match type_name {
-            t if t.contains("Transform") => { self.ecs.transforms.remove(&entity); }
-            t if t.contains("EntityKind") => { self.ecs.kinds.remove(&entity); }
-            t if t.contains("Name") => { self.ecs.names.remove(&entity); }
-            t if t.contains("NpcTraits") => { self.ecs.npc_traits.remove(&entity); }
-            t if t.contains("MonsterTraits") => { self.ecs.monster_traits.remove(&entity); }
-            t if t.contains("PersonalNeeds") => { self.ecs.personal_needs.remove(&entity); }
-            t if t.contains("SocialNeeds") => { self.ecs.social_needs.remove(&entity); }
-            t if t.contains("EcosystemNeeds") => { self.ecs.ecosystem_needs.remove(&entity); }
-            t if t.contains("NpcEconomy") => { self.ecs.npc_economies.remove(&entity); }
-            t if t.contains("SimLevel") => { self.ecs.sim_levels.remove(&entity); }
-            t if t.contains("AiState") => { self.ecs.ai_states.remove(&entity); }
-            t if t.contains("Inventory") => { self.ecs.inventories.remove(&entity); }
-            t if t.contains("Plan") => { self.ecs.plans.remove(&entity); }
-            t if t.contains("Emotions") => { self.ecs.emotions.remove(&entity); }
-            t if t.contains("Memory") => { self.ecs.memories.remove(&entity); }
-            t if t.contains("LifeInfo") => { self.ecs.life_info.remove(&entity); }
-            t if t.contains("Flammable") => { self.ecs.flammables.remove(&entity); }
-            t if t.contains("ClothComponent") => { self.ecs.cloth_components.remove(&entity); }
-            t if t.contains("EntityTags") => { self.ecs.tags.remove(&entity); }
-            t if t.contains("Attributes") => { self.ecs.attributes.remove(&entity); }
-            t if t.contains("StatusEffects") => { self.ecs.status_effects.remove(&entity); }
-            t if t.contains("Blackboard") => { self.ecs.blackboard.remove(&entity); }
-            t if t.contains("EquipmentSlots") => { self.ecs.equipment.remove(&entity); }
-            t if t.contains("FactionMembership") => { self.ecs.faction_memberships.remove(&entity); }
+            t if t.contains("Transform") => {
+                self.ecs.transforms.remove(&entity);
+            }
+            t if t.contains("EntityKind") => {
+                self.ecs.kinds.remove(&entity);
+            }
+            t if t.contains("Name") => {
+                self.ecs.names.remove(&entity);
+            }
+            t if t.contains("NpcTraits") => {
+                self.ecs.npc_traits.remove(&entity);
+            }
+            t if t.contains("MonsterTraits") => {
+                self.ecs.monster_traits.remove(&entity);
+            }
+            t if t.contains("PersonalNeeds") => {
+                self.ecs.personal_needs.remove(&entity);
+            }
+            t if t.contains("SocialNeeds") => {
+                self.ecs.social_needs.remove(&entity);
+            }
+            t if t.contains("EcosystemNeeds") => {
+                self.ecs.ecosystem_needs.remove(&entity);
+            }
+            t if t.contains("NpcEconomy") => {
+                self.ecs.npc_economies.remove(&entity);
+            }
+            t if t.contains("SimLevel") => {
+                self.ecs.sim_levels.remove(&entity);
+            }
+            t if t.contains("AiState") => {
+                self.ecs.ai_states.remove(&entity);
+            }
+            t if t.contains("Inventory") => {
+                self.ecs.inventories.remove(&entity);
+            }
+            t if t.contains("Plan") => {
+                self.ecs.plans.remove(&entity);
+            }
+            t if t.contains("Emotions") => {
+                self.ecs.emotions.remove(&entity);
+            }
+            t if t.contains("Memory") => {
+                self.ecs.memories.remove(&entity);
+            }
+            t if t.contains("LifeInfo") => {
+                self.ecs.life_info.remove(&entity);
+            }
+            t if t.contains("Flammable") => {
+                self.ecs.flammables.remove(&entity);
+            }
+            t if t.contains("ClothComponent") => {
+                self.ecs.cloth_components.remove(&entity);
+            }
+            t if t.contains("EntityTags") => {
+                self.ecs.tags.remove(&entity);
+            }
+            t if t.contains("Attributes") => {
+                self.ecs.attributes.remove(&entity);
+            }
+            t if t.contains("StatusEffects") => {
+                self.ecs.status_effects.remove(&entity);
+            }
+            t if t.contains("Blackboard") => {
+                self.ecs.blackboard.remove(&entity);
+            }
+            t if t.contains("EquipmentSlots") => {
+                self.ecs.equipment.remove(&entity);
+            }
+            t if t.contains("FactionMembership") => {
+                self.ecs.faction_memberships.remove(&entity);
+            }
             _ => {}
         }
     }

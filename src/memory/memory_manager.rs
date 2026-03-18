@@ -2,9 +2,9 @@
 //!
 //! Provides per-subsystem memory tracking, budget enforcement, and leak detection.
 
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::collections::HashMap;
 use parking_lot::RwLock;
+use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// Subsystem identifier for memory tracking.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -73,7 +73,7 @@ impl SubsystemStats {
     fn record_alloc(&self, bytes: u64) {
         self.current_bytes.fetch_add(bytes, Ordering::Relaxed);
         self.alloc_count.fetch_add(1, Ordering::Relaxed);
-        
+
         // Update peak
         let current = self.current_bytes.load(Ordering::Relaxed);
         let mut peak = self.peak_bytes.load(Ordering::Relaxed);
@@ -137,7 +137,7 @@ impl MemoryManager {
         ] {
             subsystems.insert(ss, SubsystemStats::new(ss.default_budget()));
         }
-        
+
         Self {
             subsystems: RwLock::new(subsystems),
             total_allocated: AtomicU64::new(0),
@@ -151,7 +151,7 @@ impl MemoryManager {
             stats.record_alloc(bytes);
         }
         self.total_allocated.fetch_add(bytes, Ordering::Relaxed);
-        
+
         // Warn if over budget
         if let Some(stats) = self.subsystems.read().get(&subsystem) {
             if stats.is_over_budget() {
@@ -207,7 +207,7 @@ impl MemoryManager {
     pub fn report(&self) -> MemoryReport {
         let subsystems = self.subsystems.read();
         let mut entries = Vec::new();
-        
+
         for (ss, stats) in subsystems.iter() {
             entries.push(SubsystemReport {
                 subsystem: *ss,
@@ -218,7 +218,7 @@ impl MemoryManager {
                 free_count: stats.free_count.load(Ordering::Relaxed),
             });
         }
-        
+
         MemoryReport {
             total_allocated: self.total_allocated.load(Ordering::Relaxed),
             total_freed: self.total_freed.load(Ordering::Relaxed),
@@ -265,20 +265,25 @@ impl MemoryReport {
     /// Print the report to stdout.
     pub fn print(&self) {
         println!("=== Memory Report ===");
-        println!("Total: {} bytes allocated, {} bytes freed, {} bytes current",
-            self.total_allocated, self.total_freed, self.current_total);
+        println!(
+            "Total: {} bytes allocated, {} bytes freed, {} bytes current",
+            self.total_allocated, self.total_freed, self.current_total
+        );
         println!();
-        println!("{:12} {:>12} {:>12} {:>12} {:>8}", 
-            "Subsystem", "Current", "Peak", "Budget", "Usage%");
+        println!(
+            "{:12} {:>12} {:>12} {:>12} {:>8}",
+            "Subsystem", "Current", "Peak", "Budget", "Usage%"
+        );
         println!("{}", "-".repeat(60));
-        
+
         for entry in &self.subsystems {
             let usage_pct = if entry.budget_bytes > 0 {
                 entry.current_bytes as f64 / entry.budget_bytes as f64 * 100.0
             } else {
                 0.0
             };
-            println!("{:12} {:>12} {:>12} {:>12} {:>7.1}%",
+            println!(
+                "{:12} {:>12} {:>12} {:>12} {:>7.1}%",
                 entry.subsystem.name(),
                 entry.current_bytes,
                 entry.peak_bytes,
@@ -314,13 +319,13 @@ mod tests {
     #[test]
     fn test_basic_tracking() {
         let mm = MemoryManager::new();
-        
+
         mm.record_alloc(Subsystem::Physics, 1024);
         assert_eq!(mm.current_usage(Subsystem::Physics), 1024);
-        
+
         mm.record_alloc(Subsystem::Physics, 2048);
         assert_eq!(mm.current_usage(Subsystem::Physics), 3072);
-        
+
         mm.record_free(Subsystem::Physics, 1024);
         assert_eq!(mm.current_usage(Subsystem::Physics), 2048);
     }
@@ -329,10 +334,10 @@ mod tests {
     fn test_budget_warning() {
         let mm = MemoryManager::new();
         mm.set_budget(Subsystem::AI, 100);
-        
+
         mm.record_alloc(Subsystem::AI, 50);
         assert!(!mm.has_over_budget());
-        
+
         mm.record_alloc(Subsystem::AI, 100);
         assert!(mm.has_over_budget());
     }
@@ -342,7 +347,7 @@ mod tests {
         let mm = MemoryManager::new();
         mm.record_alloc(Subsystem::Graphics, 1024 * 1024);
         mm.record_alloc(Subsystem::AI, 512 * 1024);
-        
+
         let report = mm.report();
         assert_eq!(report.current_total, 1024 * 1024 + 512 * 1024);
         assert_eq!(report.subsystems.len(), 9);

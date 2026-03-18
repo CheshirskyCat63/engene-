@@ -1,29 +1,39 @@
-use crate::game::ai::emotions;
-use crate::game::ai::memory::*;
 use crate::core::ecs::{Ecs, Entity};
 use crate::core::persistent_id::PersistentEntityId;
+use crate::game::ai::emotions;
+use crate::game::ai::memory::*;
 use crate::world::components::*;
 
 const WITNESS_RADIUS: f32 = 120.0;
 
 /// Handle a kill event - record in memory and notify witnesses.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub fn on_kill(ecs: &mut Ecs, killer: Entity, victim: Entity, tick: u64) {
     let victim_kind = ecs.get_kind(victim).cloned();
     let killer_kind = ecs.get_kind(killer).cloned();
-    let loc = ecs.get_transform(victim).map(|t| (t.cell_x, t.cell_y)).unwrap_or((0, 0));
+    let loc = ecs
+        .get_transform(victim)
+        .map(|t| (t.cell_x, t.cell_y))
+        .unwrap_or((0, 0));
     let victim_pid = ecs.identity.persistent_id_of(victim);
     let killer_pid = ecs.identity.persistent_id_of(killer);
 
     if let Some(mem) = ecs.get_memory_mut(killer) {
         mem.record_event(EventMemory {
-            tick, kind: EventKind::KilledTarget, location: loc, other: victim_pid, emotional_impact: 0.3,
+            tick,
+            kind: EventKind::KilledTarget,
+            location: loc,
+            other: victim_pid,
+            emotional_impact: 0.3,
         });
         mem.mark_cell(loc.0, loc.1, CellTag::Food, 0.4);
         if let Some(vk) = &victim_kind {
             mem.record_lesson(Lesson {
-                action: LessonAction::SoloHunt, context: context_for_kind(vk), attempts: 1, successes: 1,
+                action: LessonAction::SoloHunt,
+                context: context_for_kind(vk),
+                attempts: 1,
+                successes: 1,
             });
         }
     }
@@ -34,7 +44,9 @@ pub fn on_kill(ecs: &mut Ecs, killer: Entity, victim: Entity, tick: u64) {
 
     let witnesses = entities_near(ecs, victim, WITNESS_RADIUS);
     for &w in &witnesses {
-        if w == killer { continue; }
+        if w == killer {
+            continue;
+        }
 
         let w_kind = ecs.get_kind(w).cloned();
         let is_ally_of_victim = same_faction(&w_kind, &victim_kind);
@@ -43,13 +55,17 @@ pub fn on_kill(ecs: &mut Ecs, killer: Entity, victim: Entity, tick: u64) {
         if is_ally_of_victim {
             if let Some(mem) = ecs.get_memory_mut(w) {
                 mem.record_event(EventMemory {
-                    tick, kind: EventKind::AllyDied, location: loc, other: victim_pid, emotional_impact: 0.5,
+                    tick,
+                    kind: EventKind::AllyDied,
+                    location: loc,
+                    other: victim_pid,
+                    emotional_impact: 0.5,
                 });
                 if let Some(killer_pid) = killer_pid {
-                mem.adjust_opinion(killer_pid, |op| {
-                    op.hostility = (op.hostility + 0.4).min(1.0);
-                    op.trust = (op.trust - 0.3).max(-1.0);
-                });
+                    mem.adjust_opinion(killer_pid, |op| {
+                        op.hostility = (op.hostility + 0.4).min(1.0);
+                        op.trust = (op.trust - 0.3).max(-1.0);
+                    });
                 }
                 mem.mark_cell(loc.0, loc.1, CellTag::Danger, 0.5);
             }
@@ -80,7 +96,10 @@ pub fn on_kill(ecs: &mut Ecs, killer: Entity, victim: Entity, tick: u64) {
 
 pub fn on_group_kill(ecs: &mut Ecs, group: &[Entity], victim: Entity, tick: u64) {
     let victim_kind = ecs.get_kind(victim).cloned();
-    let loc = ecs.get_transform(victim).map(|t| (t.cell_x, t.cell_y)).unwrap_or((0, 0));
+    let loc = ecs
+        .get_transform(victim)
+        .map(|t| (t.cell_x, t.cell_y))
+        .unwrap_or((0, 0));
 
     let victim_pid = ecs.identity.persistent_id_of(victim);
     let ally_pids: Vec<(Entity, Option<PersistentEntityId>)> = group
@@ -91,11 +110,18 @@ pub fn on_group_kill(ecs: &mut Ecs, group: &[Entity], victim: Entity, tick: u64)
     for &a in group {
         if let Some(mem) = ecs.get_memory_mut(a) {
             mem.record_event(EventMemory {
-                tick, kind: EventKind::GroupHuntWin, location: loc, other: victim_pid, emotional_impact: 0.4,
+                tick,
+                kind: EventKind::GroupHuntWin,
+                location: loc,
+                other: victim_pid,
+                emotional_impact: 0.4,
             });
             if let Some(vk) = &victim_kind {
                 mem.record_lesson(Lesson {
-                    action: LessonAction::GroupHunt, context: context_for_kind(vk), attempts: 1, successes: 1,
+                    action: LessonAction::GroupHunt,
+                    context: context_for_kind(vk),
+                    attempts: 1,
+                    successes: 1,
                 });
             }
             for (ally, ally_pid) in &ally_pids {
@@ -117,7 +143,9 @@ pub fn on_group_kill(ecs: &mut Ecs, group: &[Entity], victim: Entity, tick: u64)
 
     let witnesses = entities_near(ecs, victim, WITNESS_RADIUS);
     for &w in &witnesses {
-        if group.contains(&w) { continue; }
+        if group.contains(&w) {
+            continue;
+        }
         let w_kind = ecs.get_kind(w).cloned();
         if same_faction(&w_kind, &victim_kind) {
             let attacker_pids: Vec<_> = group
@@ -127,11 +155,17 @@ pub fn on_group_kill(ecs: &mut Ecs, group: &[Entity], victim: Entity, tick: u64)
                 .collect();
             if let Some(mem) = ecs.get_memory_mut(w) {
                 mem.record_event(EventMemory {
-                    tick, kind: EventKind::AllyDied, location: loc, other: victim_pid, emotional_impact: 0.5,
+                    tick,
+                    kind: EventKind::AllyDied,
+                    location: loc,
+                    other: victim_pid,
+                    emotional_impact: 0.5,
                 });
                 for attacker_pid in attacker_pids {
                     if let Some(attacker_pid) = attacker_pid {
-                        mem.adjust_opinion(attacker_pid, |op| { op.hostility = (op.hostility + 0.3).min(1.0); });
+                        mem.adjust_opinion(attacker_pid, |op| {
+                            op.hostility = (op.hostility + 0.3).min(1.0);
+                        });
                     }
                 }
                 mem.mark_cell(loc.0, loc.1, CellTag::Danger, 0.6);
@@ -145,11 +179,18 @@ pub fn on_group_kill(ecs: &mut Ecs, group: &[Entity], victim: Entity, tick: u64)
 }
 
 pub fn on_attacked(ecs: &mut Ecs, victim: Entity, attacker: Entity, tick: u64) {
-    let loc = ecs.get_transform(victim).map(|t| (t.cell_x, t.cell_y)).unwrap_or((0, 0));
+    let loc = ecs
+        .get_transform(victim)
+        .map(|t| (t.cell_x, t.cell_y))
+        .unwrap_or((0, 0));
     let attacker_pid = ecs.identity.persistent_id_of(attacker);
     if let Some(mem) = ecs.get_memory_mut(victim) {
         mem.record_event(EventMemory {
-            tick, kind: EventKind::WasAttacked, location: loc, other: attacker_pid, emotional_impact: 0.4,
+            tick,
+            kind: EventKind::WasAttacked,
+            location: loc,
+            other: attacker_pid,
+            emotional_impact: 0.4,
         });
         if let Some(attacker_pid) = attacker_pid {
             mem.adjust_opinion(attacker_pid, |op| {
@@ -167,11 +208,25 @@ pub fn on_attacked(ecs: &mut Ecs, victim: Entity, attacker: Entity, tick: u64) {
     }
 }
 
-pub fn on_hunt_failed(ecs: &mut Ecs, hunter: Entity, target_kind: Option<&EntityKind>, was_group: bool) {
+pub fn on_hunt_failed(
+    ecs: &mut Ecs,
+    hunter: Entity,
+    target_kind: Option<&EntityKind>,
+    was_group: bool,
+) {
     if let Some(mem) = ecs.get_memory_mut(hunter) {
-        let action = if was_group { LessonAction::GroupHunt } else { LessonAction::SoloHunt };
+        let action = if was_group {
+            LessonAction::GroupHunt
+        } else {
+            LessonAction::SoloHunt
+        };
         let ctx = target_kind.map_or(LessonContext::General, context_for_kind);
-        mem.record_lesson(Lesson { action, context: ctx, attempts: 1, successes: 0 });
+        mem.record_lesson(Lesson {
+            action,
+            context: ctx,
+            attempts: 1,
+            successes: 0,
+        });
     }
 }
 
@@ -181,9 +236,13 @@ pub fn communicate_danger(ecs: &mut Ecs, sender: Entity, radius: f32, danger_cel
 
     for &w in &witnesses {
         let w_kind = ecs.get_kind(w).cloned();
-        if !same_faction(&w_kind, &sender_kind) { continue; }
+        if !same_faction(&w_kind, &sender_kind) {
+            continue;
+        }
 
-        let trust = ecs.identity.persistent_id_of(sender)
+        let trust = ecs
+            .identity
+            .persistent_id_of(sender)
             .and_then(|pid| ecs.get_memory(w).and_then(|m| m.entities.get(&pid)))
             .map_or(0.0, |op| op.trust);
 
@@ -206,9 +265,13 @@ pub fn communicate_rally(ecs: &mut Ecs, caller: Entity, radius: f32) {
 
     for &w in &witnesses {
         let w_kind = ecs.get_kind(w).cloned();
-        if !same_faction(&w_kind, &caller_kind) { continue; }
+        if !same_faction(&w_kind, &caller_kind) {
+            continue;
+        }
 
-        let trust = ecs.identity.persistent_id_of(caller)
+        let trust = ecs
+            .identity
+            .persistent_id_of(caller)
             .and_then(|pid| ecs.get_memory(w).and_then(|m| m.entities.get(&pid)))
             .map_or(0.0, |op| op.trust);
         if trust > 0.0 {
@@ -228,11 +291,16 @@ fn entities_near(ecs: &Ecs, origin: Entity, radius: f32) -> Vec<Entity> {
         None => return Vec::new(),
     };
     let r2 = radius * radius;
-    ecs.alive.iter().copied().filter(|&e| {
-        e != origin && ecs.get_transform(e).map_or(false, |t| {
-            (t.x - ot.x).powi(2) + (t.y - ot.y).powi(2) < r2
+    ecs.alive
+        .iter()
+        .copied()
+        .filter(|&e| {
+            e != origin
+                && ecs
+                    .get_transform(e)
+                    .map_or(false, |t| (t.x - ot.x).powi(2) + (t.y - ot.y).powi(2) < r2)
         })
-    }).collect()
+        .collect()
 }
 
 fn same_faction(a: &Option<EntityKind>, b: &Option<EntityKind>) -> bool {

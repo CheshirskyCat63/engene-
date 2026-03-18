@@ -1,7 +1,6 @@
 /// Vegetation as World Semantics (Phase B.4 V1)
 /// Vegetation is not just render -- it has gameplay meaning.
-
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// How vegetation affects line of sight
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]

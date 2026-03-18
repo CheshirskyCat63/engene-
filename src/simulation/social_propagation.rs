@@ -46,8 +46,8 @@ impl CampMood {
 
     pub fn update(&mut self, dt: f32) {
         let death_penalty = self.recent_deaths as f32 * 0.05;
-        self.morale = (self.morale + self.prosperity * 0.01 * dt - death_penalty * dt)
-            .clamp(0.0, 1.0);
+        self.morale =
+            (self.morale + self.prosperity * 0.01 * dt - death_penalty * dt).clamp(0.0, 1.0);
         self.fear_level = (self.fear_level - 0.01 * dt).clamp(0.0, 1.0);
         if self.recent_deaths > 0 {
             self.fear_level = (self.fear_level + 0.1).clamp(0.0, 1.0);
@@ -108,9 +108,8 @@ impl SocialPropagation {
         for mood in self.camp_moods.values_mut() {
             mood.update(dt);
         }
-        self.rumors.retain(|r| {
-            current_tick.saturating_sub(r.origin_tick) < 72_000 && r.credibility > 0.1
-        });
+        self.rumors
+            .retain(|r| current_tick.saturating_sub(r.origin_tick) < 72_000 && r.credibility > 0.1);
         for rumor in &mut self.rumors {
             rumor.credibility *= 0.999;
         }
@@ -175,8 +174,8 @@ impl RegionalPressureSystem {
             danger_level: 0.0,
             bounties: Vec::new(),
         });
-        pressure.danger_level = (monster_count as f32 * 0.1 + recent_deaths as f32 * 0.2)
-            .clamp(0.0, 1.0);
+        pressure.danger_level =
+            (monster_count as f32 * 0.1 + recent_deaths as f32 * 0.2).clamp(0.0, 1.0);
     }
 
     pub fn generate_bounty(

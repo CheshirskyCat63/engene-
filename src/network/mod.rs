@@ -7,7 +7,7 @@
 //! This module is explicitly excluded from v1.0 scope.
 //! All networking code is gated behind `#[cfg(feature = "networking")]`.
 //!
-//! For post-1.0 roadmap, see Phase F in ROADMAP.md.
+//! For post-1.0 roadmap, see docs/canonical/ENGENE_2_0_ROADMAP.md.
 
 #[cfg(feature = "networking")]
 pub mod client;

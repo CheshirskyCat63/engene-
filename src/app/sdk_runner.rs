@@ -11,6 +11,8 @@ use winit::window::{CursorGrabMode, Window};
 
 use crate::app::runtime_assembly::RuntimeAssembly;
 use crate::audio::audio::AudioEngine;
+use crate::core::build_manifest::BuildManifest;
+use crate::core::crash_telemetry;
 use crate::core::engine::Engine;
 use crate::graphics::camera::FlyCamera;
 use crate::graphics::lod::{LodConfig, LodLevel};
@@ -27,8 +29,6 @@ use crate::world::heightmap::Heightmap;
 use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
 use crate::world::streaming::WorldStreamer;
 use crate::world::world::WorldGrid;
-use crate::core::build_manifest::BuildManifest;
-use crate::core::crash_telemetry;
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -239,7 +239,10 @@ impl ApplicationHandler for SdkApp {
                 }
                 self.frame += 1;
 
-                if let Some(am) = self.engine.resources.get_mut::<std::sync::Mutex<AssetManager>>()
+                if let Some(am) = self
+                    .engine
+                    .resources
+                    .get_mut::<std::sync::Mutex<AssetManager>>()
                 {
                     if let Ok(mut am) = am.lock() {
                         am.poll();

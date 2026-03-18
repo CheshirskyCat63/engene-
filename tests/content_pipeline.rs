@@ -1,6 +1,6 @@
 #[test]
 fn import_pipeline_register_and_track() {
-    use engene::content::import::asset_pipeline::{ImportPipeline, AssetType};
+    use engene::content::import::asset_pipeline::{AssetType, ImportPipeline};
     use std::path::Path;
 
     let mut pipeline = ImportPipeline::new(4);
@@ -14,7 +14,7 @@ fn import_pipeline_register_and_track() {
 
 #[test]
 fn import_pipeline_dependencies() {
-    use engene::content::import::asset_pipeline::{ImportPipeline, AssetType};
+    use engene::content::import::asset_pipeline::{AssetType, ImportPipeline};
     use std::path::Path;
 
     let mut pipeline = ImportPipeline::new(2);
@@ -129,7 +129,11 @@ fn content_validator_missing_base() {
         name: "orphan".to_string(),
         base: Some("nonexistent".to_string()),
         spec_variant: None,
-        root: PrefabEntity { name: None, components: vec![], children: vec![] },
+        root: PrefabEntity {
+            name: None,
+            components: vec![],
+            children: vec![],
+        },
         tags: vec![],
     });
 
@@ -164,8 +168,8 @@ fn chunk_package_priority_ordering() {
 
 #[test]
 fn io_budget_streamer_respects_limits() {
+    use engene::world::chunk_package::{BundleKind, StreamPriority};
     use engene::world::io_budget::*;
-    use engene::world::chunk_package::{StreamPriority, BundleKind};
     use engene::world::streaming::ChunkCoord;
 
     let budget = IoBudget {

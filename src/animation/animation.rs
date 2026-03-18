@@ -159,7 +159,8 @@ impl AnimationPlayer {
             self.time = self.time.min(clip.duration);
         }
 
-        self.local_transforms.resize(skeleton.joint_count(), Mat4::IDENTITY);
+        self.local_transforms
+            .resize(skeleton.joint_count(), Mat4::IDENTITY);
         for i in 0..skeleton.joint_count() {
             self.local_transforms[i] = skeleton.joints[i].local_bind_transform;
         }

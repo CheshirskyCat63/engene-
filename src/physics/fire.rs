@@ -163,8 +163,8 @@ impl FireGrid {
                     }
                     FireState::Burning => {
                         cell.fuel -= BURN_RATE * cell.flammability * dt;
-                        cell.temperature = (IGNITION_TEMP + HEAT_OUTPUT * cell.flammability)
-                            .max(cell.temperature);
+                        cell.temperature =
+                            (IGNITION_TEMP + HEAT_OUTPUT * cell.flammability).max(cell.temperature);
                         if cell.fuel <= 0.0 {
                             cell.fuel = 0.0;
                             cell.state = FireState::BurnedOut;
@@ -209,7 +209,8 @@ impl FireGrid {
                             && neighbor.fuel > 0.0
                             && neighbor.flammability > 0.0
                         {
-                            let roll = (x.wrapping_mul(73) ^ y.wrapping_mul(179)
+                            let roll = (x.wrapping_mul(73)
+                                ^ y.wrapping_mul(179)
                                 ^ self.tick_counter as u32)
                                 as f32
                                 / u32::MAX as f32;

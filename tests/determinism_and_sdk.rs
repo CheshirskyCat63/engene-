@@ -1,7 +1,7 @@
 #[test]
 fn determinism_audit_detects_headless_issue() {
     use engene::core::determinism_audit::audit_determinism_tiers;
-    use engene::core::system_descriptor::{SystemDescriptor, DeterminismTier};
+    use engene::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 
     let desc = SystemDescriptor::new("Sim")
         .with_determinism(DeterminismTier::Hard)
@@ -15,7 +15,7 @@ fn determinism_audit_detects_headless_issue() {
 #[test]
 fn determinism_audit_clean_report() {
     use engene::core::determinism_audit::audit_determinism_tiers;
-    use engene::core::system_descriptor::{SystemDescriptor, DeterminismTier};
+    use engene::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 
     let descriptors = vec![
         SystemDescriptor::new("Physics")
@@ -47,14 +47,12 @@ fn serialization_registry_validates() {
         version: SchemaVersion::new(1, 0, 0),
         authority: DataAuthority::Authoritative,
         deterministic: true,
-        fields: vec![
-            FieldSchema {
-                name: "position".to_string(),
-                type_name: "Vec3".to_string(),
-                authority: DataAuthority::Authoritative,
-                deterministic: true,
-            },
-        ],
+        fields: vec![FieldSchema {
+            name: "position".to_string(),
+            type_name: "Vec3".to_string(),
+            authority: DataAuthority::Authoritative,
+            deterministic: true,
+        }],
     });
 
     let issues = reg.validate_schemas();
@@ -77,7 +75,10 @@ fn serialization_detects_contradictions() {
     });
 
     let issues = reg.validate_schemas();
-    assert!(!issues.is_empty(), "deterministic + non-authoritative is contradictory");
+    assert!(
+        !issues.is_empty(),
+        "deterministic + non-authoritative is contradictory"
+    );
 }
 
 #[test]
@@ -170,8 +171,14 @@ fn sdk_boundary_layers() {
 
     let engine_sys = sdk.engine_systems();
     let game_sys = sdk.game_systems();
-    assert!(engine_sys.iter().any(|s| s.name == "Physics"), "Physics should be in engine layer");
-    assert!(game_sys.iter().any(|s| s.name == "QuestSystem"), "QuestSystem should be in game layer");
+    assert!(
+        engine_sys.iter().any(|s| s.name == "Physics"),
+        "Physics should be in engine layer"
+    );
+    assert!(
+        game_sys.iter().any(|s| s.name == "QuestSystem"),
+        "QuestSystem should be in game layer"
+    );
 }
 
 #[test]
@@ -189,7 +196,8 @@ fn scene_hierarchy_filter() {
 
     hierarchy.set_filter("player");
     let root = hierarchy.root_entities();
-    let visible_count = root.iter()
+    let visible_count = root
+        .iter()
         .filter(|&&id| hierarchy.get_node(id).map_or(false, |n| n.visible))
         .count();
     assert!(visible_count >= 1);
@@ -218,8 +226,22 @@ fn asset_browser_filter() {
 
     let mut browser = AssetBrowser::new();
     browser.populate(vec![
-        AssetEntry { id: 1, name: "wall.obj".into(), asset_type: "Model".into(), size_bytes: 1000, path: "/assets/wall.obj".into(), cooked: true },
-        AssetEntry { id: 2, name: "brick.png".into(), asset_type: "Texture".into(), size_bytes: 2000, path: "/assets/brick.png".into(), cooked: false },
+        AssetEntry {
+            id: 1,
+            name: "wall.obj".into(),
+            asset_type: "Model".into(),
+            size_bytes: 1000,
+            path: "/assets/wall.obj".into(),
+            cooked: true,
+        },
+        AssetEntry {
+            id: 2,
+            name: "brick.png".into(),
+            asset_type: "Texture".into(),
+            size_bytes: 2000,
+            path: "/assets/brick.png".into(),
+            cooked: false,
+        },
     ]);
 
     browser.set_filter_type(Some("Model".to_string()));
@@ -232,7 +254,7 @@ fn asset_browser_filter() {
 
 #[test]
 fn replay_recorder_and_player() {
-    use engene::core::replay::recorder::{ReplayRecorder, ReplayPlayer};
+    use engene::core::replay::recorder::{ReplayPlayer, ReplayRecorder};
 
     let mut recorder = ReplayRecorder::new(42, 60.0);
     recorder.start();
@@ -257,12 +279,27 @@ fn replay_recorder_and_player() {
 
 #[test]
 fn checkpoint_nearest_before() {
-    use engene::core::replay::checkpoints::{CheckpointManager, Checkpoint};
+    use engene::core::replay::checkpoints::{Checkpoint, CheckpointManager};
 
     let mut mgr = CheckpointManager::new(100, 5);
-    mgr.save(Checkpoint { tick: 0, ecs_snapshot: vec![], resource_snapshot: vec![], event_state: vec![] });
-    mgr.save(Checkpoint { tick: 100, ecs_snapshot: vec![], resource_snapshot: vec![], event_state: vec![] });
-    mgr.save(Checkpoint { tick: 200, ecs_snapshot: vec![], resource_snapshot: vec![], event_state: vec![] });
+    mgr.save(Checkpoint {
+        tick: 0,
+        ecs_snapshot: vec![],
+        resource_snapshot: vec![],
+        event_state: vec![],
+    });
+    mgr.save(Checkpoint {
+        tick: 100,
+        ecs_snapshot: vec![],
+        resource_snapshot: vec![],
+        event_state: vec![],
+    });
+    mgr.save(Checkpoint {
+        tick: 200,
+        ecs_snapshot: vec![],
+        resource_snapshot: vec![],
+        event_state: vec![],
+    });
 
     let cp = mgr.nearest_before(150).unwrap();
     assert_eq!(cp.tick, 100);
@@ -304,7 +341,7 @@ fn sdk_plugin_contract_registration() {
 
 #[test]
 fn sdk_system_contract_registration() {
-    use engene::core::sdk::{EngineSDK, SystemContract, BoundaryLayer};
+    use engene::core::sdk::{BoundaryLayer, EngineSDK, SystemContract};
     let mut sdk = EngineSDK::new();
     let before = sdk.system_count();
     sdk.register_system(SystemContract {
@@ -315,18 +352,25 @@ fn sdk_system_contract_registration() {
         headless_compatible: true,
         public_api: vec!["apply_force".into(), "set_velocity".into()],
     });
-    assert_eq!(sdk.system_count(), before + 1, "registering a new system should increase count by 1");
+    assert_eq!(
+        sdk.system_count(),
+        before + 1,
+        "registering a new system should increase count by 1"
+    );
 }
 
 // ===== Block 10: Low-Spec Discipline Tests =====
 
 #[test]
 fn runtime_config_profiles_all_valid() {
-    use engene::core::runtime_config::{RuntimeProfile, ProfileBudgets};
+    use engene::core::runtime_config::{ProfileBudgets, RuntimeProfile};
     for profile in [
-        RuntimeProfile::Shipping, RuntimeProfile::LowSpec,
-        RuntimeProfile::DebugTools, RuntimeProfile::HeadlessServer,
-        RuntimeProfile::Sandbox, RuntimeProfile::VerticalSlice,
+        RuntimeProfile::Shipping,
+        RuntimeProfile::LowSpec,
+        RuntimeProfile::DebugTools,
+        RuntimeProfile::HeadlessServer,
+        RuntimeProfile::Sandbox,
+        RuntimeProfile::VerticalSlice,
     ] {
         let budgets = ProfileBudgets::for_profile(&profile);
         assert!(budgets.ai_think_budget_ms >= 0.0);
@@ -343,13 +387,16 @@ fn quality_governor_responds_to_pressure() {
         gov.update(50_000);
     }
     use engene::core::quality_governor::PressureLevel;
-    assert_ne!(gov.pressure_level, PressureLevel::Normal,
-        "governor should detect pressure after many overruns");
+    assert_ne!(
+        gov.pressure_level,
+        PressureLevel::Normal,
+        "governor should detect pressure after many overruns"
+    );
 }
 
 #[test]
 fn budget_registry_tracks_overruns() {
-    use engene::core::budget_registry::{BudgetRegistry, BudgetEntry};
+    use engene::core::budget_registry::{BudgetEntry, BudgetRegistry};
     let mut reg = BudgetRegistry::new();
     reg.register(BudgetEntry {
         phase_name: "test_phase",
@@ -369,8 +416,14 @@ fn budget_registry_tracks_overruns() {
 fn sdk_default_contracts_populated() {
     use engene::core::sdk::EngineSDK;
     let sdk = EngineSDK::new();
-    assert!(sdk.system_count() >= 16, "SDK should auto-populate at least 16 system contracts");
-    assert!(sdk.plugin_count() == 0, "plugins are registered at runtime, not at construction");
+    assert!(
+        sdk.system_count() >= 16,
+        "SDK should auto-populate at least 16 system contracts"
+    );
+    assert!(
+        sdk.plugin_count() == 0,
+        "plugins are registered at runtime, not at construction"
+    );
 }
 
 #[test]
@@ -378,15 +431,25 @@ fn sdk_contracts_validate_clean() {
     use engene::core::sdk::EngineSDK;
     let sdk = EngineSDK::new();
     let issues = sdk.validate_contracts();
-    assert!(issues.is_empty(), "default SDK contracts should validate cleanly: {:?}", issues);
+    assert!(
+        issues.is_empty(),
+        "default SDK contracts should validate cleanly: {:?}",
+        issues
+    );
 }
 
 #[test]
 fn sdk_boundary_layers_populated() {
     use engene::core::sdk::EngineSDK;
     let sdk = EngineSDK::new();
-    assert!(!sdk.engine_systems().is_empty(), "engine boundary should have systems");
-    assert!(!sdk.game_systems().is_empty(), "game boundary should have systems");
+    assert!(
+        !sdk.engine_systems().is_empty(),
+        "engine boundary should have systems"
+    );
+    assert!(
+        !sdk.game_systems().is_empty(),
+        "game boundary should have systems"
+    );
 }
 
 #[test]

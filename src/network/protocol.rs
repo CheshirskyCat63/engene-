@@ -1,6 +1,6 @@
-use serde::{Deserialize, Serialize};
 use crate::core::ecs::Entity;
 use crate::memory::component_delta::ComponentDelta;
+use serde::{Deserialize, Serialize};
 
 pub const CHANNEL_RELIABLE: u8 = 0;
 pub const CHANNEL_UNRELIABLE: u8 = 1;

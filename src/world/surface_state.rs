@@ -86,7 +86,13 @@ impl SurfaceStateStore {
         }
     }
 
-    pub fn apply_mask_delta(&mut self, cell_x: u32, cell_z: u32, mask: SurfaceMaskType, delta: f32) {
+    pub fn apply_mask_delta(
+        &mut self,
+        cell_x: u32,
+        cell_z: u32,
+        mask: SurfaceMaskType,
+        delta: f32,
+    ) {
         let key = (cell_x, cell_z);
         let patch = self.active_patches.entry(key).or_insert_with(|| {
             self.eviction_queue.push_back(key);
@@ -95,8 +101,12 @@ impl SurfaceStateStore {
 
         match mask {
             SurfaceMaskType::Dirt => patch.dirt_mask = (patch.dirt_mask + delta).clamp(0.0, 1.0),
-            SurfaceMaskType::Wetness => patch.wetness_mask = (patch.wetness_mask + delta).clamp(0.0, 1.0),
-            SurfaceMaskType::Scorch => patch.scorch_mask = (patch.scorch_mask + delta).clamp(0.0, 1.0),
+            SurfaceMaskType::Wetness => {
+                patch.wetness_mask = (patch.wetness_mask + delta).clamp(0.0, 1.0)
+            }
+            SurfaceMaskType::Scorch => {
+                patch.scorch_mask = (patch.scorch_mask + delta).clamp(0.0, 1.0)
+            }
             SurfaceMaskType::Wear => patch.wear_mask = (patch.wear_mask + delta).clamp(0.0, 1.0),
             SurfaceMaskType::BloodStain => {
                 patch.blood_stain = (patch.blood_stain + delta).clamp(0.0, 1.0);
@@ -165,7 +175,9 @@ impl SurfaceStateStore {
     }
 
     fn enforce_memory_cap(&mut self) {
-        while self.active_patches.len() > MAX_ACTIVE_PATCHES || self.estimated_memory() > MAX_MEMORY_BYTES {
+        while self.active_patches.len() > MAX_ACTIVE_PATCHES
+            || self.estimated_memory() > MAX_MEMORY_BYTES
+        {
             if let Some(key) = self.eviction_queue.pop_front() {
                 if let Some(full) = self.active_patches.remove(&key) {
                     let compressed = CompressedSurfacePatch::from_full(&full);

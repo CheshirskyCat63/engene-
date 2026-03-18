@@ -11,13 +11,13 @@
 //! - `components` - production, ECS components (split into sub-modules)
 //! - `surface_db`, `material_bridge` - partial, material truth
 
-pub mod authoring;
 pub mod authored_sets;
+pub mod authoring;
 pub mod biome;
 pub mod cell;
-pub mod chunk_schema;
 pub mod chunk_package;
 pub mod chunk_persistence;
+pub mod chunk_schema;
 pub mod components;
 pub mod damage_profiles;
 pub mod extension_components;

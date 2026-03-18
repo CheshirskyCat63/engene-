@@ -43,12 +43,12 @@ pub struct StormCell {
 }
 
 /// Cumulus: 5-15 min, cloud top grows to 3000m
-const CUMULUS_DURATION_MIN: f32 = 300.0;  // 5 min
-const CUMULUS_DURATION_MAX: f32 = 900.0;  // 15 min
+const CUMULUS_DURATION_MIN: f32 = 300.0; // 5 min
+const CUMULUS_DURATION_MAX: f32 = 900.0; // 15 min
 const CUMULUS_TOP_TARGET: f32 = 3000.0;
 
 /// Towering cumulus: 15-30 min, cloud top grows to 8000m
-const TOWERING_DURATION_MIN: f32 = 900.0;  // 15 min
+const TOWERING_DURATION_MIN: f32 = 900.0; // 15 min
 const TOWERING_DURATION_MAX: f32 = 1800.0; // 30 min
 const TOWERING_TOP_TARGET: f32 = 8000.0;
 
@@ -63,7 +63,9 @@ fn lerp(a: f32, b: f32, t: f32) -> f32 {
 }
 
 fn seeded_f32(seed: &mut u64, min: f32, max: f32) -> f32 {
-    *seed = seed.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+    *seed = seed
+        .wrapping_mul(6364136223846793005)
+        .wrapping_add(1442695040888963407);
     let t = ((*seed >> 32) as u32 as f32) / (u32::MAX as f32);
     lerp(min, max, t)
 }
@@ -79,7 +81,11 @@ impl StormCell {
             temperature: 15.0,
             pressure: 1010.0,
             updraft: 3.0,
-            wind_vector: Vec3::new(seeded_f32(&mut s, -5.0, 5.0), 0.0, seeded_f32(&mut s, -5.0, 5.0)),
+            wind_vector: Vec3::new(
+                seeded_f32(&mut s, -5.0, 5.0),
+                0.0,
+                seeded_f32(&mut s, -5.0, 5.0),
+            ),
             lifecycle_stage: StormStage::Cumulus,
             stage_timer: 0.0,
             cloud_base: 1500.0,
@@ -95,19 +101,28 @@ impl StormCell {
 
         match self.lifecycle_stage {
             StormStage::Cumulus => {
-                let duration = lerp(CUMULUS_DURATION_MIN, CUMULUS_DURATION_MAX, (self.seed % 100) as f32 / 100.0);
+                let duration = lerp(
+                    CUMULUS_DURATION_MIN,
+                    CUMULUS_DURATION_MAX,
+                    (self.seed % 100) as f32 / 100.0,
+                );
                 self.radius = (self.radius + dt * 50.0).min(8000.0);
                 self.cloud_top = (self.cloud_top + dt * 2.0).min(CUMULUS_TOP_TARGET);
                 self.intensity = (self.intensity + dt * 0.001).min(0.5);
                 self.updraft = (self.updraft + dt * 0.01).min(8.0);
 
-                if self.stage_timer >= duration || (self.updraft > 5.0 && self.cloud_top >= 2800.0) {
+                if self.stage_timer >= duration || (self.updraft > 5.0 && self.cloud_top >= 2800.0)
+                {
                     self.lifecycle_stage = StormStage::ToweringCumulus;
                     self.stage_timer = 0.0;
                 }
             }
             StormStage::ToweringCumulus => {
-                let duration = lerp(TOWERING_DURATION_MIN, TOWERING_DURATION_MAX, (self.seed % 100) as f32 / 100.0);
+                let duration = lerp(
+                    TOWERING_DURATION_MIN,
+                    TOWERING_DURATION_MAX,
+                    (self.seed % 100) as f32 / 100.0,
+                );
                 self.radius = (self.radius + dt * 100.0).min(25000.0);
                 self.cloud_top = (self.cloud_top + dt * 8.0).min(TOWERING_TOP_TARGET);
                 self.intensity = (self.intensity + dt * 0.002).min(0.8);
@@ -116,13 +131,25 @@ impl StormCell {
                 if self.stage_timer >= duration || self.cloud_top >= 7500.0 {
                     self.lifecycle_stage = StormStage::Cumulonimbus;
                     self.stage_timer = 0.0;
-                    let target_top = lerp(CUMULONIMBUS_TOP_MIN, CUMULONIMBUS_TOP_MAX, ((self.seed >> 8) % 100) as f32 / 100.0);
+                    let target_top = lerp(
+                        CUMULONIMBUS_TOP_MIN,
+                        CUMULONIMBUS_TOP_MAX,
+                        ((self.seed >> 8) % 100) as f32 / 100.0,
+                    );
                     self.cloud_top = self.cloud_top.min(target_top);
                 }
             }
             StormStage::Cumulonimbus => {
-                let duration = lerp(CUMULONIMBUS_DURATION_MIN, CUMULONIMBUS_DURATION_MAX, (self.seed % 100) as f32 / 100.0);
-                let target_top = lerp(CUMULONIMBUS_TOP_MIN, CUMULONIMBUS_TOP_MAX, ((self.seed >> 8) % 100) as f32 / 100.0);
+                let duration = lerp(
+                    CUMULONIMBUS_DURATION_MIN,
+                    CUMULONIMBUS_DURATION_MAX,
+                    (self.seed % 100) as f32 / 100.0,
+                );
+                let target_top = lerp(
+                    CUMULONIMBUS_TOP_MIN,
+                    CUMULONIMBUS_TOP_MAX,
+                    ((self.seed >> 8) % 100) as f32 / 100.0,
+                );
                 self.radius = (self.radius + dt * 30.0).min(50000.0);
                 self.cloud_top = (self.cloud_top + dt * 3.0).min(target_top);
                 self.cloud_base = 1000.0;

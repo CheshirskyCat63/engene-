@@ -21,12 +21,11 @@
 
 use crate::core::ecs::Ecs;
 use crate::world::components::*;
-
-/// Trait for filtering entities in queries.
-pub trait QueryFilter {
-    /// Returns true if the entity matches the filter criteria.
-    fn matches(&self, ecs: &Ecs, entity: u64) -> bool;
-}
+use engine_ecs::query_contract::{
+    collect_matching, count_matching, EntityMatcher, QueryFilter as GenericQueryFilter,
+    QueryIter as GenericQueryIter,
+};
+pub use engine_ecs::query_contract::{And, ReadComponent, WriteComponent};
 
 // ============================================================================
 // BASIC FILTERS
@@ -34,7 +33,7 @@ pub trait QueryFilter {
 
 /// Filter that matches entities with a specific component type.
 pub struct WithTransform;
-impl QueryFilter for WithTransform {
+impl EntityMatcher<Ecs> for WithTransform {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.transforms.contains_key(&entity)
     }
@@ -42,7 +41,7 @@ impl QueryFilter for WithTransform {
 
 /// Filter that matches entities with EntityKind component.
 pub struct WithKind;
-impl QueryFilter for WithKind {
+impl EntityMatcher<Ecs> for WithKind {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.kinds.contains_key(&entity)
     }
@@ -50,7 +49,7 @@ impl QueryFilter for WithKind {
 
 /// Filter that matches NPC entities.
 pub struct WithNpc;
-impl QueryFilter for WithNpc {
+impl EntityMatcher<Ecs> for WithNpc {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         matches!(ecs.kinds.get(&entity), Some(EntityKind::Npc))
     }
@@ -58,7 +57,7 @@ impl QueryFilter for WithNpc {
 
 /// Filter that matches Monster entities.
 pub struct WithMonster;
-impl QueryFilter for WithMonster {
+impl EntityMatcher<Ecs> for WithMonster {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         matches!(ecs.kinds.get(&entity), Some(EntityKind::Monster(_)))
     }
@@ -66,7 +65,7 @@ impl QueryFilter for WithMonster {
 
 /// Filter that matches entities with PersonalNeeds component.
 pub struct WithNeeds;
-impl QueryFilter for WithNeeds {
+impl EntityMatcher<Ecs> for WithNeeds {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.personal_needs.contains_key(&entity)
     }
@@ -74,7 +73,7 @@ impl QueryFilter for WithNeeds {
 
 /// Filter that matches entities with AiState component.
 pub struct WithAiState;
-impl QueryFilter for WithAiState {
+impl EntityMatcher<Ecs> for WithAiState {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.ai_states.contains_key(&entity)
     }
@@ -82,7 +81,7 @@ impl QueryFilter for WithAiState {
 
 /// Filter that matches entities with Inventory component.
 pub struct WithInventory;
-impl QueryFilter for WithInventory {
+impl EntityMatcher<Ecs> for WithInventory {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.inventories.contains_key(&entity)
     }
@@ -90,7 +89,7 @@ impl QueryFilter for WithInventory {
 
 /// Filter that matches entities with LifeInfo component.
 pub struct WithLifeInfo;
-impl QueryFilter for WithLifeInfo {
+impl EntityMatcher<Ecs> for WithLifeInfo {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.life_info.contains_key(&entity)
     }
@@ -98,7 +97,7 @@ impl QueryFilter for WithLifeInfo {
 
 /// Filter that matches entities with Memory component.
 pub struct WithMemory;
-impl QueryFilter for WithMemory {
+impl EntityMatcher<Ecs> for WithMemory {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.memories.contains_key(&entity)
     }
@@ -106,7 +105,7 @@ impl QueryFilter for WithMemory {
 
 /// Filter that matches entities with Emotions component.
 pub struct WithEmotions;
-impl QueryFilter for WithEmotions {
+impl EntityMatcher<Ecs> for WithEmotions {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.emotions.contains_key(&entity)
     }
@@ -114,7 +113,7 @@ impl QueryFilter for WithEmotions {
 
 /// Filter that matches entities with Plan component.
 pub struct WithPlan;
-impl QueryFilter for WithPlan {
+impl EntityMatcher<Ecs> for WithPlan {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.plans.contains_key(&entity)
     }
@@ -122,7 +121,7 @@ impl QueryFilter for WithPlan {
 
 /// Filter that matches entities with NpcEconomy component.
 pub struct WithNpcEconomy;
-impl QueryFilter for WithNpcEconomy {
+impl EntityMatcher<Ecs> for WithNpcEconomy {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.npc_economies.contains_key(&entity)
     }
@@ -130,7 +129,7 @@ impl QueryFilter for WithNpcEconomy {
 
 /// Filter that matches entities with SocialNeeds component.
 pub struct WithSocialNeeds;
-impl QueryFilter for WithSocialNeeds {
+impl EntityMatcher<Ecs> for WithSocialNeeds {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.social_needs.contains_key(&entity)
     }
@@ -138,7 +137,7 @@ impl QueryFilter for WithSocialNeeds {
 
 /// Filter that matches entities with EcosystemNeeds component.
 pub struct WithEcosystemNeeds;
-impl QueryFilter for WithEcosystemNeeds {
+impl EntityMatcher<Ecs> for WithEcosystemNeeds {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         ecs.ecosystem_needs.contains_key(&entity)
     }
@@ -146,7 +145,7 @@ impl QueryFilter for WithEcosystemNeeds {
 
 /// Filter that matches entities with specific MonsterSpecies.
 pub struct WithSpecies(pub MonsterSpecies);
-impl QueryFilter for WithSpecies {
+impl EntityMatcher<Ecs> for WithSpecies {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
         matches!(ecs.kinds.get(&entity), Some(EntityKind::Monster(s)) if *s == self.0)
     }
@@ -154,60 +153,26 @@ impl QueryFilter for WithSpecies {
 
 /// Filter that matches alive entities (health > 0).
 pub struct IsAlive;
-impl QueryFilter for IsAlive {
+impl EntityMatcher<Ecs> for IsAlive {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
-        ecs.personal_needs.get(&entity).map_or(false, |pn| pn.health > 0.0)
+        ecs.personal_needs
+            .get(&entity)
+            .map_or(false, |pn| pn.health > 0.0)
     }
 }
 
 /// Filter that matches dead entities (health <= 0).
 pub struct IsDead;
-impl QueryFilter for IsDead {
+impl EntityMatcher<Ecs> for IsDead {
     fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
-        ecs.personal_needs.get(&entity).map_or(false, |pn| pn.health <= 0.0)
+        ecs.personal_needs
+            .get(&entity)
+            .map_or(false, |pn| pn.health <= 0.0)
     }
 }
 
-/// Composite filter: matches if both A and B match.
-pub struct And<A: QueryFilter, B: QueryFilter>(pub A, pub B);
-
-impl<A: QueryFilter, B: QueryFilter> QueryFilter for And<A, B> {
-    fn matches(&self, ecs: &Ecs, entity: u64) -> bool {
-        self.0.matches(ecs, entity) && self.1.matches(ecs, entity)
-    }
-}
-
-/// Iterator over entities matching a query filter.
-pub struct QueryIter<'a, F: QueryFilter> {
-    ecs: &'a Ecs,
-    entities: std::vec::IntoIter<u64>,
-    filter: F,
-}
-
-impl<'a, F: QueryFilter> QueryIter<'a, F> {
-    pub fn new(ecs: &'a Ecs, filter: F) -> Self {
-        // Collect alive entities to a Vec for iteration
-        let entities: Vec<u64> = ecs.alive.iter().cloned().collect();
-        Self {
-            ecs,
-            entities: entities.into_iter(),
-            filter,
-        }
-    }
-}
-
-impl<'a, F: QueryFilter> Iterator for QueryIter<'a, F> {
-    type Item = u64;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            let entity = self.entities.next()?;  // entity: u64 (IntoIter владеет значениями)
-            if self.filter.matches(self.ecs, entity) {
-                return Some(entity);
-            }
-        }
-    }
-}
+/// Iterator over entities matching an ECS matcher.
+pub type QueryIter<'a, F> = GenericQueryIter<'a, Ecs, F>;
 
 // ============================================================================
 // QUERY ITEM TYPES - Bundled data for efficient iteration
@@ -257,45 +222,33 @@ pub struct CombatantQueryItem<'a> {
     pub life_info: Option<&'a LifeInfo>,
 }
 
-/// Read-only access to a single component.
-#[derive(Clone, Copy)]
-pub struct ReadComponent<'a, T> {
-    pub entity: u64,
-    pub component: &'a T,
-}
-
-/// Mutable access to a single component.
-pub struct WriteComponent<'a, T> {
-    pub entity: u64,
-    pub component: &'a mut T,
-}
-
 /// Extension methods for Ecs to support query API.
 impl Ecs {
     /// Create a query iterator with the given filter.
-    pub fn query_filter<F: QueryFilter>(&self, filter: F) -> QueryIter<'_, F> {
-        QueryIter::new(self, filter)
+    pub fn query_filter<F: GenericQueryFilter<Ecs>>(&self, filter: F) -> QueryIter<'_, F> {
+        QueryIter::new(self, self.alive.iter().copied(), filter)
     }
 
     /// Iterate over all entities with Transform component.
     pub fn entities_with_transform(&self) -> impl Iterator<Item = (u64, &Transform)> {
-        self.alive.iter()
+        self.alive
+            .iter()
             .filter_map(|e| self.transforms.get(e).map(|t| (*e, t)))
     }
 
     /// Iterate over all entities with Transform and EntityKind.
     pub fn iter_transform_kind(&self) -> impl Iterator<Item = (u64, &Transform, &EntityKind)> {
-        self.alive.iter()
-            .filter_map(|e| {
-                let t = self.transforms.get(e)?;
-                let k = self.kinds.get(e)?;
-                Some((*e, t, k))
-            })
+        self.alive.iter().filter_map(|e| {
+            let t = self.transforms.get(e)?;
+            let k = self.kinds.get(e)?;
+            Some((*e, t, k))
+        })
     }
 
     /// Iterate over all NPCs with their data bundled.
     pub fn iter_npcs(&self) -> impl Iterator<Item = NpcQueryItem<'_>> {
-        self.alive.iter()
+        self.alive
+            .iter()
             .filter(|e| matches!(self.kinds.get(e), Some(EntityKind::Npc)))
             .filter_map(move |e| {
                 let transform = self.transforms.get(e)?;
@@ -312,28 +265,28 @@ impl Ecs {
 
     /// Iterate over all Monsters with their data bundled.
     pub fn iter_monsters(&self) -> impl Iterator<Item = MonsterQueryItem<'_>> {
-        self.alive.iter()
-            .filter_map(move |e| {
-                let kind = self.kinds.get(e)?;
-                let species = match kind {
-                    EntityKind::Monster(s) => *s,
-                    _ => return None,
-                };
-                let transform = self.transforms.get(e)?;
-                Some(MonsterQueryItem {
-                    entity: *e,
-                    species,
-                    transform,
-                    needs: self.personal_needs.get(e),
-                    ecosystem: self.ecosystem_needs.get(e),
-                    ai_state: self.ai_states.get(e),
-                })
+        self.alive.iter().filter_map(move |e| {
+            let kind = self.kinds.get(e)?;
+            let species = match kind {
+                EntityKind::Monster(s) => *s,
+                _ => return None,
+            };
+            let transform = self.transforms.get(e)?;
+            Some(MonsterQueryItem {
+                entity: *e,
+                species,
+                transform,
+                needs: self.personal_needs.get(e),
+                ecosystem: self.ecosystem_needs.get(e),
+                ai_state: self.ai_states.get(e),
             })
+        })
     }
 
     /// Iterate over all AI entities (NPCs and Monsters) with full AI data.
     pub fn iter_ai_entities(&self) -> impl Iterator<Item = AiEntityQueryItem<'_>> {
-        self.alive.iter()
+        self.alive
+            .iter()
             .filter(|e| self.kinds.get(e).is_some())
             .filter_map(move |e| {
                 let kind = self.kinds.get(e)?;
@@ -352,7 +305,8 @@ impl Ecs {
 
     /// Iterate over all combat-ready entities.
     pub fn iter_combatants(&self) -> impl Iterator<Item = CombatantQueryItem<'_>> {
-        self.alive.iter()
+        self.alive
+            .iter()
             .filter(|e| self.kinds.get(e).is_some())
             .filter_map(move |e| {
                 let kind = self.kinds.get(e)?;
@@ -407,13 +361,13 @@ impl Ecs {
     }
 
     /// Collect all entities matching a filter into a Vec.
-    pub fn query_collect<F: QueryFilter>(&self, filter: F) -> Vec<u64> {
-        self.query_filter(filter).collect()
+    pub fn query_collect<F: GenericQueryFilter<Ecs>>(&self, filter: F) -> Vec<u64> {
+        collect_matching(self, self.alive.iter().copied(), filter)
     }
 
     /// Count entities matching a filter.
-    pub fn query_count<F: QueryFilter>(&self, filter: F) -> usize {
-        self.query_filter(filter).count()
+    pub fn query_count<F: GenericQueryFilter<Ecs>>(&self, filter: F) -> usize {
+        count_matching(self, self.alive.iter().copied(), filter)
     }
 
     /// Get entity position if available.
@@ -425,7 +379,9 @@ impl Ecs {
     /// Check if entity is alive (has health > 0).
     #[inline]
     pub fn is_entity_alive(&self, entity: u64) -> bool {
-        self.personal_needs.get(&entity).map_or(false, |pn| pn.health > 0.0)
+        self.personal_needs
+            .get(&entity)
+            .map_or(false, |pn| pn.health > 0.0)
     }
 
     /// Get entity name if available.
@@ -443,10 +399,18 @@ mod tests {
     fn test_with_transform_filter() {
         let mut ecs = Ecs::new();
         let e1 = ecs.spawn();
-        let _e2 = ecs.spawn();  // entity without transform
-        
-        ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-        
+        let _e2 = ecs.spawn(); // entity without transform
+
+        ecs.transforms.insert(
+            e1,
+            Transform {
+                x: 0.0,
+                y: 0.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
+
         let results: Vec<_> = ecs.query_filter(WithTransform).collect();
         assert_eq!(results.len(), 1);
         assert_eq!(results[0], e1);
@@ -457,10 +421,11 @@ mod tests {
         let mut ecs = Ecs::new();
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
-        
+
         ecs.kinds.insert(e1, EntityKind::Npc);
-        ecs.kinds.insert(e2, EntityKind::Monster(MonsterSpecies::Wolf));
-        
+        ecs.kinds
+            .insert(e2, EntityKind::Monster(MonsterSpecies::Wolf));
+
         let results: Vec<_> = ecs.query_filter(WithNpc).collect();
         assert_eq!(results.len(), 1);
         assert_eq!(results[0], e1);
@@ -471,12 +436,20 @@ mod tests {
         let mut ecs = Ecs::new();
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
-        
+
         ecs.kinds.insert(e1, EntityKind::Npc);
-        ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+        ecs.transforms.insert(
+            e1,
+            Transform {
+                x: 0.0,
+                y: 0.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(e2, EntityKind::Npc);
         // e2 has no transform
-        
+
         let filter = And(WithNpc, WithTransform);
         let results: Vec<_> = ecs.query_filter(filter).collect();
         assert_eq!(results.len(), 1);
@@ -487,11 +460,19 @@ mod tests {
     fn test_iter_npcs() {
         let mut ecs = Ecs::new();
         let e1 = ecs.spawn();
-        
+
         ecs.kinds.insert(e1, EntityKind::Npc);
-        ecs.transforms.insert(e1, Transform { x: 10.0, y: 20.0, cell_x: 0, cell_y: 0 });
+        ecs.transforms.insert(
+            e1,
+            Transform {
+                x: 10.0,
+                y: 20.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.names.insert(e1, Name("Test NPC".into()));
-        
+
         // Create PersonalNeeds with Default
         let needs = PersonalNeeds {
             health: 100.0,
@@ -505,7 +486,7 @@ mod tests {
             discomfort: 0.0,
         };
         ecs.personal_needs.insert(e1, needs);
-        
+
         let npcs: Vec<_> = ecs.iter_npcs().collect();
         assert_eq!(npcs.len(), 1);
         assert_eq!(npcs[0].entity, e1);
@@ -517,12 +498,12 @@ mod tests {
     #[test]
     fn test_query_count() {
         let mut ecs = Ecs::new();
-        
+
         for _ in 0..5 {
             let e = ecs.spawn();
             ecs.kinds.insert(e, EntityKind::Npc);
         }
-        
+
         assert_eq!(ecs.query_count(WithNpc), 5);
     }
 }

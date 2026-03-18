@@ -1,4 +1,4 @@
-use crate::world::components::{PersonalNeeds, LifeStage};
+use crate::world::components::{LifeStage, PersonalNeeds};
 
 #[derive(Clone, Debug)]
 pub struct BodyState {
@@ -20,10 +20,15 @@ impl BodyState {
         let hurt = (1.0 - pn.health).max(0.0);
 
         Self {
-            move_speed_mult: ((1.0 - fatigue * 0.3 - starving * 0.2 - hurt * 0.4 - sleepy * 0.2) * stage.speed_mult()).max(0.2),
+            move_speed_mult: ((1.0 - fatigue * 0.3 - starving * 0.2 - hurt * 0.4 - sleepy * 0.2)
+                * stage.speed_mult())
+            .max(0.2),
             perception_radius_mult: (1.0 - sleepy * 0.4 - fatigue * 0.15).max(0.3),
-            combat_power_mult: ((1.0 - fatigue * 0.25 - starving * 0.15 - hurt * 0.3) * stage.combat_mult()).max(0.15),
-            work_efficiency_mult: (1.0 - fatigue * 0.3 - sleepy * 0.3 - pn.discomfort * 0.2).max(0.1),
+            combat_power_mult: ((1.0 - fatigue * 0.25 - starving * 0.15 - hurt * 0.3)
+                * stage.combat_mult())
+            .max(0.15),
+            work_efficiency_mult: (1.0 - fatigue * 0.3 - sleepy * 0.3 - pn.discomfort * 0.2)
+                .max(0.1),
         }
     }
 }
@@ -35,8 +40,16 @@ pub fn is_night(day_progress: f32) -> bool {
 pub fn time_of_day_mult(day_progress: f32, nocturnal: bool) -> f32 {
     let night = is_night(day_progress);
     if nocturnal {
-        if night { 1.3 } else { 0.7 }
+        if night {
+            1.3
+        } else {
+            0.7
+        }
     } else {
-        if night { 0.6 } else { 1.0 }
+        if night {
+            0.6
+        } else {
+            1.0
+        }
     }
 }

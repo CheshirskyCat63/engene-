@@ -1,11 +1,29 @@
 //! Integration tests for Physics, Body simulation, and Combat systems.
 //! 215 tests total with real assertions against the ENGENE API.
 
+use engene::body::anatomy::{BleedPoint, BodyState as AnatomyBodyState, JointInfo, ZoneState};
+use engene::body::blood::{compute_blood_lod, BloodLod};
+use engene::body::body_damage::apply_zone_damage;
+use engene::body::body_response::{BodyPhysicalResponseCache, PhysicalResponseTier};
+use engene::body::body_store::{BodyHandle, BodyStateStore};
+use engene::body::death_pipeline::{CorpseManager, CorpseState, DeathState};
+use engene::body::dismemberment::{check_dismemberment, severed_zones};
+use engene::core::ecs::Ecs;
+use engene::core::events::EventBus;
+use engene::game::ai::body::{is_night, time_of_day_mult, BodyState as AiBodyState};
+use engene::game::ai::combat::{resolve_combat, HitLocation, StaggerState};
+use engene::navigation::path_cache::PathCache;
+use engene::navigation::world_graph::{LocationId, WorldGraph};
 use engene::physics::ballistics::{
     BallisticEvent, BallisticsSystem, ImpactResult, MaterialProps, MaterialTable, Projectile,
 };
+use engene::physics::building::{
+    BuildingDescriptor, SectionDescriptor, SectionNeighbor, SectionType, StructuralSection,
+};
 use engene::physics::chain_reactions::{ChainEvent, ChainReactionQueue};
-use engene::physics::collapse_solver::{evaluate_failure, evaluate_hanging, CollapseResult, FailureMode};
+use engene::physics::collapse_solver::{
+    evaluate_failure, evaluate_hanging, CollapseResult, FailureMode,
+};
 use engene::physics::collision::{check_overlap, resolve_collisions};
 use engene::physics::damage_pipeline::orchestrator::DamageOrchestrator;
 use engene::physics::damage_pipeline::response_aggregator::{
@@ -13,8 +31,8 @@ use engene::physics::damage_pipeline::response_aggregator::{
 };
 use engene::physics::damage_taxonomy::{DamageCapability, DamageClass};
 use engene::physics::destruction::{
-    DestructionEvent, DestructionLink, DestructionLod, DestructionNode, DestructionSystem,
-    DestructibleObject,
+    DestructibleObject, DestructionEvent, DestructionLink, DestructionLod, DestructionNode,
+    DestructionSystem,
 };
 use engene::physics::fire::{FireCell, FireGrid, FireState};
 use engene::physics::impact_event::{ImpactEvent, ProjectileInfo, StressEvent};
@@ -26,22 +44,6 @@ use engene::physics::sim_lod::PhysicsLod;
 use engene::physics::soft_state::{ObjectCondition, SoftDamageState};
 use engene::physics::structural_load::{cascade_collapse, redistribute_loads};
 use engene::physics::water::{WaterCell, WaterGrid};
-use engene::physics::building::{
-    BuildingDescriptor, SectionDescriptor, SectionNeighbor, SectionType, StructuralSection,
-};
-use engene::body::anatomy::{BodyState as AnatomyBodyState, BleedPoint, JointInfo, ZoneState};
-use engene::body::blood::{compute_blood_lod, BloodLod};
-use engene::body::body_damage::apply_zone_damage;
-use engene::body::body_response::{BodyPhysicalResponseCache, PhysicalResponseTier};
-use engene::body::body_store::{BodyHandle, BodyStateStore};
-use engene::body::death_pipeline::{CorpseManager, CorpseState, DeathState};
-use engene::body::dismemberment::{check_dismemberment, severed_zones};
-use engene::game::ai::combat::{HitLocation, StaggerState, resolve_combat};
-use engene::game::ai::body::{is_night, time_of_day_mult, BodyState as AiBodyState};
-use engene::core::ecs::Ecs;
-use engene::core::events::EventBus;
-use engene::navigation::path_cache::PathCache;
-use engene::navigation::world_graph::{LocationId, WorldGraph};
 use engene::world::components::*;
 use engene::world::fields::WorldFields;
 use engene::world::surface_db::{ResponseClass, SurfaceMaterial};
@@ -78,7 +80,13 @@ fn ballistics_fire_emits_shot_fired_event() {
     let events = sys.drain_events();
     assert_eq!(events.len(), 1);
     match &events[0] {
-        BallisticEvent::ShotFired { seed, origin: o, weapon_id, owner, dir: _ } => {
+        BallisticEvent::ShotFired {
+            seed,
+            origin: o,
+            weapon_id,
+            owner,
+            dir: _,
+        } => {
             assert_eq!(*seed, 999);
             assert_eq!(o.x, 0.0);
             assert_eq!(*weapon_id, 1);
@@ -138,7 +146,15 @@ fn ballistics_analytical_trajectory_returns_points() {
 #[test]
 fn impact_result_stopped() {
     let mut sys = BallisticsSystem::new();
-    sys.material_table.register("concrete", 1, MaterialProps { hardness: 0.9, penetration_resistance: 500.0, density: 2.4 });
+    sys.material_table.register(
+        "concrete",
+        1,
+        MaterialProps {
+            hardness: 0.9,
+            penetration_resistance: 500.0,
+            density: 2.4,
+        },
+    );
     let proj = Projectile {
         pos: Vec3::new(5.0, 2.0, 3.0),
         prev_pos: Vec3::ZERO,
@@ -160,7 +176,15 @@ fn impact_result_stopped() {
 #[test]
 fn impact_result_ricochet_shallow_angle() {
     let mut sys = BallisticsSystem::new();
-    sys.material_table.register("metal", 1, MaterialProps { hardness: 0.95, penetration_resistance: 100.0, density: 7.8 });
+    sys.material_table.register(
+        "metal",
+        1,
+        MaterialProps {
+            hardness: 0.95,
+            penetration_resistance: 100.0,
+            density: 7.8,
+        },
+    );
     let proj = Projectile {
         pos: Vec3::ZERO,
         prev_pos: Vec3::ZERO,
@@ -181,7 +205,15 @@ fn impact_result_ricochet_shallow_angle() {
 #[test]
 fn impact_result_penetrated_high_energy() {
     let mut sys = BallisticsSystem::new();
-    sys.material_table.register("wood", 1, MaterialProps { hardness: 0.3, penetration_resistance: 0.05, density: 0.6 });
+    sys.material_table.register(
+        "wood",
+        1,
+        MaterialProps {
+            hardness: 0.3,
+            penetration_resistance: 0.05,
+            density: 0.6,
+        },
+    );
     let proj = Projectile {
         pos: Vec3::ZERO,
         prev_pos: Vec3::ZERO,
@@ -202,7 +234,16 @@ fn impact_result_penetrated_high_energy() {
 #[test]
 fn ballistics_projectile_fields() {
     let mut sys = BallisticsSystem::new();
-    sys.fire(Vec3::new(1.0, 2.0, 3.0), Vec3::X, 80.0, 0.005, 0.3, 5, 2, 777);
+    sys.fire(
+        Vec3::new(1.0, 2.0, 3.0),
+        Vec3::X,
+        80.0,
+        0.005,
+        0.3,
+        5,
+        2,
+        777,
+    );
     let p = &sys.projectiles[0];
     assert_eq!(p.prev_pos, p.pos);
     assert_eq!(p.distance_traveled, 0.0);
@@ -213,7 +254,16 @@ fn ballistics_projectile_fields() {
 fn ballistics_multiple_fire() {
     let mut sys = BallisticsSystem::new();
     for i in 0..5u64 {
-        sys.fire(Vec3::new(i as f32, 0.0, 0.0), Vec3::Y, 50.0, 0.01, 0.2, i, 0, i as u32);
+        sys.fire(
+            Vec3::new(i as f32, 0.0, 0.0),
+            Vec3::Y,
+            50.0,
+            0.01,
+            0.2,
+            i,
+            0,
+            i as u32,
+        );
     }
     assert_eq!(sys.projectiles.len(), 5);
     assert_eq!(sys.events.len(), 5);
@@ -222,8 +272,24 @@ fn ballistics_multiple_fire() {
 #[test]
 fn ballistics_material_multiple() {
     let mut mt = MaterialTable::new();
-    mt.register("a", 1, MaterialProps { hardness: 0.5, penetration_resistance: 50.0, density: 1.0 });
-    mt.register("b", 2, MaterialProps { hardness: 0.9, penetration_resistance: 200.0, density: 3.0 });
+    mt.register(
+        "a",
+        1,
+        MaterialProps {
+            hardness: 0.5,
+            penetration_resistance: 50.0,
+            density: 1.0,
+        },
+    );
+    mt.register(
+        "b",
+        2,
+        MaterialProps {
+            hardness: 0.9,
+            penetration_resistance: 200.0,
+            density: 3.0,
+        },
+    );
     assert_eq!(mt.get(1).unwrap().hardness, 0.5);
     assert_eq!(mt.get(2).unwrap().hardness, 0.9);
 }
@@ -253,9 +319,26 @@ fn ballistics_projectile_energy() {
 
 #[test]
 fn ballistics_event_variants() {
-    let _sf = BallisticEvent::ShotFired { seed: 0, origin: Vec3::ZERO, dir: Vec3::Y, weapon_id: 0, owner: 0 };
-    let _im = BallisticEvent::Impact { seed: 0, hit_pos: Vec3::ZERO, normal: Vec3::Y, material: 0, damage: 10.0 };
-    let _eh = BallisticEvent::EntityHit { entity: 0, damage: 5.0, hit_pos: Vec3::ZERO, projectile_vel: Vec3::X };
+    let _sf = BallisticEvent::ShotFired {
+        seed: 0,
+        origin: Vec3::ZERO,
+        dir: Vec3::Y,
+        weapon_id: 0,
+        owner: 0,
+    };
+    let _im = BallisticEvent::Impact {
+        seed: 0,
+        hit_pos: Vec3::ZERO,
+        normal: Vec3::Y,
+        material: 0,
+        damage: 10.0,
+    };
+    let _eh = BallisticEvent::EntityHit {
+        entity: 0,
+        damage: 5.0,
+        hit_pos: Vec3::ZERO,
+        projectile_vel: Vec3::X,
+    };
 }
 
 #[test]
@@ -291,7 +374,11 @@ fn ballistics_trajectory_direction() {
 
 #[test]
 fn ballistics_material_props() {
-    let p = MaterialProps { hardness: 0.7, penetration_resistance: 80.0, density: 2.0 };
+    let p = MaterialProps {
+        hardness: 0.7,
+        penetration_resistance: 80.0,
+        density: 2.0,
+    };
     assert_eq!(p.hardness, 0.7);
     assert_eq!(p.density, 2.0);
 }
@@ -310,10 +397,20 @@ fn destruction_register_object() {
     let entity = 42u64;
     let obj = DestructibleObject::new(
         entity,
-        vec![
-            DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-        ],
-        vec![DestructionLink { a: 0, b: 0, strength: 100.0, fatigue: 0.0, broken: false }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
+        vec![DestructionLink {
+            a: 0,
+            b: 0,
+            strength: 100.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     sys.register_object(obj);
     assert_eq!(sys.objects.len(), 1);
@@ -324,12 +421,28 @@ fn destruction_apply_impulse_at_full_lod() {
     let mut sys = DestructionSystem::new();
     let entity = 1u64;
     let nodes = vec![
-        DestructionNode { id: 0, position: Vec3::new(0.0, 0.0, 0.0), mass: 1.0, material: 0, accumulated_stress: 0.0 },
-        DestructionNode { id: 1, position: Vec3::new(1.0, 0.0, 0.0), mass: 1.0, material: 0, accumulated_stress: 0.0 },
+        DestructionNode {
+            id: 0,
+            position: Vec3::new(0.0, 0.0, 0.0),
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        },
+        DestructionNode {
+            id: 1,
+            position: Vec3::new(1.0, 0.0, 0.0),
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        },
     ];
-    let links = vec![
-        DestructionLink { a: 0, b: 1, strength: 50.0, fatigue: 0.0, broken: false },
-    ];
+    let links = vec![DestructionLink {
+        a: 0,
+        b: 1,
+        strength: 50.0,
+        fatigue: 0.0,
+        broken: false,
+    }];
     let obj = DestructibleObject::new(entity, nodes, links);
     sys.register_object(obj);
     sys.apply_impulse_at(Vec3::new(0.5, 0.0, 0.0), 1000.0, DestructionLod::Full);
@@ -343,8 +456,20 @@ fn destruction_apply_impulse_statistical() {
     let entity = 2u64;
     let obj = DestructibleObject::new(
         entity,
-        vec![DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 }],
-        vec![DestructionLink { a: 0, b: 0, strength: 100.0, fatigue: 0.0, broken: false }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
+        vec![DestructionLink {
+            a: 0,
+            b: 0,
+            strength: 100.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     sys.register_object(obj);
     sys.apply_impulse_at(Vec3::ZERO, 500.0, DestructionLod::Statistical);
@@ -355,8 +480,20 @@ fn destruction_apply_impulse_frozen() {
     let mut sys = DestructionSystem::new();
     let obj = DestructibleObject::new(
         3u64,
-        vec![DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 }],
-        vec![DestructionLink { a: 0, b: 0, strength: 100.0, fatigue: 0.0, broken: false }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
+        vec![DestructionLink {
+            a: 0,
+            b: 0,
+            strength: 100.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     sys.register_object(obj);
     sys.apply_impulse_at(Vec3::ZERO, 10000.0, DestructionLod::Frozen);
@@ -369,10 +506,28 @@ fn destruction_drain_events() {
     let obj = DestructibleObject::new(
         4u64,
         vec![
-            DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-            DestructionNode { id: 1, position: Vec3::new(5.0, 0.0, 0.0), mass: 1.0, material: 0, accumulated_stress: 0.0 },
+            DestructionNode {
+                id: 0,
+                position: Vec3::ZERO,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
+            DestructionNode {
+                id: 1,
+                position: Vec3::new(5.0, 0.0, 0.0),
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
         ],
-        vec![DestructionLink { a: 0, b: 1, strength: 10.0, fatigue: 0.0, broken: false }],
+        vec![DestructionLink {
+            a: 0,
+            b: 1,
+            strength: 10.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     sys.register_object(obj);
     sys.apply_impulse_at(Vec3::ZERO, 5000.0, DestructionLod::Full);
@@ -386,15 +541,45 @@ fn destruction_drain_events() {
 fn destructible_integrity() {
     let entity = 5u64;
     let links = vec![
-        DestructionLink { a: 0, b: 1, strength: 50.0, fatigue: 0.0, broken: false },
-        DestructionLink { a: 1, b: 2, strength: 50.0, fatigue: 0.0, broken: true },
+        DestructionLink {
+            a: 0,
+            b: 1,
+            strength: 50.0,
+            fatigue: 0.0,
+            broken: false,
+        },
+        DestructionLink {
+            a: 1,
+            b: 2,
+            strength: 50.0,
+            fatigue: 0.0,
+            broken: true,
+        },
     ];
     let obj = DestructibleObject::new(
         entity,
         vec![
-            DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-            DestructionNode { id: 1, position: Vec3::X, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-            DestructionNode { id: 2, position: Vec3::new(2.0, 0.0, 0.0), mass: 1.0, material: 0, accumulated_stress: 0.0 },
+            DestructionNode {
+                id: 0,
+                position: Vec3::ZERO,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
+            DestructionNode {
+                id: 1,
+                position: Vec3::X,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
+            DestructionNode {
+                id: 2,
+                position: Vec3::new(2.0, 0.0, 0.0),
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
         ],
         links,
     );
@@ -406,10 +591,28 @@ fn destructible_apply_impulse_returns_events() {
     let mut obj = DestructibleObject::new(
         6u64,
         vec![
-            DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-            DestructionNode { id: 1, position: Vec3::new(2.0, 0.0, 0.0), mass: 1.0, material: 0, accumulated_stress: 0.0 },
+            DestructionNode {
+                id: 0,
+                position: Vec3::ZERO,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
+            DestructionNode {
+                id: 1,
+                position: Vec3::new(2.0, 0.0, 0.0),
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
         ],
-        vec![DestructionLink { a: 0, b: 1, strength: 5.0, fatigue: 0.0, broken: false }],
+        vec![DestructionLink {
+            a: 0,
+            b: 1,
+            strength: 5.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     let events = obj.apply_impulse(Vec3::ZERO, 1000.0);
     let _count = events.len();
@@ -420,12 +623,36 @@ fn destructible_apply_statistical_damage() {
     let mut obj = DestructibleObject::new(
         7u64,
         vec![
-            DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 },
-            DestructionNode { id: 1, position: Vec3::X, mass: 1.0, material: 0, accumulated_stress: 0.0 },
+            DestructionNode {
+                id: 0,
+                position: Vec3::ZERO,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
+            DestructionNode {
+                id: 1,
+                position: Vec3::X,
+                mass: 1.0,
+                material: 0,
+                accumulated_stress: 0.0,
+            },
         ],
         vec![
-            DestructionLink { a: 0, b: 1, strength: 100.0, fatigue: 0.0, broken: false },
-            DestructionLink { a: 1, b: 0, strength: 100.0, fatigue: 0.0, broken: false },
+            DestructionLink {
+                a: 0,
+                b: 1,
+                strength: 100.0,
+                fatigue: 0.0,
+                broken: false,
+            },
+            DestructionLink {
+                a: 1,
+                b: 0,
+                strength: 100.0,
+                fatigue: 0.0,
+                broken: false,
+            },
         ],
     );
     let ratio = obj.apply_statistical_damage(150.0);
@@ -441,22 +668,47 @@ fn destruction_lod_variants() {
 
 #[test]
 fn destruction_event_link_broken() {
-    let _e = DestructionEvent::LinkBroken { entity: 0, link_a: 0, link_b: 1 };
+    let _e = DestructionEvent::LinkBroken {
+        entity: 0,
+        link_a: 0,
+        link_b: 1,
+    };
 }
 
 #[test]
 fn destruction_event_object_fragmented() {
-    let _e = DestructionEvent::ObjectFragmented { entity: 0, cluster_count: 2 };
+    let _e = DestructionEvent::ObjectFragmented {
+        entity: 0,
+        cluster_count: 2,
+    };
 }
 
 #[test]
 fn destructible_new_total_strength() {
     let obj = DestructibleObject::new(
         8u64,
-        vec![DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
         vec![
-            DestructionLink { a: 0, b: 0, strength: 30.0, fatigue: 0.0, broken: false },
-            DestructionLink { a: 0, b: 0, strength: 70.0, fatigue: 0.0, broken: false },
+            DestructionLink {
+                a: 0,
+                b: 0,
+                strength: 30.0,
+                fatigue: 0.0,
+                broken: false,
+            },
+            DestructionLink {
+                a: 0,
+                b: 0,
+                strength: 70.0,
+                fatigue: 0.0,
+                broken: false,
+            },
         ],
     );
     assert_eq!(obj.total_strength, 100.0);
@@ -466,8 +718,20 @@ fn destructible_new_total_strength() {
 fn destructible_integrity_full() {
     let obj = DestructibleObject::new(
         9u64,
-        vec![DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 }],
-        vec![DestructionLink { a: 0, b: 0, strength: 100.0, fatigue: 0.0, broken: false }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
+        vec![DestructionLink {
+            a: 0,
+            b: 0,
+            strength: 100.0,
+            fatigue: 0.0,
+            broken: false,
+        }],
     );
     assert!((obj.integrity() - 1.0).abs() < 0.01);
 }
@@ -476,8 +740,20 @@ fn destructible_integrity_full() {
 fn destructible_integrity_zero() {
     let obj = DestructibleObject::new(
         10u64,
-        vec![DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.0 }],
-        vec![DestructionLink { a: 0, b: 0, strength: 100.0, fatigue: 0.0, broken: true }],
+        vec![DestructionNode {
+            id: 0,
+            position: Vec3::ZERO,
+            mass: 1.0,
+            material: 0,
+            accumulated_stress: 0.0,
+        }],
+        vec![DestructionLink {
+            a: 0,
+            b: 0,
+            strength: 100.0,
+            fatigue: 0.0,
+            broken: true,
+        }],
     );
     assert!(obj.integrity() < 0.01);
 }
@@ -510,7 +786,15 @@ fn velocity_default() {
 fn move_toward_reaches_target() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let reached = move_toward(&mut ecs, e, 5.0, 5.0, 100.0, 1.0);
     assert!(reached);
     let t = ecs.transforms.get(&e).unwrap();
@@ -522,7 +806,15 @@ fn move_toward_reaches_target() {
 fn move_toward_partial() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let reached = move_toward(&mut ecs, e, 100.0, 0.0, 1.0, 0.1);
     assert!(!reached);
     let t = ecs.transforms.get(&e).unwrap();
@@ -542,8 +834,24 @@ fn resolve_collisions_two_entities() {
     let mut ecs = Ecs::new();
     let a = ecs.spawn();
     let b = ecs.spawn();
-    ecs.transforms.insert(a, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(b, Transform { x: 1.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        a,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        b,
+        Transform {
+            x: 1.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     resolve_collisions(&mut ecs, &[a, b]);
 }
 
@@ -662,7 +970,12 @@ fn projectile_info() {
 
 #[test]
 fn impact_event_with_projectile_info() {
-    let pi = ProjectileInfo { caliber: 0.01, velocity: Vec3::Y, mass: 0.01, fragmentation: false };
+    let pi = ProjectileInfo {
+        caliber: 0.01,
+        velocity: Vec3::Y,
+        mass: 0.01,
+        fragmentation: false,
+    };
     let evt = ImpactEvent {
         position: Vec3::ZERO,
         direction: Vec3::Z,
@@ -680,7 +993,14 @@ fn impact_event_with_projectile_info() {
 
 #[test]
 fn stress_event_no_position() {
-    let evt = StressEvent { target_entity: 1, damage_class: DamageClass::Thermal, intensity: 1.0, duration: 5.0, position: None, source_direction: None };
+    let evt = StressEvent {
+        target_entity: 1,
+        damage_class: DamageClass::Thermal,
+        intensity: 1.0,
+        duration: 5.0,
+        position: None,
+        source_direction: None,
+    };
     assert!(evt.position.is_none());
 }
 
@@ -867,7 +1187,12 @@ fn damageable_store_get_mut() {
 #[test]
 fn damageable_store_remove() {
     let mut store = DamageableStore::new();
-    store.register(DamageableObject { entity: 4, capability: DamageCapability::empty(), layers: vec![], structural_section: None });
+    store.register(DamageableObject {
+        entity: 4,
+        capability: DamageCapability::empty(),
+        layers: vec![],
+        structural_section: None,
+    });
     let rem = store.remove(4);
     assert!(rem.is_some());
     assert!(store.get(4).is_none());
@@ -876,7 +1201,12 @@ fn damageable_store_remove() {
 #[test]
 fn damageable_store_capability_of() {
     let mut store = DamageableStore::new();
-    store.register(DamageableObject { entity: 5, capability: DamageCapability::THERMAL, layers: vec![], structural_section: None });
+    store.register(DamageableObject {
+        entity: 5,
+        capability: DamageCapability::THERMAL,
+        layers: vec![],
+        structural_section: None,
+    });
     assert!(store.capability_of(5).contains(DamageCapability::THERMAL));
 }
 
@@ -957,7 +1287,11 @@ fn evaluate_hanging_supported() {
         node_ids: vec![4],
         section_type: SectionType::Column,
         integrity: 0.5,
-        neighbors: vec![SectionNeighbor { section_id: 10, load_transfer: 0.8, collapse_priority: 0 }],
+        neighbors: vec![SectionNeighbor {
+            section_id: 10,
+            load_transfer: 0.8,
+            collapse_priority: 0,
+        }],
     };
     assert!(!evaluate_hanging(&section));
 }
@@ -979,8 +1313,16 @@ fn test_redistribute_loads() {
         make_section(2, 0.8, 0),
     ];
     sections[0].neighbors = vec![
-        SectionNeighbor { section_id: 1, load_transfer: 0.5, collapse_priority: 0 },
-        SectionNeighbor { section_id: 2, load_transfer: 0.5, collapse_priority: 0 },
+        SectionNeighbor {
+            section_id: 1,
+            load_transfer: 0.5,
+            collapse_priority: 0,
+        },
+        SectionNeighbor {
+            section_id: 2,
+            load_transfer: 0.5,
+            collapse_priority: 0,
+        },
     ];
     let newly = redistribute_loads(&mut sections, 0);
     let _newly_count = newly.len();
@@ -988,11 +1330,12 @@ fn test_redistribute_loads() {
 
 #[test]
 fn test_cascade_collapse() {
-    let mut sections = vec![
-        make_section(0, 0.0, 1),
-        make_section(1, 0.5, 0),
-    ];
-    sections[0].neighbors = vec![SectionNeighbor { section_id: 1, load_transfer: 0.5, collapse_priority: 0 }];
+    let mut sections = vec![make_section(0, 0.0, 1), make_section(1, 0.5, 0)];
+    sections[0].neighbors = vec![SectionNeighbor {
+        section_id: 1,
+        load_transfer: 0.5,
+        collapse_priority: 0,
+    }];
     let all = cascade_collapse(&mut sections, 0);
     assert!(all.contains(&0));
 }
@@ -1011,7 +1354,11 @@ fn structural_section_section_type() {
 
 #[test]
 fn section_neighbor_load_transfer() {
-    let n = SectionNeighbor { section_id: 1, load_transfer: 0.7, collapse_priority: 1 };
+    let n = SectionNeighbor {
+        section_id: 1,
+        load_transfer: 0.7,
+        collapse_priority: 1,
+    };
     assert_eq!(n.load_transfer, 0.7);
 }
 
@@ -1131,7 +1478,13 @@ fn chain_reaction_queue_submit() {
 #[test]
 fn chain_reaction_queue_drain_batch() {
     let mut q = ChainReactionQueue::new();
-    q.submit(ChainEvent { source_entity: None, position: Vec3::ZERO, energy: 50.0, damage_class: DamageClass::Explosive, depth: 1 });
+    q.submit(ChainEvent {
+        source_entity: None,
+        position: Vec3::ZERO,
+        energy: 50.0,
+        damage_class: DamageClass::Explosive,
+        depth: 1,
+    });
     let batch = q.drain_batch();
     let _batch_count = batch.len();
 }
@@ -1139,14 +1492,26 @@ fn chain_reaction_queue_drain_batch() {
 #[test]
 fn chain_reaction_queue_rejects_low_energy() {
     let mut q = ChainReactionQueue::new();
-    q.submit(ChainEvent { source_entity: None, position: Vec3::ZERO, energy: 5.0, damage_class: DamageClass::Explosive, depth: 0 });
+    q.submit(ChainEvent {
+        source_entity: None,
+        position: Vec3::ZERO,
+        energy: 5.0,
+        damage_class: DamageClass::Explosive,
+        depth: 0,
+    });
     assert!(q.is_empty() || q.pending_count() == 0);
 }
 
 #[test]
 fn chain_reaction_queue_rejects_deep() {
     let mut q = ChainReactionQueue::new();
-    q.submit(ChainEvent { source_entity: None, position: Vec3::ZERO, energy: 100.0, damage_class: DamageClass::Explosive, depth: 5 });
+    q.submit(ChainEvent {
+        source_entity: None,
+        position: Vec3::ZERO,
+        energy: 100.0,
+        damage_class: DamageClass::Explosive,
+        depth: 5,
+    });
     assert!(q.is_empty());
 }
 
@@ -1169,7 +1534,10 @@ fn soft_damage_state_apply_fatigue() {
 
 #[test]
 fn object_condition_wobbling() {
-    let _ = ObjectCondition::Wobbling { amplitude: 0.1, frequency: 2.0 };
+    let _ = ObjectCondition::Wobbling {
+        amplitude: 0.1,
+        frequency: 2.0,
+    };
 }
 
 #[test]
@@ -1196,10 +1564,22 @@ fn object_condition_limping() {
 
 #[test]
 fn physics_lod_from_sim_level() {
-    assert_eq!(PhysicsLod::from_sim_level(SimulationLevel::L0), PhysicsLod::Full);
-    assert_eq!(PhysicsLod::from_sim_level(SimulationLevel::L1), PhysicsLod::Simplified);
-    assert_eq!(PhysicsLod::from_sim_level(SimulationLevel::L2), PhysicsLod::Statistical);
-    assert_eq!(PhysicsLod::from_sim_level(SimulationLevel::L3), PhysicsLod::Paused);
+    assert_eq!(
+        PhysicsLod::from_sim_level(SimulationLevel::L0),
+        PhysicsLod::Full
+    );
+    assert_eq!(
+        PhysicsLod::from_sim_level(SimulationLevel::L1),
+        PhysicsLod::Simplified
+    );
+    assert_eq!(
+        PhysicsLod::from_sim_level(SimulationLevel::L2),
+        PhysicsLod::Statistical
+    );
+    assert_eq!(
+        PhysicsLod::from_sim_level(SimulationLevel::L3),
+        PhysicsLod::Paused
+    );
 }
 
 #[test]
@@ -1398,13 +1778,23 @@ fn anatomy_bleed_points_empty() {
 
 #[test]
 fn joint_info_dismember_threshold() {
-    let j = JointInfo { id: 0, zone: BodyZone::Neck, integrity: 100.0, broken: false, dismember_threshold: 15.0 };
+    let j = JointInfo {
+        id: 0,
+        zone: BodyZone::Neck,
+        integrity: 100.0,
+        broken: false,
+        dismember_threshold: 15.0,
+    };
     assert_eq!(j.dismember_threshold, 15.0);
 }
 
 #[test]
 fn bleed_point_fields() {
-    let bp = BleedPoint { zone: BodyZone::Torso, rate: 0.1, time_active: 0.0 };
+    let bp = BleedPoint {
+        zone: BodyZone::Torso,
+        rate: 0.1,
+        time_active: 0.0,
+    };
     assert_eq!(bp.rate, 0.1);
 }
 
@@ -1684,7 +2074,10 @@ fn hit_location_random() {
     use rand::SeedableRng;
     let mut rng = rand::rngs::StdRng::seed_from_u64(42);
     let loc = HitLocation::random(&mut rng);
-    assert!(matches!(loc, HitLocation::Head | HitLocation::Torso | HitLocation::Arms | HitLocation::Legs));
+    assert!(matches!(
+        loc,
+        HitLocation::Head | HitLocation::Torso | HitLocation::Arms | HitLocation::Legs
+    ));
 }
 
 #[test]
@@ -1725,12 +2118,30 @@ fn test_resolve_combat() {
     let mut events = EventBus::new();
     let attacker = ecs.spawn();
     let defender = ecs.spawn();
-    ecs.transforms.insert(attacker, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.transforms.insert(defender, Transform { x: 5.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        attacker,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.transforms.insert(
+        defender,
+        Transform {
+            x: 5.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(attacker, EntityKind::Npc);
     ecs.kinds.insert(defender, EntityKind::Npc);
-    ecs.personal_needs.insert(attacker, PersonalNeeds::default_npc());
-    ecs.personal_needs.insert(defender, PersonalNeeds::default_npc());
+    ecs.personal_needs
+        .insert(attacker, PersonalNeeds::default_npc());
+    ecs.personal_needs
+        .insert(defender, PersonalNeeds::default_npc());
     let def_health_before = ecs.personal_needs.get(&defender).unwrap().health;
     resolve_combat(&mut ecs, &mut events, attacker, defender);
     let def_health_after = ecs.personal_needs.get(&defender).unwrap().health;
@@ -1779,7 +2190,17 @@ fn time_of_day_mult_diurnal_day() {
 
 #[test]
 fn ai_body_state_work_efficiency() {
-    let pn = PersonalNeeds { hunger: 0.2, thirst: 0.2, sleep: 0.1, health: 1.0, energy: 0.9, fear: 0.0, curiosity: 0.3, ambitions: 0.4, discomfort: 0.1 };
+    let pn = PersonalNeeds {
+        hunger: 0.2,
+        thirst: 0.2,
+        sleep: 0.1,
+        health: 1.0,
+        energy: 0.9,
+        fear: 0.0,
+        curiosity: 0.3,
+        ambitions: 0.4,
+        discomfort: 0.1,
+    };
     let body = AiBodyState::compute(&pn);
     assert!(body.work_efficiency_mult > 0.0);
 }
@@ -1883,13 +2304,25 @@ fn ballistics_projectile_ttl() {
 
 #[test]
 fn destruction_node_accumulated_stress() {
-    let n = DestructionNode { id: 0, position: Vec3::ZERO, mass: 1.0, material: 0, accumulated_stress: 0.5 };
+    let n = DestructionNode {
+        id: 0,
+        position: Vec3::ZERO,
+        mass: 1.0,
+        material: 0,
+        accumulated_stress: 0.5,
+    };
     assert_eq!(n.accumulated_stress, 0.5);
 }
 
 #[test]
 fn destruction_link_broken_flag() {
-    let l = DestructionLink { a: 0, b: 1, strength: 100.0, fatigue: 0.5, broken: true };
+    let l = DestructionLink {
+        a: 0,
+        b: 1,
+        strength: 100.0,
+        fatigue: 0.5,
+        broken: true,
+    };
     assert!(l.broken);
 }
 
@@ -1897,7 +2330,15 @@ fn destruction_link_broken_flag() {
 fn apply_velocity_updates_cell() {
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 200.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 200.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     apply_velocity(&mut ecs, e, 0.1);
     let t = ecs.transforms.get(&e).unwrap();
     assert!(t.cell_x <= 40 && t.cell_y <= 40);
@@ -1938,7 +2379,11 @@ fn damage_response_layer_fractured() {
 
 #[test]
 fn damage_response_ricochet() {
-    let r = DamageResponse::Ricochet { position: Vec3::ZERO, direction: Vec3::X, energy: 10.0 };
+    let r = DamageResponse::Ricochet {
+        position: Vec3::ZERO,
+        direction: Vec3::X,
+        energy: 10.0,
+    };
     assert!(matches!(r, DamageResponse::Ricochet { .. }));
 }
 
@@ -1946,12 +2391,21 @@ fn damage_response_ricochet() {
 fn failure_mode_local_break() {
     let section = make_section(10, 0.5, 1);
     let r = evaluate_failure(&section).unwrap();
-    assert!(matches!(r.failure_mode, FailureMode::Crack | FailureMode::LocalBreak));
+    assert!(matches!(
+        r.failure_mode,
+        FailureMode::Crack | FailureMode::LocalBreak
+    ));
 }
 
 #[test]
 fn chain_event_depth() {
-    let e = ChainEvent { source_entity: Some(1), position: Vec3::ZERO, energy: 100.0, damage_class: DamageClass::Explosive, depth: 2 };
+    let e = ChainEvent {
+        source_entity: Some(1),
+        position: Vec3::ZERO,
+        energy: 100.0,
+        damage_class: DamageClass::Explosive,
+        depth: 2,
+    };
     assert_eq!(e.depth, 2);
 }
 
@@ -2013,7 +2467,11 @@ fn section_type_variants() {
 
 #[test]
 fn damage_response_structural_damage() {
-    let r = DamageResponse::StructuralDamage { entity: 1, section_id: 5, energy: 100.0 };
+    let r = DamageResponse::StructuralDamage {
+        entity: 1,
+        section_id: 5,
+        energy: 100.0,
+    };
     assert!(matches!(r, DamageResponse::StructuralDamage { .. }));
 }
 

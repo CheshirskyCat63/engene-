@@ -10,8 +10,7 @@ pub struct ConfigEnvelope<T> {
 pub fn load_config<T: DeserializeOwned>(path: &str) -> Result<T, String> {
     let contents = std::fs::read_to_string(path)
         .map_err(|e| format!("Failed to read config '{}': {}", path, e))?;
-    ron::from_str::<T>(&contents)
-        .map_err(|e| format!("Failed to parse config '{}': {}", path, e))
+    ron::from_str::<T>(&contents).map_err(|e| format!("Failed to parse config '{}': {}", path, e))
 }
 
 pub fn load_versioned_config<T: DeserializeOwned>(

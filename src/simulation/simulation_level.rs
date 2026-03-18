@@ -1,19 +1,19 @@
+use engine_runtime::simulation_core::{
+    SimulationLevel as RuntimeSimulationLevel, SimulationPolicyProfile,
+};
+
 use crate::world::components::SimulationLevel;
 
+fn runtime_policy() -> SimulationPolicyProfile {
+    SimulationPolicyProfile::default()
+}
+
 pub const L0_RADIUS: f32 = 300.0;
-pub const L1_RADIUS: f32 = 5000.0;
-pub const L2_RADIUS: f32 = 50000.0;
+pub const L1_RADIUS: f32 = 5_000.0;
+pub const L2_RADIUS: f32 = 50_000.0;
 
 pub fn level_for_distance(distance: f32) -> SimulationLevel {
-    if distance <= L0_RADIUS {
-        SimulationLevel::L0
-    } else if distance <= L1_RADIUS {
-        SimulationLevel::L1
-    } else if distance <= L2_RADIUS {
-        SimulationLevel::L2
-    } else {
-        SimulationLevel::L3
-    }
+    runtime_to_world_level(runtime_policy().classify_distance(distance))
 }
 
 pub const L0_TICK_INTERVAL: u64 = 1;
@@ -21,11 +21,40 @@ pub const L1_TICK_INTERVAL: u64 = 12;
 pub const L2_TICK_INTERVAL: u64 = 60;
 
 pub fn should_tick(level: SimulationLevel, frame: u64) -> bool {
+    runtime_policy().should_tick(world_to_runtime_level(level), frame)
+}
+
+pub fn runtime_to_world_level(level: RuntimeSimulationLevel) -> SimulationLevel {
     match level {
-        SimulationLevel::L0 => true,
-        SimulationLevel::L1 => frame % L1_TICK_INTERVAL == 0,
-        SimulationLevel::L2 => frame % L2_TICK_INTERVAL == 0,
-        SimulationLevel::L3 => false, // strategic level ticks on events only
+        RuntimeSimulationLevel::L0 => SimulationLevel::L0,
+        RuntimeSimulationLevel::L1 => SimulationLevel::L1,
+        RuntimeSimulationLevel::L2 => SimulationLevel::L2,
+        RuntimeSimulationLevel::L3 => SimulationLevel::L3,
+    }
+}
+
+pub fn to_promotion_reason(distance: f32) -> engine_runtime::simulation_core::TransitionReason {
+    if distance <= L0_RADIUS {
+        engine_runtime::simulation_core::TransitionReason::PlayerProximity
+    } else {
+        engine_runtime::simulation_core::TransitionReason::StreamingEnter
+    }
+}
+
+pub fn to_demotion_reason(distance: f32) -> engine_runtime::simulation_core::TransitionReason {
+    if distance > L2_RADIUS {
+        engine_runtime::simulation_core::TransitionReason::StreamingExit
+    } else {
+        engine_runtime::simulation_core::TransitionReason::InteractionEntropyLow
+    }
+}
+
+pub fn world_to_runtime_level(level: SimulationLevel) -> RuntimeSimulationLevel {
+    match level {
+        SimulationLevel::L0 => RuntimeSimulationLevel::L0,
+        SimulationLevel::L1 => RuntimeSimulationLevel::L1,
+        SimulationLevel::L2 => RuntimeSimulationLevel::L2,
+        SimulationLevel::L3 => RuntimeSimulationLevel::L3,
     }
 }
 

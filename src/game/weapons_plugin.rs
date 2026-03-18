@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::core::plugin::{EngineBuilder, Plugin};
 use crate::physics::ballistics::{BallisticsSystem, MaterialProps};
@@ -38,7 +38,9 @@ pub struct WeaponsPlugin {
 
 impl WeaponsPlugin {
     pub fn new(data_dir: &str) -> Self {
-        Self { data_dir: data_dir.to_string() }
+        Self {
+            data_dir: data_dir.to_string(),
+        }
     }
 }
 
@@ -50,7 +52,10 @@ impl Plugin for WeaponsPlugin {
     fn build(&self, builder: &mut EngineBuilder) {
         let mut ballistics = BallisticsSystem::new();
 
-        if let Some(config) = builder.resources.get::<crate::core::game_config::GameConfig>() {
+        if let Some(config) = builder
+            .resources
+            .get::<crate::core::game_config::GameConfig>()
+        {
             let mut next_id: u16 = 0;
             for (name, mat_cfg) in &config.materials {
                 let props = MaterialProps {
@@ -61,7 +66,10 @@ impl Plugin for WeaponsPlugin {
                 ballistics.material_table.register(name, next_id, props);
                 next_id += 1;
             }
-            println!("[weapons] loaded {} materials into ballistics table", next_id);
+            println!(
+                "[weapons] loaded {} materials into ballistics table",
+                next_id
+            );
         }
 
         let mut weapon_registry = WeaponRegistry {
@@ -70,14 +78,20 @@ impl Plugin for WeaponsPlugin {
         };
 
         let weapons_path = format!("{}/weapons.ron", self.data_dir);
-        if let Ok(envelope) = crate::core::config::load_config::<crate::core::config::ConfigEnvelope<HashMap<String, WeaponDef>>>(&weapons_path) {
+        if let Ok(envelope) = crate::core::config::load_config::<
+            crate::core::config::ConfigEnvelope<HashMap<String, WeaponDef>>,
+        >(&weapons_path)
+        {
             let mut next_id: u16 = 0;
             for (name, def) in envelope.data {
                 weapon_registry.name_to_id.insert(name.clone(), next_id);
                 weapon_registry.weapons.insert(name, def);
                 next_id += 1;
             }
-            println!("[weapons] loaded {} weapon definitions", weapon_registry.weapons.len());
+            println!(
+                "[weapons] loaded {} weapon definitions",
+                weapon_registry.weapons.len()
+            );
         }
 
         builder.insert_resource(ballistics);

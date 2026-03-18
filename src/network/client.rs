@@ -33,14 +33,18 @@ impl GameClient {
 
     pub fn connect(&mut self, server_addr: &str) -> Result<(), String> {
         let socket = UdpSocket::bind("0.0.0.0:0").map_err(|e| format!("bind: {e}"))?;
-        socket.set_nonblocking(true).map_err(|e| format!("nonblocking: {e}"))?;
+        socket
+            .set_nonblocking(true)
+            .map_err(|e| format!("nonblocking: {e}"))?;
         self.server_addr = server_addr.to_string();
 
         let msg = ClientMessage::Connect {
             player_name: "Player".into(),
         };
         let data = bincode::serialize(&msg).map_err(|e| format!("serialize: {e}"))?;
-        socket.send_to(&data, server_addr).map_err(|e| format!("send: {e}"))?;
+        socket
+            .send_to(&data, server_addr)
+            .map_err(|e| format!("send: {e}"))?;
 
         self.socket = Some(socket);
         tracing::info!("connecting to {}", server_addr);
@@ -99,7 +103,11 @@ impl GameClient {
         transforms: &mut crate::core::sparse_set::SparseSet<crate::world::components::Transform>,
     ) {
         match msg {
-            ServerMessage::Welcome { client_id, player_entity, tick } => {
+            ServerMessage::Welcome {
+                client_id,
+                player_entity,
+                tick,
+            } => {
                 self.client_id = client_id;
                 self.player_entity = player_entity;
                 self.server_tick = tick;
@@ -118,12 +126,20 @@ impl GameClient {
                     }
                 }
 
-                while self.pending_inputs.front().map_or(false, |i| i.tick <= tick) {
+                while self
+                    .pending_inputs
+                    .front()
+                    .map_or(false, |i| i.tick <= tick)
+                {
                     self.pending_inputs.pop_front();
                 }
             }
             ServerMessage::InputAck { tick } => {
-                while self.pending_inputs.front().map_or(false, |i| i.tick <= tick) {
+                while self
+                    .pending_inputs
+                    .front()
+                    .map_or(false, |i| i.tick <= tick)
+                {
                     self.pending_inputs.pop_front();
                 }
             }

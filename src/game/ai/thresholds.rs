@@ -1,5 +1,5 @@
-use crate::world::components::{NpcTraits, MonsterTraits};
 use crate::core::ai_memory::Memory;
+use crate::world::components::{MonsterTraits, NpcTraits};
 
 #[derive(Clone, Debug)]
 pub struct Thresholds {
@@ -17,7 +17,11 @@ pub struct Thresholds {
 impl Thresholds {
     pub fn from_npc(t: &NpcTraits, mem: Option<&Memory>) -> Self {
         let near_death_exp = mem.map_or(0.0, |m| {
-            m.events.iter().filter(|e| e.kind == crate::game::ai::memory::EventKind::WasAttacked).count() as f32 * 0.02
+            m.events
+                .iter()
+                .filter(|e| e.kind == crate::game::ai::memory::EventKind::WasAttacked)
+                .count() as f32
+                * 0.02
         });
 
         Self {
@@ -35,7 +39,11 @@ impl Thresholds {
 
     pub fn from_monster(t: &MonsterTraits, mem: Option<&Memory>) -> Self {
         let near_death_exp = mem.map_or(0.0, |m| {
-            m.events.iter().filter(|e| e.kind == crate::game::ai::memory::EventKind::WasAttacked).count() as f32 * 0.03
+            m.events
+                .iter()
+                .filter(|e| e.kind == crate::game::ai::memory::EventKind::WasAttacked)
+                .count() as f32
+                * 0.03
         });
 
         Self {

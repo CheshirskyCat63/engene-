@@ -35,15 +35,39 @@ impl Default for GameRules {
     fn default() -> Self {
         Self {
             systems: vec![
-                SystemEntry { name: "Simulation".into(), frequency: TickFreqConfig::EveryFrame, order: 0 },
-                SystemEntry { name: "WorldTick".into(), frequency: TickFreqConfig::EveryFrame, order: 1 },
-                SystemEntry { name: "AI".into(), frequency: TickFreqConfig::EveryFrame, order: 2 },
-                SystemEntry { name: "Physics".into(), frequency: TickFreqConfig::EveryFrame, order: 3 },
-                SystemEntry { name: "Economy".into(), frequency: TickFreqConfig::EveryFrame, order: 4 },
+                SystemEntry {
+                    name: "Simulation".into(),
+                    frequency: TickFreqConfig::EveryFrame,
+                    order: 0,
+                },
+                SystemEntry {
+                    name: "WorldTick".into(),
+                    frequency: TickFreqConfig::EveryFrame,
+                    order: 1,
+                },
+                SystemEntry {
+                    name: "AI".into(),
+                    frequency: TickFreqConfig::EveryFrame,
+                    order: 2,
+                },
+                SystemEntry {
+                    name: "Physics".into(),
+                    frequency: TickFreqConfig::EveryFrame,
+                    order: 3,
+                },
+                SystemEntry {
+                    name: "Economy".into(),
+                    frequency: TickFreqConfig::EveryFrame,
+                    order: 4,
+                },
             ],
             simulation_radii: SimRadii {
-                l0: 300.0, l1: 5000.0, l2: 50000.0,
-                l0_tick: 1, l1_tick: 12, l2_tick: 60,
+                l0: 300.0,
+                l1: 5000.0,
+                l2: 50000.0,
+                l0_tick: 1,
+                l1_tick: 12,
+                l2_tick: 60,
             },
             replicated_events: vec![
                 "ShotFired".into(),

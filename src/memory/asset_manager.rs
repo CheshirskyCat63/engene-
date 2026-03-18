@@ -92,7 +92,8 @@ impl AssetManager {
         let handle = self.next_handle;
         self.next_handle += 1;
         self.textures.insert(handle, AssetState::Loading);
-        self.texture_path_to_handle.insert(canonical.clone(), handle);
+        self.texture_path_to_handle
+            .insert(canonical.clone(), handle);
         let _ = self.tx.send(AssetRequest::LoadTexture(handle, canonical));
         handle
     }
@@ -101,7 +102,8 @@ impl AssetManager {
         while let Ok(result) = self.rx_results.try_recv() {
             match result {
                 AssetResult::ModelReady(handle, Ok(model)) => {
-                    self.models.insert(handle, AssetState::Ready(Arc::new(model)));
+                    self.models
+                        .insert(handle, AssetState::Ready(Arc::new(model)));
                 }
                 AssetResult::ModelReady(handle, Err(e)) => {
                     tracing::warn!("asset load failed for handle {}: {}", handle, e);

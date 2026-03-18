@@ -1,6 +1,5 @@
 use glam::Vec3;
 
-
 pub const OCCLUSION_UPDATE_RADIUS: f32 = 500.0;
 
 #[derive(Clone, Debug)]

@@ -1,5 +1,5 @@
-use std::collections::VecDeque;
 use crate::memory::component_delta::ComponentDelta;
+use std::collections::VecDeque;
 
 const BUFFER_SIZE: usize = 4;
 const INTERP_DELAY_MS: f32 = 100.0;

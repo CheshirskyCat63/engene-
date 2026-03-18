@@ -1,5 +1,5 @@
-use glam::Vec3;
 use crate::core::ecs::Entity;
+use glam::Vec3;
 
 #[derive(Clone, Debug)]
 pub struct DeformationRegion {

@@ -1,6 +1,6 @@
-use std::collections::HashMap;
 use super::job::JobId;
 use super::task_groups::TaskGroup;
+use std::collections::HashMap;
 
 pub struct FrameGraphNode {
     pub job_id: JobId,
@@ -46,7 +46,8 @@ impl FrameGraph {
             }
         }
 
-        let mut queue: Vec<JobId> = in_degree.iter()
+        let mut queue: Vec<JobId> = in_degree
+            .iter()
             .filter(|(_, &deg)| deg == 0)
             .map(|(&id, _)| id)
             .collect();
@@ -72,9 +73,13 @@ impl FrameGraph {
         self.next_id = 0;
     }
 
-    pub fn node_count(&self) -> usize { self.nodes.len() }
+    pub fn node_count(&self) -> usize {
+        self.nodes.len()
+    }
 }
 
 impl Default for FrameGraph {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::any::Any;
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum DebugCategory {
@@ -44,7 +44,10 @@ impl DebugRegistry {
     }
 
     pub fn is_enabled(&self, name: &str) -> bool {
-        self.views.iter().find(|v| v.name == name).map_or(false, |v| v.enabled)
+        self.views
+            .iter()
+            .find(|v| v.name == name)
+            .map_or(false, |v| v.enabled)
     }
 
     pub fn set_data<T: Any + Send + Sync>(&mut self, key: &str, value: T) {
@@ -60,10 +63,15 @@ impl DebugRegistry {
     }
 
     pub fn views_in_category(&self, category: DebugCategory) -> Vec<&DebugView> {
-        self.views.iter().filter(|v| v.category == category).collect()
+        self.views
+            .iter()
+            .filter(|v| v.category == category)
+            .collect()
     }
 }
 
 impl Default for DebugRegistry {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

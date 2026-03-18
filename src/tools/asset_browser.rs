@@ -61,10 +61,13 @@ impl AssetBrowser {
     }
 
     pub fn visible_assets(&self) -> Vec<&AssetEntry> {
-        self.assets.iter()
+        self.assets
+            .iter()
             .filter(|a| {
                 if let Some(ref t) = self.filter_type {
-                    if a.asset_type != *t { return false; }
+                    if a.asset_type != *t {
+                        return false;
+                    }
                 }
                 if !self.filter_text.is_empty() {
                     if !a.name.to_lowercase().contains(&self.filter_text) {
@@ -86,7 +89,9 @@ impl AssetBrowser {
     }
 
     pub fn asset_types(&self) -> Vec<String> {
-        let mut types: Vec<String> = self.assets.iter()
+        let mut types: Vec<String> = self
+            .assets
+            .iter()
             .map(|a| a.asset_type.clone())
             .collect::<std::collections::HashSet<_>>()
             .into_iter()
@@ -116,15 +121,27 @@ impl AssetBrowser {
         });
 
         ui.separator();
-        ui.label(format!("{} assets, {:.1} MB total",
+        ui.label(format!(
+            "{} assets, {:.1} MB total",
             self.asset_count(),
             self.total_size() as f64 / (1024.0 * 1024.0)
         ));
         ui.separator();
 
-        let visible: Vec<(u64, String)> = self.visible_assets()
+        let visible: Vec<(u64, String)> = self
+            .visible_assets()
             .iter()
-            .map(|a| (a.id, format!("[{}] {} ({:.1} KB)", a.asset_type, a.name, a.size_bytes as f64 / 1024.0)))
+            .map(|a| {
+                (
+                    a.id,
+                    format!(
+                        "[{}] {} ({:.1} KB)",
+                        a.asset_type,
+                        a.name,
+                        a.size_bytes as f64 / 1024.0
+                    ),
+                )
+            })
             .collect();
         for (id, label) in &visible {
             let selected = self.selected == Some(*id);
@@ -136,5 +153,7 @@ impl AssetBrowser {
 }
 
 impl Default for AssetBrowser {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

@@ -57,7 +57,8 @@ impl EngineSystem for AudioIntegrationSystem {
             .map(|a| a.listener_pos)
             .unwrap_or(glam::Vec3::ZERO);
 
-        let triggers: Vec<SoundTrigger> = ctx.events
+        let triggers: Vec<SoundTrigger> = ctx
+            .events
             .read::<SoundTrigger>()
             .iter()
             .map(|r| (*r).clone())

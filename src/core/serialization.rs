@@ -16,7 +16,11 @@ pub struct SchemaVersion {
 
 impl SchemaVersion {
     pub fn new(major: u32, minor: u32, patch: u32) -> Self {
-        Self { major, minor, patch }
+        Self {
+            major,
+            minor,
+            patch,
+        }
     }
 
     pub fn is_compatible(&self, other: &SchemaVersion) -> bool {
@@ -89,25 +93,25 @@ impl SerializationRegistry {
     }
 
     pub fn authoritative_types(&self) -> Vec<&str> {
-        self.schemas.values()
+        self.schemas
+            .values()
             .filter(|s| s.authority == DataAuthority::Authoritative)
             .map(|s| s.type_name.as_str())
             .collect()
     }
 
     pub fn deterministic_types(&self) -> Vec<&str> {
-        self.schemas.values()
+        self.schemas
+            .values()
             .filter(|s| s.deterministic)
             .map(|s| s.type_name.as_str())
             .collect()
     }
 
     pub fn migrations_for(&self, _type_name: &str, from: &SchemaVersion) -> Vec<&FieldMigration> {
-        self.migrations.iter()
-            .filter(|m| {
-                m.from_version.major == from.major
-                    && m.from_version.minor >= from.minor
-            })
+        self.migrations
+            .iter()
+            .filter(|m| m.from_version.major == from.major && m.from_version.minor >= from.minor)
             .collect()
     }
 
@@ -138,5 +142,7 @@ impl SerializationRegistry {
 }
 
 impl Default for SerializationRegistry {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

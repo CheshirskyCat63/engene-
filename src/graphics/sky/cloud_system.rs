@@ -21,11 +21,7 @@ fn hash3(p: [i32; 3]) -> [f32; 3] {
     let f = ((n & 0x7fff_ffff) as f32) / 2147483647.0;
     let theta = f * 6.2831853;
     let phi = ((n.wrapping_mul(31) & 0x7fff_ffff) as f32 / 2147483647.0) * 3.1415926;
-    [
-        theta.sin() * phi.cos(),
-        theta.sin() * phi.sin(),
-        phi.cos(),
-    ]
+    [theta.sin() * phi.cos(), theta.sin() * phi.sin(), phi.cos()]
 }
 
 /// Value/gradient noise 3D (deterministic, Perlin-like).
@@ -50,11 +46,7 @@ fn gradient_noise_3d(p: [f32; 3]) -> f32 {
             for dz in 0..2 {
                 let gi = [i0[0] + dx, i0[1] + dy, i0[2] + dz];
                 let g = hash3(gi);
-                let diff = [
-                    dx as f32 - f[0],
-                    dy as f32 - f[1],
-                    dz as f32 - f[2],
-                ];
+                let diff = [dx as f32 - f[0], dy as f32 - f[1], dz as f32 - f[2]];
                 let t = diff[0] * g[0] + diff[1] * g[1] + diff[2] * g[2];
                 let wx = if dx == 0 { 1.0 - u } else { u };
                 let wy = if dy == 0 { 1.0 - v } else { v };
@@ -110,11 +102,7 @@ fn generate_perlin_worley_3d() -> Vec<u8> {
         for y in 0..size {
             for x in 0..size {
                 let scale = 0.02;
-                let p = [
-                    x as f32 * scale,
-                    y as f32 * scale,
-                    z as f32 * scale,
-                ];
+                let p = [x as f32 * scale, y as f32 * scale, z as f32 * scale];
 
                 let perlin_low = gradient_noise_3d(p);
                 let perlin_mid = gradient_noise_3d([p[0] * 2.0, p[1] * 2.0, p[2] * 2.0]);
@@ -146,11 +134,7 @@ fn generate_worley_3d() -> Vec<u8> {
         for y in 0..size {
             for x in 0..size {
                 let scale = 0.15;
-                let p = [
-                    x as f32 * scale,
-                    y as f32 * scale,
-                    z as f32 * scale,
-                ];
+                let p = [x as f32 * scale, y as f32 * scale, z as f32 * scale];
                 let w = worley_noise_3d(p).clamp(0.0, 1.0);
                 out[z * size * size + y * size + x] = (w * 255.0) as u8;
             }

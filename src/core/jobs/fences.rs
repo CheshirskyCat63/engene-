@@ -7,7 +7,9 @@ pub struct Fence {
 
 impl Fence {
     pub fn new() -> Self {
-        Self { signaled: Arc::new(AtomicBool::new(false)) }
+        Self {
+            signaled: Arc::new(AtomicBool::new(false)),
+        }
     }
 
     pub fn signal(&self) {
@@ -30,11 +32,15 @@ impl Fence {
 }
 
 impl Default for Fence {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Clone for Fence {
     fn clone(&self) -> Self {
-        Self { signaled: Arc::clone(&self.signaled) }
+        Self {
+            signaled: Arc::clone(&self.signaled),
+        }
     }
 }

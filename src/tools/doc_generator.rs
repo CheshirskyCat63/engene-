@@ -1,5 +1,5 @@
 //! Documentation Generator (Phase D.6)
-//! 
+//!
 //! Generates API documentation, READMEs, and inline docs.
 
 use std::collections::HashMap;
@@ -117,16 +117,14 @@ impl DocGenerator {
 
     fn scan_modules(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         let src_dir = &self.config.src_dir;
-        
+
         for entry in fs::read_dir(src_dir)? {
             let entry = entry?;
             let path = entry.path();
-            
+
             if path.is_dir() {
-                let module_name = path.file_name()
-                    .and_then(|n| n.to_str())
-                    .unwrap_or("");
-                
+                let module_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+
                 // Skip internal dirs
                 if module_name.starts_with('.') || module_name == "target" {
                     continue;
@@ -144,9 +142,13 @@ impl DocGenerator {
         Ok(())
     }
 
-    fn parse_module_doc(&self, path: &Path, name: &str) -> Result<ModuleDoc, Box<dyn std::error::Error>> {
+    fn parse_module_doc(
+        &self,
+        path: &Path,
+        name: &str,
+    ) -> Result<ModuleDoc, Box<dyn std::error::Error>> {
         let content = fs::read_to_string(path)?;
-        
+
         let mut doc = ModuleDoc::default();
         doc.name = name.to_string();
 
@@ -157,7 +159,7 @@ impl DocGenerator {
 
         for line in &lines {
             let trimmed = line.trim();
-            
+
             if trimmed.starts_with("//!") {
                 in_doc_comment = true;
                 let doc_line = trimmed.trim_start_matches("//!").trim();
@@ -171,7 +173,10 @@ impl DocGenerator {
                 doc.status = trimmed.trim_start_matches("# Status:").trim().to_string();
             }
             if trimmed.starts_with("# Integration:") {
-                doc.integration = trimmed.trim_start_matches("# Integration:").trim().to_string();
+                doc.integration = trimmed
+                    .trim_start_matches("# Integration:")
+                    .trim()
+                    .to_string();
             }
             if trimmed.starts_with("# Tests:") {
                 doc.tests = trimmed.trim_start_matches("# Tests:").trim().to_string();
@@ -193,7 +198,7 @@ impl DocGenerator {
 
         for (name, module) in &self.modules {
             content.push_str(&format!("### `{}`\n\n", name));
-            
+
             if !module.description.is_empty() {
                 content.push_str(&format!("{}\n\n", module.description));
             }
@@ -215,7 +220,7 @@ impl DocGenerator {
         let mut content = String::new();
 
         content.push_str("# ENGENE Engine Documentation\n\n");
-        content.push_str("Auto-generated documentation. See [ROADMAP.md](../ROADMAP.md) for development status.\n\n");
+        content.push_str("Auto-generated documentation. See [ENGENE_2_0_ROADMAP.md](../docs/canonical/ENGENE_2_0_ROADMAP.md) for 2.0 phase status.\n\n");
         content.push_str("## Modules\n\n");
         content.push_str("| Module | Status | Integration | Tests |\n");
         content.push_str("|--------|--------|-------------|-------|\n");
@@ -236,9 +241,9 @@ impl DocGenerator {
 
     fn generate_module_index(&self) -> Result<(), Box<dyn std::error::Error>> {
         let index_path = self.config.output_dir.join("modules.json");
-        
+
         let mut json = String::from("[\n");
-        
+
         let modules: Vec<_> = self.modules.values().collect();
         for (i, module) in modules.iter().enumerate() {
             json.push_str(&format!(
@@ -250,9 +255,9 @@ impl DocGenerator {
             }
             json.push_str("\n");
         }
-        
+
         json.push_str("]\n");
-        
+
         fs::write(index_path, json)?;
         Ok(())
     }

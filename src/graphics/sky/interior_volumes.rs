@@ -29,9 +29,12 @@ pub struct InteriorWeatherVolume {
 
 impl InteriorWeatherVolume {
     pub fn contains(&self, pos: Vec3) -> bool {
-        pos.x >= self.min.x && pos.x <= self.max.x
-            && pos.y >= self.min.y && pos.y <= self.max.y
-            && pos.z >= self.min.z && pos.z <= self.max.z
+        pos.x >= self.min.x
+            && pos.x <= self.max.x
+            && pos.y >= self.min.y
+            && pos.y <= self.max.y
+            && pos.z >= self.min.z
+            && pos.z <= self.max.z
     }
 
     pub fn rain_factor(&self, rain_dir: Vec3) -> f32 {
@@ -45,7 +48,9 @@ impl InteriorWeatherVolume {
             ShelterClass::EnclosedBroken => {
                 let mut ingress = 0.0;
                 for opening in &self.openings {
-                    if opening.has_glass { continue; }
+                    if opening.has_glass {
+                        continue;
+                    }
                     let alignment = (-rain_dir).dot(opening.normal).max(0.0);
                     ingress += alignment * opening.area * 0.01;
                 }

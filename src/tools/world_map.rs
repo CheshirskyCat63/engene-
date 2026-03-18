@@ -35,8 +35,12 @@ impl WorldMapPanel {
 
         for &e in &ecs.alive {
             if let Some(t) = ecs.get_transform(e) {
-                let cx = (t.x / self.cell_size).min(self.grid_size as f32 - 1.0).max(0.0) as usize;
-                let cy = (t.y / self.cell_size).min(self.grid_size as f32 - 1.0).max(0.0) as usize;
+                let cx = (t.x / self.cell_size)
+                    .min(self.grid_size as f32 - 1.0)
+                    .max(0.0) as usize;
+                let cy = (t.y / self.cell_size)
+                    .min(self.grid_size as f32 - 1.0)
+                    .max(0.0) as usize;
                 let idx = cy * gs + cx;
                 match ecs.get_kind(e) {
                     Some(EntityKind::Npc) => npc_counts[idx] += 1,
@@ -64,25 +68,42 @@ impl WorldMapPanel {
     }
 
     pub fn total_entities(&self) -> u32 {
-        self.cells.iter().map(|c| c.npc_count + c.monster_count).sum()
+        self.cells
+            .iter()
+            .map(|c| c.npc_count + c.monster_count)
+            .sum()
     }
 }
 
 impl WorldMapPanel {
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("World Map").default_width(300.0).show(ctx, |ui| {
-            ui.label(format!("Grid: {}x{} cells @ {:.0}m", self.grid_size, self.grid_size, self.cell_size));
-            ui.label(format!("Populated cells: {}  Entities: {}", self.cells.len(), self.total_entities()));
-            ui.separator();
-            egui::ScrollArea::vertical().max_height(250.0).show(ui, |ui| {
-                for cell in &self.cells {
-                    ui.horizontal(|ui| {
-                        ui.monospace(format!("[{},{}]", cell.x, cell.y));
-                        ui.label(format!("NPCs:{} Monsters:{}", cell.npc_count, cell.monster_count));
+        egui::Window::new("World Map")
+            .default_width(300.0)
+            .show(ctx, |ui| {
+                ui.label(format!(
+                    "Grid: {}x{} cells @ {:.0}m",
+                    self.grid_size, self.grid_size, self.cell_size
+                ));
+                ui.label(format!(
+                    "Populated cells: {}  Entities: {}",
+                    self.cells.len(),
+                    self.total_entities()
+                ));
+                ui.separator();
+                egui::ScrollArea::vertical()
+                    .max_height(250.0)
+                    .show(ui, |ui| {
+                        for cell in &self.cells {
+                            ui.horizontal(|ui| {
+                                ui.monospace(format!("[{},{}]", cell.x, cell.y));
+                                ui.label(format!(
+                                    "NPCs:{} Monsters:{}",
+                                    cell.npc_count, cell.monster_count
+                                ));
+                            });
+                        }
                     });
-                }
             });
-        });
     }
 }
 

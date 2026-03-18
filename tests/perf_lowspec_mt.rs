@@ -2,20 +2,25 @@
 //! 110 tests covering QualityGovernor, degradation, BudgetRegistry, LowSpecCertifier,
 //! Telemetry, WorkerPool, DirtySet, Simulation LOD, Physics LOD, Engine integration, RuntimeConfig.
 
-use engene::core::quality_governor::{QualityGovernor, PressureLevel, degradation_order, systems_to_disable};
-use engene::core::runtime_config::{QualityTier, RuntimeConfig, RuntimeProfile};
-use engene::core::budget_registry::{BudgetRegistry, BudgetEntry, create_default_registry};
+use engene::app::runtime_assembly::RuntimeAssembly;
+use engene::core::budget_registry::{create_default_registry, BudgetEntry, BudgetRegistry};
+use engene::core::dirty_set::DirtySet;
+use engene::core::jobs::WorkerPool;
 use engene::core::perf::low_spec_cert::LowSpecCertifier;
 use engene::core::perf::telemetry::Telemetry;
-use engene::core::jobs::WorkerPool;
-use engene::core::dirty_set::DirtySet;
-use engene::simulation::simulation_level::{level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L2_RADIUS, L1_TICK_INTERVAL, L2_TICK_INTERVAL};
+use engene::core::quality_governor::{
+    degradation_order, systems_to_disable, PressureLevel, QualityGovernor,
+};
+use engene::core::runtime_config::{QualityTier, RuntimeConfig, RuntimeProfile};
 use engene::physics::sim_lod::PhysicsLod;
+use engene::simulation::simulation_level::{
+    level_for_distance, should_tick, L0_RADIUS, L1_RADIUS, L1_TICK_INTERVAL, L2_RADIUS,
+    L2_TICK_INTERVAL,
+};
+use engene::world::biome::Biome;
 use engene::world::components::SimulationLevel;
-use engene::app::runtime_assembly::RuntimeAssembly;
 use engene::world::heightmap::Heightmap;
 use engene::world::world::WorldGrid;
-use engene::world::biome::Biome;
 use std::sync::Arc;
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -213,7 +218,11 @@ fn br_total_budget_us_known_sum() {
 fn br_record_measurement_updates_last_measured() {
     let mut reg = create_default_registry();
     reg.record_measurement("damage_pipeline", 100);
-    let entry = reg.entries().iter().find(|e| e.phase_name == "damage_pipeline").unwrap();
+    let entry = reg
+        .entries()
+        .iter()
+        .find(|e| e.phase_name == "damage_pipeline")
+        .unwrap();
     assert_eq!(entry.last_measured_us, 100);
 }
 

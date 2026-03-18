@@ -49,22 +49,34 @@ impl EngineSystem for ClosedLoopRecorderSystem {
 
         let deaths = ctx.events.read::<EntityDied>();
         recorder.deaths += deaths.len() as u32;
-        let e = recorder.events_processed.entry("EntityDied".into()).or_insert(0);
+        let e = recorder
+            .events_processed
+            .entry("EntityDied".into())
+            .or_insert(0);
         *e = e.saturating_add(deaths.len() as u64);
 
         let impacts = ctx.events.read::<ImpactEvent>();
         recorder.impacts += impacts.len() as u32;
-        let e = recorder.events_processed.entry("ImpactEvent".into()).or_insert(0);
+        let e = recorder
+            .events_processed
+            .entry("ImpactEvent".into())
+            .or_insert(0);
         *e = e.saturating_add(impacts.len() as u64);
 
         let nav = ctx.events.read::<NavUpdated>();
         recorder.nav_updates += nav.len() as u32;
-        let e = recorder.events_processed.entry("NavUpdated".into()).or_insert(0);
+        let e = recorder
+            .events_processed
+            .entry("NavUpdated".into())
+            .or_insert(0);
         *e = e.saturating_add(nav.len() as u64);
 
         let topo = ctx.events.read::<WorldTopologyChanged>();
         recorder.topology_changes += topo.len() as u32;
-        let e = recorder.events_processed.entry("WorldTopologyChanged".into()).or_insert(0);
+        let e = recorder
+            .events_processed
+            .entry("WorldTopologyChanged".into())
+            .or_insert(0);
         *e = e.saturating_add(topo.len() as u64);
     }
 }
@@ -99,16 +111,19 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.insert_resource(ClosedLoopRecorder::default());
 
     let mut world_fields = crate::world::fields::WorldFields::new();
-    world_fields.anomaly.zones.push(crate::world::fields::AnomalyZone {
-        center: glam::Vec3::new(
-            crate::world::cell::WORLD_SIZE * 0.7,
-            0.0,
-            crate::world::cell::WORLD_SIZE * 0.3,
-        ),
-        radius: 80.0,
-        force_strength: 15.0,
-        force_type: crate::world::fields::AnomalyForceType::Vortex,
-    });
+    world_fields
+        .anomaly
+        .zones
+        .push(crate::world::fields::AnomalyZone {
+            center: glam::Vec3::new(
+                crate::world::cell::WORLD_SIZE * 0.7,
+                0.0,
+                crate::world::cell::WORLD_SIZE * 0.3,
+            ),
+            radius: 80.0,
+            force_strength: 15.0,
+            force_type: crate::world::fields::AnomalyForceType::Vortex,
+        });
     builder.insert_resource(world_fields);
     builder.insert_resource(crate::physics::destruction::DestructionSystem::new());
     builder.insert_resource(crate::world::terrain_deformation::TerrainDeformationSystem::new());
@@ -117,9 +132,9 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.add_plugin(crate::game::weapons_plugin::WeaponsPlugin::new("game/data"));
 
     {
-        use std::collections::HashMap;
-        use crate::game::ai::combat_tactics::tactics::TacticProfile;
         use crate::core::config::{load_config, ConfigEnvelope};
+        use crate::game::ai::combat_tactics::tactics::TacticProfile;
+        use std::collections::HashMap;
         let tactics: HashMap<String, TacticProfile> =
             load_config::<ConfigEnvelope<HashMap<String, TacticProfile>>>("game/data/tactics.ron")
                 .map(|e| e.data)
@@ -138,29 +153,28 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     }
 
     builder.insert_resource(crate::world::streaming::WorldStreamer::new(3000.0, 4000.0));
-    builder.insert_resource(std::sync::Mutex::new(crate::memory::asset_manager::AssetManager::new()));
+    builder.insert_resource(std::sync::Mutex::new(
+        crate::memory::asset_manager::AssetManager::new(),
+    ));
     builder.insert_resource(crate::audio::audio::AudioEngine::new());
     builder.insert_resource(crate::world::hierarchical_spatial::HierarchicalSpatialIndex::new());
     builder.insert_resource(crate::navigation::hpa_star::HpaGraph::build());
     builder.insert_resource(crate::world::origin_shift::OriginShift::new());
     builder.insert_resource(crate::navigation::dynamic_nav_update::NavDirtyTracker::new());
-    builder.insert_resource(
-        crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new(),
-    );
+    builder
+        .insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
     builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
     builder.insert_resource(crate::core::component_registry::ComponentRegistry::default_registry());
     builder.insert_resource(crate::core::material_truth::MaterialTruthService::empty());
-    builder.insert_resource(
-        crate::graphics::surface_state_render::SurfaceStateRenderSystem::new(),
-    );
+    builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
 
     let center = crate::world::cell::WORLD_SIZE * 0.5;
-    builder.add_system_default(Box::new(crate::simulation::simulation::SimulationSystem::new(
-        center, center,
-    )));
-    builder.add_system_default(Box::new(crate::game::runtime_world_tick::WorldTickSystem::new(
-        grid,
-    )));
+    builder.add_system_default(Box::new(
+        crate::simulation::simulation::SimulationSystem::new(center, center),
+    ));
+    builder.add_system_default(Box::new(
+        crate::game::runtime_world_tick::WorldTickSystem::new(grid),
+    ));
     builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
     builder.add_system_default(Box::new(crate::physics::physics::PhysicsSystem::new(
         heightmap,
@@ -169,15 +183,21 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.add_system_default(Box::new(
         crate::game::integration_systems::BallisticsTickSystem,
     ));
-    builder.add_system_default(Box::new(crate::game::integration_systems::DamageDispatchSystem));
+    builder.add_system_default(Box::new(
+        crate::game::integration_systems::DamageDispatchSystem,
+    ));
     builder.add_system_default(Box::new(
         crate::game::integration_systems::DestructionTickSystem,
     ));
     builder.add_system_default(Box::new(
         crate::game::integration_systems::TerrainDeformationTickSystem,
     ));
-    builder.add_system_default(Box::new(crate::game::integration_systems::NavDirtyTickSystem));
-    builder.add_system_default(Box::new(crate::game::integration_systems::OcclusionWireSystem));
+    builder.add_system_default(Box::new(
+        crate::game::integration_systems::NavDirtyTickSystem,
+    ));
+    builder.add_system_default(Box::new(
+        crate::game::integration_systems::OcclusionWireSystem,
+    ));
     builder.add_system_default(Box::new(crate::game::integration_systems::GoreWireSystem));
     builder.add_system_default(Box::new(
         crate::game::animation_integration::AnimationIntegrationSystem::new(),
@@ -258,7 +278,10 @@ pub struct ClosedLoopValidation {
 
 /// Validate report: money circulated, at least one death in long sim, destruction occurred,
 /// nav updates occurred, no entity count explosion.
-pub fn validate_closed_loop(report: &ClosedLoopReport, min_ticks_for_death: u64) -> ClosedLoopValidation {
+pub fn validate_closed_loop(
+    report: &ClosedLoopReport,
+    min_ticks_for_death: u64,
+) -> ClosedLoopValidation {
     let mut messages = Vec::new();
     let mut passed = true;
 
@@ -287,10 +310,7 @@ pub fn validate_closed_loop(report: &ClosedLoopReport, min_ticks_for_death: u64)
         messages.push("No destruction/topology events in long simulation".to_string());
         passed = false;
     } else if report.topology_changes > 0 {
-        messages.push(format!(
-            "Destruction events: {}",
-            report.topology_changes
-        ));
+        messages.push(format!("Destruction events: {}", report.topology_changes));
     }
 
     if report.nav_updates == 0 && report.ticks > 50 {

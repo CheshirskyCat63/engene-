@@ -1,7 +1,7 @@
 //! Entity-related events.
 
-use crate::core::ecs::Entity;
 use super::entity_kind::MonsterSpecies;
+use crate::core::ecs::Entity;
 
 /// Emitted when an entity dies.
 #[derive(Clone, Debug)]

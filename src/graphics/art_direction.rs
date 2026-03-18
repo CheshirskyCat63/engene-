@@ -103,9 +103,8 @@ impl ArtDirectionProfile {
     pub fn interpolate(&self, other: &Self, t: f32) -> Self {
         let t = t.clamp(0.0, 1.0);
         let lerp = |a: f32, b: f32| a + (b - a) * t;
-        let lerp3 = |a: [f32; 3], b: [f32; 3]| {
-            [lerp(a[0], b[0]), lerp(a[1], b[1]), lerp(a[2], b[2])]
-        };
+        let lerp3 =
+            |a: [f32; 3], b: [f32; 3]| [lerp(a[0], b[0]), lerp(a[1], b[1]), lerp(a[2], b[2])];
         Self {
             name: format!("blend({}, {})", self.name, other.name),
             fog_near: lerp(self.fog_near, other.fog_near),
@@ -113,10 +112,7 @@ impl ArtDirectionProfile {
             fog_color_day: lerp3(self.fog_color_day, other.fog_color_day),
             fog_color_night: lerp3(self.fog_color_night, other.fog_color_night),
             fog_density: lerp(self.fog_density, other.fog_density),
-            ambient_intensity_day: lerp(
-                self.ambient_intensity_day,
-                other.ambient_intensity_day,
-            ),
+            ambient_intensity_day: lerp(self.ambient_intensity_day, other.ambient_intensity_day),
             ambient_intensity_night: lerp(
                 self.ambient_intensity_night,
                 other.ambient_intensity_night,

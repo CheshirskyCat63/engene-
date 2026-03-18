@@ -7,19 +7,33 @@ use crate::world::cell::{CELL_SIZE, GRID_SIZE};
 use crate::world::components::*;
 
 static NPC_NAMES: &[&str] = &[
-    "Viktor", "Elena", "Sasha", "Dmitri", "Irina",
-    "Andrei", "Natasha", "Boris", "Yuri", "Olga",
-    "Maxim", "Tatiana", "Sergei", "Anya", "Pavel",
-    "Ilya", "Marina", "Roman", "Vera", "Artem",
+    "Viktor", "Elena", "Sasha", "Dmitri", "Irina", "Andrei", "Natasha", "Boris", "Yuri", "Olga",
+    "Maxim", "Tatiana", "Sergei", "Anya", "Pavel", "Ilya", "Marina", "Roman", "Vera", "Artem",
 ];
 
 pub fn spawn_npcs(ecs: &mut Ecs) {
     let mut rng = rand::thread_rng();
     let jobs = [
-        Job::Guard, Job::Trader, Job::ArtifactHunter, Job::Guard, Job::Trader,
-        Job::ArtifactHunter, Job::Guard, Job::Trader, Job::Guard, Job::ArtifactHunter,
-        Job::Trader, Job::Guard, Job::ArtifactHunter, Job::Trader, Job::Guard,
-        Job::ArtifactHunter, Job::Guard, Job::Trader, Job::Guard, Job::Trader,
+        Job::Guard,
+        Job::Trader,
+        Job::ArtifactHunter,
+        Job::Guard,
+        Job::Trader,
+        Job::ArtifactHunter,
+        Job::Guard,
+        Job::Trader,
+        Job::Guard,
+        Job::ArtifactHunter,
+        Job::Trader,
+        Job::Guard,
+        Job::ArtifactHunter,
+        Job::Trader,
+        Job::Guard,
+        Job::ArtifactHunter,
+        Job::Guard,
+        Job::Trader,
+        Job::Guard,
+        Job::Trader,
     ];
 
     for (i, &name) in NPC_NAMES.iter().enumerate() {
@@ -28,36 +42,51 @@ pub fn spawn_npcs(ecs: &mut Ecs) {
         let cx = rng.gen_range(center.saturating_sub(2)..center + 2);
         let cy = rng.gen_range(center.saturating_sub(2)..center + 2);
 
-        ecs.transforms.insert(e, Transform {
-            x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
-            y: cy as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
-            cell_x: cx,
-            cell_y: cy,
-        });
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
+                y: cy as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
+                cell_x: cx,
+                cell_y: cy,
+            },
+        );
         ecs.kinds.insert(e, EntityKind::Npc);
         ecs.names.insert(e, Name(name.to_string()));
         ecs.npc_traits.insert(e, random_npc_traits(&mut rng));
         ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
         ecs.social_needs.insert(e, SocialNeeds::default());
-        ecs.npc_economies.insert(e, NpcEconomy {
-            money: rng.gen_range(20.0..60.0),
-            monthly_required: 50.0,
-            job: jobs[i % jobs.len()],
-            desperation: 0.0,
-        });
-        ecs.sim_levels.insert(e, SimLevel { level: SimulationLevel::L1 });
+        ecs.npc_economies.insert(
+            e,
+            NpcEconomy {
+                money: rng.gen_range(20.0..60.0),
+                monthly_required: 50.0,
+                job: jobs[i % jobs.len()],
+                desperation: 0.0,
+            },
+        );
+        ecs.sim_levels.insert(
+            e,
+            SimLevel {
+                level: SimulationLevel::L1,
+            },
+        );
         ecs.ai_states.insert(e, AiState::Idle);
         ecs.inventories.insert(e, Inventory { items: Vec::new() });
         ecs.memories.insert(e, Memory::new());
         ecs.emotions.insert(e, Emotions::new());
-        ecs.life_info.insert(e, LifeInfo {
-            age: rng.gen_range(80.0..200.0),
-            max_age: rng.gen_range(350.0..450.0),
-            last_mate_day: 0,
-            mate_cooldown_days: 60,
-        });
+        ecs.life_info.insert(
+            e,
+            LifeInfo {
+                age: rng.gen_range(80.0..200.0),
+                max_age: rng.gen_range(350.0..450.0),
+                last_mate_day: 0,
+                mate_cooldown_days: 60,
+            },
+        );
         ecs.equipment.insert(e, EquipmentSlots::default_stalker());
-        ecs.faction_memberships.insert(e, FactionMembership::default());
+        ecs.faction_memberships
+            .insert(e, FactionMembership::default());
     }
 }
 
@@ -88,18 +117,29 @@ pub fn spawn_monsters(ecs: &mut Ecs) {
     for &(species, count, cx, cy) in &packs {
         for _ in 0..count {
             let (e, _pid) = ecs.spawn_new();
-            ecs.transforms.insert(e, Transform {
-                x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
-                y: cy as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
-                cell_x: cx,
-                cell_y: cy,
-            });
+            ecs.transforms.insert(
+                e,
+                Transform {
+                    x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
+                    y: cy as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
+                    cell_x: cx,
+                    cell_y: cy,
+                },
+            );
             ecs.kinds.insert(e, EntityKind::Monster(species));
             ecs.names.insert(e, Name(format!("{}", species)));
-            ecs.monster_traits.insert(e, random_monster_traits(&mut rng, species));
-            ecs.personal_needs.insert(e, PersonalNeeds::default_monster());
-            ecs.ecosystem_needs.insert(e, EcosystemNeeds::for_species(species));
-            ecs.sim_levels.insert(e, SimLevel { level: SimulationLevel::L1 });
+            ecs.monster_traits
+                .insert(e, random_monster_traits(&mut rng, species));
+            ecs.personal_needs
+                .insert(e, PersonalNeeds::default_monster());
+            ecs.ecosystem_needs
+                .insert(e, EcosystemNeeds::for_species(species));
+            ecs.sim_levels.insert(
+                e,
+                SimLevel {
+                    level: SimulationLevel::L1,
+                },
+            );
             ecs.ai_states.insert(e, AiState::Idle);
             ecs.inventories.insert(e, Inventory { items: Vec::new() });
             ecs.memories.insert(e, Memory::new());

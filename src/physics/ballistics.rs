@@ -53,16 +53,45 @@ impl MaterialTable {
 
 #[derive(Clone, Debug)]
 pub enum ImpactResult {
-    Stopped { pos: Vec3, normal: Vec3, material: MaterialId },
-    Ricochet { pos: Vec3, new_vel: Vec3, energy_lost: f32 },
-    Penetrated { pos: Vec3, exit_vel: Vec3, energy_lost: f32 },
+    Stopped {
+        pos: Vec3,
+        normal: Vec3,
+        material: MaterialId,
+    },
+    Ricochet {
+        pos: Vec3,
+        new_vel: Vec3,
+        energy_lost: f32,
+    },
+    Penetrated {
+        pos: Vec3,
+        exit_vel: Vec3,
+        energy_lost: f32,
+    },
 }
 
 #[derive(Clone, Debug)]
 pub enum BallisticEvent {
-    ShotFired { seed: u32, origin: Vec3, dir: Vec3, weapon_id: u16, owner: Entity },
-    Impact { seed: u32, hit_pos: Vec3, normal: Vec3, material: MaterialId, damage: f32 },
-    EntityHit { entity: Entity, damage: f32, hit_pos: Vec3, projectile_vel: Vec3 },
+    ShotFired {
+        seed: u32,
+        origin: Vec3,
+        dir: Vec3,
+        weapon_id: u16,
+        owner: Entity,
+    },
+    Impact {
+        seed: u32,
+        hit_pos: Vec3,
+        normal: Vec3,
+        material: MaterialId,
+        damage: f32,
+    },
+    EntityHit {
+        entity: Entity,
+        damage: f32,
+        hit_pos: Vec3,
+        projectile_vel: Vec3,
+    },
 }
 
 pub struct BallisticsSystem {
@@ -82,7 +111,17 @@ impl BallisticsSystem {
         }
     }
 
-    pub fn fire(&mut self, origin: Vec3, dir: Vec3, speed: f32, mass: f32, drag: f32, owner: Entity, weapon_id: u16, seed: u32) {
+    pub fn fire(
+        &mut self,
+        origin: Vec3,
+        dir: Vec3,
+        speed: f32,
+        mass: f32,
+        drag: f32,
+        owner: Entity,
+        weapon_id: u16,
+        seed: u32,
+    ) {
         let vel = dir.normalize() * speed;
         let energy = 0.5 * mass * speed * speed;
         self.projectiles.push(Projectile {
@@ -98,10 +137,21 @@ impl BallisticsSystem {
             weapon_id,
             distance_traveled: 0.0,
         });
-        self.events.push(BallisticEvent::ShotFired { seed, origin, dir, weapon_id, owner });
+        self.events.push(BallisticEvent::ShotFired {
+            seed,
+            origin,
+            dir,
+            weapon_id,
+            owner,
+        });
     }
 
-    pub fn update(&mut self, dt: f32, fields: &WorldFields, terrain_height_fn: &dyn Fn(f32, f32) -> f32) {
+    pub fn update(
+        &mut self,
+        dt: f32,
+        fields: &WorldFields,
+        terrain_height_fn: &dyn Fn(f32, f32) -> f32,
+    ) {
         self.events.clear();
         let mut to_remove = Vec::new();
 
@@ -153,10 +203,21 @@ impl BallisticsSystem {
         }
     }
 
-    pub fn resolve_impact(&self, proj: &Projectile, hit_normal: Vec3, mat_id: MaterialId) -> ImpactResult {
+    pub fn resolve_impact(
+        &self,
+        proj: &Projectile,
+        hit_normal: Vec3,
+        mat_id: MaterialId,
+    ) -> ImpactResult {
         let mat = match self.material_table.get(mat_id) {
             Some(m) => m,
-            None => return ImpactResult::Stopped { pos: proj.pos, normal: hit_normal, material: mat_id },
+            None => {
+                return ImpactResult::Stopped {
+                    pos: proj.pos,
+                    normal: hit_normal,
+                    material: mat_id,
+                }
+            }
         };
 
         let incident_dir = proj.vel.normalize();
@@ -183,7 +244,11 @@ impl BallisticsSystem {
             };
         }
 
-        ImpactResult::Stopped { pos: proj.pos, normal: hit_normal, material: mat_id }
+        ImpactResult::Stopped {
+            pos: proj.pos,
+            normal: hit_normal,
+            material: mat_id,
+        }
     }
 
     pub fn analytical_trajectory(

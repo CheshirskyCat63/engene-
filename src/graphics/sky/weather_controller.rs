@@ -51,11 +51,26 @@ impl WeatherController {
         self.target_state = state;
         self.transition_progress = 1.0;
         match state {
-            WeatherState::Clear => { self.cloud_coverage = 0.1; self.humidity = 0.3; }
-            WeatherState::Cloudy => { self.cloud_coverage = 0.6; self.humidity = 0.6; }
-            WeatherState::Storm => { self.cloud_coverage = 0.95; self.humidity = 0.9; }
-            WeatherState::Rain => { self.cloud_coverage = 0.8; self.humidity = 0.85; }
-            WeatherState::Clearing => { self.cloud_coverage = 0.4; self.humidity = 0.5; }
+            WeatherState::Clear => {
+                self.cloud_coverage = 0.1;
+                self.humidity = 0.3;
+            }
+            WeatherState::Cloudy => {
+                self.cloud_coverage = 0.6;
+                self.humidity = 0.6;
+            }
+            WeatherState::Storm => {
+                self.cloud_coverage = 0.95;
+                self.humidity = 0.9;
+            }
+            WeatherState::Rain => {
+                self.cloud_coverage = 0.8;
+                self.humidity = 0.85;
+            }
+            WeatherState::Clearing => {
+                self.cloud_coverage = 0.4;
+                self.humidity = 0.5;
+            }
         }
     }
 
@@ -80,7 +95,8 @@ impl WeatherController {
         if self.storm_cells.len() >= 3 {
             return;
         }
-        let storm_risk = (self.humidity - 0.4) * (1.0 - (self.pressure - 990.0) / 40.0).clamp(0.0, 1.0);
+        let storm_risk =
+            (self.humidity - 0.4) * (1.0 - (self.pressure - 990.0) / 40.0).clamp(0.0, 1.0);
         if storm_risk < 0.3 {
             return;
         }
@@ -88,14 +104,13 @@ impl WeatherController {
         if roll < storm_risk * dt * 0.01 {
             let offset_x = (self.rng.gen::<f32>() - 0.5) * 20000.0;
             let offset_z = (self.rng.gen::<f32>() - 0.5) * 20000.0;
-            let seed = self.master_seed
+            let seed = self
+                .master_seed
                 .wrapping_add((self.time_accumulator * 1000.0) as u64)
                 .wrapping_add((offset_x as u64) << 16)
                 .wrapping_add(offset_z as u64);
-            self.storm_cells.push(StormCell::new(
-                Vec3::new(offset_x, 0.0, offset_z),
-                seed,
-            ));
+            self.storm_cells
+                .push(StormCell::new(Vec3::new(offset_x, 0.0, offset_z), seed));
         }
     }
 
@@ -107,7 +122,9 @@ impl WeatherController {
     }
 
     fn update_transitions(&mut self, dt: f32) {
-        let max_coverage = self.storm_cells.iter()
+        let max_coverage = self
+            .storm_cells
+            .iter()
             .map(|s| s.intensity * s.influence_at(Vec3::ZERO))
             .fold(self.humidity * 0.6, |a, b| a.max(b));
         let target_coverage = match self.state {
@@ -120,11 +137,16 @@ impl WeatherController {
         let effective_target = target_coverage.max(max_coverage);
         self.cloud_coverage += (effective_target - self.cloud_coverage) * dt * 0.15;
 
-        let has_active_storm = self.storm_cells.iter()
-            .any(|s| s.lifecycle_stage == StormStage::Cumulonimbus || s.lifecycle_stage == StormStage::ToweringCumulus);
-        let avg_precip: f32 = self.storm_cells.iter()
+        let has_active_storm = self.storm_cells.iter().any(|s| {
+            s.lifecycle_stage == StormStage::Cumulonimbus
+                || s.lifecycle_stage == StormStage::ToweringCumulus
+        });
+        let avg_precip: f32 = self
+            .storm_cells
+            .iter()
             .map(|s| s.precipitation_intensity())
-            .sum::<f32>() / (self.storm_cells.len().max(1) as f32);
+            .sum::<f32>()
+            / (self.storm_cells.len().max(1) as f32);
 
         let next = if has_active_storm && self.cloud_coverage > 0.5 {
             WeatherState::Storm
@@ -155,7 +177,8 @@ impl WeatherController {
     }
 
     pub fn rain_intensity(&self) -> f32 {
-        self.storm_cells.iter()
+        self.storm_cells
+            .iter()
             .map(|s| s.precipitation_intensity() * s.influence_at(Vec3::ZERO))
             .fold(0.0f32, |a, b| a.max(b))
     }

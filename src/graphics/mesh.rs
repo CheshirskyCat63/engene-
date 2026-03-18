@@ -20,8 +20,16 @@ pub struct EntityInstance {
 impl MeshVertex {
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         static ATTRS: &[wgpu::VertexAttribute] = &[
-            wgpu::VertexAttribute { offset: 0, shader_location: 0, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 12, shader_location: 1, format: wgpu::VertexFormat::Float32x3 },
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 0,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 1,
+                format: wgpu::VertexFormat::Float32x3,
+            },
         ];
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<MeshVertex>() as wgpu::BufferAddress,
@@ -34,8 +42,16 @@ impl MeshVertex {
 impl EntityInstance {
     pub fn layout() -> wgpu::VertexBufferLayout<'static> {
         static ATTRS: &[wgpu::VertexAttribute] = &[
-            wgpu::VertexAttribute { offset: 0, shader_location: 2, format: wgpu::VertexFormat::Float32x3 },
-            wgpu::VertexAttribute { offset: 12, shader_location: 3, format: wgpu::VertexFormat::Float32x3 },
+            wgpu::VertexAttribute {
+                offset: 0,
+                shader_location: 2,
+                format: wgpu::VertexFormat::Float32x3,
+            },
+            wgpu::VertexAttribute {
+                offset: 12,
+                shader_location: 3,
+                format: wgpu::VertexFormat::Float32x3,
+            },
         ];
         wgpu::VertexBufferLayout {
             array_stride: std::mem::size_of::<EntityInstance>() as wgpu::BufferAddress,
@@ -52,7 +68,13 @@ pub struct CapsuleMesh {
 }
 
 impl CapsuleMesh {
-    pub fn new(device: &wgpu::Device, radius: f32, half_body: f32, slices: u32, cap_stacks: u32) -> Self {
+    pub fn new(
+        device: &wgpu::Device,
+        radius: f32,
+        half_body: f32,
+        slices: u32,
+        cap_stacks: u32,
+    ) -> Self {
         let (verts, indices) = generate_capsule(radius, half_body, slices, cap_stacks);
         let vertex_buffer = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
             label: Some("capsule_vb"),
@@ -72,7 +94,12 @@ impl CapsuleMesh {
     }
 }
 
-fn generate_capsule(radius: f32, half_body: f32, slices: u32, cap_stacks: u32) -> (Vec<MeshVertex>, Vec<u32>) {
+fn generate_capsule(
+    radius: f32,
+    half_body: f32,
+    slices: u32,
+    cap_stacks: u32,
+) -> (Vec<MeshVertex>, Vec<u32>) {
     let mut verts = Vec::new();
     let mut idxs = Vec::new();
 

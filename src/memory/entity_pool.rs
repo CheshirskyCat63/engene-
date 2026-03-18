@@ -31,7 +31,7 @@ impl EntityPool {
         for i in (0..capacity as u32).rev() {
             free_list.push_back(i);
         }
-        
+
         Self {
             free_list,
             generations: vec![0; capacity],
@@ -58,17 +58,17 @@ impl EntityPool {
     /// Returns true if the entity was valid and deallocated.
     pub fn deallocate(&mut self, entity: PooledEntity) -> bool {
         let idx = entity.index as usize;
-        
+
         // Validate generation
         if idx >= self.capacity || self.generations[idx] != entity.generation {
             return false;
         }
-        
+
         // Increment generation to invalidate stale handles
         self.generations[idx] = self.generations[idx].wrapping_add(1);
         self.free_list.push_back(entity.index);
         self.allocated -= 1;
-        
+
         true
     }
 
@@ -101,21 +101,21 @@ mod tests {
     #[test]
     fn test_allocate_deallocate() {
         let mut pool = EntityPool::new(10);
-        
+
         let e1 = pool.allocate().expect("should allocate");
         assert_eq!(pool.allocated_count(), 1);
-        
+
         let e2 = pool.allocate().expect("should allocate");
         assert_ne!(e1.index, e2.index);
         assert_eq!(pool.allocated_count(), 2);
-        
+
         assert!(pool.deallocate(e1));
         assert_eq!(pool.allocated_count(), 1);
-        
+
         // After deallocate, pool has capacity for one more
         let e3 = pool.allocate().expect("should allocate");
         assert_eq!(pool.allocated_count(), 2);
-        
+
         // e3 should have incremented generation (either from e1's slot or another)
         assert!(pool.is_valid(e3));
     }
@@ -123,18 +123,18 @@ mod tests {
     #[test]
     fn test_stale_handle_detection() {
         let mut pool = EntityPool::new(10);
-        
+
         let e1 = pool.allocate().unwrap();
         assert!(pool.is_valid(e1));
-        
+
         pool.deallocate(e1);
-        
+
         // e1 is now stale (generation mismatch)
         assert!(!pool.is_valid(e1));
-        
+
         // Allocate new entity - will have updated generation
         let e2 = pool.allocate().unwrap();
-        
+
         // e2 is valid, e1 is still stale
         assert!(pool.is_valid(e2));
         assert!(!pool.is_valid(e1));
@@ -143,11 +143,11 @@ mod tests {
     #[test]
     fn test_pool_exhaustion() {
         let mut pool = EntityPool::new(3);
-        
+
         let _e1 = pool.allocate();
         let _e2 = pool.allocate();
         let _e3 = pool.allocate();
-        
+
         assert!(pool.allocate().is_none());
     }
 }

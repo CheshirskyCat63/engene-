@@ -1,4 +1,3 @@
-
 pub struct DebugUiState {
     pub show_inspector: bool,
     pub show_overlays: bool,
@@ -71,7 +70,13 @@ impl DebugUiState {
     }
 
     pub fn set_pressure(&mut self, pressure: f32) {
-        self.throttle_factor = if pressure > 0.8 { 0.25 } else if pressure > 0.5 { 0.5 } else { 1.0 };
+        self.throttle_factor = if pressure > 0.8 {
+            0.25
+        } else if pressure > 0.5 {
+            0.5
+        } else {
+            1.0
+        };
     }
 }
 

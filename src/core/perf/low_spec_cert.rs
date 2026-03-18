@@ -5,7 +5,9 @@
 //! - Acceptable degradation only (per degradation_order)
 //! - No runaway memory
 
-use crate::core::quality_governor::{DegradationPriority, PressureLevel, QualityGovernor, degradation_order};
+use crate::core::quality_governor::{
+    degradation_order, DegradationPriority, PressureLevel, QualityGovernor,
+};
 
 #[derive(Debug, Clone)]
 pub struct LowSpecCertResult {
@@ -100,14 +102,8 @@ impl LowSpecCertifier {
         if !self.truth_checks_passed {
             notes.push("Truth loss detected during certification run".into());
         }
-        notes.push(format!(
-            "Pressure level: {:?}",
-            governor.pressure_level
-        ));
-        notes.push(format!(
-            "Frame samples: {}",
-            self.frame_samples.len()
-        ));
+        notes.push(format!("Pressure level: {:?}", governor.pressure_level));
+        notes.push(format!("Frame samples: {}", self.frame_samples.len()));
 
         LowSpecCertResult {
             passed: fps_ok && self.truth_checks_passed && memory_ok && unacceptable.is_empty(),
@@ -133,10 +129,7 @@ impl LowSpecCertifier {
             "- Achieved FPS estimate: {:.1}\n",
             result.achieved_fps_estimate
         ));
-        report.push_str(&format!(
-            "- Truth loss: {}\n",
-            result.truth_loss_detected
-        ));
+        report.push_str(&format!("- Truth loss: {}\n", result.truth_loss_detected));
         report.push_str(&format!("- Memory runaway: {}\n", result.memory_runaway));
         if !result.unacceptable_degradation.is_empty() {
             report.push_str("\n## Unacceptable Degradation\n");

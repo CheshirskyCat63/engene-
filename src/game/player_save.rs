@@ -99,7 +99,11 @@ impl PlayerInventory {
     }
 
     pub fn item_count(&self, name: &str) -> u32 {
-        self.items.iter().find(|i| i.name == name).map(|i| i.quantity).unwrap_or(0)
+        self.items
+            .iter()
+            .find(|i| i.name == name)
+            .map(|i| i.quantity)
+            .unwrap_or(0)
     }
 }
 
@@ -144,11 +148,19 @@ impl PlayerSave {
             max_stamina: self.max_stamina,
             bleeding: self.bleeding,
             camera_mode: self.camera_mode.clone(),
-            state: if self.health > 0.0 { PlayerState::Alive } else { PlayerState::Dead },
+            state: if self.health > 0.0 {
+                PlayerState::Alive
+            } else {
+                PlayerState::Dead
+            },
             move_speed: 4.0,
             sprint_speed: 7.0,
             interaction_range: 3.0,
-            weight_carried: self.inventory.iter().map(|i| i.weight * i.quantity as f32).sum(),
+            weight_carried: self
+                .inventory
+                .iter()
+                .map(|i| i.weight * i.quantity as f32)
+                .sum(),
             max_weight: 50.0,
             weapon_slots: [
                 Some("Makarov".to_string()),
@@ -162,7 +174,11 @@ impl PlayerSave {
     }
 
     pub fn restore_inventory(&self) -> PlayerInventory {
-        let weight = self.inventory.iter().map(|i| i.weight * i.quantity as f32).sum();
+        let weight = self
+            .inventory
+            .iter()
+            .map(|i| i.weight * i.quantity as f32)
+            .sum();
         PlayerInventory {
             items: self.inventory.clone(),
             money: self.money,
@@ -180,7 +196,6 @@ impl PlayerSave {
 
     pub fn load_from_file(path: &str) -> std::io::Result<Self> {
         let data = std::fs::read_to_string(path)?;
-        ron::from_str(&data)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+        ron::from_str(&data).map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
     }
 }

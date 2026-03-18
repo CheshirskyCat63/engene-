@@ -33,12 +33,20 @@ impl ReplayRecorder {
         }
     }
 
-    pub fn start(&mut self) { self.recording = true; }
-    pub fn stop(&mut self) { self.recording = false; }
-    pub fn is_recording(&self) -> bool { self.recording }
+    pub fn start(&mut self) {
+        self.recording = true;
+    }
+    pub fn stop(&mut self) {
+        self.recording = false;
+    }
+    pub fn is_recording(&self) -> bool {
+        self.recording
+    }
 
     pub fn record_frame(&mut self, tick: u64, inputs: &[u8], events: &[u8]) {
-        if !self.recording { return; }
+        if !self.recording {
+            return;
+        }
         self.frames.push(ReplayFrame {
             tick,
             input_snapshot: inputs.to_vec(),
@@ -47,8 +55,12 @@ impl ReplayRecorder {
         self.header.frame_count += 1;
     }
 
-    pub fn header(&self) -> &ReplayHeader { &self.header }
-    pub fn frame_count(&self) -> usize { self.frames.len() }
+    pub fn header(&self) -> &ReplayHeader {
+        &self.header
+    }
+    pub fn frame_count(&self) -> usize {
+        self.frames.len()
+    }
 
     pub fn get_frame(&self, index: usize) -> Option<&ReplayFrame> {
         self.frames.get(index)
@@ -67,12 +79,22 @@ pub struct ReplayPlayer {
 
 impl ReplayPlayer {
     pub fn new(frames: Vec<ReplayFrame>) -> Self {
-        Self { frames, current_frame: 0, playing: false }
+        Self {
+            frames,
+            current_frame: 0,
+            playing: false,
+        }
     }
 
-    pub fn play(&mut self) { self.playing = true; }
-    pub fn pause(&mut self) { self.playing = false; }
-    pub fn is_playing(&self) -> bool { self.playing }
+    pub fn play(&mut self) {
+        self.playing = true;
+    }
+    pub fn pause(&mut self) {
+        self.playing = false;
+    }
+    pub fn is_playing(&self) -> bool {
+        self.playing
+    }
 
     pub fn advance(&mut self) -> Option<&ReplayFrame> {
         if !self.playing || self.current_frame >= self.frames.len() {
@@ -87,7 +109,13 @@ impl ReplayPlayer {
         self.current_frame = frame_index.min(self.frames.len());
     }
 
-    pub fn current_frame_index(&self) -> usize { self.current_frame }
-    pub fn total_frames(&self) -> usize { self.frames.len() }
-    pub fn is_finished(&self) -> bool { self.current_frame >= self.frames.len() }
+    pub fn current_frame_index(&self) -> usize {
+        self.current_frame
+    }
+    pub fn total_frames(&self) -> usize {
+        self.frames.len()
+    }
+    pub fn is_finished(&self) -> bool {
+        self.current_frame >= self.frames.len()
+    }
 }

@@ -51,10 +51,22 @@ fn faction_relations_default() {
     use engene::game::gameplay::factions::{Faction, FactionRelations, FactionStance};
 
     let rel = FactionRelations::new();
-    assert_eq!(rel.stance_between(Faction::Loners, Faction::Loners), FactionStance::Allied);
-    assert_eq!(rel.stance_between(Faction::Duty, Faction::Freedom), FactionStance::Hostile);
-    assert_eq!(rel.stance_between(Faction::Loners, Faction::Duty), FactionStance::Neutral);
-    assert_eq!(rel.stance_between(Faction::Bandits, Faction::Loners), FactionStance::Suspicious);
+    assert_eq!(
+        rel.stance_between(Faction::Loners, Faction::Loners),
+        FactionStance::Allied
+    );
+    assert_eq!(
+        rel.stance_between(Faction::Duty, Faction::Freedom),
+        FactionStance::Hostile
+    );
+    assert_eq!(
+        rel.stance_between(Faction::Loners, Faction::Duty),
+        FactionStance::Neutral
+    );
+    assert_eq!(
+        rel.stance_between(Faction::Bandits, Faction::Loners),
+        FactionStance::Suspicious
+    );
 }
 
 #[test]

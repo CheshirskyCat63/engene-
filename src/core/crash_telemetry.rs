@@ -141,9 +141,9 @@ pub fn install_panic_hook() {
             "unknown panic".to_string()
         };
 
-        let location = info.location().map(|loc| {
-            format!("{}:{}:{}", loc.file(), loc.line(), loc.column())
-        });
+        let location = info
+            .location()
+            .map(|loc| format!("{}:{}:{}", loc.file(), loc.line(), loc.column()));
 
         let now = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)

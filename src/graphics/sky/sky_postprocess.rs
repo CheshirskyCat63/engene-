@@ -63,10 +63,7 @@ pub struct WeatherPostProcess {
 }
 
 impl WeatherPostProcess {
-    pub fn new(
-        device: &wgpu::Device,
-        target_format: wgpu::TextureFormat,
-    ) -> Self {
+    pub fn new(device: &wgpu::Device, target_format: wgpu::TextureFormat) -> Self {
         let bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("weather_postprocess_bgl"),
             entries: &[
@@ -190,11 +187,7 @@ impl WeatherPostProcess {
         })
     }
 
-    pub fn render<'a>(
-        &'a self,
-        pass: &mut wgpu::RenderPass<'a>,
-        bind_group: &'a wgpu::BindGroup,
-    ) {
+    pub fn render<'a>(&'a self, pass: &mut wgpu::RenderPass<'a>, bind_group: &'a wgpu::BindGroup) {
         pass.set_pipeline(&self.pipeline);
         pass.set_bind_group(0, bind_group, &[]);
         pass.draw(0..3, 0..1);

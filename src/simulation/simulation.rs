@@ -1,3 +1,7 @@
+use engine_runtime::simulation_core::{
+    DeferredTransitionPolicy, DeferredTransitionQueue, TransitionRequest,
+};
+
 use crate::core::mutation_policy::*;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
@@ -6,11 +10,22 @@ use crate::simulation::activation;
 pub struct SimulationSystem {
     player_x: f32,
     player_y: f32,
+    deferred_queue: DeferredTransitionQueue,
+    transition_batch: Vec<TransitionRequest>,
 }
 
 impl SimulationSystem {
     pub fn new(player_x: f32, player_y: f32) -> Self {
-        Self { player_x, player_y }
+        let queue_policy = DeferredTransitionPolicy::default();
+        let deferred_queue = DeferredTransitionQueue::with_policy(queue_policy);
+        let transition_batch = Vec::with_capacity(queue_policy.max_queue_capacity);
+        debug_assert!(transition_batch.capacity() >= queue_policy.max_queue_capacity);
+        Self {
+            player_x,
+            player_y,
+            deferred_queue,
+            transition_batch,
+        }
     }
 }
 
@@ -27,6 +42,14 @@ impl EngineSystem for SimulationSystem {
     }
 
     fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
-        activation::update_simulation_levels(ctx.ecs, self.player_x, self.player_y);
+        let _transition_metrics = activation::update_simulation_levels(
+            ctx.ecs,
+            self.player_x,
+            self.player_y,
+            ctx.time.tick_count,
+            ctx.time.tick_count,
+            &mut self.deferred_queue,
+            &mut self.transition_batch,
+        );
     }
 }

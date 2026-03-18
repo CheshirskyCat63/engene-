@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use crate::game::ai::combat_tactics::threat::ThreatEntry;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum Tactic {

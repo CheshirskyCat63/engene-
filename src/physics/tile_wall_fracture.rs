@@ -2,12 +2,12 @@
 //! Layers: tile shell → adhesive/plaster → support wall.
 //! See TILE_WALL_FRACTURE_SPEC.md for the full contract.
 
-use glam::Vec3;
 use crate::core::ecs::Entity;
 use crate::physics::ballistics::MaterialId;
-use crate::physics::destruction::{DestructibleObject, DestructionNode, DestructionLink};
-use crate::physics::layered_damage::{DamageLayer, DamageableObject};
 use crate::physics::damage_taxonomy::DamageCapability;
+use crate::physics::destruction::{DestructibleObject, DestructionLink, DestructionNode};
+use crate::physics::layered_damage::{DamageLayer, DamageableObject};
+use glam::Vec3;
 
 pub const LAYER_TILE: u8 = 0;
 pub const LAYER_ADHESIVE: u8 = 1;
@@ -268,7 +268,11 @@ pub fn apply_weapon_to_tile_wall(
     let broken_links: usize = wall.links.iter().filter(|l| l.broken).count();
     let total_links = wall.links.len();
     let clusters = wall.find_clusters_public();
-    let detached_count = if clusters.len() > 1 { clusters.len() - 1 } else { 0 };
+    let detached_count = if clusters.len() > 1 {
+        clusters.len() - 1
+    } else {
+        0
+    };
 
     TileWallImpactResult {
         weapon,

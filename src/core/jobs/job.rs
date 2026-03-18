@@ -12,7 +12,9 @@ pub enum JobPriority {
 
 pub trait Job: Send {
     fn name(&self) -> &str;
-    fn priority(&self) -> JobPriority { JobPriority::Normal }
+    fn priority(&self) -> JobPriority {
+        JobPriority::Normal
+    }
     fn execute(&mut self) -> Box<dyn Any + Send>;
 }
 
@@ -41,8 +43,12 @@ impl FnJob {
 }
 
 impl Job for FnJob {
-    fn name(&self) -> &str { &self.name }
-    fn priority(&self) -> JobPriority { self.priority }
+    fn name(&self) -> &str {
+        &self.name
+    }
+    fn priority(&self) -> JobPriority {
+        self.priority
+    }
     fn execute(&mut self) -> Box<dyn Any + Send> {
         let func = self.func.take().expect("job already executed");
         func()

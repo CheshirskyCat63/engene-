@@ -12,9 +12,9 @@ use crate::world::streaming::{ChunkCoord, CHUNK_SIZE};
 pub struct PersistentEntitySnapshot {
     pub persistent_id: u64, // PersistentEntityId.0
     pub snapshot: EntitySnapshot,
-    pub social_ties: Vec<u64>, // PersistentEntityIds of known entities
+    pub social_ties: Vec<u64>,     // PersistentEntityIds of known entities
     pub group_leader: Option<u64>, // PersistentEntityId of group leader
-    pub group_members: Vec<u64>, // PersistentEntityIds of group members
+    pub group_members: Vec<u64>,   // PersistentEntityIds of group members
     pub destruction_state: Option<ChunkDestructionState>,
 }
 
@@ -83,8 +83,8 @@ pub struct RelinkReport {
     pub entities_restored: usize,
     pub duplicates_skipped: usize,
     pub social_ties_resolved: usize,
-    pub social_ties_dangling: usize,  // target is unloaded
-    pub social_ties_dead: usize,       // target is dead
+    pub social_ties_dangling: usize, // target is unloaded
+    pub social_ties_dead: usize,     // target is dead
     pub details: Vec<String>,
 }
 
@@ -96,9 +96,13 @@ impl RelinkReport {
     pub fn summary(&self) -> String {
         format!(
             "chunk ({},{}): {} restored, {} dupes, ties: {} ok / {} dangling / {} dead",
-            self.chunk.x, self.chunk.z,
-            self.entities_restored, self.duplicates_skipped,
-            self.social_ties_resolved, self.social_ties_dangling, self.social_ties_dead
+            self.chunk.x,
+            self.chunk.z,
+            self.entities_restored,
+            self.duplicates_skipped,
+            self.social_ties_resolved,
+            self.social_ties_dangling,
+            self.social_ties_dead
         )
     }
 }
@@ -152,12 +156,7 @@ impl ChunkPersistenceService {
                     let social_ties: Vec<u64> = ecs
                         .memories
                         .get(&entity)
-                        .map(|mem| {
-                            mem.entities
-                                .keys()
-                                .map(|pid| pid.0)
-                                .collect()
-                        })
+                        .map(|mem| mem.entities.keys().map(|pid| pid.0).collect())
                         .unwrap_or_default();
 
                     let persistent_snapshot = PersistentEntitySnapshot {
@@ -210,11 +209,7 @@ impl ChunkPersistenceService {
 
     /// Load entities from a saved chunk back into ECS.
     /// Uses ecs.spawn_restored() -- no separate registry parameter needed.
-    pub fn load_chunk_entities(
-        &mut self,
-        coord: ChunkCoord,
-        ecs: &mut Ecs,
-    ) -> usize {
+    pub fn load_chunk_entities(&mut self, coord: ChunkCoord, ecs: &mut Ecs) -> usize {
         match self.try_load_chunk_entities(coord, ecs) {
             Ok(count) => count,
             Err(e) => {
@@ -300,20 +295,13 @@ impl ChunkPersistenceService {
 
         ecs.rebuild_spatial();
 
-        tracing::info!(
-            "chunk ({},{}) loaded: {} entities",
-            coord.x, coord.z, count
-        );
+        tracing::info!("chunk ({},{}) loaded: {} entities", coord.x, coord.z, count);
 
         Ok(count)
     }
 
     /// Load chunk and produce a detailed relink report
-    pub fn load_chunk_with_report(
-        &mut self,
-        coord: ChunkCoord,
-        ecs: &mut Ecs,
-    ) -> RelinkReport {
+    pub fn load_chunk_with_report(&mut self, coord: ChunkCoord, ecs: &mut Ecs) -> RelinkReport {
         let mut report = RelinkReport {
             chunk: coord,
             entities_restored: 0,
@@ -364,7 +352,9 @@ impl ChunkPersistenceService {
         }
 
         // Use RelinkContext to resolve cross-entity references after all entities are spawned
-        let relink = RelinkContext { registry: &ecs.identity };
+        let relink = RelinkContext {
+            registry: &ecs.identity,
+        };
         for ps in &save_data.entities {
             for &tie_pid_raw in &ps.social_ties {
                 let entity_ref = EntityRef::new(PersistentEntityId(tie_pid_raw));

@@ -67,7 +67,11 @@ impl NavGrid {
                         }
                         let ni = ny as usize * self.width + nx as usize;
                         if self.passable[ni] {
-                            let cost = if dx.abs() + dy.abs() == 2 { 14u32 } else { 10u32 };
+                            let cost = if dx.abs() + dy.abs() == 2 {
+                                14u32
+                            } else {
+                                10u32
+                            };
                             neighbors.push((ni, cost));
                         }
                     }

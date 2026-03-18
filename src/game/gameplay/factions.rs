@@ -1,7 +1,7 @@
 // Phase 11: faction reputation system.
 
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Faction {
@@ -29,7 +29,10 @@ impl FactionStance {
     }
 
     pub fn can_trade(&self) -> bool {
-        matches!(self, FactionStance::Allied | FactionStance::Friendly | FactionStance::Neutral)
+        matches!(
+            self,
+            FactionStance::Allied | FactionStance::Friendly | FactionStance::Neutral
+        )
     }
 }
 
@@ -73,11 +76,12 @@ impl FactionRelations {
                                 FactionStance::Hostile
                             }
                         }
-                        (Faction::Military, Faction::Freedom) | (Faction::Freedom, Faction::Military) => {
-                            FactionStance::Hostile
-                        }
+                        (Faction::Military, Faction::Freedom)
+                        | (Faction::Freedom, Faction::Military) => FactionStance::Hostile,
                         (Faction::Traders, _) | (_, Faction::Traders) => FactionStance::Friendly,
-                        (Faction::Scientists, _) | (_, Faction::Scientists) => FactionStance::Neutral,
+                        (Faction::Scientists, _) | (_, Faction::Scientists) => {
+                            FactionStance::Neutral
+                        }
                         _ => FactionStance::Neutral,
                     };
                     self.relations.insert((a, b), stance);

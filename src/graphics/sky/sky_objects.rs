@@ -165,13 +165,7 @@ impl StarField {
     }
 
     /// Update uniforms. Call before render each frame.
-    pub fn update(
-        &self,
-        queue: &wgpu::Queue,
-        view_proj: Mat4,
-        sky_radius: f32,
-        sun_height: f32,
-    ) {
+    pub fn update(&self, queue: &wgpu::Queue, view_proj: Mat4, sky_radius: f32, sun_height: f32) {
         let uniforms = StarUniforms {
             view_proj: view_proj.to_cols_array_2d(),
             sun_height,

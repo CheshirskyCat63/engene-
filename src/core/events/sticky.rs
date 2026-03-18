@@ -7,7 +7,9 @@ pub struct StickyEvents {
 
 impl StickyEvents {
     pub fn new() -> Self {
-        Self { events: HashMap::new() }
+        Self {
+            events: HashMap::new(),
+        }
     }
 
     pub fn set<E: 'static + Send + Sync>(&mut self, event: E) {
@@ -15,7 +17,9 @@ impl StickyEvents {
     }
 
     pub fn get<E: 'static>(&self) -> Option<&E> {
-        self.events.get(&TypeId::of::<E>()).and_then(|e| e.downcast_ref::<E>())
+        self.events
+            .get(&TypeId::of::<E>())
+            .and_then(|e| e.downcast_ref::<E>())
     }
 
     pub fn remove<E: 'static>(&mut self) -> bool {
@@ -28,5 +32,7 @@ impl StickyEvents {
 }
 
 impl Default for StickyEvents {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

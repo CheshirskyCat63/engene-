@@ -68,11 +68,7 @@ impl DamageOrchestrator {
             }
 
             if caps.contains(DamageCapability::STRUCTURAL) {
-                StructuralResolver::resolve_impact(
-                    &event,
-                    destruction_sys,
-                    &mut self.responses,
-                );
+                StructuralResolver::resolve_impact(&event, destruction_sys, &mut self.responses);
             }
 
             if caps.intersects(DamageCapability::ANATOMICAL) {
@@ -108,7 +104,7 @@ mod tests {
     #[test]
     fn test_submit_impact() {
         let mut orch = DamageOrchestrator::new();
-        
+
         let impact = ImpactEvent {
             position: glam::Vec3::ZERO,
             direction: glam::Vec3::Y,
@@ -121,7 +117,7 @@ mod tests {
             target_entity: None,
             projectile_info: None,
         };
-        
+
         orch.submit_impact(impact);
         assert_eq!(orch.impact_queue.len(), 1);
     }
@@ -129,7 +125,7 @@ mod tests {
     #[test]
     fn test_submit_stress() {
         let mut orch = DamageOrchestrator::new();
-        
+
         let stress = StressEvent {
             target_entity: 1,
             damage_class: DamageClass::Blunt,
@@ -138,7 +134,7 @@ mod tests {
             position: Some(glam::Vec3::ZERO),
             source_direction: Some(glam::Vec3::Y),
         };
-        
+
         orch.submit_stress(stress);
         assert_eq!(orch.stress_queue.len(), 1);
     }
@@ -146,7 +142,7 @@ mod tests {
     #[test]
     fn test_max_impacts_limit() {
         let mut orch = DamageOrchestrator::new();
-        
+
         let impact = ImpactEvent {
             position: glam::Vec3::ZERO,
             direction: glam::Vec3::Y,
@@ -159,19 +155,19 @@ mod tests {
             target_entity: None,
             projectile_info: None,
         };
-        
+
         // Submit more than limit
         for _ in 0..100 {
             orch.submit_impact(impact.clone());
         }
-        
+
         assert_eq!(orch.impact_queue.len(), MAX_IMPACTS_PER_FRAME);
     }
 
     #[test]
     fn test_drain_responses() {
         let mut orch = DamageOrchestrator::new();
-        
+
         // Manually add a response for test
         orch.responses.push(DamageResponse::SurfaceMarked {
             position: glam::Vec3::ZERO,
@@ -179,7 +175,7 @@ mod tests {
             decal_type: crate::physics::damage_pipeline::response_aggregator::DecalType::BulletHole,
             intensity: 0.5,
         });
-        
+
         let responses = orch.drain_responses();
         assert_eq!(responses.len(), 1);
         assert!(orch.responses.is_empty());
@@ -188,7 +184,7 @@ mod tests {
     #[test]
     fn test_queues_cleared_after_resolve() {
         let mut orch = DamageOrchestrator::new();
-        
+
         let impact = ImpactEvent {
             position: glam::Vec3::ZERO,
             direction: glam::Vec3::Y,
@@ -201,16 +197,16 @@ mod tests {
             target_entity: None,
             projectile_info: None,
         };
-        
+
         orch.submit_impact(impact);
         assert_eq!(orch.impact_queue.len(), 1);
-        
+
         // Resolve with empty stores (surface-only damage)
         let surface_db = SurfaceDB::new(Vec::new());
         let mut damageable_store = DamageableStore::new();
         let mut destruction_sys = DestructionSystem::new();
         let mut body_store = BodyStateStore::new();
-        
+
         orch.resolve_all(
             &surface_db,
             &mut damageable_store,
@@ -218,7 +214,7 @@ mod tests {
             &mut body_store,
             &|_| DamageCapability::SURFACE,
         );
-        
+
         // Queue should be drained
         assert!(orch.impact_queue.is_empty());
     }

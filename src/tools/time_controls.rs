@@ -19,7 +19,11 @@ impl Default for TimeControlState {
 impl TimeControlState {
     pub fn effective_delta(&self, real_delta: f32) -> f32 {
         if self.paused {
-            if self.single_step_requested { real_delta } else { 0.0 }
+            if self.single_step_requested {
+                real_delta
+            } else {
+                0.0
+            }
         } else {
             real_delta * self.time_scale
         }
@@ -33,19 +37,36 @@ impl TimeControlState {
 pub fn draw_time_controls(ctx: &egui::Context, state: &mut TimeControlState) {
     egui::Window::new("Time Controls").show(ctx, |ui| {
         ui.horizontal(|ui| {
-            if ui.button(if state.paused { "▶ Play" } else { "⏸ Pause" }).clicked() {
+            if ui
+                .button(if state.paused {
+                    "▶ Play"
+                } else {
+                    "⏸ Pause"
+                })
+                .clicked()
+            {
                 state.paused = !state.paused;
             }
-            if ui.add_enabled(state.paused, egui::Button::new("⏭ Step")).clicked() {
+            if ui
+                .add_enabled(state.paused, egui::Button::new("⏭ Step"))
+                .clicked()
+            {
                 state.single_step_requested = true;
             }
         });
         ui.separator();
-        ui.add(egui::Slider::new(&mut state.time_scale, 0.1..=10.0).text("Time Scale").logarithmic(true));
+        ui.add(
+            egui::Slider::new(&mut state.time_scale, 0.1..=10.0)
+                .text("Time Scale")
+                .logarithmic(true),
+        );
         ui.separator();
 
         let mut use_override = state.fixed_tick_override.is_some();
-        if ui.checkbox(&mut use_override, "Override fixed tick rate").changed() {
+        if ui
+            .checkbox(&mut use_override, "Override fixed tick rate")
+            .changed()
+        {
             state.fixed_tick_override = if use_override { Some(20.0) } else { None };
         }
         if let Some(ref mut rate) = state.fixed_tick_override {

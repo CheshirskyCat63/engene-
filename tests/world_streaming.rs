@@ -10,14 +10,16 @@ use engene::core::ecs::Ecs;
 use engene::core::persistent_id::{EntityPresence, EntityRef, PersistentEntityId};
 use engene::memory::save_chunks::{snapshot_entity, EntitySnapshot};
 use engene::world::authoring::{ChunkAuthoring, NavHint, SpawnDescriptor, WorldAuthoringDatabase};
+use engene::world::biome::Biome;
 use engene::world::chunk_persistence::{
     CarcassState, ChunkDestructionState, ChunkPersistenceService, ChunkSaveData, ChunkSurfaceState,
     PersistentEntitySnapshot, RelinkReport, SurfaceMark, TerrainPatch,
 };
-use engene::world::chunk_schema::{AuthoredChunk, ChunkMetadata, EntityPlacement, PatrolRoute, SpawnZone};
+use engene::world::chunk_schema::{
+    AuthoredChunk, ChunkMetadata, EntityPlacement, PatrolRoute, SpawnZone,
+};
 use engene::world::components::*;
 use engene::world::streaming::{ChunkCoord, ChunkInfo, ChunkState, WorldStreamer, CHUNK_SIZE};
-use engene::world::biome::Biome;
 use std::collections::HashMap;
 
 fn temp_test_dir() -> std::path::PathBuf {
@@ -63,7 +65,15 @@ fn save_load_single_entity_npc() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
     assert!(pid.0 > 0);
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.names.insert(e, Name("TestNpc".into()));
 
@@ -87,8 +97,17 @@ fn save_load_single_entity_monster() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e, EntityKind::Monster(MonsterSpecies::Wolf));
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e, EntityKind::Monster(MonsterSpecies::Wolf));
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     let coord = ChunkCoord::from_world(500.0, 500.0);
@@ -108,13 +127,23 @@ fn save_load_mixed_entities() {
     let mut ecs = Ecs::new();
     for i in 0..5 {
         let (e, _) = ecs.spawn_new();
-        ecs.transforms.insert(e, Transform {
-            x: 100.0 + i as f32 * 10.0,
-            y: 100.0,
-            cell_x: 0,
-            cell_y: 0,
-        });
-        ecs.kinds.insert(e, if i % 2 == 0 { EntityKind::Npc } else { EntityKind::Monster(MonsterSpecies::Boar) });
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: 100.0 + i as f32 * 10.0,
+                y: 100.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
+        ecs.kinds.insert(
+            e,
+            if i % 2 == 0 {
+                EntityKind::Npc
+            } else {
+                EntityKind::Monster(MonsterSpecies::Boar)
+            },
+        );
     }
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -135,7 +164,15 @@ fn repeated_roundtrip() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 200.0, y: 200.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 200.0,
+            y: 200.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.personal_needs.insert(e, PersonalNeeds::default_npc());
 
@@ -159,14 +196,31 @@ fn roundtrip_with_inventory() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 300.0, y: 300.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 300.0,
+            y: 300.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.inventories.insert(e, Inventory {
-        items: vec![
-            Item { name: "medkit".into(), value: 50.0 },
-            Item { name: "bread".into(), value: 15.0 },
-        ],
-    });
+    ecs.inventories.insert(
+        e,
+        Inventory {
+            items: vec![
+                Item {
+                    name: "medkit".into(),
+                    value: 50.0,
+                },
+                Item {
+                    name: "bread".into(),
+                    value: 15.0,
+                },
+            ],
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -188,12 +242,23 @@ fn roundtrip_with_faction() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 400.0, y: 400.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 400.0,
+            y: 400.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.faction_memberships.insert(e, FactionMembership {
-        faction: Faction::Duty,
-        standing: 0.7,
-    });
+    ecs.faction_memberships.insert(
+        e,
+        FactionMembership {
+            faction: Faction::Duty,
+            standing: 0.7,
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -214,9 +279,22 @@ fn roundtrip_with_equipment() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 500.0, y: 500.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 500.0,
+            y: 500.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.sim_levels.insert(e, SimLevel { level: SimulationLevel::L0 });
+    ecs.sim_levels.insert(
+        e,
+        SimLevel {
+            level: SimulationLevel::L0,
+        },
+    );
     let mut eq = EquipmentSlots::default_stalker();
     eq.weapon_condition = 0.8;
     eq.armor_condition = 0.6;
@@ -243,14 +321,25 @@ fn roundtrip_with_economy() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 600.0, y: 600.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 600.0,
+            y: 600.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 250.0,
-        monthly_required: 80.0,
-        job: Job::Hunter,
-        desperation: 0.2,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 250.0,
+            monthly_required: 80.0,
+            job: Job::Hunter,
+            desperation: 0.2,
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -271,7 +360,15 @@ fn roundtrip_with_personal_needs() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 700.0, y: 700.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 700.0,
+            y: 700.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     let mut pn = PersonalNeeds::default_npc();
     pn.hunger = 0.5;
@@ -297,14 +394,25 @@ fn roundtrip_with_life_info() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 800.0, y: 800.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 800.0,
+            y: 800.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.life_info.insert(e, LifeInfo {
-        age: 25.0,
-        max_age: 80.0,
-        last_mate_day: 100,
-        mate_cooldown_days: 30,
-    });
+    ecs.life_info.insert(
+        e,
+        LifeInfo {
+            age: 25.0,
+            max_age: 80.0,
+            last_mate_day: 100,
+            mate_cooldown_days: 30,
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     let coord = ChunkCoord { x: 0, z: 0 };
@@ -345,7 +453,12 @@ fn chunk_surface_state_default() {
 
 #[test]
 fn terrain_patch_roundtrip() {
-    let patch = TerrainPatch { x: 10.0, z: 20.0, radius: 5.0, depth: 0.5 };
+    let patch = TerrainPatch {
+        x: 10.0,
+        z: 20.0,
+        radius: 5.0,
+        depth: 0.5,
+    };
     let encoded = bincode::serialize(&patch).unwrap();
     let decoded: TerrainPatch = bincode::deserialize(&encoded).unwrap();
     assert_eq!(decoded.x, 10.0);
@@ -381,7 +494,15 @@ fn has_save_true_after_save() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -410,7 +531,15 @@ fn saved_chunk_count() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -425,7 +554,15 @@ fn saved_chunk_count() {
 fn snapshot_entity_captures_transform() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 123.0, y: 456.0, cell_x: 1, cell_y: 2 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 123.0,
+            y: 456.0,
+            cell_x: 1,
+            cell_y: 2,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
 
     let snap = snapshot_entity(e, &ecs);
@@ -437,8 +574,17 @@ fn snapshot_entity_captures_transform() {
 fn snapshot_entity_captures_kind() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e, EntityKind::Monster(MonsterSpecies::Bloodsucker));
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e, EntityKind::Monster(MonsterSpecies::Bloodsucker));
 
     let snap = snapshot_entity(e, &ecs);
     assert!(snap.kind.is_some());
@@ -452,7 +598,15 @@ fn entities_outside_chunk_not_saved() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 5000.0, y: 5000.0, cell_x: 5, cell_y: 5 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 5000.0,
+            y: 5000.0,
+            cell_x: 5,
+            cell_y: 5,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -479,7 +633,15 @@ fn roundtrip_with_name() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.names.insert(e, Name("Viktor".into()));
 
@@ -501,12 +663,28 @@ fn roundtrip_emotions() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.emotions.insert(e, engene::game::ai::emotions::Emotions {
-        anger: 0.2, grief: 0.1, joy: 0.5, fear: 0.3,
-        disgust: 0.0, surprise: 0.0, longing: 0.0,
-    });
+    ecs.emotions.insert(
+        e,
+        engene::game::ai::emotions::Emotions {
+            anger: 0.2,
+            grief: 0.1,
+            joy: 0.5,
+            fear: 0.3,
+            disgust: 0.0,
+            surprise: 0.0,
+            longing: 0.0,
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
@@ -525,13 +703,31 @@ fn roundtrip_npc_traits() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.npc_traits.insert(e, NpcTraits {
-        bravery: 0.7, aggressiveness: 0.3, work_ethic: 0.8, curiosity: 0.5,
-        honesty: 0.6, sociality: 0.4, autonomy: 0.5, materialism: 0.3,
-        risk_tolerance: 0.4, stress_resistance: 0.6,
-    });
+    ecs.npc_traits.insert(
+        e,
+        NpcTraits {
+            bravery: 0.7,
+            aggressiveness: 0.3,
+            work_ethic: 0.8,
+            curiosity: 0.5,
+            honesty: 0.6,
+            sociality: 0.4,
+            autonomy: 0.5,
+            materialism: 0.3,
+            risk_tolerance: 0.4,
+            stress_resistance: 0.6,
+        },
+    );
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
@@ -551,7 +747,15 @@ fn roundtrip_social_needs() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.social_needs.insert(e, SocialNeeds::default());
 
@@ -571,9 +775,19 @@ fn roundtrip_ecosystem_needs() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e, EntityKind::Monster(MonsterSpecies::Wolf));
-    ecs.ecosystem_needs.insert(e, EcosystemNeeds::for_species(MonsterSpecies::Wolf));
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e, EntityKind::Monster(MonsterSpecies::Wolf));
+    ecs.ecosystem_needs
+        .insert(e, EcosystemNeeds::for_species(MonsterSpecies::Wolf));
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
@@ -588,7 +802,11 @@ fn roundtrip_ecosystem_needs() {
 fn chunk_save_data_with_surface_marks() {
     let mut surf = ChunkSurfaceState::default();
     surf.blood_marks.push(SurfaceMark {
-        x: 10.0, z: 20.0, radius: 1.0, intensity: 0.8, age_seconds: 5.0,
+        x: 10.0,
+        z: 20.0,
+        radius: 1.0,
+        intensity: 0.8,
+        age_seconds: 5.0,
     });
 
     let data = ChunkSaveData {
@@ -640,16 +858,35 @@ fn persistent_entity_snapshot_structure() {
 fn identity_registry_mark_unloaded() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.unload_entity(e);
-    assert!(matches!(ecs.identity.presence(pid), EntityPresence::Unloaded));
+    assert!(matches!(
+        ecs.identity.presence(pid),
+        EntityPresence::Unloaded
+    ));
 }
 
 #[test]
 fn identity_registry_mark_dead() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     assert!(matches!(ecs.identity.presence(pid), EntityPresence::Dead));
 }
@@ -658,7 +895,15 @@ fn identity_registry_mark_dead() {
 fn entity_ref_resolve_live() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let r = EntityRef::new(pid);
     assert_eq!(r.resolve(&ecs.identity), Some(e));
 }
@@ -667,7 +912,15 @@ fn entity_ref_resolve_live() {
 fn entity_ref_resolve_unloaded() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.unload_entity(e);
     let r = EntityRef::new(pid);
     assert!(r.resolve(&ecs.identity).is_none());
@@ -678,7 +931,15 @@ fn entity_ref_resolve_unloaded() {
 fn entity_ref_resolve_dead() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     let r = EntityRef::new(pid);
     assert!(r.resolve(&ecs.identity).is_none());
@@ -697,7 +958,15 @@ fn spawn_restored_assigns_pid() {
 fn spawn_restored_duplicate_fails() {
     let mut ecs = Ecs::new();
     let (e1, pid) = ecs.spawn_new();
-    ecs.transforms.insert(e1, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e1,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     let result = ecs.spawn_restored(pid);
     assert!(result.is_err());
 }
@@ -763,7 +1032,15 @@ fn identity_gc_tombstones() {
     let mut ecs = Ecs::new();
     let (e, pid) = ecs.spawn_new();
     assert!(ecs.identity.resolve(pid).is_some());
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     assert!(ecs.identity.tombstone_count() >= 1);
     ecs.identity.gc_tombstones(0, 1);
@@ -784,7 +1061,15 @@ fn persistent_id_ord_equality() {
 fn identity_live_count() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     assert_eq!(ecs.identity.live_count(), 1);
 }
 
@@ -792,7 +1077,15 @@ fn identity_live_count() {
 fn identity_total_count() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     assert!(ecs.identity.total_count() >= 1);
 }
 
@@ -803,7 +1096,15 @@ fn reload_same_chunk_skips_duplicates() {
 
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
 
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -822,11 +1123,25 @@ fn social_ties_in_snapshot() {
     let ps = PersistentEntitySnapshot {
         persistent_id: 1,
         snapshot: EntitySnapshot {
-            id: 0, persistent_id: Some(1), transform: None, kind: None,
-            name: None, personal_needs: None, social_needs: None, ecosystem_needs: None,
-            npc_traits: None, monster_traits: None, npc_economy: None,
-            sim_level: None, ai_state: None, life_info: None, emotions: None,
-            flammable: None, inventory: None, equipment: None, faction_membership: None,
+            id: 0,
+            persistent_id: Some(1),
+            transform: None,
+            kind: None,
+            name: None,
+            personal_needs: None,
+            social_needs: None,
+            ecosystem_needs: None,
+            npc_traits: None,
+            monster_traits: None,
+            npc_economy: None,
+            sim_level: None,
+            ai_state: None,
+            life_info: None,
+            emotions: None,
+            flammable: None,
+            inventory: None,
+            equipment: None,
+            faction_membership: None,
         },
         social_ties: vec![2, 3],
         group_leader: None,
@@ -841,11 +1156,25 @@ fn group_leader_in_snapshot() {
     let ps = PersistentEntitySnapshot {
         persistent_id: 1,
         snapshot: EntitySnapshot {
-            id: 0, persistent_id: Some(1), transform: None, kind: None,
-            name: None, personal_needs: None, social_needs: None, ecosystem_needs: None,
-            npc_traits: None, monster_traits: None, npc_economy: None,
-            sim_level: None, ai_state: None, life_info: None, emotions: None,
-            flammable: None, inventory: None, equipment: None, faction_membership: None,
+            id: 0,
+            persistent_id: Some(1),
+            transform: None,
+            kind: None,
+            name: None,
+            personal_needs: None,
+            social_needs: None,
+            ecosystem_needs: None,
+            npc_traits: None,
+            monster_traits: None,
+            npc_economy: None,
+            sim_level: None,
+            ai_state: None,
+            life_info: None,
+            emotions: None,
+            flammable: None,
+            inventory: None,
+            equipment: None,
+            faction_membership: None,
         },
         social_ties: vec![],
         group_leader: Some(5),
@@ -1192,7 +1521,15 @@ fn roundtrip_empty_inventory() {
     let _ = std::fs::create_dir_all(&dir);
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     ecs.inventories.insert(e, Inventory { items: vec![] });
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -1209,8 +1546,17 @@ fn roundtrip_monster_species_boar() {
     let _ = std::fs::create_dir_all(&dir);
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
-    ecs.kinds.insert(e, EntityKind::Monster(MonsterSpecies::Boar));
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
+    ecs.kinds
+        .insert(e, EntityKind::Monster(MonsterSpecies::Boar));
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
     svc.load_chunk_entities(ChunkCoord { x: 0, z: 0 }, &mut ecs);
@@ -1225,7 +1571,15 @@ fn roundtrip_save_tick_preserved() {
     let _ = std::fs::create_dir_all(&dir);
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 12345);
@@ -1363,11 +1717,25 @@ fn snapshot_entity_no_transform() {
 fn snapshot_entity_captures_inventory() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.inventories.insert(e, Inventory {
-        items: vec![Item { name: "x".into(), value: 10.0 }],
-    });
+    ecs.inventories.insert(
+        e,
+        Inventory {
+            items: vec![Item {
+                name: "x".into(),
+                value: 10.0,
+            }],
+        },
+    );
     let snap = snapshot_entity(e, &ecs);
     assert!(snap.inventory.is_some());
     assert_eq!(snap.inventory.as_ref().unwrap().items.len(), 1);
@@ -1461,7 +1829,10 @@ fn streamer_chunk_info_state() {
     let (load, _) = ws.update(0.0, 0.0);
     if !load.is_empty() {
         let info = ws.chunks.get(&load[0]).unwrap();
-        assert!(matches!(info.state, ChunkState::Loading | ChunkState::Loaded));
+        assert!(matches!(
+            info.state,
+            ChunkState::Loading | ChunkState::Loaded
+        ));
     }
 }
 
@@ -1538,7 +1909,15 @@ fn register_save_migration() {
 fn ecs_unload_removes_from_alive() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.unload_entity(e);
     assert!(!ecs.is_alive(e));
 }
@@ -1547,7 +1926,15 @@ fn ecs_unload_removes_from_alive() {
 fn ecs_despawn_removes_from_alive() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.despawn(e);
     assert!(!ecs.is_alive(e));
 }
@@ -1573,7 +1960,15 @@ fn load_report_entities_restored() {
     let _ = std::fs::create_dir_all(&dir);
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 0, z: 0 }, &mut ecs, 0);
@@ -1604,12 +1999,15 @@ fn roundtrip_10_entities() {
     let mut ecs = Ecs::new();
     for i in 0..10 {
         let (e, _) = ecs.spawn_new();
-        ecs.transforms.insert(e, Transform {
-            x: 100.0 + i as f32,
-            y: 100.0,
-            cell_x: 0,
-            cell_y: 0,
-        });
+        ecs.transforms.insert(
+            e,
+            Transform {
+                x: 100.0 + i as f32,
+                y: 100.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(e, EntityKind::Npc);
     }
     let mut svc = ChunkPersistenceService::new(dir.as_path());
@@ -1652,14 +2050,25 @@ fn chunk_coord_world_center_negative() {
 fn snapshot_entity_npc_economy() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Trader,
-        desperation: 0.1,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Trader,
+            desperation: 0.1,
+        },
+    );
     let snap = snapshot_entity(e, &ecs);
     assert!(snap.npc_economy.is_some());
 }
@@ -1668,14 +2077,25 @@ fn snapshot_entity_npc_economy() {
 fn snapshot_entity_life_info() {
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 0.0, y: 0.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 0.0,
+            y: 0.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.life_info.insert(e, LifeInfo {
-        age: 30.0,
-        max_age: 80.0,
-        last_mate_day: 0,
-        mate_cooldown_days: 60,
-    });
+    ecs.life_info.insert(
+        e,
+        LifeInfo {
+            age: 30.0,
+            max_age: 80.0,
+            last_mate_day: 0,
+            mate_cooldown_days: 60,
+        },
+    );
     let snap = snapshot_entity(e, &ecs);
     assert!(snap.life_info.is_some());
 }
@@ -1732,7 +2152,15 @@ fn chunk_persistence_file_naming() {
     let _ = std::fs::create_dir_all(&dir);
     let mut ecs = Ecs::new();
     let (e, _) = ecs.spawn_new();
-    ecs.transforms.insert(e, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        e,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(e, EntityKind::Npc);
     let mut svc = ChunkPersistenceService::new(dir.as_path());
     svc.save_and_unload(ChunkCoord { x: 3, z: 7 }, &mut ecs, 0);

@@ -10,8 +10,8 @@ use crate::app::runtime_assembly::RuntimeAssembly;
 use crate::core::engine::Engine;
 use crate::physics::ballistics::BallisticsSystem;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
-use crate::world::population;
 use crate::world::components::MonsterSpecies;
+use crate::world::population;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -31,10 +31,7 @@ pub struct StressReport {
 }
 
 /// Build headless and spawn extra entities for stress.
-fn build_stress_world(
-    extra_npcs: usize,
-    extra_monsters_per_species: usize,
-) -> Engine {
+fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> Engine {
     let grid = crate::world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let mut engine = RuntimeAssembly::headless(&biomes);
@@ -53,28 +50,51 @@ fn build_stress_world(
                 cell_y: cy,
             },
         );
-        engine.ecs.set_kind(e, crate::world::components::EntityKind::Npc);
-        engine.ecs.set_name(e, crate::world::components::Name("StressNPC".into()));
-        engine.ecs.set_personal_needs(e, crate::world::components::PersonalNeeds::default_npc());
-        engine.ecs.set_npc_economy(e, crate::world::components::NpcEconomy {
-            money: 50.0,
-            monthly_required: 50.0,
-            job: crate::world::components::Job::Guard,
-            desperation: 0.0,
-        });
-        engine.ecs.set_sim_level(e, crate::world::components::SimLevel {
-            level: crate::world::components::SimulationLevel::L1,
-        });
-        engine.ecs.set_ai_state(e, crate::world::components::AiState::Idle);
-        engine.ecs.set_inventory(e, crate::world::components::Inventory { items: Vec::new() });
-        engine.ecs.set_memory(e, crate::core::ai_memory::Memory::new());
-        engine.ecs.set_emotions(e, crate::core::ai_emotions::Emotions::new());
-        engine.ecs.set_life_info(e, crate::world::components::LifeInfo {
-            age: 100.0,
-            max_age: 400.0,
-            last_mate_day: 0,
-            mate_cooldown_days: 60,
-        });
+        engine
+            .ecs
+            .set_kind(e, crate::world::components::EntityKind::Npc);
+        engine
+            .ecs
+            .set_name(e, crate::world::components::Name("StressNPC".into()));
+        engine
+            .ecs
+            .set_personal_needs(e, crate::world::components::PersonalNeeds::default_npc());
+        engine.ecs.set_npc_economy(
+            e,
+            crate::world::components::NpcEconomy {
+                money: 50.0,
+                monthly_required: 50.0,
+                job: crate::world::components::Job::Guard,
+                desperation: 0.0,
+            },
+        );
+        engine.ecs.set_sim_level(
+            e,
+            crate::world::components::SimLevel {
+                level: crate::world::components::SimulationLevel::L1,
+            },
+        );
+        engine
+            .ecs
+            .set_ai_state(e, crate::world::components::AiState::Idle);
+        engine
+            .ecs
+            .set_inventory(e, crate::world::components::Inventory { items: Vec::new() });
+        engine
+            .ecs
+            .set_memory(e, crate::core::ai_memory::Memory::new());
+        engine
+            .ecs
+            .set_emotions(e, crate::core::ai_emotions::Emotions::new());
+        engine.ecs.set_life_info(
+            e,
+            crate::world::components::LifeInfo {
+                age: 100.0,
+                max_age: 400.0,
+                last_mate_day: 0,
+                mate_cooldown_days: 60,
+            },
+        );
     }
 
     for species in [
@@ -107,7 +127,11 @@ pub fn run_meat_grinder(ticks: u64) -> StressReport {
     let weapon_id = weapons
         .as_ref()
         .and_then(|w| w.get_id("ak47"))
-        .or_else(|| weapons.as_ref().and_then(|w| w.name_to_id.values().next().copied()))
+        .or_else(|| {
+            weapons
+                .as_ref()
+                .and_then(|w| w.name_to_id.values().next().copied())
+        })
         .unwrap_or(0);
 
     for i in 0..ticks {
@@ -139,7 +163,10 @@ pub fn run_meat_grinder(ticks: u64) -> StressReport {
 
         peak_entity_count = peak_entity_count.max(engine.ecs.alive.len());
 
-        if let Some(dest) = engine.resources.get::<crate::physics::destruction::DestructionSystem>() {
+        if let Some(dest) = engine
+            .resources
+            .get::<crate::physics::destruction::DestructionSystem>()
+        {
             let obj_count = dest.objects.len();
             peak_destruction_objects = peak_destruction_objects.max(obj_count);
         }
@@ -156,7 +183,10 @@ pub fn run_meat_grinder(ticks: u64) -> StressReport {
     };
     let worst_tick_ms = tick_times.last().copied().unwrap_or(0.0);
     let p99_idx = (n as f64 * 0.99) as usize;
-    let p99_tick_ms = tick_times.get(p99_idx.min(n.saturating_sub(1))).copied().unwrap_or(0.0);
+    let p99_tick_ms = tick_times
+        .get(p99_idx.min(n.saturating_sub(1)))
+        .copied()
+        .unwrap_or(0.0);
 
     StressReport {
         ticks,

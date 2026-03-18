@@ -1,8 +1,8 @@
 //! Material truth service: unified query layer over MaterialBridge with fallbacks.
 
 use crate::world::material_bridge::{
-    MaterialBridge, MaterialBridgeData,
-    AudioMaterialMapping, ParticleMaterialMapping, RenderMaterialMapping,
+    AudioMaterialMapping, MaterialBridge, MaterialBridgeData, ParticleMaterialMapping,
+    RenderMaterialMapping,
 };
 use crate::world::surface_db::{MaterialId, SurfaceDB};
 
@@ -16,27 +16,27 @@ pub struct MaterialTruthService {
 impl MaterialTruthService {
     pub fn new(bridge: MaterialBridge) -> Self {
         let fallback_render = RenderMaterialMapping {
-                material_id: 0,
-                base_albedo_tint: [0.5, 0.5, 0.5],
-                roughness_range: (0.5, 0.8),
-                metallic: 0.0,
-                normal_intensity: 1.0,
-                subsurface: 0.0,
+            material_id: 0,
+            base_albedo_tint: [0.5, 0.5, 0.5],
+            roughness_range: (0.5, 0.8),
+            metallic: 0.0,
+            normal_intensity: 1.0,
+            subsurface: 0.0,
         };
         let fallback_audio = AudioMaterialMapping {
-                material_id: 0,
-                impact_sound_class: "GenericImpact".into(),
-                footstep_sound_class: "GenericFootstep".into(),
-                scrape_sound_class: "GenericScrape".into(),
-                break_sound_class: "GenericBreak".into(),
+            material_id: 0,
+            impact_sound_class: "GenericImpact".into(),
+            footstep_sound_class: "GenericFootstep".into(),
+            scrape_sound_class: "GenericScrape".into(),
+            break_sound_class: "GenericBreak".into(),
         };
         let fallback_particle = ParticleMaterialMapping {
-                material_id: 0,
-                debris_color: [0.4, 0.4, 0.4],
-                debris_size_range: (0.05, 0.2),
-                dust_color: [0.6, 0.6, 0.6],
-                dust_density: 0.5,
-                spark_on_impact: false,
+            material_id: 0,
+            debris_color: [0.4, 0.4, 0.4],
+            debris_size_range: (0.05, 0.2),
+            dust_color: [0.6, 0.6, 0.6],
+            dust_density: 0.5,
+            spark_on_impact: false,
         };
         Self {
             bridge,

@@ -24,7 +24,10 @@ pub struct EncounterEditor {
 
 impl EncounterEditor {
     pub fn new() -> Self {
-        Self { encounters: Vec::new(), selected: None }
+        Self {
+            encounters: Vec::new(),
+            selected: None,
+        }
     }
 
     pub fn add_encounter(&mut self, encounter: EncounterDescriptor) {
@@ -52,7 +55,9 @@ impl EncounterEditor {
 }
 
 impl Default for EncounterEditor {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -68,7 +73,9 @@ pub struct FactionEditor {
 
 impl FactionEditor {
     pub fn new() -> Self {
-        Self { factions: Vec::new() }
+        Self {
+            factions: Vec::new(),
+        }
     }
 
     pub fn add_faction(&mut self, faction: FactionData) {
@@ -96,7 +103,9 @@ impl FactionEditor {
 }
 
 impl Default for FactionEditor {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -137,7 +146,9 @@ impl SpawnSetEditor {
 }
 
 impl Default for SpawnSetEditor {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -155,7 +166,9 @@ pub struct EconomyBalanceTool {
 
 impl EconomyBalanceTool {
     pub fn new() -> Self {
-        Self { entries: Vec::new() }
+        Self {
+            entries: Vec::new(),
+        }
     }
 
     pub fn add_entry(&mut self, entry: EconomyBalanceEntry) {
@@ -165,7 +178,9 @@ impl EconomyBalanceTool {
     pub fn equilibrium_time(&self, resource: &str) -> Option<f32> {
         let entry = self.entries.iter().find(|e| e.resource_name == resource)?;
         let net_rate = entry.production_rate - entry.consumption_rate;
-        if net_rate.abs() < 0.001 { return None; }
+        if net_rate.abs() < 0.001 {
+            return None;
+        }
         Some(entry.max_stockpile / net_rate.abs())
     }
 
@@ -179,5 +194,7 @@ impl EconomyBalanceTool {
 }
 
 impl Default for EconomyBalanceTool {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

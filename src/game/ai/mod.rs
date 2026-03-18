@@ -15,7 +15,6 @@
 pub mod ai;
 pub mod ai_scheduler;
 pub mod body;
-pub mod observability;
 pub mod combat;
 pub mod combat_tactics;
 pub mod desire;
@@ -25,6 +24,7 @@ pub mod memory;
 pub mod monster_ai;
 pub mod needs;
 pub mod npc_ai;
+pub mod observability;
 pub mod offline_simulation;
 pub mod perception;
 pub mod plan;

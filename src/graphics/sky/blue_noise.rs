@@ -113,11 +113,7 @@ impl BlueNoiseSampler {
                 wgpu::TexelCopyTextureInfo {
                     texture,
                     mip_level: 0,
-                    origin: wgpu::Origin3d {
-                        x: 0,
-                        y: 0,
-                        z: i,
-                    },
+                    origin: wgpu::Origin3d { x: 0, y: 0, z: i },
                     aspect: wgpu::TextureAspect::All,
                 },
                 img.as_raw(),

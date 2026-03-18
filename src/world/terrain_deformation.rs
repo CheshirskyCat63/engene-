@@ -57,14 +57,15 @@ impl TerrainDeformationSystem {
                     continue;
                 }
 
-                let patch = self.modified_patches.entry(key).or_insert_with(|| {
-                    TerrainPatch {
+                let patch = self
+                    .modified_patches
+                    .entry(key)
+                    .or_insert_with(|| TerrainPatch {
                         chunk_x: key.0,
                         chunk_z: key.1,
                         height_deltas: vec![0.0; 64],
                         dirty: false,
-                    }
-                });
+                    });
 
                 let patch_world_x = key.0 as f32 * PATCH_SIZE;
                 let patch_world_z = key.1 as f32 * PATCH_SIZE;
@@ -105,6 +106,7 @@ impl TerrainDeformationSystem {
 
 impl TerrainDeformationSystem {
     fn update_memory_estimate(&mut self) {
-        self.total_memory_bytes = self.modified_patches.len() * (std::mem::size_of::<TerrainPatch>() + 64 * 4);
+        self.total_memory_bytes =
+            self.modified_patches.len() * (std::mem::size_of::<TerrainPatch>() + 64 * 4);
     }
 }

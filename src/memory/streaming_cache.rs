@@ -65,19 +65,23 @@ impl<K: std::hash::Hash + Eq + Clone + std::fmt::Debug, V> StreamingCache<K, V> 
     /// Insert a value with estimated memory size.
     pub fn insert(&mut self, key: K, value: V, memory_bytes: u64) {
         // Check if we need to evict
-        while self.entries.len() >= self.max_entries 
-            || (self.current_memory_bytes + memory_bytes > self.max_memory_bytes && !self.entries.is_empty())
+        while self.entries.len() >= self.max_entries
+            || (self.current_memory_bytes + memory_bytes > self.max_memory_bytes
+                && !self.entries.is_empty())
         {
             self.evict_lru();
         }
 
         self.current_memory_bytes += memory_bytes;
-        self.entries.insert(key, CacheEntry {
-            data: value,
-            last_access: Instant::now(),
-            access_count: 1,
-            memory_bytes,
-        });
+        self.entries.insert(
+            key,
+            CacheEntry {
+                data: value,
+                last_access: Instant::now(),
+                access_count: 1,
+                memory_bytes,
+            },
+        );
     }
 
     /// Remove a value from the cache.
@@ -127,7 +131,8 @@ impl<K: std::hash::Hash + Eq + Clone + std::fmt::Debug, V> StreamingCache<K, V> 
         }
 
         // Find LRU entry
-        let lru_key = self.entries
+        let lru_key = self
+            .entries
             .iter()
             .min_by_key(|(_, e)| (e.last_access, e.access_count))
             .map(|(k, _)| k.clone());
@@ -140,8 +145,9 @@ impl<K: std::hash::Hash + Eq + Clone + std::fmt::Debug, V> StreamingCache<K, V> 
     /// Evict entries that haven't been accessed recently.
     pub fn evict_older_than(&mut self, max_age_secs: u64) -> usize {
         let cutoff = Instant::now() - std::time::Duration::from_secs(max_age_secs);
-        
-        let to_evict: Vec<K> = self.entries
+
+        let to_evict: Vec<K> = self
+            .entries
             .iter()
             .filter(|(_, e)| e.last_access < cutoff)
             .map(|(k, _)| k.clone())
@@ -189,7 +195,8 @@ pub struct CacheStats {
 impl CacheStats {
     /// Print stats to stdout.
     pub fn print(&self) {
-        println!("Cache: {}/{} entries, {}/{} MB, hits: {}, misses: {}, ratio: {:.1}%",
+        println!(
+            "Cache: {}/{} entries, {}/{} MB, hits: {}, misses: {}, ratio: {:.1}%",
             self.entry_count,
             self.max_entries,
             self.memory_bytes / (1024 * 1024),
@@ -208,10 +215,10 @@ mod tests {
     #[test]
     fn test_basic_operations() {
         let mut cache: StreamingCache<i32, String> = StreamingCache::new(10, 1);
-        
+
         cache.insert(1, "one".to_string(), 100);
         cache.insert(2, "two".to_string(), 100);
-        
+
         assert_eq!(cache.get(&1), Some(&"one".to_string()));
         assert_eq!(cache.get(&3), None);
         assert_eq!(cache.len(), 2);
@@ -220,17 +227,17 @@ mod tests {
     #[test]
     fn test_lru_eviction() {
         let mut cache: StreamingCache<i32, String> = StreamingCache::new(3, 1);
-        
+
         cache.insert(1, "one".to_string(), 100);
         cache.insert(2, "two".to_string(), 100);
         cache.insert(3, "three".to_string(), 100);
-        
+
         // Access 1 to make it more recent
         cache.get(&1);
-        
+
         // Insert 4, should evict 2 (LRU)
         cache.insert(4, "four".to_string(), 100);
-        
+
         assert!(cache.contains(&1));
         assert!(!cache.contains(&2)); // Evicted
         assert!(cache.contains(&3));
@@ -240,17 +247,17 @@ mod tests {
     #[test]
     fn test_memory_eviction() {
         let mut cache: StreamingCache<i32, String> = StreamingCache::new(100, 1); // 1 MB limit
-        
+
         // Insert 2 MB of data (should evict)
         cache.insert(1, "a".to_string(), 512 * 1024);
         cache.insert(2, "b".to_string(), 512 * 1024);
-        
+
         // Memory is now at 1 MB
         assert_eq!(cache.memory_usage(), 1024 * 1024);
-        
+
         // Insert more, should evict
         cache.insert(3, "c".to_string(), 512 * 1024);
-        
+
         // Should have evicted to make room
         assert!(cache.memory_usage() <= 1024 * 1024);
     }
@@ -258,16 +265,16 @@ mod tests {
     #[test]
     fn test_hit_ratio() {
         let mut cache: StreamingCache<i32, String> = StreamingCache::new(10, 1);
-        
+
         cache.insert(1, "one".to_string(), 100);
-        
+
         // 2 hits
         cache.get(&1);
         cache.get(&1);
-        
+
         // 1 miss
         cache.get(&2);
-        
+
         assert!((cache.hit_ratio() - 0.666).abs() < 0.01);
     }
 }

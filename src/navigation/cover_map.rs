@@ -33,8 +33,16 @@ impl CoverMap {
                 let mut best_dir = Vec2::ZERO;
                 let probe = cell_size * 0.5;
 
-                for &(dx, dz) in &[(1.0, 0.0), (-1.0, 0.0), (0.0, 1.0), (0.0, -1.0),
-                                    (0.7, 0.7), (-0.7, 0.7), (0.7, -0.7), (-0.7, -0.7)] {
+                for &(dx, dz) in &[
+                    (1.0, 0.0),
+                    (-1.0, 0.0),
+                    (0.0, 1.0),
+                    (0.0, -1.0),
+                    (0.7, 0.7),
+                    (-0.7, 0.7),
+                    (0.7, -0.7),
+                    (-0.7, -0.7),
+                ] {
                     let nx = x + dx * probe;
                     let nz = z + dz * probe;
                     let nh = terrain_height_fn(nx, nz);
@@ -46,13 +54,19 @@ impl CoverMap {
                 }
 
                 let quality = (max_slope * 3.0).clamp(0.0, 1.0);
-                cells.push(CoverCell { quality, direction: best_dir });
+                cells.push(CoverCell {
+                    quality,
+                    direction: best_dir,
+                });
             }
         }
 
         println!(
             "[cover_map] precomputed {}x{} grid ({} cells, cell_size={:.1}m)",
-            grid_dim, grid_dim, cells.len(), cell_size,
+            grid_dim,
+            grid_dim,
+            cells.len(),
+            cell_size,
         );
 
         Self {

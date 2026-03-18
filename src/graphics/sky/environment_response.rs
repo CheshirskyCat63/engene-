@@ -19,13 +19,7 @@ impl Default for WetnessState {
 }
 
 impl WetnessState {
-    pub fn update(
-        &mut self,
-        rain_intensity: f32,
-        dt: f32,
-        temperature: f32,
-        humidity: f32,
-    ) {
+    pub fn update(&mut self, rain_intensity: f32, dt: f32, temperature: f32, humidity: f32) {
         if rain_intensity > 0.0 {
             // Accumulate wetness when raining
             let accumulation_rate = rain_intensity * 0.5;

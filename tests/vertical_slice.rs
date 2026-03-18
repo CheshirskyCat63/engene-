@@ -11,11 +11,11 @@ fn vertical_slice_world_loads() {
 
 #[test]
 fn vertical_slice_engine_boots() {
-    use std::sync::Arc;
     use engene::app::runtime_assembly::RuntimeAssembly;
-    use engene::world::world::WorldGrid;
-    use engene::world::heightmap::Heightmap;
     use engene::tools::doctor;
+    use engene::world::heightmap::Heightmap;
+    use engene::world::world::WorldGrid;
+    use std::sync::Arc;
 
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
@@ -26,14 +26,18 @@ fn vertical_slice_engine_boots() {
     assert!(engine.ecs.npcs().len() > 0);
 
     let report = doctor::run_doctor(&engine, doctor::DoctorMode::Advisory);
-    assert_eq!(report.error_count(), 0, "vertical slice should boot with 0 doctor errors");
+    assert_eq!(
+        report.error_count(),
+        0,
+        "vertical slice should boot with 0 doctor errors"
+    );
 }
 
 #[test]
 fn vertical_slice_simulation_stable() {
     use engene::app::runtime_assembly::RuntimeAssembly;
-    use engene::world::world::WorldGrid;
     use engene::world::heightmap::Heightmap;
+    use engene::world::world::WorldGrid;
     use std::sync::Arc;
 
     let grid = WorldGrid::generate();
@@ -50,7 +54,11 @@ fn vertical_slice_simulation_stable() {
 
     let final_entities = engine.ecs.alive.len();
     let drift = (final_entities as f64 - initial_entities as f64).abs() / initial_entities as f64;
-    assert!(drift < 0.5, "entity count drifted {:.0}% after 200 ticks", drift * 100.0);
+    assert!(
+        drift < 0.5,
+        "entity count drifted {:.0}% after 200 ticks",
+        drift * 100.0
+    );
 }
 
 #[test]

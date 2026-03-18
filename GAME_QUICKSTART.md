@@ -1,14 +1,20 @@
 # ENGENE Game — Quick Start
 
-## Launch
+## Canonical launch
+
+```bash
+cargo run --bin engene_game
+```
+
+Optional helper:
 
 ```powershell
 .\run_game.ps1
-# or
-ENGENE_Game.exe
-# or
-cargo run --bin engene_game
 ```
+
+For canonical entrypoint law see:
+- `docs/canonical/ENGENE_2_0_ENTRYPOINTS.md`
+- `README_FIRST_RUN.md`
 
 ## Controls
 
@@ -47,10 +53,3 @@ The game loads a 2x2 km world slice with:
 - Monster habitats with wolves, boars, bloodsuckers
 - Chunk streaming based on camera position
 - Persistent entity state across chunk load/unload cycles
-
-## Console Output
-
-The game prints periodic status to the terminal:
-- Entity counts (NPCs, monsters by species)
-- Economy snapshots (total money, desperation)
-- Monthly reports with detailed NPC/monster status

@@ -100,7 +100,9 @@ impl RoleBehavior {
             crate::world::components::Job::Hunter => NpcRole::Hunter,
             crate::world::components::Job::Scavenger => NpcRole::Scavenger,
             crate::world::components::Job::Courier => NpcRole::Courier,
-            crate::world::components::Job::Resident | crate::world::components::Job::Unemployed => NpcRole::IdleResident,
+            crate::world::components::Job::Resident | crate::world::components::Job::Unemployed => {
+                NpcRole::IdleResident
+            }
         }
     }
 }

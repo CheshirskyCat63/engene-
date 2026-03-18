@@ -23,7 +23,10 @@ fn quality_governor_pressure_response() {
     for _ in 0..20 {
         governor.update(50_000);
     }
-    assert!(governor.pressure_level != PressureLevel::Normal || governor.max_dirty_surface_uploads() < 16);
+    assert!(
+        governor.pressure_level != PressureLevel::Normal
+            || governor.max_dirty_surface_uploads() < 16
+    );
 }
 
 #[test]

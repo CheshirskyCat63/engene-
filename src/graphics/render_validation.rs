@@ -15,8 +15,11 @@ pub struct PassValidationResult {
 
 impl PassValidationResult {
     pub fn all_ok(&self) -> bool {
-        self.visual_correct && self.within_budget && self.temporal_stable
-            && self.exposure_correct && self.tier_fallback_ok
+        self.visual_correct
+            && self.within_budget
+            && self.temporal_stable
+            && self.exposure_correct
+            && self.tier_fallback_ok
     }
 }
 
@@ -31,14 +34,78 @@ pub struct TierBudgets {
 /// Budget ceilings per render pass
 pub fn pass_budgets() -> Vec<(&'static str, TierBudgets)> {
     vec![
-        ("Atmosphere/Fog", TierBudgets { low: 0.0, medium: 0.3, high: 0.5, ultra: 0.8 }),
-        ("IBL", TierBudgets { low: 0.1, medium: 0.1, high: 0.2, ultra: 0.3 }),
-        ("TAA", TierBudgets { low: 0.0, medium: 0.3, high: 0.5, ultra: 0.5 }),
-        ("SSAO", TierBudgets { low: 0.0, medium: 0.0, high: 0.5, ultra: 0.8 }),
-        ("Bloom (full)", TierBudgets { low: 0.0, medium: 0.2, high: 0.3, ultra: 0.5 }),
-        ("Contact Shadows", TierBudgets { low: 0.0, medium: 0.0, high: 0.3, ultra: 0.5 }),
-        ("Reflection Probes", TierBudgets { low: 0.0, medium: 0.1, high: 0.3, ultra: 0.5 }),
-        ("Total Post-Process", TierBudgets { low: 0.5, medium: 1.5, high: 3.0, ultra: 4.0 }),
+        (
+            "Atmosphere/Fog",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.3,
+                high: 0.5,
+                ultra: 0.8,
+            },
+        ),
+        (
+            "IBL",
+            TierBudgets {
+                low: 0.1,
+                medium: 0.1,
+                high: 0.2,
+                ultra: 0.3,
+            },
+        ),
+        (
+            "TAA",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.3,
+                high: 0.5,
+                ultra: 0.5,
+            },
+        ),
+        (
+            "SSAO",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.0,
+                high: 0.5,
+                ultra: 0.8,
+            },
+        ),
+        (
+            "Bloom (full)",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.2,
+                high: 0.3,
+                ultra: 0.5,
+            },
+        ),
+        (
+            "Contact Shadows",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.0,
+                high: 0.3,
+                ultra: 0.5,
+            },
+        ),
+        (
+            "Reflection Probes",
+            TierBudgets {
+                low: 0.0,
+                medium: 0.1,
+                high: 0.3,
+                ultra: 0.5,
+            },
+        ),
+        (
+            "Total Post-Process",
+            TierBudgets {
+                low: 0.5,
+                medium: 1.5,
+                high: 3.0,
+                ultra: 4.0,
+            },
+        ),
     ]
 }
 
@@ -70,61 +137,161 @@ pub fn generate_pass_checklists() -> Vec<PassChecklist> {
         PassChecklist {
             pass_name: "Atmosphere/Fog",
             checks: vec![
-                PassCheck { name: "no_nan_pixels", description: "No NaN/Inf in output", status: CheckStatus::NotTested },
-                PassCheck { name: "exposure_respect", description: "Fog respects auto-exposure", status: CheckStatus::NotTested },
-                PassCheck { name: "time_of_day", description: "Works across sunrise/noon/dusk/night", status: CheckStatus::NotTested },
-                PassCheck { name: "low_tier_disabled", description: "Gracefully disabled on Low tier", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "no_nan_pixels",
+                    description: "No NaN/Inf in output",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "exposure_respect",
+                    description: "Fog respects auto-exposure",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "time_of_day",
+                    description: "Works across sunrise/noon/dusk/night",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "low_tier_disabled",
+                    description: "Gracefully disabled on Low tier",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "IBL",
             checks: vec![
-                PassCheck { name: "env_light_binds", description: "EnvLightUniforms bound to PBR shader", status: CheckStatus::NotTested },
-                PassCheck { name: "time_responsive", description: "Ambient changes with day progress", status: CheckStatus::NotTested },
-                PassCheck { name: "no_overbright", description: "No overexposure from IBL", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "env_light_binds",
+                    description: "EnvLightUniforms bound to PBR shader",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "time_responsive",
+                    description: "Ambient changes with day progress",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "no_overbright",
+                    description: "No overexposure from IBL",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "TAA",
             checks: vec![
-                PassCheck { name: "motion_vectors", description: "Motion vectors generated in geometry pass", status: CheckStatus::NotTested },
-                PassCheck { name: "jitter_applied", description: "Sub-pixel jitter on projection", status: CheckStatus::NotTested },
-                PassCheck { name: "no_ghosting", description: "No ghosting on moving objects", status: CheckStatus::NotTested },
-                PassCheck { name: "reactive_mask", description: "Particles/UI excluded from TAA", status: CheckStatus::NotTested },
-                PassCheck { name: "history_rejection", description: "Disocclusion handled", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "motion_vectors",
+                    description: "Motion vectors generated in geometry pass",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "jitter_applied",
+                    description: "Sub-pixel jitter on projection",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "no_ghosting",
+                    description: "No ghosting on moving objects",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "reactive_mask",
+                    description: "Particles/UI excluded from TAA",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "history_rejection",
+                    description: "Disocclusion handled",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "SSAO",
             checks: vec![
-                PassCheck { name: "normal_buffer", description: "Normal buffer output from geometry pass", status: CheckStatus::NotTested },
-                PassCheck { name: "no_halo", description: "No dirty halo artifacts", status: CheckStatus::NotTested },
-                PassCheck { name: "denoise", description: "Spatial denoise applied", status: CheckStatus::NotTested },
-                PassCheck { name: "high_tier_only", description: "Disabled on Low/Medium tiers", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "normal_buffer",
+                    description: "Normal buffer output from geometry pass",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "no_halo",
+                    description: "No dirty halo artifacts",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "denoise",
+                    description: "Spatial denoise applied",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "high_tier_only",
+                    description: "Disabled on Low/Medium tiers",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "Bloom",
             checks: vec![
-                PassCheck { name: "blur_chain", description: "4-level downsample + upsample", status: CheckStatus::NotTested },
-                PassCheck { name: "no_soap", description: "No over-bloom (2016 soap effect)", status: CheckStatus::NotTested },
-                PassCheck { name: "threshold_correct", description: "Only bright pixels bloom", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "blur_chain",
+                    description: "4-level downsample + upsample",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "no_soap",
+                    description: "No over-bloom (2016 soap effect)",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "threshold_correct",
+                    description: "Only bright pixels bloom",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "Contact Shadows",
             checks: vec![
-                PassCheck { name: "depth_bound", description: "Depth buffer correctly bound", status: CheckStatus::NotTested },
-                PassCheck { name: "no_noise", description: "No excessive noise", status: CheckStatus::NotTested },
-                PassCheck { name: "complement_csm", description: "Complements CSM, doesn't fight it", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "depth_bound",
+                    description: "Depth buffer correctly bound",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "no_noise",
+                    description: "No excessive noise",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "complement_csm",
+                    description: "Complements CSM, doesn't fight it",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
         PassChecklist {
             pass_name: "Reflection Probes",
             checks: vec![
-                PassCheck { name: "nearest_lookup", description: "nearest_probe() used in PBR", status: CheckStatus::NotTested },
-                PassCheck { name: "parallax_correction", description: "Box parallax correction", status: CheckStatus::NotTested },
-                PassCheck { name: "blend_probes", description: "Smooth blending between probes", status: CheckStatus::NotTested },
+                PassCheck {
+                    name: "nearest_lookup",
+                    description: "nearest_probe() used in PBR",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "parallax_correction",
+                    description: "Box parallax correction",
+                    status: CheckStatus::NotTested,
+                },
+                PassCheck {
+                    name: "blend_probes",
+                    description: "Smooth blending between probes",
+                    status: CheckStatus::NotTested,
+                },
             ],
         },
     ]

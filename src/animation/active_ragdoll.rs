@@ -11,10 +11,16 @@ pub struct PdGains {
 
 impl PdGains {
     pub fn stiff() -> Self {
-        Self { kp: 600.0, kd: 60.0 }
+        Self {
+            kp: 600.0,
+            kd: 60.0,
+        }
     }
     pub fn medium() -> Self {
-        Self { kp: 300.0, kd: 40.0 }
+        Self {
+            kp: 300.0,
+            kd: 40.0,
+        }
     }
     pub fn loose() -> Self {
         Self { kp: 80.0, kd: 20.0 }
@@ -102,8 +108,8 @@ impl BalanceSensor {
         }
 
         if !foot_positions.is_empty() {
-            self.support_center = foot_positions.iter().copied().sum::<Vec3>()
-                / foot_positions.len() as f32;
+            self.support_center =
+                foot_positions.iter().copied().sum::<Vec3>() / foot_positions.len() as f32;
         }
 
         let horizontal_offset = Vec3::new(
@@ -256,11 +262,8 @@ impl ActiveRagdollController {
                 let current_rot = *body.rotation();
                 let angular_vel = body.angvel();
 
-                let torque = controller.compute_torque(
-                    current_rot,
-                    target_rot,
-                    angular_vel,
-                ) * self.overall_strength;
+                let torque = controller.compute_torque(current_rot, target_rot, angular_vel)
+                    * self.overall_strength;
 
                 body.apply_torque_impulse(torque * (1.0 / 60.0), true);
 
@@ -333,8 +336,11 @@ impl ActiveRagdollController {
         for (i, ctrl) in self.joint_controllers.iter_mut().enumerate() {
             if i < skeleton.joint_count() {
                 let name = skeleton.joints[i].name.to_lowercase();
-                if name.contains("leg") || name.contains("hip") || name.contains("knee")
-                    || name.contains("ankle") || name.contains("foot")
+                if name.contains("leg")
+                    || name.contains("hip")
+                    || name.contains("knee")
+                    || name.contains("ankle")
+                    || name.contains("foot")
                 {
                     ctrl.strength = 0.3 + 0.7 * progress;
                     ctrl.gains = PdGains::medium();
@@ -350,8 +356,11 @@ impl ActiveRagdollController {
         for (i, ctrl) in self.joint_controllers.iter_mut().enumerate() {
             if i < skeleton.joint_count() {
                 let name = skeleton.joints[i].name.to_lowercase();
-                if name.contains("arm") || name.contains("hand") || name.contains("wrist")
-                    || name.contains("elbow") || name.contains("shoulder")
+                if name.contains("arm")
+                    || name.contains("hand")
+                    || name.contains("wrist")
+                    || name.contains("elbow")
+                    || name.contains("shoulder")
                 {
                     ctrl.gains = PdGains::stiff();
                     ctrl.strength = 1.0;

@@ -12,9 +12,8 @@ fn lod_config_levels() {
 
 #[test]
 fn frustum_containment() {
-    use engene::graphics::visibility::Frustum;
     use engene::graphics::camera::FlyCamera;
-    
+    use engene::graphics::visibility::Frustum;
 
     let camera = FlyCamera::new();
     let vp = camera.view_projection();
@@ -54,7 +53,7 @@ fn render_validation_clean() {
 
 #[test]
 fn vegetation_semantics() {
-    use engene::graphics::vegetation_semantics::{VegetationSemantics, OcclusionClass};
+    use engene::graphics::vegetation_semantics::{OcclusionClass, VegetationSemantics};
 
     let short = VegetationSemantics::short_grass();
     assert_eq!(short.occlusion, OcclusionClass::None);

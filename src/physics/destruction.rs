@@ -1,8 +1,8 @@
-use glam::Vec3;
-use std::collections::HashMap;
 use crate::core::ecs::Entity;
 use crate::physics::ballistics::MaterialId;
 use crate::physics::building::StructuralSection;
+use glam::Vec3;
+use std::collections::HashMap;
 
 #[derive(Clone, Debug)]
 pub struct DestructionNode {
@@ -33,18 +33,22 @@ pub struct DestructibleObject {
 impl DestructibleObject {
     pub fn new(entity: Entity, nodes: Vec<DestructionNode>, links: Vec<DestructionLink>) -> Self {
         let total_strength: f32 = links.iter().map(|l| l.strength).sum();
-        Self { nodes, links, entity, total_strength }
+        Self {
+            nodes,
+            links,
+            entity,
+            total_strength,
+        }
     }
 
     pub fn apply_impulse(&mut self, position: Vec3, energy: f32) -> Vec<DestructionEvent> {
         let mut events = Vec::new();
 
-        let nearest = self.nodes.iter_mut()
-            .min_by(|a, b| {
-                let da = (a.position - position).length_squared();
-                let db = (b.position - position).length_squared();
-                da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
-            });
+        let nearest = self.nodes.iter_mut().min_by(|a, b| {
+            let da = (a.position - position).length_squared();
+            let db = (b.position - position).length_squared();
+            da.partial_cmp(&db).unwrap_or(std::cmp::Ordering::Equal)
+        });
 
         let nearest_id = match nearest {
             Some(n) => {
@@ -57,10 +61,20 @@ impl DestructibleObject {
         self.propagate_stress(nearest_id, energy);
 
         for link in &mut self.links {
-            if link.broken { continue; }
+            if link.broken {
+                continue;
+            }
             let threshold = link.strength * (1.0 - link.fatigue);
-            let node_a_stress = self.nodes.iter().find(|n| n.id == link.a).map_or(0.0, |n| n.accumulated_stress);
-            let node_b_stress = self.nodes.iter().find(|n| n.id == link.b).map_or(0.0, |n| n.accumulated_stress);
+            let node_a_stress = self
+                .nodes
+                .iter()
+                .find(|n| n.id == link.a)
+                .map_or(0.0, |n| n.accumulated_stress);
+            let node_b_stress = self
+                .nodes
+                .iter()
+                .find(|n| n.id == link.b)
+                .map_or(0.0, |n| n.accumulated_stress);
             let max_stress = node_a_stress.max(node_b_stress);
 
             if max_stress > threshold {
@@ -98,14 +112,22 @@ impl DestructibleObject {
         }
 
         while let Some((node_idx, remaining_energy)) = queue.pop_front() {
-            if remaining_energy < 1.0 { continue; }
+            if remaining_energy < 1.0 {
+                continue;
+            }
             let node_id = self.nodes[node_idx].id;
 
             for link in &self.links {
-                if link.broken { continue; }
-                let neighbor_id = if link.a == node_id { link.b }
-                    else if link.b == node_id { link.a }
-                    else { continue };
+                if link.broken {
+                    continue;
+                }
+                let neighbor_id = if link.a == node_id {
+                    link.b
+                } else if link.b == node_id {
+                    link.a
+                } else {
+                    continue;
+                };
 
                 if let Some(ni) = self.nodes.iter().position(|n| n.id == neighbor_id) {
                     if !visited[ni] {
@@ -128,22 +150,32 @@ impl DestructibleObject {
         let mut clusters = Vec::new();
 
         for start_idx in 0..self.nodes.len() {
-            if visited[start_idx] { continue; }
+            if visited[start_idx] {
+                continue;
+            }
 
             let mut cluster = Vec::new();
             let mut stack = vec![start_idx];
 
             while let Some(idx) = stack.pop() {
-                if visited[idx] { continue; }
+                if visited[idx] {
+                    continue;
+                }
                 visited[idx] = true;
                 cluster.push(self.nodes[idx].id);
 
                 let node_id = self.nodes[idx].id;
                 for link in &self.links {
-                    if link.broken { continue; }
-                    let neighbor_id = if link.a == node_id { link.b }
-                        else if link.b == node_id { link.a }
-                        else { continue };
+                    if link.broken {
+                        continue;
+                    }
+                    let neighbor_id = if link.a == node_id {
+                        link.b
+                    } else if link.b == node_id {
+                        link.a
+                    } else {
+                        continue;
+                    };
                     if let Some(ni) = self.nodes.iter().position(|n| n.id == neighbor_id) {
                         if !visited[ni] {
                             stack.push(ni);
@@ -163,7 +195,9 @@ impl DestructibleObject {
         let links_to_break = (self.links.len() as f32 * damage_ratio) as usize;
         let mut broken = 0;
         for link in &mut self.links {
-            if broken >= links_to_break { break; }
+            if broken >= links_to_break {
+                break;
+            }
             if !link.broken {
                 link.broken = true;
                 broken += 1;
@@ -173,15 +207,31 @@ impl DestructibleObject {
     }
 
     pub fn integrity(&self) -> f32 {
-        let intact: f32 = self.links.iter().filter(|l| !l.broken).map(|l| l.strength).sum();
-        if self.total_strength > 0.0 { intact / self.total_strength } else { 0.0 }
+        let intact: f32 = self
+            .links
+            .iter()
+            .filter(|l| !l.broken)
+            .map(|l| l.strength)
+            .sum();
+        if self.total_strength > 0.0 {
+            intact / self.total_strength
+        } else {
+            0.0
+        }
     }
 }
 
 #[derive(Clone, Debug)]
 pub enum DestructionEvent {
-    LinkBroken { entity: Entity, link_a: u32, link_b: u32 },
-    ObjectFragmented { entity: Entity, cluster_count: u32 },
+    LinkBroken {
+        entity: Entity,
+        link_a: u32,
+        link_b: u32,
+    },
+    ObjectFragmented {
+        entity: Entity,
+        cluster_count: u32,
+    },
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -264,8 +314,13 @@ impl DestructionSystem {
 
         let radius = 10.0;
         for obj in &mut self.objects {
-            let close_enough = obj.nodes.iter().any(|n| (n.position - position).length() < radius);
-            if !close_enough { continue; }
+            let close_enough = obj
+                .nodes
+                .iter()
+                .any(|n| (n.position - position).length() < radius);
+            if !close_enough {
+                continue;
+            }
 
             match lod {
                 DestructionLod::Full => {

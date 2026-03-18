@@ -114,7 +114,10 @@ impl WorldStreamer {
     }
 
     pub fn loaded_chunk_count(&self) -> usize {
-        self.chunks.values().filter(|c| c.state == ChunkState::Loaded).count()
+        self.chunks
+            .values()
+            .filter(|c| c.state == ChunkState::Loaded)
+            .count()
     }
 
     pub fn total_chunk_count(&self) -> usize {
@@ -157,15 +160,15 @@ mod tests {
         let c1 = ChunkCoord::from_world(0.0, 0.0);
         assert_eq!(c1.x, 0);
         assert_eq!(c1.z, 0);
-        
+
         let c2 = ChunkCoord::from_world(500.0, 500.0);
         assert_eq!(c2.x, 0);
         assert_eq!(c2.z, 0);
-        
+
         let c3 = ChunkCoord::from_world(1000.0, 1000.0);
         assert_eq!(c3.x, 1);
         assert_eq!(c3.z, 1);
-        
+
         let c4 = ChunkCoord::from_world(-500.0, -500.0);
         assert_eq!(c4.x, -1);
         assert_eq!(c4.z, -1);
@@ -177,7 +180,7 @@ mod tests {
         let (cx, cz) = c.world_center();
         assert_eq!(cx, 500.0);
         assert_eq!(cz, 500.0);
-        
+
         let c2 = ChunkCoord { x: 1, z: 2 };
         let (cx2, cz2) = c2.world_center();
         assert_eq!(cx2, 1500.0);
@@ -187,14 +190,14 @@ mod tests {
     #[test]
     fn test_streamer_load_unload() {
         let mut streamer = WorldStreamer::new(1500.0, 2500.0);
-        
+
         // Camera at origin
         let (to_load, to_unload) = streamer.update(0.0, 0.0);
-        
+
         // Should load chunks within 1500 radius
         assert!(!to_load.is_empty());
         assert!(to_unload.is_empty());
-        
+
         // Mark first chunk as loaded
         if let Some(&coord) = to_load.first() {
             streamer.mark_loaded(coord);
@@ -205,13 +208,13 @@ mod tests {
     #[test]
     fn test_streamer_unload_distant() {
         let mut streamer = WorldStreamer::new(1500.0, 2500.0);
-        
+
         // Load chunks at origin
         streamer.update(0.0, 0.0);
-        
+
         // Move camera far away
         let (_, to_unload) = streamer.update(10000.0, 10000.0);
-        
+
         // Should unload old chunks
         assert!(!to_unload.is_empty());
     }
@@ -219,19 +222,19 @@ mod tests {
     #[test]
     fn test_transaction_rollback() {
         let mut streamer = WorldStreamer::new(1500.0, 2500.0);
-        
+
         // Initial load
         streamer.update(0.0, 0.0);
         let initial_count = streamer.total_chunk_count();
         assert!(initial_count > 0);
-        
+
         // Begin transaction
         let tx = streamer.begin_transaction();
-        
+
         // Make changes - move far away
         let _ = streamer.update(10000.0, 10000.0);
         let _after_move_count = streamer.total_chunk_count();
-        
+
         // Rollback should restore original state
         streamer.rollback(tx);
         assert_eq!(streamer.total_chunk_count(), initial_count);
@@ -240,14 +243,14 @@ mod tests {
     #[test]
     fn test_loaded_chunk_count() {
         let mut streamer = WorldStreamer::new(1500.0, 2500.0);
-        
+
         assert_eq!(streamer.loaded_chunk_count(), 0);
-        
+
         let (to_load, _) = streamer.update(0.0, 0.0);
-        
+
         // Initially all are Loading, not Loaded
         assert_eq!(streamer.loaded_chunk_count(), 0);
-        
+
         // Mark one as loaded
         if let Some(coord) = to_load.first() {
             streamer.mark_loaded(*coord);

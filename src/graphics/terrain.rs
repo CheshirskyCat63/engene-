@@ -64,7 +64,11 @@ impl TerrainMesh {
                 let cx = ((wx / CELL_SIZE) as u32).min(GRID_SIZE - 1);
                 let cz = ((wz / CELL_SIZE) as u32).min(GRID_SIZE - 1);
                 let bi = (cz * GRID_SIZE + cx) as usize;
-                let biome = if bi < biomes.len() { biomes[bi] } else { Biome::Plains };
+                let biome = if bi < biomes.len() {
+                    biomes[bi]
+                } else {
+                    Biome::Plains
+                };
                 let color = biome_color(biome, wy);
 
                 vertices.push(TerrainVertex {
@@ -108,7 +112,11 @@ impl TerrainMesh {
 
         let index_count = indices.len() as u32;
 
-        Self { vertex_buffer, index_buffer, index_count }
+        Self {
+            vertex_buffer,
+            index_buffer,
+            index_count,
+        }
     }
 }
 

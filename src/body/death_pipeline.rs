@@ -61,7 +61,9 @@ pub struct CorpseManager {
 
 impl CorpseManager {
     pub fn new() -> Self {
-        Self { corpses: Vec::new() }
+        Self {
+            corpses: Vec::new(),
+        }
     }
 
     pub fn register_death(

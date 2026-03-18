@@ -1,6 +1,6 @@
-use std::collections::HashMap;
-use serde::{Deserialize, Serialize};
 use super::streaming::ChunkCoord;
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct SpawnDescriptor {
@@ -22,9 +22,18 @@ pub struct ChunkAuthoring {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum NavHint {
-    BlockedRect { min: [f32; 2], max: [f32; 2] },
-    CoverPoint { position: [f32; 3], direction: [f32; 2] },
-    Waypoint { position: [f32; 3], tags: Vec<String> },
+    BlockedRect {
+        min: [f32; 2],
+        max: [f32; 2],
+    },
+    CoverPoint {
+        position: [f32; 3],
+        direction: [f32; 2],
+    },
+    Waypoint {
+        position: [f32; 3],
+        tags: Vec<String>,
+    },
 }
 
 impl ChunkAuthoring {
@@ -49,7 +58,9 @@ pub struct WorldAuthoringDatabase {
 
 impl WorldAuthoringDatabase {
     pub fn new() -> Self {
-        Self { chunks: HashMap::new() }
+        Self {
+            chunks: HashMap::new(),
+        }
     }
 
     pub fn set_chunk(&mut self, auth: ChunkAuthoring) {
@@ -97,5 +108,7 @@ impl WorldAuthoringDatabase {
 }
 
 impl Default for WorldAuthoringDatabase {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

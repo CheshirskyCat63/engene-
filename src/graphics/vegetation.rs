@@ -93,8 +93,7 @@ impl VegetationSystem {
             usage: wgpu::BufferUsages::INDEX,
         });
 
-        let (grass_instances, tree_instances) =
-            scatter_vegetation(heightmap, biomes);
+        let (grass_instances, tree_instances) = scatter_vegetation(heightmap, biomes);
 
         let grass_count = grass_instances.len() as u32;
         let grass_instance_buf = device.create_buffer_init(&wgpu::util::BufferInitDescriptor {
@@ -181,14 +180,38 @@ fn grass_quad() -> (Vec<GrassVertex>, Vec<u32>) {
     let w = 0.3;
     let h = 0.6;
     let verts = vec![
-        GrassVertex { position: [-w, 0.0, 0.0], uv: [0.0, 1.0] },
-        GrassVertex { position: [w, 0.0, 0.0], uv: [1.0, 1.0] },
-        GrassVertex { position: [w, h, 0.0], uv: [1.0, 0.0] },
-        GrassVertex { position: [-w, h, 0.0], uv: [0.0, 0.0] },
-        GrassVertex { position: [0.0, 0.0, -w], uv: [0.0, 1.0] },
-        GrassVertex { position: [0.0, 0.0, w], uv: [1.0, 1.0] },
-        GrassVertex { position: [0.0, h, w], uv: [1.0, 0.0] },
-        GrassVertex { position: [0.0, h, -w], uv: [0.0, 0.0] },
+        GrassVertex {
+            position: [-w, 0.0, 0.0],
+            uv: [0.0, 1.0],
+        },
+        GrassVertex {
+            position: [w, 0.0, 0.0],
+            uv: [1.0, 1.0],
+        },
+        GrassVertex {
+            position: [w, h, 0.0],
+            uv: [1.0, 0.0],
+        },
+        GrassVertex {
+            position: [-w, h, 0.0],
+            uv: [0.0, 0.0],
+        },
+        GrassVertex {
+            position: [0.0, 0.0, -w],
+            uv: [0.0, 1.0],
+        },
+        GrassVertex {
+            position: [0.0, 0.0, w],
+            uv: [1.0, 1.0],
+        },
+        GrassVertex {
+            position: [0.0, h, w],
+            uv: [1.0, 0.0],
+        },
+        GrassVertex {
+            position: [0.0, h, -w],
+            uv: [0.0, 0.0],
+        },
     ];
     let indices = vec![0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7];
     (verts, indices)
@@ -212,7 +235,11 @@ fn scatter_vegetation(
             let bx = ((x / ws) * GRID_SIZE as f32) as usize;
             let bz = ((z / ws) * GRID_SIZE as f32) as usize;
             let bi = (bz * GRID_SIZE as usize + bx).min(biomes.len().saturating_sub(1));
-            let biome = if bi < biomes.len() { biomes[bi] } else { Biome::Plains };
+            let biome = if bi < biomes.len() {
+                biomes[bi]
+            } else {
+                Biome::Plains
+            };
 
             let density = match biome {
                 Biome::Forest => 1.0,
@@ -244,7 +271,11 @@ fn scatter_vegetation(
             let bx = ((x / ws) * GRID_SIZE as f32) as usize;
             let bz = ((z / ws) * GRID_SIZE as f32) as usize;
             let bi = (bz * GRID_SIZE as usize + bx).min(biomes.len().saturating_sub(1));
-            let biome = if bi < biomes.len() { biomes[bi] } else { Biome::Plains };
+            let biome = if bi < biomes.len() {
+                biomes[bi]
+            } else {
+                Biome::Plains
+            };
 
             let tree_density = match biome {
                 Biome::Forest => 0.6,

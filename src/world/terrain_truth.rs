@@ -1,8 +1,7 @@
 /// Terrain Truth Layer (Phase B.3)
 /// Terrain is not just visual -- it is a semantic material of the world.
 /// Each terrain cell has physical, acoustic, ecological, and navigational properties.
-
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// Physical properties of terrain at a given point
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -93,16 +92,27 @@ impl TerrainTruth {
     pub fn grassland() -> Self {
         Self {
             physical: TerrainPhysicalMaterial {
-                traversal_cost: 1.0, cover_quality: 0.1, movement_penalty: 0.0, vehicle_passable: true,
+                traversal_cost: 1.0,
+                cover_quality: 0.1,
+                movement_penalty: 0.0,
+                vehicle_passable: true,
             },
             acoustic: TerrainAcousticMaterial {
-                footstep_sound_class: FootstepSoundClass::Grass, sound_propagation: 1.0, absorption: 0.3,
+                footstep_sound_class: FootstepSoundClass::Grass,
+                sound_propagation: 1.0,
+                absorption: 0.3,
             },
             ecology: TerrainEcologyMaterial {
-                vegetation_suitability: 0.7, fire_spread_rate: 0.8, food_growth_rate: 1.0, water_retention: 0.3,
+                vegetation_suitability: 0.7,
+                fire_spread_rate: 0.8,
+                food_growth_rate: 1.0,
+                water_retention: 0.3,
             },
             moisture: TerrainMoistureBehavior {
-                wetness: 0.2, evaporation_rate: 0.05, deformation_recovery_rate: 0.02, puddle_capacity: 0.1,
+                wetness: 0.2,
+                evaporation_rate: 0.05,
+                deformation_recovery_rate: 0.02,
+                puddle_capacity: 0.1,
             },
         }
     }
@@ -110,16 +120,27 @@ impl TerrainTruth {
     pub fn forest() -> Self {
         Self {
             physical: TerrainPhysicalMaterial {
-                traversal_cost: 1.3, cover_quality: 0.6, movement_penalty: 0.15, vehicle_passable: false,
+                traversal_cost: 1.3,
+                cover_quality: 0.6,
+                movement_penalty: 0.15,
+                vehicle_passable: false,
             },
             acoustic: TerrainAcousticMaterial {
-                footstep_sound_class: FootstepSoundClass::Dirt, sound_propagation: 0.7, absorption: 0.5,
+                footstep_sound_class: FootstepSoundClass::Dirt,
+                sound_propagation: 0.7,
+                absorption: 0.5,
             },
             ecology: TerrainEcologyMaterial {
-                vegetation_suitability: 1.0, fire_spread_rate: 1.2, food_growth_rate: 0.8, water_retention: 0.6,
+                vegetation_suitability: 1.0,
+                fire_spread_rate: 1.2,
+                food_growth_rate: 0.8,
+                water_retention: 0.6,
             },
             moisture: TerrainMoistureBehavior {
-                wetness: 0.4, evaporation_rate: 0.02, deformation_recovery_rate: 0.01, puddle_capacity: 0.3,
+                wetness: 0.4,
+                evaporation_rate: 0.02,
+                deformation_recovery_rate: 0.01,
+                puddle_capacity: 0.3,
             },
         }
     }
@@ -127,16 +148,27 @@ impl TerrainTruth {
     pub fn swamp() -> Self {
         Self {
             physical: TerrainPhysicalMaterial {
-                traversal_cost: 1.8, cover_quality: 0.3, movement_penalty: 0.4, vehicle_passable: false,
+                traversal_cost: 1.8,
+                cover_quality: 0.3,
+                movement_penalty: 0.4,
+                vehicle_passable: false,
             },
             acoustic: TerrainAcousticMaterial {
-                footstep_sound_class: FootstepSoundClass::Mud, sound_propagation: 0.6, absorption: 0.7,
+                footstep_sound_class: FootstepSoundClass::Mud,
+                sound_propagation: 0.6,
+                absorption: 0.7,
             },
             ecology: TerrainEcologyMaterial {
-                vegetation_suitability: 0.5, fire_spread_rate: 0.2, food_growth_rate: 0.6, water_retention: 0.9,
+                vegetation_suitability: 0.5,
+                fire_spread_rate: 0.2,
+                food_growth_rate: 0.6,
+                water_retention: 0.9,
             },
             moisture: TerrainMoistureBehavior {
-                wetness: 0.8, evaporation_rate: 0.01, deformation_recovery_rate: 0.005, puddle_capacity: 0.8,
+                wetness: 0.8,
+                evaporation_rate: 0.01,
+                deformation_recovery_rate: 0.005,
+                puddle_capacity: 0.8,
             },
         }
     }
@@ -144,16 +176,27 @@ impl TerrainTruth {
     pub fn settlement() -> Self {
         Self {
             physical: TerrainPhysicalMaterial {
-                traversal_cost: 0.9, cover_quality: 0.4, movement_penalty: 0.0, vehicle_passable: true,
+                traversal_cost: 0.9,
+                cover_quality: 0.4,
+                movement_penalty: 0.0,
+                vehicle_passable: true,
             },
             acoustic: TerrainAcousticMaterial {
-                footstep_sound_class: FootstepSoundClass::Stone, sound_propagation: 1.2, absorption: 0.1,
+                footstep_sound_class: FootstepSoundClass::Stone,
+                sound_propagation: 1.2,
+                absorption: 0.1,
             },
             ecology: TerrainEcologyMaterial {
-                vegetation_suitability: 0.1, fire_spread_rate: 0.5, food_growth_rate: 0.2, water_retention: 0.1,
+                vegetation_suitability: 0.1,
+                fire_spread_rate: 0.5,
+                food_growth_rate: 0.2,
+                water_retention: 0.1,
             },
             moisture: TerrainMoistureBehavior {
-                wetness: 0.1, evaporation_rate: 0.1, deformation_recovery_rate: 0.0, puddle_capacity: 0.05,
+                wetness: 0.1,
+                evaporation_rate: 0.1,
+                deformation_recovery_rate: 0.0,
+                puddle_capacity: 0.05,
             },
         }
     }
@@ -161,16 +204,27 @@ impl TerrainTruth {
     pub fn mountain() -> Self {
         Self {
             physical: TerrainPhysicalMaterial {
-                traversal_cost: 2.0, cover_quality: 0.5, movement_penalty: 0.5, vehicle_passable: false,
+                traversal_cost: 2.0,
+                cover_quality: 0.5,
+                movement_penalty: 0.5,
+                vehicle_passable: false,
             },
             acoustic: TerrainAcousticMaterial {
-                footstep_sound_class: FootstepSoundClass::Stone, sound_propagation: 1.3, absorption: 0.05,
+                footstep_sound_class: FootstepSoundClass::Stone,
+                sound_propagation: 1.3,
+                absorption: 0.05,
             },
             ecology: TerrainEcologyMaterial {
-                vegetation_suitability: 0.2, fire_spread_rate: 0.3, food_growth_rate: 0.3, water_retention: 0.1,
+                vegetation_suitability: 0.2,
+                fire_spread_rate: 0.3,
+                food_growth_rate: 0.3,
+                water_retention: 0.1,
             },
             moisture: TerrainMoistureBehavior {
-                wetness: 0.1, evaporation_rate: 0.08, deformation_recovery_rate: 0.0, puddle_capacity: 0.02,
+                wetness: 0.1,
+                evaporation_rate: 0.08,
+                deformation_recovery_rate: 0.0,
+                puddle_capacity: 0.02,
             },
         }
     }

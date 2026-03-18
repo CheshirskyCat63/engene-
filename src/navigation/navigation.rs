@@ -38,12 +38,7 @@ pub fn travel_toward(
     false
 }
 
-pub fn estimated_travel_time(
-    graph: &WorldGraph,
-    from: u32,
-    to: u32,
-    speed: f32,
-) -> f32 {
+pub fn estimated_travel_time(graph: &WorldGraph, from: u32, to: u32, speed: f32) -> f32 {
     let dist = graph.distance_between(from, to);
     dist / speed.max(0.01)
 }

@@ -122,11 +122,7 @@ impl QuestRegistry {
         self.quests.last().unwrap()
     }
 
-    pub fn assign_quest(
-        &mut self,
-        quest_id: u32,
-        assignee: PersistentEntityId,
-    ) -> bool {
+    pub fn assign_quest(&mut self, quest_id: u32, assignee: PersistentEntityId) -> bool {
         if let Some(q) = self.quests.iter_mut().find(|q| q.id == quest_id) {
             if q.status == QuestStatus::Available {
                 q.assignee = Some(assignee);
@@ -192,9 +188,9 @@ impl QuestRegistry {
     }
 
     pub fn active_quests_for(&self, assignee: PersistentEntityId) -> impl Iterator<Item = &Quest> {
-        self.quests.iter().filter(move |q| {
-            q.status == QuestStatus::Active && q.assignee == Some(assignee)
-        })
+        self.quests
+            .iter()
+            .filter(move |q| q.status == QuestStatus::Active && q.assignee == Some(assignee))
     }
 
     pub fn get_quest(&self, quest_id: u32) -> Option<&Quest> {

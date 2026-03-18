@@ -188,7 +188,12 @@ impl ContactShadowPass {
             mapped_at_creation: false,
         });
 
-        Self { pipeline, params_buf, bgl, sampler }
+        Self {
+            pipeline,
+            params_buf,
+            bgl,
+            sampler,
+        }
     }
 
     pub fn layout(&self) -> &wgpu::BindGroupLayout {

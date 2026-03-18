@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 use crate::world::surface_db::{MaterialId, SurfaceDB};
 
@@ -54,9 +54,17 @@ pub struct MaterialBridge {
 impl MaterialBridge {
     pub fn from_data(data: MaterialBridgeData) -> Self {
         Self {
-            render_map: data.render.into_iter().map(|r| (r.material_id, r)).collect(),
+            render_map: data
+                .render
+                .into_iter()
+                .map(|r| (r.material_id, r))
+                .collect(),
             audio_map: data.audio.into_iter().map(|a| (a.material_id, a)).collect(),
-            particle_map: data.particle.into_iter().map(|p| (p.material_id, p)).collect(),
+            particle_map: data
+                .particle
+                .into_iter()
+                .map(|p| (p.material_id, p))
+                .collect(),
         }
     }
 
@@ -80,13 +88,22 @@ pub fn validate_material_bridge(
     let mut errors = Vec::new();
     for mat in surface_db.all_materials() {
         if !bridge.render_map.contains_key(&mat.id) {
-            errors.push(format!("Material '{}' (id={}) missing RenderMaterialMapping", mat.name, mat.id));
+            errors.push(format!(
+                "Material '{}' (id={}) missing RenderMaterialMapping",
+                mat.name, mat.id
+            ));
         }
         if !bridge.audio_map.contains_key(&mat.id) {
-            errors.push(format!("Material '{}' (id={}) missing AudioMaterialMapping", mat.name, mat.id));
+            errors.push(format!(
+                "Material '{}' (id={}) missing AudioMaterialMapping",
+                mat.name, mat.id
+            ));
         }
         if !bridge.particle_map.contains_key(&mat.id) {
-            errors.push(format!("Material '{}' (id={}) missing ParticleMaterialMapping", mat.name, mat.id));
+            errors.push(format!(
+                "Material '{}' (id={}) missing ParticleMaterialMapping",
+                mat.name, mat.id
+            ));
         }
     }
     if errors.is_empty() {

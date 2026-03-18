@@ -2,6 +2,7 @@
 //! 175 tests covering camera, LOD, frustum, shadow, atmosphere, particles, postprocess, etc.
 //! Tests only what can be tested without GPU where possible.
 
+use bytemuck::Zeroable;
 use engene::graphics::atmosphere::AtmosphereParams;
 use engene::graphics::camera::FlyCamera;
 use engene::graphics::contact_shadows::ContactShadowParams;
@@ -14,12 +15,11 @@ use engene::graphics::postprocess::{
     ArtisticGrading, CameraSimulation, ExposureLimits, PostProcessParams, WorldLightingResponse,
 };
 use engene::graphics::renderer::RenderCamera;
-use engene::graphics::shadow::{CASCADE_COUNT, ShadowUniforms, SHADOW_MAP_SIZE};
+use engene::graphics::shadow::{ShadowUniforms, CASCADE_COUNT, SHADOW_MAP_SIZE};
 use engene::graphics::terrain::TerrainVertex;
 use engene::graphics::vegetation::{GrassInstance, GrassVertex};
 use engene::graphics::visibility::Frustum;
 use engene::input::input::InputState;
-use bytemuck::Zeroable;
 use glam::{Mat4, Vec3, Vec4Swizzles};
 
 // ===== Camera (20 tests) =====
@@ -476,12 +476,7 @@ fn frustum_test_sphere_zero_radius() {
 
 #[test]
 fn frustum_from_perspective() {
-    let proj = Mat4::perspective_rh(
-        std::f32::consts::FRAC_PI_4,
-        16.0 / 9.0,
-        0.1,
-        1000.0,
-    );
+    let proj = Mat4::perspective_rh(std::f32::consts::FRAC_PI_4, 16.0 / 9.0, 0.1, 1000.0);
     let view = Mat4::look_to_rh(Vec3::new(0.0, 0.0, 5.0), Vec3::NEG_Z, Vec3::Y);
     let vp = proj * view;
     let f = Frustum::from_view_projection(&vp);

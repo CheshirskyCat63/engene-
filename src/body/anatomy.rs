@@ -64,12 +64,48 @@ impl BodyState {
                 ZoneState::new(BodyZone::RightLeg),
             ],
             joints: vec![
-                JointInfo { id: 0, zone: BodyZone::Neck, integrity: 100.0, broken: false, dismember_threshold: 15.0 },
-                JointInfo { id: 1, zone: BodyZone::LeftArm, integrity: 100.0, broken: false, dismember_threshold: 20.0 },
-                JointInfo { id: 2, zone: BodyZone::RightArm, integrity: 100.0, broken: false, dismember_threshold: 20.0 },
-                JointInfo { id: 3, zone: BodyZone::LeftLeg, integrity: 100.0, broken: false, dismember_threshold: 25.0 },
-                JointInfo { id: 4, zone: BodyZone::RightLeg, integrity: 100.0, broken: false, dismember_threshold: 25.0 },
-                JointInfo { id: 5, zone: BodyZone::Pelvis, integrity: 100.0, broken: false, dismember_threshold: 30.0 },
+                JointInfo {
+                    id: 0,
+                    zone: BodyZone::Neck,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 15.0,
+                },
+                JointInfo {
+                    id: 1,
+                    zone: BodyZone::LeftArm,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 20.0,
+                },
+                JointInfo {
+                    id: 2,
+                    zone: BodyZone::RightArm,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 20.0,
+                },
+                JointInfo {
+                    id: 3,
+                    zone: BodyZone::LeftLeg,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 25.0,
+                },
+                JointInfo {
+                    id: 4,
+                    zone: BodyZone::RightLeg,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 25.0,
+                },
+                JointInfo {
+                    id: 5,
+                    zone: BodyZone::Pelvis,
+                    integrity: 100.0,
+                    broken: false,
+                    dismember_threshold: 30.0,
+                },
             ],
             blood_level: 1.0,
             total_trauma: 0.0,
@@ -84,7 +120,8 @@ impl BodyState {
     }
 
     pub fn aggregate_health(&self) -> f32 {
-        let zone_avg: f32 = self.zones.iter().map(|z| z.integrity).sum::<f32>() / self.zones.len() as f32;
+        let zone_avg: f32 =
+            self.zones.iter().map(|z| z.integrity).sum::<f32>() / self.zones.len() as f32;
         (zone_avg * self.blood_level * self.consciousness).max(0.0)
     }
 }

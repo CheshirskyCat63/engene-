@@ -15,7 +15,7 @@ pub mod cover_map;
 pub mod dynamic_nav_update;
 pub mod hpa_star;
 pub mod local_cover_refresh;
-pub mod navmesh;
 pub mod navigation;
+pub mod navmesh;
 pub mod path_cache;
 pub mod world_graph;

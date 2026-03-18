@@ -91,7 +91,10 @@ impl EngineSystem for AnimationIntegrationSystem {
                 _ => 0.0,
             };
 
-            let is_dead = ctx.ecs.get_needs(entity).map_or(false, |pn| pn.health <= 0.0);
+            let is_dead = ctx
+                .ecs
+                .get_needs(entity)
+                .map_or(false, |pn| pn.health <= 0.0);
             let machine = self
                 .locomotion
                 .entry(entity)

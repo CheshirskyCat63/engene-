@@ -12,15 +12,20 @@ pub struct MemoryBudgetRegistry {
 
 impl MemoryBudgetRegistry {
     pub fn new() -> Self {
-        Self { entries: HashMap::new() }
+        Self {
+            entries: HashMap::new(),
+        }
     }
 
     pub fn register(&mut self, name: &'static str, budget_bytes: usize) {
-        self.entries.insert(name, MemoryBudgetEntry {
+        self.entries.insert(
             name,
-            budget_bytes,
-            used_bytes: 0,
-        });
+            MemoryBudgetEntry {
+                name,
+                budget_bytes,
+                used_bytes: 0,
+            },
+        );
     }
 
     pub fn record_usage(&mut self, name: &str, used_bytes: usize) {
@@ -30,7 +35,9 @@ impl MemoryBudgetRegistry {
     }
 
     pub fn is_over_budget(&self, name: &str) -> bool {
-        self.entries.get(name).map_or(false, |e| e.used_bytes > e.budget_bytes)
+        self.entries
+            .get(name)
+            .map_or(false, |e| e.used_bytes > e.budget_bytes)
     }
 
     pub fn total_budget(&self) -> usize {
@@ -47,5 +54,7 @@ impl MemoryBudgetRegistry {
 }
 
 impl Default for MemoryBudgetRegistry {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

@@ -66,6 +66,7 @@ impl LightningSystem {
                 self.flash_intensity += strike.brightness * (1.0 - t);
             }
         }
-        self.active_strikes.retain(|s| s.timer < s.duration + s.thunder_delay + 1.0);
+        self.active_strikes
+            .retain(|s| s.timer < s.duration + s.thunder_delay + 1.0);
     }
 }

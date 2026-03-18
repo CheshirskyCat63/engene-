@@ -164,13 +164,14 @@ impl ClothWorld {
     pub fn add_cloth(&mut self, width: u32, height: u32, origin: [f32; 3], spacing: f32) -> u32 {
         let id = self.next_id;
         self.next_id += 1;
-        self.cloths.push(ClothSim::new(id, width, height, origin, spacing));
+        self.cloths
+            .push(ClothSim::new(id, width, height, origin, spacing));
         id
     }
 
     pub fn update(&mut self, dt: f32, sim_level: SimulationLevel) {
-        let iterations = crate::physics::sim_lod::PhysicsLod::from_sim_level(sim_level)
-            .cloth_iterations();
+        let iterations =
+            crate::physics::sim_lod::PhysicsLod::from_sim_level(sim_level).cloth_iterations();
         for cloth in &mut self.cloths {
             cloth.step(dt, iterations);
         }

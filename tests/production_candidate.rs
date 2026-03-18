@@ -19,11 +19,11 @@ fn production_schema_compatibility() {
 
 #[test]
 fn production_doctor_no_errors() {
-    use std::sync::Arc;
     use engene::app::runtime_assembly::RuntimeAssembly;
-    use engene::world::world::WorldGrid;
-    use engene::world::heightmap::Heightmap;
     use engene::tools::doctor;
+    use engene::world::heightmap::Heightmap;
+    use engene::world::world::WorldGrid;
+    use std::sync::Arc;
 
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
@@ -31,16 +31,20 @@ fn production_doctor_no_errors() {
     let engine = RuntimeAssembly::vertical_slice(heightmap, &biomes);
 
     let report = doctor::run_doctor(&engine, doctor::DoctorMode::Advisory);
-    assert_eq!(report.error_count(), 0, "production candidate: 0 doctor errors required");
+    assert_eq!(
+        report.error_count(),
+        0,
+        "production candidate: 0 doctor errors required"
+    );
 }
 
 #[test]
 fn production_runtime_truth_json() {
-    use std::sync::Arc;
     use engene::app::runtime_assembly::RuntimeAssembly;
-    use engene::world::world::WorldGrid;
-    use engene::world::heightmap::Heightmap;
     use engene::tools::doctor;
+    use engene::world::heightmap::Heightmap;
+    use engene::world::world::WorldGrid;
+    use std::sync::Arc;
 
     let grid = WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
@@ -64,7 +68,7 @@ fn production_world_layout_skeleton() {
 
 #[test]
 fn production_item_registry_coverage() {
-    use engene::game::economy::item_registry::{ItemRegistry, ItemCategory};
+    use engene::game::economy::item_registry::{ItemCategory, ItemRegistry};
     let registry = ItemRegistry::new();
     assert!(registry.by_category(ItemCategory::Medkit).len() >= 2);
     assert!(registry.by_category(ItemCategory::Food).len() >= 2);
@@ -74,7 +78,7 @@ fn production_item_registry_coverage() {
 
 #[test]
 fn production_animation_clip_map() {
-    use engene::animation::clip_map::{ClipMap, AnimationState};
+    use engene::animation::clip_map::{AnimationState, ClipMap};
     let map = ClipMap::new();
     assert!(map.clip_for_state(&AnimationState::Idle).is_some());
     assert!(map.clip_for_state(&AnimationState::Walk).is_some());

@@ -55,23 +55,35 @@ impl PersistenceDashboard {
     }
 
     pub fn draw_ui(&self, ctx: &egui::Context) {
-        egui::Window::new("Persistence").default_width(380.0).show(ctx, |ui| {
-            ui.label(format!("Saves: {}  Loads: {}", self.total_saves, self.total_loads));
-            ui.label(format!("Orphans resolved: {}  remaining: {}",
-                self.total_orphans_resolved, self.total_orphans_remaining));
-            ui.label(format!("Schema: save v{}  chunk v{}",
-                self.schema_version_save, self.schema_version_chunk));
-            if !self.schema_warnings.is_empty() {
-                ui.separator();
-                ui.colored_label(egui::Color32::YELLOW, "Schema warnings:");
-                for w in &self.schema_warnings {
-                    ui.label(w);
+        egui::Window::new("Persistence")
+            .default_width(380.0)
+            .show(ctx, |ui| {
+                ui.label(format!(
+                    "Saves: {}  Loads: {}",
+                    self.total_saves, self.total_loads
+                ));
+                ui.label(format!(
+                    "Orphans resolved: {}  remaining: {}",
+                    self.total_orphans_resolved, self.total_orphans_remaining
+                ));
+                ui.label(format!(
+                    "Schema: save v{}  chunk v{}",
+                    self.schema_version_save, self.schema_version_chunk
+                ));
+                if !self.schema_warnings.is_empty() {
+                    ui.separator();
+                    ui.colored_label(egui::Color32::YELLOW, "Schema warnings:");
+                    for w in &self.schema_warnings {
+                        ui.label(w);
+                    }
                 }
-            }
-            if !self.last_relink_reports.is_empty() {
-                ui.separator();
-                ui.label(format!("Last {} relink reports:", self.last_relink_reports.len()));
-            }
-        });
+                if !self.last_relink_reports.is_empty() {
+                    ui.separator();
+                    ui.label(format!(
+                        "Last {} relink reports:",
+                        self.last_relink_reports.len()
+                    ));
+                }
+            });
     }
 }

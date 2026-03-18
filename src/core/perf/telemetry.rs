@@ -24,13 +24,16 @@ impl Telemetry {
     }
 
     pub fn record_system(&mut self, name: &str, elapsed_us: u32) {
-        let timing = self.system_timings.entry(name.to_string()).or_insert(SystemTiming {
-            system_name: name.to_string(),
-            last_us: 0,
-            avg_us: 0.0,
-            max_us: 0,
-            sample_count: 0,
-        });
+        let timing = self
+            .system_timings
+            .entry(name.to_string())
+            .or_insert(SystemTiming {
+                system_name: name.to_string(),
+                last_us: 0,
+                avg_us: 0.0,
+                max_us: 0,
+                sample_count: 0,
+            });
         timing.last_us = elapsed_us;
         timing.max_us = timing.max_us.max(elapsed_us);
         timing.sample_count += 1;
@@ -47,10 +50,16 @@ impl Telemetry {
         &self.system_timings
     }
 
-    pub fn frame_time_us(&self) -> u32 { self.frame_time_us }
-    pub fn frame_count(&self) -> u64 { self.frame_count }
+    pub fn frame_time_us(&self) -> u32 {
+        self.frame_time_us
+    }
+    pub fn frame_count(&self) -> u64 {
+        self.frame_count
+    }
 }
 
 impl Default for Telemetry {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }

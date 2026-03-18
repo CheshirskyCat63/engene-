@@ -3,7 +3,7 @@ use std::net::UdpSocket;
 use std::time::Instant;
 
 use crate::core::ecs::Entity;
-use crate::memory::component_delta::{DirtyFlags, collect_transform_deltas, COMP_TRANSFORM};
+use crate::memory::component_delta::{collect_transform_deltas, DirtyFlags, COMP_TRANSFORM};
 use crate::network::protocol::*;
 
 pub struct ConnectedClient {
@@ -37,7 +37,9 @@ impl GameServer {
     pub fn start(&mut self, port: u16) -> Result<(), String> {
         let addr = format!("0.0.0.0:{}", port);
         let socket = UdpSocket::bind(&addr).map_err(|e| format!("bind: {e}"))?;
-        socket.set_nonblocking(true).map_err(|e| format!("nonblocking: {e}"))?;
+        socket
+            .set_nonblocking(true)
+            .map_err(|e| format!("nonblocking: {e}"))?;
         self.socket = Some(socket);
         self.running = true;
         tracing::info!("server started on {}", addr);
@@ -76,12 +78,15 @@ impl GameServer {
                                 let cid = self.next_client_id;
                                 self.next_client_id += 1;
                                 tracing::info!("client {} connected: {}", cid, player_name);
-                                self.clients.insert(cid, ConnectedClient {
-                                    client_id: cid,
-                                    player_entity: cid,
-                                    last_acked_tick: 0,
-                                    connected_at: Instant::now(),
-                                });
+                                self.clients.insert(
+                                    cid,
+                                    ConnectedClient {
+                                        client_id: cid,
+                                        player_entity: cid,
+                                        last_acked_tick: 0,
+                                        connected_at: Instant::now(),
+                                    },
+                                );
                                 let welcome = ServerMessage::Welcome {
                                     client_id: cid,
                                     player_entity: cid,

@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use glam::Vec3;
+use std::collections::HashSet;
 
 const MAX_DIRTY_CELLS_PER_FRAME: usize = 64;
 const MAX_CLUSTER_REBUILDS_PER_FRAME: usize = 2;
@@ -49,7 +49,10 @@ impl NavDirtyTracker {
     }
 
     pub fn drain_cluster_rebuilds(&mut self) -> Vec<u32> {
-        let count = self.pending_cluster_rebuilds.len().min(MAX_CLUSTER_REBUILDS_PER_FRAME);
+        let count = self
+            .pending_cluster_rebuilds
+            .len()
+            .min(MAX_CLUSTER_REBUILDS_PER_FRAME);
         self.pending_cluster_rebuilds.drain(..count).collect()
     }
 

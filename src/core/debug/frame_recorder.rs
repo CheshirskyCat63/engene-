@@ -25,18 +25,28 @@ impl FrameRecorder {
     }
 
     pub fn record(&mut self, snapshot: DebugFrameSnapshot) {
-        if self.frozen { return; }
+        if self.frozen {
+            return;
+        }
         self.frame_counter += 1;
-        if self.frame_counter % self.thinning_factor as u64 != 0 { return; }
+        if self.frame_counter % self.thinning_factor as u64 != 0 {
+            return;
+        }
         if self.frames.len() >= self.capacity {
             self.frames.pop_front();
         }
         self.frames.push_back(snapshot);
     }
 
-    pub fn freeze(&mut self) { self.frozen = true; }
-    pub fn unfreeze(&mut self) { self.frozen = false; }
-    pub fn is_frozen(&self) -> bool { self.frozen }
+    pub fn freeze(&mut self) {
+        self.frozen = true;
+    }
+    pub fn unfreeze(&mut self) {
+        self.frozen = false;
+    }
+    pub fn is_frozen(&self) -> bool {
+        self.frozen
+    }
 
     pub fn set_thinning(&mut self, factor: u32) {
         self.thinning_factor = factor.max(1);
@@ -50,9 +60,15 @@ impl FrameRecorder {
         self.frames.back()
     }
 
-    pub fn len(&self) -> usize { self.frames.len() }
-    pub fn is_empty(&self) -> bool { self.frames.is_empty() }
-    pub fn capacity(&self) -> usize { self.capacity }
+    pub fn len(&self) -> usize {
+        self.frames.len()
+    }
+    pub fn is_empty(&self) -> bool {
+        self.frames.is_empty()
+    }
+    pub fn capacity(&self) -> usize {
+        self.capacity
+    }
 
     pub fn iter(&self) -> impl Iterator<Item = &DebugFrameSnapshot> {
         self.frames.iter()

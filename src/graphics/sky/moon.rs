@@ -230,25 +230,23 @@ impl MoonPass {
     fn load_moon_texture(device: &wgpu::Device, queue: &wgpu::Queue) -> wgpu::Texture {
         let path = Path::new("game/assets/sky/moon/moon_albedo_8k.jpg");
         let (width, height, data) = match std::fs::read(path) {
-            Ok(bytes) => {
-                match image::load_from_memory(&bytes) {
-                    Ok(img) => {
-                        let rgb = img.into_rgb8();
-                        let (w, h) = (rgb.width(), rgb.height());
-                        let raw_rgb = rgb.into_raw();
-                        let mut raw = Vec::with_capacity(raw_rgb.len() / 3 * 4);
-                        for chunk in raw_rgb.chunks(3) {
-                            raw.extend_from_slice(chunk);
-                            raw.push(255);
-                        }
-                        (w, h, raw)
+            Ok(bytes) => match image::load_from_memory(&bytes) {
+                Ok(img) => {
+                    let rgb = img.into_rgb8();
+                    let (w, h) = (rgb.width(), rgb.height());
+                    let raw_rgb = rgb.into_raw();
+                    let mut raw = Vec::with_capacity(raw_rgb.len() / 3 * 4);
+                    for chunk in raw_rgb.chunks(3) {
+                        raw.extend_from_slice(chunk);
+                        raw.push(255);
                     }
-                    Err(e) => {
-                        tracing::warn!("Failed to decode moon texture: {}", e);
-                        Self::fallback_texture_data()
-                    }
+                    (w, h, raw)
                 }
-            }
+                Err(e) => {
+                    tracing::warn!("Failed to decode moon texture: {}", e);
+                    Self::fallback_texture_data()
+                }
+            },
             Err(e) => {
                 tracing::warn!("Moon texture not found at {}: {}", path.display(), e);
                 Self::fallback_texture_data()
@@ -321,11 +319,7 @@ impl MoonPass {
         let sun = sun_dir.normalize();
         let opposite = -sun;
         let orbital_offset = (day_of_year / LUNAR_CYCLE_DAYS) * std::f32::consts::TAU;
-        let axis = if sun.y.abs() > 0.99 {
-            Vec3::X
-        } else {
-            Vec3::Y
-        };
+        let axis = if sun.y.abs() > 0.99 { Vec3::X } else { Vec3::Y };
         let rot = Mat4::from_axis_angle(axis, orbital_offset * 0.1);
         let dir = (rot * opposite.extend(0.0)).truncate().normalize();
         dir
@@ -383,12 +377,30 @@ impl MoonPass {
         queue.write_buffer(&self.uniforms_buffer, 0, bytemuck::bytes_of(&uniforms));
 
         let vertices: [MoonVertex; 6] = [
-            MoonVertex { position: v0, uv: [0.0, 1.0] },
-            MoonVertex { position: v1, uv: [1.0, 1.0] },
-            MoonVertex { position: v2, uv: [0.0, 0.0] },
-            MoonVertex { position: v2, uv: [0.0, 0.0] },
-            MoonVertex { position: v1, uv: [1.0, 1.0] },
-            MoonVertex { position: v3, uv: [1.0, 0.0] },
+            MoonVertex {
+                position: v0,
+                uv: [0.0, 1.0],
+            },
+            MoonVertex {
+                position: v1,
+                uv: [1.0, 1.0],
+            },
+            MoonVertex {
+                position: v2,
+                uv: [0.0, 0.0],
+            },
+            MoonVertex {
+                position: v2,
+                uv: [0.0, 0.0],
+            },
+            MoonVertex {
+                position: v1,
+                uv: [1.0, 1.0],
+            },
+            MoonVertex {
+                position: v3,
+                uv: [1.0, 0.0],
+            },
         ];
 
         queue.write_buffer(&self.vertex_buffer, 0, bytemuck::cast_slice(&vertices));

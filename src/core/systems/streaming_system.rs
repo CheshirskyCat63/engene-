@@ -1,4 +1,5 @@
- //! Streaming system - handles chunk load/unload and persistence.
+
+//! Streaming system - handles chunk load/unload and persistence.
 
 use crate::core::engine::Engine;
 use crate::world::chunk_persistence::ChunkPersistenceService;
@@ -13,14 +14,17 @@ pub struct StreamingSystem {
 impl StreamingSystem {
     /// Create new streaming system with given persistence service.
     pub fn new(streamer: WorldStreamer, persistence: ChunkPersistenceService) -> Self {
-        Self { streamer, persistence }
+        Self {
+            streamer,
+            persistence,
+        }
     }
 
     /// Update streaming based on camera position.
     /// Returns (chunks_loaded, chunks_unloaded) counts.
     pub fn update(&mut self, engine: &mut Engine, cam_x: f32, cam_z: f32) -> (usize, usize) {
         let (to_load, to_unload) = self.streamer.update(cam_x, cam_z);
-        
+
         for coord in &to_load {
             self.streamer.mark_loaded(*coord);
         }
@@ -30,19 +34,33 @@ impl StreamingSystem {
 
         if !to_unload.is_empty() || !to_load.is_empty() {
             let tick = engine.ecs.tick;
-            
+
             for coord in &to_unload {
-                let saved = self.persistence.save_and_unload(*coord, &mut engine.ecs, tick);
+                let saved = self
+                    .persistence
+                    .save_and_unload(*coord, &mut engine.ecs, tick);
                 if saved > 0 {
-                    tracing::debug!("streamer: unloaded chunk ({},{}) — {} entities saved", coord.x, coord.z, saved);
+                    tracing::debug!(
+                        "streamer: unloaded chunk ({},{}) — {} entities saved",
+                        coord.x,
+                        coord.z,
+                        saved
+                    );
                     unloaded_count += 1;
                 }
             }
-            
+
             for coord in &to_load {
-                let loaded = self.persistence.load_chunk_entities(*coord, &mut engine.ecs);
+                let loaded = self
+                    .persistence
+                    .load_chunk_entities(*coord, &mut engine.ecs);
                 if loaded > 0 {
-                    tracing::debug!("streamer: loaded chunk ({},{}) — {} entities restored", coord.x, coord.z, loaded);
+                    tracing::debug!(
+                        "streamer: loaded chunk ({},{}) — {} entities restored",
+                        coord.x,
+                        coord.z,
+                        loaded
+                    );
                     loaded_count += 1;
                 }
             }

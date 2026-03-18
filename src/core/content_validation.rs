@@ -66,9 +66,9 @@ pub fn validate_all_content(
         surface_db, bridge,
     ));
 
-    report.add_warnings(crate::world::material_bridge::validate_material_consistency(
-        surface_db, bridge,
-    ));
+    report.add_warnings(
+        crate::world::material_bridge::validate_material_consistency(surface_db, bridge),
+    );
 
     match mode {
         ValidationMode::Strict => {

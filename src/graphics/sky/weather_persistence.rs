@@ -1,6 +1,6 @@
 //! Phase 13.6: Weather state serialization and save/load.
 
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct WeatherSaveState {

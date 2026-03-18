@@ -24,7 +24,9 @@ impl Default for EventMonitorState {
 
 impl EventMonitorState {
     pub fn record(&mut self, tick: u64, event_type: &str, count: usize) {
-        if self.paused { return; }
+        if self.paused {
+            return;
+        }
         if self.log.len() >= self.max_entries {
             self.log.remove(0);
         }
@@ -41,7 +43,10 @@ pub fn draw_event_monitor(ctx: &egui::Context, state: &mut EventMonitorState, bu
         .default_width(400.0)
         .show(ctx, |ui| {
             ui.horizontal(|ui| {
-                if ui.button(if state.paused { "Resume" } else { "Pause" }).clicked() {
+                if ui
+                    .button(if state.paused { "Resume" } else { "Pause" })
+                    .clicked()
+                {
                     state.paused = !state.paused;
                 }
                 if ui.button("Clear").clicked() {
@@ -52,14 +57,16 @@ pub fn draw_event_monitor(ctx: &egui::Context, state: &mut EventMonitorState, bu
             });
             ui.separator();
 
-            egui::ScrollArea::vertical().stick_to_bottom(true).show(ui, |ui| {
-                for entry in &state.log {
-                    ui.horizontal(|ui| {
-                        ui.monospace(format!("[{:6}]", entry.tick));
-                        ui.label(&entry.event_type);
-                        ui.label(format!("x{}", entry.count));
-                    });
-                }
-            });
+            egui::ScrollArea::vertical()
+                .stick_to_bottom(true)
+                .show(ui, |ui| {
+                    for entry in &state.log {
+                        ui.horizontal(|ui| {
+                            ui.monospace(format!("[{:6}]", entry.tick));
+                            ui.label(&entry.event_type);
+                            ui.label(format!("x{}", entry.count));
+                        });
+                    }
+                });
         });
 }

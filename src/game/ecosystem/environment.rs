@@ -4,7 +4,7 @@ use crate::world::components::EntityKind;
 use crate::world::world::WorldGrid;
 
 /// Update cell danger levels based on monster positions.
-/// 
+///
 /// Uses helper methods instead of direct storage access.
 pub fn update_cell_danger(ecs: &Ecs, grid: &mut WorldGrid) {
     for cell in &mut grid.cells {

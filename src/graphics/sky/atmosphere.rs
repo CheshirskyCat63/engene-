@@ -85,10 +85,16 @@ impl BrunetonAtmosphere {
             usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         });
 
-        let transmittance_lut = Self::create_lut_2d(device, "transmittance", TRANSMITTANCE_W, TRANSMITTANCE_H);
+        let transmittance_lut =
+            Self::create_lut_2d(device, "transmittance", TRANSMITTANCE_W, TRANSMITTANCE_H);
         let transmittance_view = transmittance_lut.create_view(&Default::default());
 
-        let multi_scattering_lut = Self::create_lut_2d(device, "multi_scatter", MULTI_SCATTERING_SIZE, MULTI_SCATTERING_SIZE);
+        let multi_scattering_lut = Self::create_lut_2d(
+            device,
+            "multi_scatter",
+            MULTI_SCATTERING_SIZE,
+            MULTI_SCATTERING_SIZE,
+        );
         let multi_scattering_view = multi_scattering_lut.create_view(&Default::default());
 
         let sky_view_lut = Self::create_lut_2d(device, "sky_view", SKY_VIEW_W, SKY_VIEW_H);
@@ -96,7 +102,11 @@ impl BrunetonAtmosphere {
 
         let aerial_lut = device.create_texture(&wgpu::TextureDescriptor {
             label: Some("aerial_perspective"),
-            size: wgpu::Extent3d { width: AERIAL_SIZE, height: AERIAL_SIZE, depth_or_array_layers: AERIAL_SIZE },
+            size: wgpu::Extent3d {
+                width: AERIAL_SIZE,
+                height: AERIAL_SIZE,
+                depth_or_array_layers: AERIAL_SIZE,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D3,
@@ -153,20 +163,27 @@ impl BrunetonAtmosphere {
             bind_group_layouts: &[&trans_bgl],
             push_constant_ranges: &[],
         });
-        let transmittance_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-            label: Some("transmittance_pipeline"),
-            layout: Some(&trans_pl),
-            module: &trans_shader,
-            entry_point: Some("main"),
-            compilation_options: Default::default(),
-            cache: None,
-        });
+        let transmittance_pipeline =
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some("transmittance_pipeline"),
+                layout: Some(&trans_pl),
+                module: &trans_shader,
+                entry_point: Some("main"),
+                compilation_options: Default::default(),
+                cache: None,
+            });
         let transmittance_bg = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("trans_bg"),
             layout: &trans_bgl,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: config_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&transmittance_view) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: config_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::TextureView(&transmittance_view),
+                },
             ],
         });
 
@@ -212,22 +229,35 @@ impl BrunetonAtmosphere {
             bind_group_layouts: &[&ms_bgl],
             push_constant_ranges: &[],
         });
-        let multi_scatter_pipeline = device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-            label: Some("multi_scatter_pipeline"),
-            layout: Some(&ms_pl),
-            module: &ms_shader,
-            entry_point: Some("main"),
-            compilation_options: Default::default(),
-            cache: None,
-        });
+        let multi_scatter_pipeline =
+            device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some("multi_scatter_pipeline"),
+                layout: Some(&ms_pl),
+                module: &ms_shader,
+                entry_point: Some("main"),
+                compilation_options: Default::default(),
+                cache: None,
+            });
         let multi_scatter_bg = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("ms_bg"),
             layout: &ms_bgl,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: config_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&transmittance_view) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(&lut_sampler) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(&multi_scattering_view) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: config_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::TextureView(&transmittance_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::Sampler(&lut_sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::TextureView(&multi_scattering_view),
+                },
             ],
         });
 
@@ -295,11 +325,26 @@ impl BrunetonAtmosphere {
             label: Some("sv_bg"),
             layout: &sv_bgl,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: config_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&transmittance_view) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&multi_scattering_view) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::Sampler(&lut_sampler) },
-                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::TextureView(&sky_view_view) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: config_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::TextureView(&transmittance_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&multi_scattering_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::Sampler(&lut_sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(&sky_view_view),
+                },
             ],
         });
 
@@ -367,86 +412,120 @@ impl BrunetonAtmosphere {
             label: Some("ap_bg"),
             layout: &ap_bgl,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: config_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&transmittance_view) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&multi_scattering_view) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::Sampler(&lut_sampler) },
-                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::TextureView(&aerial_view) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: config_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::TextureView(&transmittance_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&multi_scattering_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::Sampler(&lut_sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(&aerial_view),
+                },
             ],
         });
 
         // --- Read-only bind group for sampling LUTs in fragment shaders ---
-        let lut_bind_group_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("atmo_lut_read_bgl"),
-            entries: &[
-                wgpu::BindGroupLayoutEntry {
-                    binding: 0,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Buffer {
-                        ty: wgpu::BufferBindingType::Uniform,
-                        has_dynamic_offset: false,
-                        min_binding_size: None,
+        let lut_bind_group_layout =
+            device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("atmo_lut_read_bgl"),
+                entries: &[
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 0,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Buffer {
+                            ty: wgpu::BufferBindingType::Uniform,
+                            has_dynamic_offset: false,
+                            min_binding_size: None,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 1,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 1,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 2,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 2,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 3,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D2,
-                        multisampled: false,
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 3,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D2,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 4,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Texture {
-                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
-                        view_dimension: wgpu::TextureViewDimension::D3,
-                        multisampled: false,
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 4,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Texture {
+                            sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                            view_dimension: wgpu::TextureViewDimension::D3,
+                            multisampled: false,
+                        },
+                        count: None,
                     },
-                    count: None,
-                },
-                wgpu::BindGroupLayoutEntry {
-                    binding: 5,
-                    visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
-                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
-                    count: None,
-                },
-            ],
-        });
+                    wgpu::BindGroupLayoutEntry {
+                        binding: 5,
+                        visibility: wgpu::ShaderStages::FRAGMENT | wgpu::ShaderStages::COMPUTE,
+                        ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                        count: None,
+                    },
+                ],
+            });
         let lut_bind_group = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("atmo_lut_read_bg"),
             layout: &lut_bind_group_layout,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: config_buffer.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(&transmittance_view) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&multi_scattering_view) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(&sky_view_view) },
-                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::TextureView(&aerial_view) },
-                wgpu::BindGroupEntry { binding: 5, resource: wgpu::BindingResource::Sampler(&lut_sampler) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: config_buffer.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::TextureView(&transmittance_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&multi_scattering_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::TextureView(&sky_view_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(&aerial_view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 5,
+                    resource: wgpu::BindingResource::Sampler(&lut_sampler),
+                },
             ],
         });
 
@@ -498,11 +577,7 @@ impl BrunetonAtmosphere {
             });
             pass.set_pipeline(&self.transmittance_pipeline);
             pass.set_bind_group(0, &self.transmittance_bg, &[]);
-            pass.dispatch_workgroups(
-                (TRANSMITTANCE_W + 7) / 8,
-                (TRANSMITTANCE_H + 7) / 8,
-                1,
-            );
+            pass.dispatch_workgroups((TRANSMITTANCE_W + 7) / 8, (TRANSMITTANCE_H + 7) / 8, 1);
         }
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
@@ -524,11 +599,7 @@ impl BrunetonAtmosphere {
             });
             pass.set_pipeline(&self.sky_view_pipeline);
             pass.set_bind_group(0, &self.sky_view_bg, &[]);
-            pass.dispatch_workgroups(
-                (SKY_VIEW_W + 7) / 8,
-                (SKY_VIEW_H + 7) / 8,
-                1,
-            );
+            pass.dispatch_workgroups((SKY_VIEW_W + 7) / 8, (SKY_VIEW_H + 7) / 8, 1);
         }
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
@@ -548,7 +619,11 @@ impl BrunetonAtmosphere {
     fn create_lut_2d(device: &wgpu::Device, label: &str, w: u32, h: u32) -> wgpu::Texture {
         device.create_texture(&wgpu::TextureDescriptor {
             label: Some(label),
-            size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            size: wgpu::Extent3d {
+                width: w,
+                height: h,
+                depth_or_array_layers: 1,
+            },
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
@@ -637,10 +712,12 @@ fn transmittance_params_to_uv(h: f32, cos_angle: f32, cfg: AtmoConfig) -> vec2<f
 }
 "#;
 
-const TRANSMITTANCE_COMPUTE_WGSL: &str = concat!(r#"
+const TRANSMITTANCE_COMPUTE_WGSL: &str = concat!(
+    r#"
 @group(0) @binding(0) var<uniform> cfg: AtmoConfig;
 @group(0) @binding(1) var output_tex: texture_storage_2d<rgba16float, write>;
-"#, r#"
+"#,
+    r#"
 const PI: f32 = 3.14159265359;
 
 struct AtmoConfig {
@@ -717,7 +794,8 @@ fn main(@builtin(global_invocation_id) id: vec3<u32>) {
     let transmittance = exp(-optical_depth);
     textureStore(output_tex, id.xy, vec4<f32>(transmittance, 1.0));
 }
-"#);
+"#
+);
 
 const MULTI_SCATTER_COMPUTE_WGSL: &str = r#"
 struct AtmoConfig {

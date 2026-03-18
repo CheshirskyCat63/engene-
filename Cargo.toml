@@ -1,7 +1,28 @@
+[workspace]
+members = [
+    ".",
+    "crates/engine_core",
+    "crates/engine_ecs",
+    "crates/engine_world",
+    "crates/engine_runtime",
+    "crates/engine_render",
+    "crates/engine_physics",
+    "crates/engine_audio",
+    "crates/engine_content",
+    "crates/engine_tools",
+    "crates/sdk_app",
+    "crates/game_framework",
+    "apps/engene_game",
+    "apps/engene_sdk",
+    "apps/engene_headless",
+]
+resolver = "2"
+
 [package]
 name = "engene"
 version = "0.1.0"
 edition = "2021"
+autobins = false
 
 [features]
 default = ["full"]
@@ -25,18 +46,22 @@ sdk_tools = ["full", "debug_ui"]
 [[bin]]
 name = "engene_game"
 path = "src/bin/engene_game.rs"
+bench = false
 
 [[bin]]
 name = "engene_sdk"
 path = "src/bin/engene_sdk.rs"
+bench = false
 
 [[bin]]
 name = "engene_headless"
 path = "src/bin/engene_headless.rs"
+bench = false
 
 [[bin]]
 name = "engene_test"
 path = "src/bin/engene_test.rs"
+bench = false
 
 [[bench]]
 name = "engine_benchmarks"
@@ -77,7 +102,17 @@ inherits = "release"
 opt-level = 3
 lto = "thin"
 
+[profile.bench]
+inherits = "release"
+opt-level = 3
+lto = "off"
+codegen-units = 16
+
 [dependencies]
+engine_core = { path = "crates/engine_core" }
+engine_content = { path = "crates/engine_content" }
+engine_ecs = { path = "crates/engine_ecs" }
+engine_runtime = { path = "crates/engine_runtime" }
 rand = "0.8"
 wgpu = "27"
 winit = "0.30"
@@ -109,3 +144,7 @@ walkdir = "2.4"
 criterion = { version = "0.5", features = ["html_reports"] }
 glob = "0.3"
 tempfile = "3"
+
+[[bench]]
+name = "simulation_transition_core"
+harness = false

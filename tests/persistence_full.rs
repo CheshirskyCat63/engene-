@@ -47,20 +47,29 @@ fn crash_bundle_creation() {
 
 #[test]
 fn determinism_policy_default() {
-    use engene::core::determinism_policy::{DeterminismPolicyMatrix, DeterminismLevel};
+    use engene::core::determinism_policy::{DeterminismLevel, DeterminismPolicyMatrix};
 
     let matrix = DeterminismPolicyMatrix::build_default();
-    assert_eq!(matrix.level_of("ECS tick order"), DeterminismLevel::Required);
-    assert_eq!(matrix.level_of("Render order"), DeterminismLevel::Acceptable);
-    assert_eq!(matrix.level_of("PhysicsSystem"), DeterminismLevel::Preferred);
+    assert_eq!(
+        matrix.level_of("ECS tick order"),
+        DeterminismLevel::Required
+    );
+    assert_eq!(
+        matrix.level_of("Render order"),
+        DeterminismLevel::Acceptable
+    );
+    assert_eq!(
+        matrix.level_of("PhysicsSystem"),
+        DeterminismLevel::Preferred
+    );
 }
 
 #[test]
 fn equipment_state_roundtrip() {
     use engene::core::ecs::Ecs;
+    use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
-    use engene::world::chunk_persistence::ChunkPersistenceService;
     let test_dir = std::env::temp_dir().join("engene_test_equip_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
 
@@ -69,7 +78,15 @@ fn equipment_state_roundtrip() {
 
     let (entity, pid) = ecs.spawn_new();
     assert!(pid.0 > 0, "PID should be positive");
-    ecs.transforms.insert(entity, Transform { x: 100.0, y: 100.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        entity,
+        Transform {
+            x: 100.0,
+            y: 100.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(entity, EntityKind::Npc);
     let mut equip = EquipmentSlots::default_stalker();
     equip.weapon_condition = 0.75;
@@ -77,7 +94,12 @@ fn equipment_state_roundtrip() {
     equip.medkits = 3;
     equip.ammo = 45;
     ecs.equipment.insert(entity, equip);
-    ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+    ecs.sim_levels.insert(
+        entity,
+        SimLevel {
+            level: SimulationLevel::L0,
+        },
+    );
 
     let mut persistence = ChunkPersistenceService::new(test_dir.to_str().unwrap());
     persistence.save_and_unload(coord, &mut ecs, 0);
@@ -87,7 +109,10 @@ fn equipment_state_roundtrip() {
     assert_eq!(ecs.alive.len(), 1);
 
     let restored = ecs.alive[0];
-    let restored_equip = ecs.equipment.get(&restored).expect("equipment missing after restore");
+    let restored_equip = ecs
+        .equipment
+        .get(&restored)
+        .expect("equipment missing after restore");
     assert!((restored_equip.weapon_condition - 0.75).abs() < 0.01);
     assert!((restored_equip.armor_condition - 0.5).abs() < 0.01);
     assert_eq!(restored_equip.medkits, 3);
@@ -99,10 +124,10 @@ fn equipment_state_roundtrip() {
 #[test]
 fn faction_membership_roundtrip() {
     use engene::core::ecs::Ecs;
-    use engene::world::components::*;
-    use engene::world::streaming::ChunkCoord;
     use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::components::Faction;
+    use engene::world::components::*;
+    use engene::world::streaming::ChunkCoord;
 
     let test_dir = std::env::temp_dir().join("engene_test_faction_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
@@ -111,20 +136,39 @@ fn faction_membership_roundtrip() {
     let coord = ChunkCoord { x: 0, z: 0 };
 
     let (entity, _pid) = ecs.spawn_new();
-    ecs.transforms.insert(entity, Transform { x: 50.0, y: 50.0, cell_x: 0, cell_y: 0 });
+    ecs.transforms.insert(
+        entity,
+        Transform {
+            x: 50.0,
+            y: 50.0,
+            cell_x: 0,
+            cell_y: 0,
+        },
+    );
     ecs.kinds.insert(entity, EntityKind::Npc);
-    ecs.faction_memberships.insert(entity, FactionMembership {
-        faction: Faction::Duty,
-        standing: 0.8,
-    });
-    ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+    ecs.faction_memberships.insert(
+        entity,
+        FactionMembership {
+            faction: Faction::Duty,
+            standing: 0.8,
+        },
+    );
+    ecs.sim_levels.insert(
+        entity,
+        SimLevel {
+            level: SimulationLevel::L0,
+        },
+    );
 
     let mut persistence = ChunkPersistenceService::new(test_dir.to_str().unwrap());
     persistence.save_and_unload(coord, &mut ecs, 0);
     persistence.load_chunk_entities(coord, &mut ecs);
 
     let restored = ecs.alive[0];
-    let fm = ecs.faction_memberships.get(&restored).expect("faction membership missing");
+    let fm = ecs
+        .faction_memberships
+        .get(&restored)
+        .expect("faction membership missing");
     assert_eq!(fm.faction, Faction::Duty);
     assert!((fm.standing - 0.8).abs() < 0.01);
 
@@ -135,7 +179,9 @@ fn faction_membership_roundtrip() {
 fn chunk_load_rejects_schema_mismatch() {
     use engene::core::ecs::Ecs;
     use engene::memory::save_chunks::PersistenceError;
-    use engene::world::chunk_persistence::{ChunkPersistenceService, ChunkSaveData, ChunkSurfaceState};
+    use engene::world::chunk_persistence::{
+        ChunkPersistenceService, ChunkSaveData, ChunkSurfaceState,
+    };
     use engene::world::streaming::ChunkCoord;
 
     let test_dir = std::env::temp_dir().join("engene_test_schema_mismatch");
@@ -160,7 +206,9 @@ fn chunk_load_rejects_schema_mismatch() {
 
     let mut svc = ChunkPersistenceService::new(test_dir.to_str().unwrap());
     let mut ecs = Ecs::new();
-    let err = svc.try_load_chunk_entities(coord, &mut ecs).expect_err("must fail");
+    let err = svc
+        .try_load_chunk_entities(coord, &mut ecs)
+        .expect_err("must fail");
 
     match err {
         PersistenceError::SchemaVersion { kind, .. } => assert_eq!(kind, "chunk"),
@@ -172,10 +220,10 @@ fn chunk_load_rejects_schema_mismatch() {
 
 #[test]
 fn surface_destruction_state_roundtrip() {
-    use engene::world::streaming::ChunkCoord;
-    use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::core::ecs::Ecs;
+    use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::components::*;
+    use engene::world::streaming::ChunkCoord;
 
     let test_dir = std::env::temp_dir().join("engene_test_surface_rt");
     let _ = std::fs::remove_dir_all(&test_dir);
@@ -185,19 +233,33 @@ fn surface_destruction_state_roundtrip() {
 
     for i in 0..5u64 {
         let (entity, _) = ecs.spawn_new();
-        ecs.transforms.insert(entity, Transform {
-            x: 1000.0 + (i as f32) * 50.0,
-            y: 1000.0 + (i as f32) * 50.0,
-            cell_x: 1, cell_y: 1,
-        });
+        ecs.transforms.insert(
+            entity,
+            Transform {
+                x: 1000.0 + (i as f32) * 50.0,
+                y: 1000.0 + (i as f32) * 50.0,
+                cell_x: 1,
+                cell_y: 1,
+            },
+        );
         ecs.kinds.insert(entity, EntityKind::Npc);
-        ecs.personal_needs.insert(entity, PersonalNeeds::default_npc());
-        ecs.inventories.insert(entity, Inventory {
-            items: vec![
-                Item { name: format!("item_{}", i), value: 10.0 * (i as f32 + 1.0) },
-            ],
-        });
-        ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+        ecs.personal_needs
+            .insert(entity, PersonalNeeds::default_npc());
+        ecs.inventories.insert(
+            entity,
+            Inventory {
+                items: vec![Item {
+                    name: format!("item_{}", i),
+                    value: 10.0 * (i as f32 + 1.0),
+                }],
+            },
+        );
+        ecs.sim_levels.insert(
+            entity,
+            SimLevel {
+                level: SimulationLevel::L0,
+            },
+        );
     }
 
     let mut persistence = ChunkPersistenceService::new(test_dir.to_str().unwrap());
@@ -208,7 +270,10 @@ fn surface_destruction_state_roundtrip() {
     assert_eq!(ecs.alive.len(), 5);
 
     for &e in &ecs.alive {
-        assert!(ecs.transforms.get(&e).is_some(), "transform missing after roundtrip");
+        assert!(
+            ecs.transforms.get(&e).is_some(),
+            "transform missing after roundtrip"
+        );
         assert!(ecs.kinds.get(&e).is_some(), "kind missing after roundtrip");
     }
 
@@ -217,10 +282,10 @@ fn surface_destruction_state_roundtrip() {
 
 #[test]
 fn runtime_truth_json_generation() {
-    use engene::world::world::WorldGrid;
-    use engene::world::heightmap::Heightmap;
     use engene::app::runtime_assembly::RuntimeAssembly;
     use engene::tools::doctor;
+    use engene::world::heightmap::Heightmap;
+    use engene::world::world::WorldGrid;
     use std::sync::Arc;
 
     let grid = WorldGrid::generate();
