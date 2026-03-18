@@ -84,6 +84,7 @@ Each new crate exposes a minimal `api` module to establish stable public entrypo
   - `classify_only_single_thread` vs `classify_only_multi_thread_x8`
   - `classify_materialize_single_thread` vs `classify_materialize_multi_thread_x8`
 - `scripts/check_transition_speed_law.sh` enforces per-surface latency/throughput thresholds for all transition-core surfaces.
+- `scripts/check_transition_speed_law.sh` now also hard-fails x8 scaling proof when host capacity is below 8 logical CPUs (environment validity guard, no threshold/workload softening).
 - Scaling gates are pair-specific and workload-equivalent:
   - `classify_only_x8 >= 3.0x` (target 4.5x)
   - `classify_materialize_x8 >= 3.0x` (target 4.5x)

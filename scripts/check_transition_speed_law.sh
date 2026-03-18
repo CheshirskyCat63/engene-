@@ -198,6 +198,19 @@ PY
     fi
   done
 
+  local available_cpus
+  if command -v nproc >/dev/null 2>&1; then
+    available_cpus="$(nproc)"
+  else
+    available_cpus="$(getconf _NPROCESSORS_ONLN)"
+  fi
+
+  if [[ "$available_cpus" -lt 8 ]]; then
+    echo "CRITICAL_FAILURE: environment invalid for x8 scaling proof (available_cpus=${available_cpus}, required>=8)" >&2
+    echo "transition-core speed law regression gate failed" >&2
+    exit 1
+  fi
+
   gate_scaling_pair \
     "classify_only" \
     "simulation_core/classify_only_single_thread" \

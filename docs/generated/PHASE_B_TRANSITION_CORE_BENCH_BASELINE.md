@@ -66,7 +66,6 @@ Scaling checks in gate:
 - PASS: `classify_order_resolve` (0.125528ms, 130,520,602/s)
 - PASS: `deferred_queue_replay` (0.005105ms, 200,577,306/s)
 - PASS: `deterministic_merge_prep` (0.398503ms, 328,910,609/s)
-- CRITICAL_FAILURE: `classify_only_x8` scaling = 0.508x (MT slower than ST)
-- CRITICAL_FAILURE: `classify_materialize_x8` scaling = 0.862x (MT slower than ST)
+- CRITICAL_FAILURE: scaling proof blocked on this host by environment guard (`available_cpus=3`, `required>=8`) before `classify_only_x8` / `classify_materialize_x8` evaluation.
 
-Closure status: **Phase B remains open** because runtime scaling gates still fail.
+Closure status: **Phase B remains open** until rerun on an environment with at least 8 logical CPUs for honest x8 scaling validation.
