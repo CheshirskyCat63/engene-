@@ -5,7 +5,10 @@ use engine_runtime::simulation_core::{
     TransitionMetricsSnapshot, TransitionOrchestrator, TransitionReason, TransitionRequest,
     TransitionShardMergePolicy, TransitionShardOutput,
 };
+use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::Arc;
+use std::sync::Barrier;
 use std::thread::JoinHandle;
 
 const CLASSIFY_COUNT: usize = 131_072;
@@ -75,82 +78,82 @@ struct ShardRanges {
 }
 
 #[derive(Clone, Copy)]
-struct ClassifyOnlySignal {
-    distances_addr: usize,
-    out_addr: usize,
+struct ClassifyOnlyShard {
+    start: usize,
+    end: usize,
 }
 
-enum ClassifyOnlyCommand {
-    Run(ClassifyOnlySignal),
-    Stop,
+struct ClassifyOnlySharedState {
+    stop: AtomicBool,
+    distances_addr: AtomicUsize,
+    out_addr: AtomicUsize,
+    start_barrier: Barrier,
+    done_barrier: Barrier,
 }
 
 struct PersistentClassifyOnlyPool {
-    txs: Vec<Sender<ClassifyOnlyCommand>>,
-    done_rx: Receiver<()>,
+    shared: Arc<ClassifyOnlySharedState>,
     handles: Vec<JoinHandle<()>>,
 }
 
 impl PersistentClassifyOnlyPool {
     fn new(orchestrator: TransitionOrchestrator, ranges: &ShardRanges) -> Self {
-        let (done_tx, done_rx) = mpsc::channel();
-        let mut txs = Vec::with_capacity(SHARDS);
+        let shared = Arc::new(ClassifyOnlySharedState {
+            stop: AtomicBool::new(false),
+            distances_addr: AtomicUsize::new(0),
+            out_addr: AtomicUsize::new(0),
+            start_barrier: Barrier::new(SHARDS + 1),
+            done_barrier: Barrier::new(SHARDS + 1),
+        });
         let mut handles = Vec::with_capacity(SHARDS);
         for sid in 0..SHARDS {
             let (start, end) = ranges.get(sid);
-            let (tx, rx) = mpsc::channel();
-            let done_tx = done_tx.clone();
+            let shard = ClassifyOnlyShard { start, end };
+            let shared = Arc::clone(&shared);
             let handle = std::thread::spawn(move || {
-                while let Ok(cmd) = rx.recv() {
-                    match cmd {
-                        ClassifyOnlyCommand::Run(signal) => {
-                            if start < end {
-                                let distances_ptr = signal.distances_addr as *const f32;
-                                let out_ptr = signal.out_addr as *mut SimulationLevel;
-                                for idx in start..end {
-                                    // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
-                                    unsafe {
-                                        *out_ptr.add(idx) =
-                                            orchestrator.classify_distance(*distances_ptr.add(idx));
-                                    }
-                                }
-                            }
-                            done_tx.send(()).expect("classify-only done send");
-                        }
-                        ClassifyOnlyCommand::Stop => break,
+                loop {
+                    shared.start_barrier.wait();
+                    if shared.stop.load(Ordering::Acquire) {
+                        break;
                     }
+
+                    if shard.start < shard.end {
+                        let distances_ptr =
+                            shared.distances_addr.load(Ordering::Relaxed) as *const f32;
+                        let out_ptr =
+                            shared.out_addr.load(Ordering::Relaxed) as *mut SimulationLevel;
+                        for idx in shard.start..shard.end {
+                            // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
+                            unsafe {
+                                *out_ptr.add(idx) =
+                                    orchestrator.classify_distance(*distances_ptr.add(idx));
+                            }
+                        }
+                    }
+                    shared.done_barrier.wait();
                 }
             });
-            txs.push(tx);
             handles.push(handle);
         }
-        Self {
-            txs,
-            done_rx,
-            handles,
-        }
+        Self { shared, handles }
     }
 
     fn run(&self, distances: &[f32], out_levels: &mut [SimulationLevel]) {
-        let signal = ClassifyOnlySignal {
-            distances_addr: distances.as_ptr() as usize,
-            out_addr: out_levels.as_mut_ptr() as usize,
-        };
-        for tx in &self.txs {
-            tx.send(ClassifyOnlyCommand::Run(signal))
-                .expect("classify-only send");
-        }
-        for _ in 0..self.txs.len() {
-            self.done_rx.recv().expect("classify-only done recv");
-        }
+        self.shared
+            .distances_addr
+            .store(distances.as_ptr() as usize, Ordering::Relaxed);
+        self.shared
+            .out_addr
+            .store(out_levels.as_mut_ptr() as usize, Ordering::Relaxed);
+        self.shared.start_barrier.wait();
+        self.shared.done_barrier.wait();
     }
 }
 
 impl Drop for PersistentClassifyOnlyPool {
     fn drop(&mut self) {
-        for tx in &self.txs {
-            let _ = tx.send(ClassifyOnlyCommand::Stop);
-        }
+        self.shared.stop.store(true, Ordering::Release);
+        self.shared.start_barrier.wait();
         while let Some(handle) = self.handles.pop() {
             let _ = handle.join();
         }

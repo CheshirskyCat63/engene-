@@ -1,4 +1,4 @@
-# Phase A/Phase B Dependency Graph Snapshot (Batch 8 closure + Phase B Batch 12)
+# Phase A/Phase B Dependency Graph Snapshot (Batch 8 closure + Phase B Batch 14)
 
 ## Workspace members
 - root package `engene`
@@ -29,5 +29,5 @@
 - ECS direct storage gate: PASS.
 
 ## Notes
-Phase B Batch 12 continues structural transition-core closure work under unchanged benchmark semantics/thresholds and severity-tagged runtime gate output, with no crate-direction law changes and no reverse dependencies added.
+Phase B Batch 14 continues narrow transition-core bench execution-model work under unchanged benchmark semantics/thresholds and severity-tagged runtime gate output, with no crate-direction law changes and no reverse dependencies added.
 - Transition-core x8 scaling proof is now environment-guarded (requires >=8 logical CPUs) before scaling ratio evaluation.

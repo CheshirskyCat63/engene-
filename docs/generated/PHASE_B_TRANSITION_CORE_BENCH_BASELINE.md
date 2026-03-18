@@ -1,4 +1,4 @@
-# Phase B Transition Core Bench Baseline (Batch 12)
+# Phase B Transition Core Bench Baseline (Batch 14)
 
 ## Harness
 - Bench target: `simulation_transition_core` (criterion).
@@ -57,7 +57,18 @@ Scaling checks in gate:
 - no string formatting in transition-core hot path
 - deterministic ordering + merge policy maintained
 
-## Batch 12 measured result snapshot (`--from-existing` on 2026-03-18)
+## Batch 14 measured result snapshot (`--from-existing` on 2026-03-18, container)
+- NEAR_MISS: `deterministic_merge_prep` (0.510372ms, 256,816,469/s)
+- PASS: `classify_only_single_thread` (0.081967ms, 1,599,079,597/s)
+- PASS: `classify_only_multi_thread_x8` (0.136433ms, 960,708,913/s)
+- PASS: `classify_materialize_single_thread` (0.266687ms, 491,483,056/s)
+- PASS: `classify_materialize_multi_thread_x8` (0.231011ms, 567,384,203/s)
+- PASS: `classify_order` (0.034100ms, 480,472,320/s)
+- PASS: `classify_order_resolve` (0.195670ms, 83,732,994/s)
+- PASS: `deferred_queue_replay` (0.007859ms, 130,303,396/s)
+- CRITICAL_FAILURE: scaling proof blocked on this host by environment guard (`available_cpus=3`, `required>=8`) before x8 scaling ratio evaluation.
+
+## Prior Batch 12 measured result snapshot (`--from-existing` on 2026-03-18)
 - PASS: `classify_only_single_thread` (0.058003ms, 2,259,757,508/s)
 - PASS: `classify_only_multi_thread_x8` (0.114272ms, 1,147,020,746/s)
 - PASS: `classify_materialize_single_thread` (0.193818ms, 676,264,673/s)
