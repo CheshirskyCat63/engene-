@@ -1,4 +1,4 @@
-# Phase A API Surface Report (Batch 8 closure) + Phase B Batch 12 update
+# Phase A API Surface Report (Batch 8 closure) + Phase B Batch 15 update
 
 ## New crate facades
 Each new crate exposes a minimal `api` module to establish stable public entrypoints:
@@ -79,8 +79,8 @@ Each new crate exposes a minimal `api` module to establish stable public entrypo
 - Domain truth (world/render/audio/physics/game) remains outside `engine_runtime`.
 
 
-## Bench/regression tooling (Phase B Batch 14)
-- `benches/simulation_transition_core.rs` retains the same fair ST/MT benchmark pairs (Batch 7 truth) while Batch 11 focuses on structural transition-core closure work and severity-tagged runtime gate truth output:
+## Bench/regression tooling (Phase B Batch 15)
+- `benches/simulation_transition_core.rs` retains the same fair ST/MT benchmark pairs (Batch 7 truth) while Batch 15 focuses on reducing MT coordination overhead in bench-only execution while keeping workloads and semantics fixed:
   - `classify_only_single_thread` vs `classify_only_multi_thread_x8`
   - `classify_materialize_single_thread` vs `classify_materialize_multi_thread_x8`
 - `scripts/check_transition_speed_law.sh` enforces per-surface latency/throughput thresholds for all transition-core surfaces.
@@ -91,4 +91,3 @@ Each new crate exposes a minimal `api` module to establish stable public entrypo
 - Compile truth split is explicit:
   - compatibility check: `cargo bench --bench simulation_transition_core --no-run`
   - isolation truth: `cargo rustc --bench simulation_transition_core --profile bench -vv -- -C debuginfo=0` via `--proof-cold-build/--proof-warm-build`.
-- Batch 14 MT classify-only bench execution model uses persistent fixed workers with fixed shard ownership and barrier synchronization (no per-iteration spawn; no per-iteration channel fanout).

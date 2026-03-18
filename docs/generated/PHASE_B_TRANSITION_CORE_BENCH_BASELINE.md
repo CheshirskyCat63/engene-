@@ -1,4 +1,4 @@
-# Phase B Transition Core Bench Baseline (Batch 14)
+# Phase B Transition Core Bench Baseline (Batch 15)
 
 ## Harness
 - Bench target: `simulation_transition_core` (criterion).
@@ -57,18 +57,27 @@ Scaling checks in gate:
 - no string formatting in transition-core hot path
 - deterministic ordering + merge policy maintained
 
-## Batch 14 measured result snapshot (`--from-existing` on 2026-03-18, container)
-- NEAR_MISS: `deterministic_merge_prep` (0.510372ms, 256,816,469/s)
-- PASS: `classify_only_single_thread` (0.081967ms, 1,599,079,597/s)
-- PASS: `classify_only_multi_thread_x8` (0.136433ms, 960,708,913/s)
-- PASS: `classify_materialize_single_thread` (0.266687ms, 491,483,056/s)
-- PASS: `classify_materialize_multi_thread_x8` (0.231011ms, 567,384,203/s)
-- PASS: `classify_order` (0.034100ms, 480,472,320/s)
-- PASS: `classify_order_resolve` (0.195670ms, 83,732,994/s)
-- PASS: `deferred_queue_replay` (0.007859ms, 130,303,396/s)
-- CRITICAL_FAILURE: scaling proof blocked on this host by environment guard (`available_cpus=3`, `required>=8`) before x8 scaling ratio evaluation.
+## Batch 15 validated >=8 CPU host snapshot (provided rerun truth)
+- `classify_only_single_thread` mean=`0.038812ms`
+- `classify_only_multi_thread_x8` mean=`0.016695ms`
+- `classify_only_x8` ratio=`2.325x` (`MATERIAL_REGRESSION`, required `>=3.0x`)
+- `classify_materialize_single_thread` mean=`0.136389ms`
+- `classify_materialize_multi_thread_x8` mean=`0.046846ms`
+- `classify_materialize_x8` ratio=`2.911x` (`NEAR_MISS`, required `>=3.0x`)
+- Other surfaces: PASS
 
-## Prior Batch 12 measured result snapshot (`--from-existing` on 2026-03-18)
+## Batch 15 measured container snapshot (`--from-existing` on 2026-03-18)
+- NEAR_MISS: `deterministic_merge_prep` (0.500151ms, 262,064,737/s)
+- PASS: `classify_only_single_thread` (0.084338ms, 1,554,132,345/s)
+- PASS: `classify_only_multi_thread_x8` (0.092521ms, 1,416,680,097/s)
+- PASS: `classify_materialize_single_thread` (0.285725ms, 458,734,041/s)
+- PASS: `classify_materialize_multi_thread_x8` (0.288009ms, 455,097,164/s)
+- PASS: `classify_order` (0.034892ms, 469,569,464/s)
+- PASS: `classify_order_resolve` (0.174255ms, 94,023,222/s)
+- PASS: `deferred_queue_replay` (0.007100ms, 144,228,505/s)
+- CRITICAL_FAILURE: scaling proof blocked on this host by environment guard (`available_cpus=3`, `required>=8`) before `classify_only_x8` / `classify_materialize_x8` evaluation.
+
+## Batch 12 measured result snapshot (`--from-existing` on 2026-03-18)
 - PASS: `classify_only_single_thread` (0.058003ms, 2,259,757,508/s)
 - PASS: `classify_only_multi_thread_x8` (0.114272ms, 1,147,020,746/s)
 - PASS: `classify_materialize_single_thread` (0.193818ms, 676,264,673/s)

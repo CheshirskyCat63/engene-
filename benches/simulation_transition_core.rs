@@ -5,10 +5,8 @@ use engine_runtime::simulation_core::{
     TransitionMetricsSnapshot, TransitionOrchestrator, TransitionReason, TransitionRequest,
     TransitionShardMergePolicy, TransitionShardOutput,
 };
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
-use std::sync::Barrier;
 use std::thread::JoinHandle;
 
 const CLASSIFY_COUNT: usize = 131_072;
@@ -78,17 +76,31 @@ struct ShardRanges {
 }
 
 #[derive(Clone, Copy)]
-struct ClassifyOnlyShard {
+struct ShardRange {
     start: usize,
     end: usize,
 }
 
-struct ClassifyOnlySharedState {
+struct SharedEpochState {
+    epoch: AtomicU64,
+    done_count: AtomicUsize,
     stop: AtomicBool,
+}
+
+impl SharedEpochState {
+    fn new() -> Self {
+        Self {
+            epoch: AtomicU64::new(0),
+            done_count: AtomicUsize::new(0),
+            stop: AtomicBool::new(false),
+        }
+    }
+}
+
+struct ClassifyOnlySharedState {
+    sync: SharedEpochState,
     distances_addr: AtomicUsize,
     out_addr: AtomicUsize,
-    start_barrier: Barrier,
-    done_barrier: Barrier,
 }
 
 struct PersistentClassifyOnlyPool {
@@ -99,22 +111,21 @@ struct PersistentClassifyOnlyPool {
 impl PersistentClassifyOnlyPool {
     fn new(orchestrator: TransitionOrchestrator, ranges: &ShardRanges) -> Self {
         let shared = Arc::new(ClassifyOnlySharedState {
-            stop: AtomicBool::new(false),
+            sync: SharedEpochState::new(),
             distances_addr: AtomicUsize::new(0),
             out_addr: AtomicUsize::new(0),
-            start_barrier: Barrier::new(SHARDS + 1),
-            done_barrier: Barrier::new(SHARDS + 1),
         });
         let mut handles = Vec::with_capacity(SHARDS);
         for sid in 0..SHARDS {
             let (start, end) = ranges.get(sid);
-            let shard = ClassifyOnlyShard { start, end };
+            let shard = ShardRange { start, end };
             let shared = Arc::clone(&shared);
             let handle = std::thread::spawn(move || {
+                let mut observed_epoch = 0u64;
                 loop {
-                    shared.start_barrier.wait();
-                    if shared.stop.load(Ordering::Acquire) {
-                        break;
+                    wait_for_next_epoch(&shared.sync, &mut observed_epoch);
+                    if shared.sync.stop.load(Ordering::Acquire) {
+                        return;
                     }
 
                     if shard.start < shard.end {
@@ -130,7 +141,7 @@ impl PersistentClassifyOnlyPool {
                             }
                         }
                     }
-                    shared.done_barrier.wait();
+                    shared.sync.done_count.fetch_add(1, Ordering::Release);
                 }
             });
             handles.push(handle);
@@ -145,109 +156,133 @@ impl PersistentClassifyOnlyPool {
         self.shared
             .out_addr
             .store(out_levels.as_mut_ptr() as usize, Ordering::Relaxed);
-        self.shared.start_barrier.wait();
-        self.shared.done_barrier.wait();
+        run_epoch_and_wait(&self.shared.sync, SHARDS);
     }
 }
 
 impl Drop for PersistentClassifyOnlyPool {
     fn drop(&mut self) {
-        self.shared.stop.store(true, Ordering::Release);
-        self.shared.start_barrier.wait();
+        self.shared.sync.stop.store(true, Ordering::Release);
+        self.shared.sync.epoch.fetch_add(1, Ordering::Release);
         while let Some(handle) = self.handles.pop() {
             let _ = handle.join();
         }
     }
 }
 
-#[derive(Clone, Copy)]
-struct MaterializeSignal {
-    distances_addr: usize,
-    arena_addr: usize,
-}
-
-enum MaterializeCommand {
-    Run(MaterializeSignal),
-    Stop,
+struct MaterializeSharedState {
+    sync: SharedEpochState,
+    distances_addr: AtomicUsize,
+    arena_addr: AtomicUsize,
 }
 
 struct PersistentMaterializePool {
-    txs: Vec<Sender<MaterializeCommand>>,
-    done_rx: Receiver<()>,
+    shared: Arc<MaterializeSharedState>,
     handles: Vec<JoinHandle<()>>,
 }
 
 impl PersistentMaterializePool {
     fn new(orchestrator: TransitionOrchestrator, ranges: &ShardRanges) -> Self {
-        let (done_tx, done_rx) = mpsc::channel();
-        let mut txs = Vec::with_capacity(SHARDS);
+        let shared = Arc::new(MaterializeSharedState {
+            sync: SharedEpochState::new(),
+            distances_addr: AtomicUsize::new(0),
+            arena_addr: AtomicUsize::new(0),
+        });
         let mut handles = Vec::with_capacity(SHARDS);
         for sid in 0..SHARDS {
             let (start, end) = ranges.get(sid);
-            let (tx, rx) = mpsc::channel();
-            let done_tx = done_tx.clone();
+            let shard = ShardRange { start, end };
+            let shared = Arc::clone(&shared);
             let handle = std::thread::spawn(move || {
-                while let Ok(cmd) = rx.recv() {
-                    match cmd {
-                        MaterializeCommand::Run(signal) => {
-                            if start < end {
-                                let distances_ptr = signal.distances_addr as *const f32;
-                                let arena_ptr = signal.arena_addr as *mut TransitionRequest;
-                                for idx in start..end {
-                                    // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
-                                    unsafe {
-                                        let level =
-                                            orchestrator.classify_distance(*distances_ptr.add(idx));
-                                        *arena_ptr.add(idx) =
-                                            TransitionRequest::Promote(PromotionRequest {
-                                                subject: SimulationSubject {
-                                                    entity_id: idx as u64,
-                                                },
-                                                from: SimulationLevel::L1,
-                                                to: level,
-                                                reason: TransitionReason::PlayerProximity,
-                                            });
-                                    }
-                                }
-                            }
-                            done_tx.send(()).expect("materialize done send");
-                        }
-                        MaterializeCommand::Stop => break,
+                let mut observed_epoch = 0u64;
+                loop {
+                    wait_for_next_epoch(&shared.sync, &mut observed_epoch);
+                    if shared.sync.stop.load(Ordering::Acquire) {
+                        return;
                     }
+
+                    if shard.start < shard.end {
+                        let distances_ptr =
+                            shared.distances_addr.load(Ordering::Relaxed) as *const f32;
+                        let arena_ptr =
+                            shared.arena_addr.load(Ordering::Relaxed) as *mut TransitionRequest;
+                        for idx in shard.start..shard.end {
+                            // SAFETY: pointers are valid for run duration and shard ranges are disjoint.
+                            unsafe {
+                                let level = orchestrator.classify_distance(*distances_ptr.add(idx));
+                                *arena_ptr.add(idx) =
+                                    TransitionRequest::Promote(PromotionRequest {
+                                        subject: SimulationSubject {
+                                            entity_id: idx as u64,
+                                        },
+                                        from: SimulationLevel::L1,
+                                        to: level,
+                                        reason: TransitionReason::PlayerProximity,
+                                    });
+                            }
+                        }
+                    }
+                    shared.sync.done_count.fetch_add(1, Ordering::Release);
                 }
             });
-            txs.push(tx);
             handles.push(handle);
         }
-        Self {
-            txs,
-            done_rx,
-            handles,
-        }
+        Self { shared, handles }
     }
 
     fn run(&self, distances: &[f32], arena: &mut [TransitionRequest]) {
-        let signal = MaterializeSignal {
-            distances_addr: distances.as_ptr() as usize,
-            arena_addr: arena.as_mut_ptr() as usize,
-        };
-        for tx in &self.txs {
-            tx.send(MaterializeCommand::Run(signal))
-                .expect("materialize send");
-        }
-        for _ in 0..self.txs.len() {
-            self.done_rx.recv().expect("materialize done recv");
-        }
+        self.shared
+            .distances_addr
+            .store(distances.as_ptr() as usize, Ordering::Relaxed);
+        self.shared
+            .arena_addr
+            .store(arena.as_mut_ptr() as usize, Ordering::Relaxed);
+        run_epoch_and_wait(&self.shared.sync, SHARDS);
     }
 }
 
 impl Drop for PersistentMaterializePool {
     fn drop(&mut self) {
-        for tx in &self.txs {
-            let _ = tx.send(MaterializeCommand::Stop);
-        }
+        self.shared.sync.stop.store(true, Ordering::Release);
+        self.shared.sync.epoch.fetch_add(1, Ordering::Release);
         while let Some(handle) = self.handles.pop() {
             let _ = handle.join();
+        }
+    }
+}
+
+#[inline(always)]
+fn wait_for_next_epoch(sync: &SharedEpochState, observed_epoch: &mut u64) {
+    let mut spins = 0u32;
+    loop {
+        if sync.stop.load(Ordering::Acquire) {
+            return;
+        }
+        let epoch = sync.epoch.load(Ordering::Acquire);
+        if epoch != *observed_epoch {
+            *observed_epoch = epoch;
+            return;
+        }
+        if spins < 256 {
+            std::hint::spin_loop();
+            spins += 1;
+        } else {
+            std::thread::yield_now();
+        }
+    }
+}
+
+#[inline(always)]
+fn run_epoch_and_wait(sync: &SharedEpochState, expected_done: usize) {
+    sync.done_count.store(0, Ordering::Relaxed);
+    sync.epoch.fetch_add(1, Ordering::Release);
+    let mut spins = 0u32;
+    while sync.done_count.load(Ordering::Acquire) != expected_done {
+        if spins < 256 {
+            std::hint::spin_loop();
+            spins += 1;
+        } else {
+            std::thread::yield_now();
         }
     }
 }
