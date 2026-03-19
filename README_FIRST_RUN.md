@@ -139,10 +139,11 @@ cargo test --test ci_surface_contracts
 cargo test --test physics_core_boundary_contracts
 cargo test --test physics_bootstrap_contracts
 cargo test --test runtime_phase_contracts
+cargo test --test spatial_dirty_contracts
 ```
 
-Migration is not finished while root shell ownership is still active.
-After stabilization, the next step is structural movement, not another audit pass.
+Migration is not finished while root shell ownership is still active as canonical launch path.
+Current state is finish-ready for migration handoff, with root constrained to thin compatibility shell duties.
 
 ## Version info
 

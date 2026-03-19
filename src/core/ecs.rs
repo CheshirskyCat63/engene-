@@ -50,6 +50,9 @@ pub struct Ecs {
     pub faction_memberships: SparseSet<FactionMembership>,
     pub territory: HashMap<(u32, u32), MonsterSpecies>,
     pub spatial: SpatialIndex,
+    spatial_inserted_journal: HashSet<Entity>,
+    spatial_moved_journal: HashSet<Entity>,
+    spatial_removed_journal: HashSet<Entity>,
 }
 
 impl Ecs {
@@ -87,6 +90,9 @@ impl Ecs {
             faction_memberships: SparseSet::new(),
             territory: HashMap::new(),
             spatial: SpatialIndex::new(),
+            spatial_inserted_journal: HashSet::new(),
+            spatial_moved_journal: HashSet::new(),
+            spatial_removed_journal: HashSet::new(),
         }
     }
 
@@ -98,6 +104,8 @@ impl Ecs {
         self.alive.push(id);
         self.alive_set.insert(id);
         self.gen_alloc.insert(id);
+        self.spatial_inserted_journal.insert(id);
+        self.spatial_removed_journal.remove(&id);
         debug_assert!(
             self.validate_invariants().is_ok(),
             "ECS invariant violation after spawn"
@@ -260,6 +268,9 @@ impl Ecs {
         self.blackboard.remove(&entity);
         self.equipment.remove(&entity);
         self.faction_memberships.remove(&entity);
+        self.spatial_removed_journal.insert(entity);
+        self.spatial_inserted_journal.remove(&entity);
+        self.spatial_moved_journal.remove(&entity);
     }
 
     pub fn is_alive(&self, entity: Entity) -> bool {
@@ -433,6 +444,9 @@ impl Ecs {
     /// Get transform mutable.
     #[inline]
     pub fn get_transform_mut(&mut self, entity: Entity) -> Option<&mut Transform> {
+        if self.alive_set.contains(&entity) {
+            self.spatial_moved_journal.insert(entity);
+        }
         self.transforms.get_mut(&entity)
     }
 
@@ -443,6 +457,9 @@ impl Ecs {
 
     #[inline]
     pub fn transform_mut(&mut self, entity: Entity) -> Option<&mut Transform> {
+        if self.alive_set.contains(&entity) {
+            self.spatial_moved_journal.insert(entity);
+        }
         self.transforms.get_mut(&entity)
     }
 
@@ -458,7 +475,25 @@ impl Ecs {
 
     #[inline]
     pub fn set_transform(&mut self, entity: Entity, value: Transform) {
+        if self.transforms.get(&entity).is_some() {
+            self.spatial_moved_journal.insert(entity);
+        } else {
+            self.spatial_inserted_journal.insert(entity);
+            self.spatial_removed_journal.remove(&entity);
+        }
         self.transforms.insert(entity, value);
+    }
+
+    pub fn drain_spatial_inserted_journal(&mut self) -> Vec<Entity> {
+        self.spatial_inserted_journal.drain().collect()
+    }
+
+    pub fn drain_spatial_moved_journal(&mut self) -> Vec<Entity> {
+        self.spatial_moved_journal.drain().collect()
+    }
+
+    pub fn drain_spatial_removed_journal(&mut self) -> Vec<Entity> {
+        self.spatial_removed_journal.drain().collect()
     }
 
     #[inline]

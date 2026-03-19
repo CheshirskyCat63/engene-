@@ -28,6 +28,9 @@ The workspace may already declare `apps/engene_game`, `apps/engene_sdk`, and `ap
 but until package-level execution replaces the root-package bins in actual operator use,
 the documentation must describe the root-package bins as canonical.
 
+Current root behavior is constrained to thin compatibility shell ownership.
+New runtime policy decisions must not be introduced in root.
+
 ## Transition policy
 
 When package-level entrypoints become the active truth, this file changes in one step:

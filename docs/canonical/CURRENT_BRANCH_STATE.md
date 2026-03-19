@@ -2,7 +2,7 @@
 
 ## Status label
 
-**Transition-shaped repo. Split declared; split not fully enforced.**
+**Transition finish-ready. Structural split active; root constrained to thin compatibility shell.**
 
 ## Current package truth
 
@@ -64,12 +64,12 @@
 
 ## Current architecture truth
 
-- `src/lib.rs` — broad monolith export surface (migration shell)
+- `src/lib.rs` — reduced compatibility export surface (migration shell)
 - `src/app/sdk_runner.rs` — phase driver shell with explicit redraw phase calls
 - `src/app/sdk_runner/sdk_runner_phases/*` — phase modules (`tick`, `streaming`, `persistence`, `spatial`, `audio`, `editor`, `render`)
 - `src/app/sdk_runner/sdk_runner_phases/spatial.rs` — explicit no-op / incremental / controlled full-rebuild spatial policy
 - `src/runtime/wiring/integration/mod.rs` + `integration/*` — boundary module tree (old flat `integration.rs` removed)
-- Root exports: animation, app, audio, body, content, core, engine, game, graphics, input, memory, navigation, network, physics, runtime, simulation, testsupport, tools, world
+- Root exports: animation, app, audio, body, content, core, game, graphics, input, memory, navigation, network, physics, runtime, simulation, testsupport, tools, world
 - `crates/engine_physics` — real minimal physics seam with bootstrap validation path
 - `crates/engine_tools` — stub placeholder, not real tools implementation
 
@@ -90,11 +90,12 @@
 
 - `apps/*` packages are declared in workspace but are **not** current canonical launch truth
 - `engene_test` bin does **not** exist in current Cargo
-- Split is declared but **not** fully enforced
+- Split is active and compile-clean on current platform gate path
 - Package-level entrypoints are **not** yet operator truth
-- Full spatial rebuild in SDK redraw is **not** default; dirty path policy is active
+- Spatial hot path uses journal-driven dirty tracking; no global ECS dirty scan each redraw
 - Migration is **not** finished while root shell ownership is still active
-- Root shell remains active but no new permanent ownership should be introduced there
+- Root shell is active as compatibility shell and is not owner of new policy decisions
+- Migration finish-ready state is reached; remaining work is post-migration handoff and optimization
 - Legacy integration tests (`world_streaming`, `physics_body_combat`, `content_pipeline`, `persistence_full`, `runtime_systems`, `gameplay_and_ai`) are **not** part of current platform gate and are isolated in `tests_legacy/`
 
 ## Rule

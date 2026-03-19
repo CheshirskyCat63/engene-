@@ -4,7 +4,7 @@
 
 | Crate | Status | Notes |
 |---|---|---|
-| `engene` (root) | **Active** | migration shell, hosts 4 canonical bins |
+| `engene` (root) | **Active shell** | thin compatibility shell, hosts 4 canonical bins |
 | `engine_core` | Active | core contracts, events, scheduling |
 | `engine_ecs` | Active | ECS and entity lifecycle |
 | `engine_world` | Active | world truth, spatial, persistence |
@@ -126,7 +126,7 @@ Jobs in PR CI:
 - `clippy` — `cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `build` — `cargo build --verbose`
 - `smoke` — nextest, engine_contracts + production_candidate + entrypoint + ci_surface
-- `contracts` — nextest, runtime_phase + physics_boundary + physics_bootstrap
+- `contracts` — nextest, runtime_phase + physics_boundary + physics_bootstrap + spatial_dirty
 
 Jobs NOT in PR CI:
 - `certification`
@@ -145,8 +145,8 @@ Branches watched: `main`, `engene-2.0-transition`
 
 1. `apps/*` packages are declared but **not** current canonical launch truth
 2. `engine_physics` is a minimal seam, not a full physics stack migration endpoint
-3. Split is declared but **not** fully enforced
-4. Root package still hosts active execution and broad exports
+3. Package-level entrypoints are not yet operator truth (root bins still canonical)
+4. Root package still hosts active execution, but new policy ownership is kept out of root
 5. ~~No physics boundary tests exist~~ — ✅ Now exist
 6. ~~No physics bootstrap contract tests exist~~ — ✅ Now exist
 7. ~~runtime_phase_contracts.rs does not call production runtime assembly path~~ — ✅ Now does
@@ -161,14 +161,14 @@ Branches watched: `main`, `engene-2.0-transition`
 **Smoke lane:** Contains only fast tests, correct.
 **Contract lane:** Contains behavioral tests, correct.
 
-**Status:** Fast verification path is truthful and currently green, but not maximally small due to root-shell architecture.
+**Status:** Fast verification path is truthful and currently green, with journal-driven spatial dirty path in SDK.
 
-Migration is not finished while root shell remains active.
-Next step after this stabilization pass is structural movement, not another audit pass.
+Migration is not finished while root shell remains canonical launch surface.
+Migration finish-ready is reached: active migration stabilization is complete, remaining work is launch-ownership handoff and post-migration optimization.
 
 Spatial update policy is explicit in SDK runtime:
 - `no_op` when no dirty input,
-- incremental update when dirty entities exist,
+- incremental update from explicit dirty journal,
 - controlled full rebuild on structural invalidation (chunk/origin-shift/recovery).
 
 ## Rule

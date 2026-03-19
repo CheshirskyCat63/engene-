@@ -3,9 +3,11 @@
 //! Real production checks for spatial dirty policy and index behavior.
 
 use engene::core::ecs::Entity;
+use engene::app::spatial_dirty_journal::SpatialDirtyJournal;
 use engene::world::hierarchical_spatial::{
     select_spatial_update_path, HierarchicalSpatialIndex, SpatialDirtyInput, SpatialUpdatePath,
 };
+use std::fs;
 
 fn entity(n: u64) -> Entity {
     n
@@ -89,4 +91,31 @@ fn origin_shift_forces_rebuild_trigger() {
 fn no_dirty_input_means_no_spatial_work() {
     let dirty = SpatialDirtyInput::default();
     assert_eq!(select_spatial_update_path(&dirty), SpatialUpdatePath::NoWork);
+}
+
+#[test]
+fn journal_driven_path_does_not_require_global_dirty_scan_source_check() {
+    let source = fs::read_to_string("src/app/sdk_runner/sdk_runner_phases/spatial.rs")
+        .expect("src/app/sdk_runner/sdk_runner_phases/spatial.rs must exist");
+
+    assert!(!source.contains("collect_dirty_from_ecs("));
+    assert!(!source.contains("spatial_prev_alive"));
+    assert!(!source.contains("spatial_prev_positions"));
+}
+
+#[test]
+fn journal_to_input_reflects_written_dirty_flags() {
+    let mut journal = SpatialDirtyJournal::default();
+    journal.mark_inserted(entity(1));
+    journal.mark_moved(entity(2));
+    journal.mark_removed(entity(3));
+    journal.mark_editor_mutation();
+    journal.mark_chunk_structural_change();
+
+    let input = journal.to_input();
+    assert_eq!(input.inserted, vec![entity(1)]);
+    assert_eq!(input.moved, vec![entity(2)]);
+    assert_eq!(input.removed, vec![entity(3)]);
+    assert!(input.editor_mutation);
+    assert!(input.chunk_structural_change);
 }

@@ -54,6 +54,7 @@ pub struct EditorShell {
 #[derive(Debug, Default, Clone)]
 pub struct InspectorApplyResult {
     pub spatial_dirty: bool,
+    pub spatial_moved_entities: Vec<crate::core::ecs::Entity>,
 }
 
 impl EditorShell {
@@ -241,6 +242,7 @@ impl EditorShell {
                     if let Some(t) = engine.ecs.get_transform_mut(entity) {
                         if t.x != x || t.y != y {
                             result.spatial_dirty = true;
+                            result.spatial_moved_entities.push(entity);
                         }
                         t.x = x;
                         t.y = y;

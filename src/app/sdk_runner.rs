@@ -2,7 +2,7 @@
 
 use std::sync::Arc;
 use std::time::Instant;
-use std::{collections::HashMap, collections::HashSet};
+use std::collections::HashMap;
 
 #[path = "sdk_runner/sdk_runner_phases/mod.rs"]
 mod sdk_runner_phases;
@@ -26,9 +26,10 @@ use crate::memory::asset_manager::AssetManager;
 use crate::runtime::bootstrap::ToolsRuntimeAssembly;
 use crate::tools::doctor;
 use crate::tools::editor_shell::EditorShell;
+use crate::app::spatial_dirty_journal::SpatialDirtyJournal;
 use crate::world::components::*;
 use crate::world::heightmap::Heightmap;
-use crate::world::hierarchical_spatial::{SpatialDirtyInput, SpatialUpdatePath};
+use crate::world::hierarchical_spatial::SpatialUpdatePath;
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -79,13 +80,11 @@ pub fn run_from_env_args() {
         sim_accum: 0.0,
         sim_paused: false,
         sim_speed: 1.0,
-        spatial_dirty_input: SpatialDirtyInput {
+        spatial_dirty_journal: SpatialDirtyJournal {
             force_rebuild: true,
-            ..SpatialDirtyInput::default()
+            ..SpatialDirtyJournal::default()
         },
-        spatial_prev_positions: HashMap::new(),
         spatial_last_applied_positions: HashMap::new(),
-        spatial_prev_alive: HashSet::new(),
         spatial_last_origin_shift_count: 0,
         spatial_last_update_path: SpatialUpdatePath::FullRebuild,
         heightmap,
@@ -108,10 +107,8 @@ struct SdkApp {
     sim_accum: f32,
     sim_paused: bool,
     sim_speed: f32,
-    spatial_dirty_input: SpatialDirtyInput,
-    spatial_prev_positions: HashMap<crate::core::ecs::Entity, (f32, f32)>,
+    spatial_dirty_journal: SpatialDirtyJournal,
     spatial_last_applied_positions: HashMap<crate::core::ecs::Entity, (f32, f32)>,
-    spatial_prev_alive: HashSet<crate::core::ecs::Entity>,
     spatial_last_origin_shift_count: u32,
     spatial_last_update_path: SpatialUpdatePath,
     heightmap: ArcHeightmap,

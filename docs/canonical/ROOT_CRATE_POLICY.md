@@ -3,6 +3,7 @@
 ## Status
 
 The root crate `engene` is a **migration shell**.
+Current branch status: **finish-ready shell** (active for compatibility, not for new ownership).
 
 It is not allowed to silently become the permanent architecture center.
 

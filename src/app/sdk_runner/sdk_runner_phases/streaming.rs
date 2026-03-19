@@ -17,7 +17,7 @@ pub fn run(
             streamer.mark_loaded(*coord);
         }
         if !result.0.is_empty() || !result.1.is_empty() {
-            app.spatial_dirty_input.mark_chunk_structural_change();
+            app.spatial_dirty_journal.mark_chunk_structural_change();
         }
         result
     } else {

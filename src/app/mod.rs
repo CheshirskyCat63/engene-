@@ -13,4 +13,5 @@
 pub mod game_runner;
 pub mod headless_runner;
 pub mod sdk_runner;
+pub mod spatial_dirty_journal;
 pub mod tools_runner;
