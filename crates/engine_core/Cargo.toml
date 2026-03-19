@@ -20,3 +20,7 @@ audio_playback = []
 serde = { version = "1", features = ["derive"] }
 ron = "0.8"
 puffin = "0.19"
+rayon = "1"
+parking_lot = "0.12"
+pathfinding = "4"
+tracing = "0.1"

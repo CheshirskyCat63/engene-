@@ -13,3 +13,7 @@ pub mod prefabs;
 pub mod validation;
 
 pub mod content_hash;
+
+// moved from root
+pub mod content;
+pub mod model_loader;

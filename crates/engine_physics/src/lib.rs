@@ -8,3 +8,7 @@ pub mod bootstrap;
 pub mod contracts;
 pub mod resources;
 pub mod systems;
+
+// moved from root
+pub mod physics;
+pub mod animation;

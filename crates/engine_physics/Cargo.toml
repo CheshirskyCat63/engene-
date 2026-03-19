@@ -5,3 +5,11 @@ edition = "2021"
 
 [dependencies]
 engine_core = { path = "../engine_core" }
+engine_ecs = { path = "../engine_ecs" }
+rapier3d = "0.32"
+glam = "0.30"
+tracing = "0.1"
+serde = { version = "1", features = ["derive"] }
+bincode = "1"
+bitflags = "2"
+anyhow = "1"
