@@ -20,16 +20,18 @@ fn extract_push_branches(workflow: &str) -> Vec<String> {
             in_push_section = true;
         } else if trimmed.starts_with("branches:") && in_push_section {
             in_branches_section = true;
-        } else if trimmed.starts_with('[') && in_branches_section {
-            // Single line array: branches: [ "main", "engene-2.0-transition" ]
-            let content = trimmed.trim_start_matches('[').trim_end_matches(']');
-            for part in content.split(',') {
-                let branch = part.trim().trim_matches('"').to_string();
-                if !branch.is_empty() {
-                    branches.push(branch);
+            // Check if it's a single line array
+            if trimmed.contains('[') {
+                let start = trimmed.find('[').unwrap();
+                let content = &trimmed[start..].trim_start_matches('[').trim_end_matches(']');
+                for part in content.split(',') {
+                    let branch = part.trim().trim_matches('"').to_string();
+                    if !branch.is_empty() {
+                        branches.push(branch);
+                    }
                 }
+                break;
             }
-            break;
         } else if trimmed.starts_with('"') && in_branches_section {
             // Multi-line array
             let branch = trimmed.trim_matches(',').trim_matches('"').to_string();

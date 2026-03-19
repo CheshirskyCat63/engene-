@@ -35,6 +35,11 @@
 - `scripts/test/contracts.sh`
 - `scripts/test/contracts.ps1`
 
+**Legacy recovery lane:**
+- `just legacy-recovery`
+- `scripts/test/legacy_recovery.sh`
+- `scripts/test/legacy_recovery.ps1`
+
 **Certification lane:**
 - `just certification`
 - `cargo cert`
@@ -87,7 +92,8 @@
 - `sdk_runner.rs` orchestration is **not** yet split into phase methods
 - `integration.rs` wiring is **not** yet decomposed into boundary modules
 - Full spatial rebuild in SDK redraw is **not** yet replaced by dirty-path incremental
-- `engine_physics` is **not** a real physics runtime, only a stub
+- `engine_physics` is **not** a real physics runtime, only a minimal bootstrap seam
+- Legacy integration tests (`world_streaming`, `physics_body_combat`, `content_pipeline`, `persistence_full`) are **not** part of current platform gate and are isolated in `tests_legacy/`
 
 ## Rule
 

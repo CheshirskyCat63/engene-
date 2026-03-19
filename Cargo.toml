@@ -27,7 +27,7 @@ autobins = false
 [features]
 default = ["full"]
 engine_core = []
-physics = ["engine_core"]
+physics = ["engine_core", "engine_physics"]
 render = ["engine_core"]
 ai = ["engine_core"]
 audio = ["engine_core"]
@@ -113,6 +113,7 @@ engine_core = { path = "crates/engine_core" }
 engine_content = { path = "crates/engine_content" }
 engine_ecs = { path = "crates/engine_ecs" }
 engine_runtime = { path = "crates/engine_runtime" }
+engine_physics = { path = "crates/engine_physics", optional = true }
 rand = "0.8"
 wgpu = "27"
 winit = "0.30"

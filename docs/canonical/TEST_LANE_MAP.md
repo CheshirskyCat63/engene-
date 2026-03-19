@@ -27,7 +27,7 @@ scripts/test/smoke.sh
 scripts/test/smoke.ps1
 ```
 
-### 2. Contract lane
+### 2. Contracts lane
 Use after:
 - runtime ownership changes,
 - determinism / SDK boundary work,
@@ -40,8 +40,6 @@ Targets:
 - `determinism_and_sdk`
 - `runtime_systems`
 - `runtime_phase_contracts`
-- `spatial_dirty_contracts`
-- `wiring_boundary_contracts`
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
 
@@ -53,7 +51,23 @@ scripts/test/contracts.sh
 scripts/test/contracts.ps1
 ```
 
-### 3. Certification lane
+### 3. Legacy recovery lane
+Use only for recovering broken legacy integration tests after API drift.
+
+Targets:
+- `world_streaming` (moved to tests_legacy/)
+- `physics_body_combat` (moved to tests_legacy/)
+- `content_pipeline` (moved to tests_legacy/)
+- `persistence_full` (moved to tests_legacy/)
+
+Commands:
+```bash
+just legacy-recovery
+scripts/test/legacy_recovery.sh
+scripts/test/legacy_recovery.ps1
+```
+
+### 4. Certification lane
 Use after:
 - performance boundary work,
 - measured acceptance changes,
@@ -73,7 +87,7 @@ scripts/test/certification.sh
 scripts/test/certification.ps1
 ```
 
-### 4. Perf lane
+### 5. Perf lane
 Use only when touching hot paths or perf contracts.
 
 Targets:

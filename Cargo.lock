@@ -1053,6 +1053,7 @@ dependencies = [
  "engine_content",
  "engine_core",
  "engine_ecs",
+ "engine_physics",
  "engine_runtime",
  "glam 0.30.10",
  "glob",

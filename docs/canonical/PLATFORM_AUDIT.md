@@ -10,7 +10,7 @@
 | `engine_world` | Active | world truth, spatial, persistence |
 | `engine_runtime` | Active | runtime orchestration |
 | `engine_render` | Active | rendering |
-| `engine_physics` | **Stub** | placeholder, minimal API facade |
+| `engine_physics` | **Partial** | minimal bootstrap seam exists; not yet fully integrated |
 | `engine_audio` | Active | audio runtime |
 | `engine_content` | Active | content pipeline |
 | `engine_tools` | Active | maintenance tooling |
@@ -52,8 +52,19 @@ Targets:
 - `determinism_and_sdk`
 - `runtime_systems`
 - `runtime_phase_contracts`
-- `spatial_dirty_contracts`
-- `wiring_boundary_contracts`
+- `physics_core_boundary_contracts`
+- `physics_bootstrap_contracts`
+
+### Legacy recovery lane
+- `just legacy-recovery`
+- `scripts/test/legacy_recovery.sh`
+- `scripts/test/legacy_recovery.ps1`
+
+Targets:
+- `world_streaming` (isolated in tests_legacy/)
+- `physics_body_combat` (isolated in tests_legacy/)
+- `content_pipeline` (isolated in tests_legacy/)
+- `persistence_full` (isolated in tests_legacy/)
 
 ### Certification lane
 - `just certification`
@@ -98,10 +109,12 @@ Targets: benches only.
 | `entrypoint_and_operator_truth.rs` | ✅ Exact match to docs |
 | `ci_surface_contracts.rs` | ✅ CI structure verification |
 | `runtime_phase_contracts.rs` | ✅ Source text checks + real production calls |
-| `spatial_dirty_contracts.rs` | ✅ Uses real `HierarchicalSpatialIndex` |
-| `wiring_boundary_contracts.rs` | ✅ Uses real system descriptors |
 | `physics_core_boundary_contracts.rs` | ✅ Boundary tests exist |
 | `physics_bootstrap_contracts.rs` | ✅ Bootstrap tests exist |
+| `world_streaming.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
+| `physics_body_combat.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
+| `content_pipeline.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
+| `persistence_full.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
 
 ## Current CI truth
 

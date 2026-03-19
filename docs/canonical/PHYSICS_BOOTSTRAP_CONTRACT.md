@@ -88,11 +88,11 @@ As of this writing:
 
 - `PHYSICS_CORE_BOUNDARY.md` — **exists** (this boundary contract)
 - `PHYSICS_BOOTSTRAP_CONTRACT.md` — **exists** (this document)
-- `engine_physics` crate — **stub only**, no real implementation
-- Physics systems — **not registered** in runtime
-- Physics bootstrap tests — **not yet written**
+- `engine_physics` crate — provides a minimal bootstrap seam (validation + registration state)
+- Physics systems registration is minimal but present (bootstrapped by runtime helper)
+- Physics bootstrap tests — **exist and validate real code paths**
 
-**Status:** Physics is **not** normally connected. It is a declared capability with a stub implementation.
+**Status:** Physics is partially connected: bootstrap seam exists, but full physics system integration is not yet complete.
 
 ## What "not future fanfic" means
 

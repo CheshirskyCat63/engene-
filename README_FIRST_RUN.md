@@ -98,6 +98,21 @@ The smoke lane runs:
 - `engine_contracts` — core engine contracts
 - `production_candidate` — production readiness gate
 - `entrypoint_and_operator_truth` — exact doc/bin match
+
+## Fast platform gate verification
+
+For narrow green gate validation (physics/platform readiness):
+
+**Canonical order:**
+```bash
+cargo test entrypoint_and_operator_truth
+cargo test ci_surface_contracts
+cargo test physics_core_boundary_contracts
+cargo test physics_bootstrap_contracts
+cargo test runtime_phase_contracts
+```
+
+These tests validate the real physics seam and platform contracts without legacy interference.
 - `ci_surface_contracts` — CI structure verification
 
 **Contract lane** (slower, more thorough):

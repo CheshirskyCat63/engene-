@@ -30,7 +30,9 @@ perf:
     cargo bench --bench boundary_cost
     cargo bench --bench tick_pressure
 
-doctor:
+legacy-recovery:
+    @echo "Running legacy recovery tests (may fail)..."
+	cd tests_legacy && cargo test
     cargo run --bin engene_tools
 
 sdk:

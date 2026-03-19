@@ -102,10 +102,10 @@ To verify boundary integrity:
 
 As of this writing:
 
-- `engine_physics` exists as a **stub** with only `pub mod api { pub const CRATE: &str = "engine_physics"; }`
-- No real physics implementation exists
-- Physics boundary contract is **not yet enforced** — it is declared
-- No physics tests exist in the test suite
+- `engine_physics` provides a minimal bootstrap seam with runtime validation types
+- Physics boundary contract is documented and boundary tests exist
+- Physics bootstrap contract is documented and bootstrap tests exist
+- Physics systems are not yet fully registered, but a minimal registration seam exists
 
 ## What must exist before physics is "real"
 

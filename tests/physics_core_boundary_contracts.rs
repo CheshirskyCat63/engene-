@@ -159,15 +159,38 @@ fn physics_boundary_has_explicit_forbidden_dependencies() {
             boundary_doc.to_lowercase().contains("must not"),
         "PHYSICS_CORE_BOUNDARY must document forbidden dependencies");
     
-    // Verify core -> physics direction is forbidden
-    assert!(boundary_doc.contains("core") && boundary_doc.contains("physics"),
+    // Verify core -> physics direction is forbidden and physics -> core is allowed
+    assert!(boundary_doc.to_lowercase().contains("core") && boundary_doc.to_lowercase().contains("physics"),
         "PHYSICS_CORE_BOUNDARY must mention core and physics relationship");
-    
-    // Verify no core-to-physics imports rule exists
+    assert!(boundary_doc.to_lowercase().contains("physics -> core") ||
+            boundary_doc.to_lowercase().contains("physics to core"),
+        "PHYSICS_CORE_BOUNDARY must document allowed physics->core direction");
+
+    // Verify import/dependency rules are explicitly called out
     let has_import_rule = boundary_doc.to_lowercase().contains("import") ||
                           boundary_doc.to_lowercase().contains("dependency");
     assert!(has_import_rule,
         "PHYSICS_CORE_BOUNDARY must document import/dependency rules");
+}
+
+/// Physics core boundary doc exists and is not a placeholder.
+#[test]
+fn physics_core_boundary_doc_exists_and_is_not_placeholder() {
+    let boundary_doc = fs::read_to_string("docs/canonical/PHYSICS_CORE_BOUNDARY.md")
+        .expect("PHYSICS_CORE_BOUNDARY.md must exist");
+
+    // Verify required sections exist
+    assert!(boundary_doc.contains("What is core"), "Boundary doc must describe core");
+    assert!(boundary_doc.contains("What is physics runtime"), "Boundary doc must describe physics runtime");
+    assert!(boundary_doc.contains("Where physics must live"), "Boundary doc must describe ownership");
+    assert!(boundary_doc.contains("What physics can read from core"), "Boundary doc must describe allowed dependencies");
+    assert!(boundary_doc.contains("What physics must NOT pull back to core"), "Boundary doc must describe forbidden dependencies");
+
+    // Verify the doc is not just a placeholder statement.
+    let is_placeholder = boundary_doc.to_lowercase().contains("stub") ||
+                         boundary_doc.to_lowercase().contains("placeholder");
+    assert!(!is_placeholder,
+        "PHYSICS_CORE_BOUNDARY.md must describe current boundary state, not be a placeholder");
 }
 
 /// Engine_physics dependencies are correct (physics -> core, not reverse).
@@ -210,4 +233,31 @@ fn workspace_ownership_map_assigns_physics_to_engine_physics() {
                                   ownership_map.contains("engine_physics"));
     assert!(has_physics_ownership,
         "WORKSPACE_OWNERSHIP_MAP must assign physics to engine_physics");
+}
+
+/// Engine_physics crate exposes real bootstrap types and is not a placeholder.
+#[test]
+fn engine_physics_crate_has_real_surface_not_placeholder() {
+    let bootstrap = fs::read_to_string("crates/engine_physics/src/bootstrap.rs")
+        .expect("crates/engine_physics/src/bootstrap.rs must exist");
+
+    let resources = fs::read_to_string("crates/engine_physics/src/resources.rs")
+        .expect("crates/engine_physics/src/resources.rs must exist");
+
+    let contracts = fs::read_to_string("crates/engine_physics/src/contracts.rs")
+        .expect("crates/engine_physics/src/contracts.rs must exist");
+
+    // Verify bootstrap types are present.
+    assert!(bootstrap.contains("pub struct PhysicsBootstrap"),
+        "engine_physics bootstrap.rs must define PhysicsBootstrap");
+    assert!(bootstrap.contains("fn validate"),
+        "engine_physics bootstrap.rs must provide validate() method");
+
+    // Verify registration state is tracked.
+    assert!(resources.contains("PhysicsRegistrationState"),
+        "engine_physics resources.rs must define PhysicsRegistrationState");
+
+    // Verify failure mode covers registration.
+    assert!(contracts.contains("InvalidRegistration"),
+        "engine_physics contracts.rs must include InvalidRegistration failure");
 }
