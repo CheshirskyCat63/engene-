@@ -51,6 +51,7 @@ Targets:
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
 - `runtime_phase_contracts`
+- `spatial_dirty_contracts`
 
 ### Legacy recovery lane
 - `just legacy-recovery`
@@ -108,6 +109,7 @@ Targets: benches only.
 | `entrypoint_and_operator_truth.rs` | ✅ Exact match to docs |
 | `ci_surface_contracts.rs` | ✅ CI structure verification |
 | `runtime_phase_contracts.rs` | ✅ Source text checks + real production calls |
+| `spatial_dirty_contracts.rs` | ✅ Real spatial dirty policy contracts |
 | `physics_core_boundary_contracts.rs` | ✅ Boundary tests exist |
 | `physics_bootstrap_contracts.rs` | ✅ Bootstrap tests exist |
 | `world_streaming.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
@@ -163,6 +165,11 @@ Branches watched: `main`, `engene-2.0-transition`
 
 Migration is not finished while root shell remains active.
 Next step after this stabilization pass is structural movement, not another audit pass.
+
+Spatial update policy is explicit in SDK runtime:
+- `no_op` when no dirty input,
+- incremental update when dirty entities exist,
+- controlled full rebuild on structural invalidation (chunk/origin-shift/recovery).
 
 ## Rule
 

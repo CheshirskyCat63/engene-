@@ -35,6 +35,7 @@ Targets:
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
 - `runtime_phase_contracts`
+- `spatial_dirty_contracts`
 
 Commands:
 ```bash
@@ -111,7 +112,7 @@ The command surface must do that remembering for them.
 
 Current green platform gate is narrow by design:
 - Smoke: `engine_contracts`, `production_candidate`, `entrypoint_and_operator_truth`, `ci_surface_contracts`
-- Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`
+- Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`, `spatial_dirty_contracts`
 
 Excluded from default gate and isolated in `tests_legacy/`:
 - `world_streaming`

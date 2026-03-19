@@ -40,30 +40,30 @@ fn source_text_check_sdk_runner_redraw_phase_order_matches_contract() {
         .expect("streaming phase must be called");
     let persistence_pos = find_position(after_redraw, "sdk_runner_phases::persistence::run")
         .expect("persistence phase must be called");
-    let spatial_pos = find_position(after_redraw, "sdk_runner_phases::spatial::run")
-        .expect("spatial phase must be called");
     let audio_pos = find_position(after_redraw, "sdk_runner_phases::audio::run")
         .expect("audio phase must be called");
-    let dashboard_pos = find_position(after_redraw, "sdk_runner_phases::editor::run")
+    let editor_pos = find_position(after_redraw, "sdk_runner_phases::editor::run")
         .expect("editor phase must be called");
-    let inspector_pos = find_position(after_redraw, "sdk_runner_phases::render::run")
+    let spatial_pos = find_position(after_redraw, "sdk_runner_phases::spatial::run")
+        .expect("spatial phase must be called");
+    let render_pos = find_position(after_redraw, "sdk_runner_phases::render::run")
         .expect("render phase must be called");
 
-    // Verify order: tick -> poll -> streaming -> persistence -> spatial -> audio -> editor -> render
+    // Verify order: tick -> poll -> streaming -> persistence -> audio -> editor -> spatial -> render
     assert!(tick_pos < poll_pos, 
         "engine.tick (pos {}) must come before asset poll (pos {})", tick_pos, poll_pos);
     assert!(poll_pos < streamer_pos,
         "asset poll (pos {}) must come before streaming (pos {})", poll_pos, streamer_pos);
     assert!(streamer_pos < persistence_pos,
         "streaming (pos {}) must come before persistence (pos {})", streamer_pos, persistence_pos);
-    assert!(persistence_pos < spatial_pos,
-        "persistence (pos {}) must come before spatial (pos {})", persistence_pos, spatial_pos);
-    assert!(spatial_pos < audio_pos,
-        "spatial (pos {}) must come before audio (pos {})", spatial_pos, audio_pos);
-    assert!(audio_pos < dashboard_pos,
-        "audio (pos {}) must come before editor (pos {})", audio_pos, dashboard_pos);
-    assert!(dashboard_pos < inspector_pos,
-        "editor (pos {}) must come before render (pos {})", dashboard_pos, inspector_pos);
+    assert!(persistence_pos < audio_pos,
+        "persistence (pos {}) must come before audio (pos {})", persistence_pos, audio_pos);
+    assert!(audio_pos < editor_pos,
+        "audio (pos {}) must come before editor (pos {})", audio_pos, editor_pos);
+    assert!(editor_pos < spatial_pos,
+        "editor (pos {}) must come before spatial (pos {})", editor_pos, spatial_pos);
+    assert!(spatial_pos < render_pos,
+        "spatial (pos {}) must come before render (pos {})", spatial_pos, render_pos);
 }
 
 /// SOURCE-ONLY CHECK: Audio update occurs before render call.
@@ -101,9 +101,9 @@ fn source_text_check_dashboard_update_occurs_before_inspector_edits() {
         dashboard_pos, inspector_pos);
 }
 
-/// SOURCE-ONLY CHECK: Streaming/persistence/spatial order is locked in SDK runner.
+/// SOURCE-ONLY CHECK: Streaming/editor/spatial order is locked in SDK runner.
 #[test]
-fn source_text_check_streaming_persistence_spatial_order_is_locked() {
+fn source_text_check_streaming_editor_spatial_order_is_locked() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
@@ -113,15 +113,15 @@ fn source_text_check_streaming_persistence_spatial_order_is_locked() {
 
     let streamer_pos = find_position(after_redraw, "sdk_runner_phases::streaming::run")
         .expect("streaming phase must be called");
-    let persistence_pos = find_position(after_redraw, "sdk_runner_phases::persistence::run")
-        .expect("persistence phase must be called");
+    let editor_pos = find_position(after_redraw, "sdk_runner_phases::editor::run")
+        .expect("editor phase must be called");
     let spatial_pos = find_position(after_redraw, "sdk_runner_phases::spatial::run")
         .expect("spatial phase must be called");
 
-    assert!(streamer_pos < persistence_pos,
-        "streamer (pos {}) must come before persistence (pos {})", streamer_pos, persistence_pos);
-    assert!(persistence_pos < spatial_pos,
-        "persistence (pos {}) must come before spatial (pos {})", persistence_pos, spatial_pos);
+    assert!(streamer_pos < editor_pos,
+        "streamer (pos {}) must come before editor (pos {})", streamer_pos, editor_pos);
+    assert!(editor_pos < spatial_pos,
+        "editor (pos {}) must come before spatial (pos {})", editor_pos, spatial_pos);
 }
 
 /// SOURCE-ONLY CHECK: SDK runner references tools runtime assembly.

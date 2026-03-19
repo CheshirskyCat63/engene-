@@ -3,7 +3,7 @@
 
 [alias]
 smoke = "test --test engine_contracts --test production_candidate --test entrypoint_and_operator_truth --test ci_surface_contracts"
-contracts = "test --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts"
+contracts = "test --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts --test spatial_dirty_contracts"
 cert = "test --test certification_boundary_overhead --test certification_kernel_throughput --test certification_tick_budget --test certification_perf_snapshot"
 
 [build]

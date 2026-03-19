@@ -2,6 +2,7 @@
 
 use std::sync::Arc;
 use std::time::Instant;
+use std::{collections::HashMap, collections::HashSet};
 
 #[path = "sdk_runner/sdk_runner_phases/mod.rs"]
 mod sdk_runner_phases;
@@ -27,6 +28,7 @@ use crate::tools::doctor;
 use crate::tools::editor_shell::EditorShell;
 use crate::world::components::*;
 use crate::world::heightmap::Heightmap;
+use crate::world::hierarchical_spatial::{SpatialDirtyInput, SpatialUpdatePath};
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -77,6 +79,15 @@ pub fn run_from_env_args() {
         sim_accum: 0.0,
         sim_paused: false,
         sim_speed: 1.0,
+        spatial_dirty_input: SpatialDirtyInput {
+            force_rebuild: true,
+            ..SpatialDirtyInput::default()
+        },
+        spatial_prev_positions: HashMap::new(),
+        spatial_last_applied_positions: HashMap::new(),
+        spatial_prev_alive: HashSet::new(),
+        spatial_last_origin_shift_count: 0,
+        spatial_last_update_path: SpatialUpdatePath::FullRebuild,
         heightmap,
         editor_shell,
     };
@@ -97,6 +108,12 @@ struct SdkApp {
     sim_accum: f32,
     sim_paused: bool,
     sim_speed: f32,
+    spatial_dirty_input: SpatialDirtyInput,
+    spatial_prev_positions: HashMap<crate::core::ecs::Entity, (f32, f32)>,
+    spatial_last_applied_positions: HashMap<crate::core::ecs::Entity, (f32, f32)>,
+    spatial_prev_alive: HashSet<crate::core::ecs::Entity>,
+    spatial_last_origin_shift_count: u32,
+    spatial_last_update_path: SpatialUpdatePath,
     heightmap: ArcHeightmap,
     editor_shell: EditorShell,
 }
@@ -238,14 +255,14 @@ impl ApplicationHandler for SdkApp {
                 // Persistence
                 sdk_runner_phases::persistence::run(self, &to_load, &to_unload);
 
-                // Rebuild spatial index
-                sdk_runner_phases::spatial::run(self);
-
                 // Audio
                 sdk_runner_phases::audio::run(self, cam_pos, cam_fwd, dt);
 
                 // Editor
                 sdk_runner_phases::editor::run(self);
+
+                // Spatial policy (no-op / incremental / controlled full rebuild)
+                sdk_runner_phases::spatial::run(self);
 
                 // Render
                 let vp = self.camera.view_projection();

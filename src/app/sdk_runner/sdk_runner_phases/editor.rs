@@ -5,5 +5,8 @@ pub fn run(app: &mut SdkApp) {
     app.editor_shell.update_dashboards(&app.engine);
 
     // Apply any pending inspector edits
-    app.editor_shell.apply_inspector_edits(&mut app.engine);
+    let applied = app.editor_shell.apply_inspector_edits(&mut app.engine);
+    if applied.spatial_dirty {
+        app.spatial_dirty_input.mark_editor_mutation();
+    }
 }

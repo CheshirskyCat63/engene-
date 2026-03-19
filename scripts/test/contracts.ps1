@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 # ENGENE Contract Lane — runtime boundary contracts and phase ordering
-# Targets: runtime_phase_contracts, physics_core_boundary_contracts, physics_bootstrap_contracts
+# Targets: physics_core_boundary_contracts, physics_bootstrap_contracts, runtime_phase_contracts, spatial_dirty_contracts
 
 $nextest = $false
 try {
@@ -18,7 +18,8 @@ if ($nextest) {
     cargo nextest run --profile default `
       --test physics_core_boundary_contracts `
       --test physics_bootstrap_contracts `
-      --test runtime_phase_contracts
+      --test runtime_phase_contracts `
+      --test spatial_dirty_contracts
 } else {
     cargo test --test physics_core_boundary_contracts
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -27,5 +28,8 @@ if ($nextest) {
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     cargo test --test runtime_phase_contracts
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+    cargo test --test spatial_dirty_contracts
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }

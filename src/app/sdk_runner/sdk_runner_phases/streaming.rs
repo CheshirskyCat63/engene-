@@ -16,6 +16,9 @@ pub fn run(
         for coord in &result.0 {
             streamer.mark_loaded(*coord);
         }
+        if !result.0.is_empty() || !result.1.is_empty() {
+            app.spatial_dirty_input.mark_chunk_structural_change();
+        }
         result
     } else {
         (vec![], vec![])

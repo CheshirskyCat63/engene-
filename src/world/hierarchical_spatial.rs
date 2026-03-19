@@ -121,6 +121,51 @@ pub struct HierarchicalSpatialIndex {
     needs_full_rebuild: bool,
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct SpatialDirtyInput {
+    pub inserted: Vec<Entity>,
+    pub moved: Vec<Entity>,
+    pub removed: Vec<Entity>,
+    pub force_rebuild: bool,
+    pub editor_mutation: bool,
+    pub chunk_structural_change: bool,
+}
+
+impl SpatialDirtyInput {
+    pub fn mark_editor_mutation(&mut self) {
+        self.editor_mutation = true;
+    }
+
+    pub fn mark_chunk_structural_change(&mut self) {
+        self.chunk_structural_change = true;
+    }
+
+    pub fn mark_origin_shift(&mut self) {
+        self.force_rebuild = true;
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SpatialUpdatePath {
+    NoWork,
+    Incremental,
+    FullRebuild,
+}
+
+pub fn select_spatial_update_path(dirty: &SpatialDirtyInput) -> SpatialUpdatePath {
+    if dirty.force_rebuild || dirty.chunk_structural_change {
+        SpatialUpdatePath::FullRebuild
+    } else if dirty.inserted.is_empty()
+        && dirty.moved.is_empty()
+        && dirty.removed.is_empty()
+        && !dirty.editor_mutation
+    {
+        SpatialUpdatePath::NoWork
+    } else {
+        SpatialUpdatePath::Incremental
+    }
+}
+
 impl HierarchicalSpatialIndex {
     pub fn new() -> Self {
         Self {

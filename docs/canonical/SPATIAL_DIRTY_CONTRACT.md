@@ -70,3 +70,9 @@ That means property checks of the form:
 - editor mutation propagation
 - origin shift rebuild trigger
 - fallback path observability
+
+## Current branch truth
+
+- SDK runtime uses explicit path selection: `no_op`, `incremental`, `full_rebuild`.
+- Default redraw path is no longer unconditional full rebuild.
+- Full rebuild fallback still exists and is used for structural invalidation.

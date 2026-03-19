@@ -120,6 +120,7 @@ Contracts targets:
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
 - `runtime_phase_contracts`
+- `spatial_dirty_contracts`
 
 ## Legacy recovery
 

@@ -51,6 +51,11 @@ pub struct EditorShell {
     pub read_only: bool,
 }
 
+#[derive(Debug, Default, Clone)]
+pub struct InspectorApplyResult {
+    pub spatial_dirty: bool,
+}
+
 impl EditorShell {
     pub fn new() -> Self {
         let mut safe_mode = EditorSafeMode::new();
@@ -227,12 +232,16 @@ impl EditorShell {
     }
 
     /// Apply pending inspector edits to the engine.
-    pub fn apply_inspector_edits(&mut self, engine: &mut Engine) {
+    pub fn apply_inspector_edits(&mut self, engine: &mut Engine) -> InspectorApplyResult {
+        let mut result = InspectorApplyResult::default();
         let edits: Vec<InspectorEdit> = self.inspector.pending_edits.drain(..).collect();
         for edit in edits {
             match edit {
                 InspectorEdit::SetTransform { entity, x, y } => {
                     if let Some(t) = engine.ecs.get_transform_mut(entity) {
+                        if t.x != x || t.y != y {
+                            result.spatial_dirty = true;
+                        }
                         t.x = x;
                         t.y = y;
                     }
@@ -259,6 +268,7 @@ impl EditorShell {
                 }
             }
         }
+        result
     }
 }
 
