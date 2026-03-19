@@ -13,7 +13,7 @@ Optional helper:
 ```
 
 For canonical entrypoint law see:
-- `docs/canonical/ENGENE_2_0_ENTRYPOINTS.md`
+- `docs/canonical/ENTRYPOINT_TRUTH.md`
 - `README_FIRST_RUN.md`
 
 ## Controls

@@ -59,7 +59,6 @@ On PowerShell:
 
 ## Canonical truth docs
 
-- `docs/canonical/ACTIVE_REPO_STATE.md`
 - `docs/canonical/ENTRYPOINT_TRUTH.md`
 - `docs/canonical/RUNTIME_ROLE_MATRIX.md`
 - `docs/canonical/TEST_LANE_MAP.md`
