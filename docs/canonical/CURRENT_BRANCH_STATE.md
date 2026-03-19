@@ -22,10 +22,29 @@
 ## Current operator/test truth
 
 ### Test lanes
-- `just smoke` / `cargo smoke` / `scripts/test/smoke.sh|ps1`
-- `just contracts` / `cargo contracts` / `scripts/test/contracts.sh|ps1`
-- `just certification` / `cargo cert` / `scripts/test/certification.sh|ps1`
-- `just perf` / `scripts/test/perf.sh|ps1`
+
+**Smoke lane:**
+- `just smoke`
+- `cargo smoke`
+- `scripts/test/smoke.sh`
+- `scripts/test/smoke.ps1`
+
+**Contract lane:**
+- `just contracts`
+- `cargo contracts`
+- `scripts/test/contracts.sh`
+- `scripts/test/contracts.ps1`
+
+**Certification lane:**
+- `just certification`
+- `cargo cert`
+- `scripts/test/certification.sh`
+- `scripts/test/certification.ps1`
+
+**Perf lane:**
+- `just perf`
+- `scripts/test/perf.sh`
+- `scripts/test/perf.ps1`
 
 ### Config
 - `.config/nextest.toml` — default and ci profiles

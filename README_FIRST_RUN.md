@@ -27,6 +27,7 @@ cargo run --bin engene_tools
 
 ### Operator shortcuts
 
+**Bash (Linux/macOS/Git Bash):**
 ```bash
 just smoke
 just contracts
@@ -34,13 +35,27 @@ just certification
 just perf
 ```
 
-On PowerShell:
-
+**PowerShell (Windows):**
 ```powershell
-./scripts/test/smoke.ps1
-./scripts/test/contracts.ps1
-./scripts/test/certification.ps1
-./scripts/test/perf.ps1
+scripts/test/smoke.ps1
+scripts/test/contracts.ps1
+scripts/test/certification.ps1
+scripts/test/perf.ps1
+```
+
+**Cargo aliases:**
+```bash
+cargo smoke
+cargo contracts
+cargo cert
+```
+
+**Bash scripts:**
+```bash
+scripts/test/smoke.sh
+scripts/test/contracts.sh
+scripts/test/certification.sh
+scripts/test/perf.sh
 ```
 
 ## Current structure truth

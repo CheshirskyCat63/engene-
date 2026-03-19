@@ -16,6 +16,8 @@ Use after:
 Targets:
 - `engine_contracts`
 - `production_candidate`
+- `entrypoint_and_operator_truth`
+- `ci_surface_contracts`
 
 Commands:
 ```bash
@@ -36,6 +38,9 @@ Targets:
 - `engine_contracts`
 - `determinism_and_sdk`
 - `runtime_systems`
+- `runtime_phase_contracts`
+- `spatial_dirty_contracts`
+- `wiring_boundary_contracts`
 
 Commands:
 ```bash

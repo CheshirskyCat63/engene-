@@ -13,10 +13,10 @@ clippy:
     cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 smoke:
-    cargo nextest run --profile default --test engine_contracts --test production_candidate
+    cargo nextest run --profile default --test engine_contracts --test production_candidate --test entrypoint_and_operator_truth --test ci_surface_contracts
 
 contracts:
-    cargo nextest run --profile default --test engine_contracts --test determinism_and_sdk --test runtime_systems
+    cargo nextest run --profile default --test engine_contracts --test determinism_and_sdk --test runtime_systems --test runtime_phase_contracts --test spatial_dirty_contracts --test wiring_boundary_contracts
 
 certification:
     cargo nextest run --profile ci --test certification_boundary_overhead --test certification_kernel_throughput --test certification_tick_budget --test certification_perf_snapshot
