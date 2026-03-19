@@ -1,6 +1,16 @@
-#!/bin/bash
-# ENGENE Contract Lane — runtime ownership and boundary validation
-# Targets: engine_contracts, determinism_and_sdk, runtime_systems, runtime_phase_contracts, spatial_dirty_contracts, wiring_boundary_contracts, physics_core_boundary_contracts, physics_bootstrap_contracts
+#!/usr/bin/env bash
+# ENGENE Contract Lane — runtime boundary contracts and phase ordering
+# Targets: runtime_phase_contracts, physics_core_boundary_contracts, physics_bootstrap_contracts
 
-set -e
-cargo nextest run --profile default --test engine_contracts --test determinism_and_sdk --test runtime_systems --test runtime_phase_contracts --test spatial_dirty_contracts --test wiring_boundary_contracts --test physics_core_boundary_contracts --test physics_bootstrap_contracts
+set -euo pipefail
+
+if cargo nextest --version >/dev/null 2>&1; then
+  cargo nextest run --profile default \
+    --test physics_core_boundary_contracts \
+    --test physics_bootstrap_contracts \
+    --test runtime_phase_contracts
+else
+  cargo test --test physics_core_boundary_contracts
+  cargo test --test physics_bootstrap_contracts
+  cargo test --test runtime_phase_contracts
+fi

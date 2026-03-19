@@ -65,10 +65,11 @@
 ## Current architecture truth
 
 - `src/lib.rs` — broad monolith export surface (migration shell)
-- `src/app/sdk_runner.rs` — multi-responsibility redraw orchestration
-- `src/runtime/wiring/integration.rs` — mixed-domain wiring catch-all
+- `src/app/sdk_runner.rs` — phase driver shell with explicit redraw phase calls
+- `src/app/sdk_runner/sdk_runner_phases/*` — phase modules (`tick`, `streaming`, `persistence`, `spatial`, `audio`, `editor`, `render`)
+- `src/runtime/wiring/integration/mod.rs` + `integration/*` — boundary module tree (old flat `integration.rs` removed)
 - Root exports: animation, app, audio, body, content, core, engine, game, graphics, input, memory, navigation, network, physics, runtime, simulation, testsupport, tools, world
-- `crates/engine_physics` — stub placeholder, not real physics runtime
+- `crates/engine_physics` — real minimal physics seam with bootstrap validation path
 - `crates/engine_tools` — stub placeholder, not real tools implementation
 
 ## Current doc truth
@@ -89,11 +90,9 @@
 - `engene_test` bin does **not** exist in current Cargo
 - Split is declared but **not** fully enforced
 - Package-level entrypoints are **not** yet operator truth
-- `sdk_runner.rs` orchestration is **not** yet split into phase methods
-- `integration.rs` wiring is **not** yet decomposed into boundary modules
 - Full spatial rebuild in SDK redraw is **not** yet replaced by dirty-path incremental
-- `engine_physics` is **not** a real physics runtime, only a minimal bootstrap seam
-- Legacy integration tests (`world_streaming`, `physics_body_combat`, `content_pipeline`, `persistence_full`) are **not** part of current platform gate and are isolated in `tests_legacy/`
+- Migration is **not** finished while root shell ownership is still active
+- Legacy integration tests (`world_streaming`, `physics_body_combat`, `content_pipeline`, `persistence_full`, `runtime_systems`, `gameplay_and_ai`) are **not** part of current platform gate and are isolated in `tests_legacy/`
 
 ## Rule
 

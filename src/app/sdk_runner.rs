@@ -3,31 +3,30 @@
 use std::sync::Arc;
 use std::time::Instant;
 
+#[path = "sdk_runner/sdk_runner_phases/mod.rs"]
+mod sdk_runner_phases;
+
 use winit::application::ApplicationHandler;
 use winit::event::{DeviceEvent, DeviceId, ElementState, KeyEvent, MouseButton, WindowEvent};
 use winit::event_loop::EventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
-use crate::audio::audio::AudioEngine;
 use crate::core::build_manifest::BuildManifest;
 use crate::core::crash_telemetry;
 use crate::core::engine::Engine;
 use crate::graphics::camera::FlyCamera;
 use crate::graphics::lod::{LodConfig, LodLevel};
 use crate::graphics::mesh::EntityInstance;
-use crate::graphics::renderer::{RenderCamera, Renderer};
+use crate::graphics::renderer::Renderer;
 use crate::graphics::visibility::Frustum;
 use crate::input::input::InputState;
 use crate::memory::asset_manager::AssetManager;
 use crate::runtime::bootstrap::ToolsRuntimeAssembly;
 use crate::tools::doctor;
 use crate::tools::editor_shell::EditorShell;
-use crate::world::chunk_persistence::ChunkPersistenceService;
 use crate::world::components::*;
 use crate::world::heightmap::Heightmap;
-use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
-use crate::world::streaming::WorldStreamer;
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -210,12 +209,12 @@ impl ApplicationHandler for SdkApp {
                 self.camera.update(&self.input, dt);
                 self.input.end_frame();
 
+                const SIM_DT: f32 = 1.0 / 20.0;
                 if !self.sim_paused {
-                    const SIM_DT: f32 = 1.0 / 20.0;
                     self.sim_accum += (dt * self.sim_speed).min(0.25);
                     while self.sim_accum >= SIM_DT {
                         self.sim_accum -= SIM_DT;
-                        self.engine.tick(SIM_DT);
+                        sdk_runner_phases::tick::run(self, SIM_DT);
                     }
                 }
                 self.frame += 1;
@@ -234,95 +233,23 @@ impl ApplicationHandler for SdkApp {
                 let cam_fwd = self.camera.forward();
 
                 // World streaming
-                let (to_load, to_unload) = {
-                    if let Some(streamer) = self.engine.resources.get_mut::<WorldStreamer>() {
-                        let result = streamer.update(cam_pos.x, cam_pos.z);
-                        for coord in &result.0 {
-                            streamer.mark_loaded(*coord);
-                        }
-                        result
-                    } else {
-                        (vec![], vec![])
-                    }
-                };
+                let (to_load, to_unload) = sdk_runner_phases::streaming::run(self, cam_pos);
 
-                if !to_unload.is_empty() || !to_load.is_empty() {
-                    if let Some(mut persistence) =
-                        self.engine.resources.take::<ChunkPersistenceService>()
-                    {
-                        let tick = self.engine.ecs.tick;
-                        for coord in &to_unload {
-                            persistence.save_and_unload(*coord, &mut self.engine.ecs, tick);
-                        }
-                        for coord in &to_load {
-                            persistence.load_chunk_entities(*coord, &mut self.engine.ecs);
-                        }
-                        self.engine.resources.insert_runtime(persistence);
-                    }
-                }
+                // Persistence
+                sdk_runner_phases::persistence::run(self, &to_load, &to_unload);
 
                 // Rebuild spatial index
-                if let Some(spatial) = self.engine.resources.get_mut::<HierarchicalSpatialIndex>() {
-                    spatial.clear();
-                    for &e in &self.engine.ecs.alive {
-                        if let Some(t) = self.engine.ecs.get_transform(e) {
-                            spatial.insert(e, t.x, t.y);
-                        }
-                    }
-                }
+                sdk_runner_phases::spatial::run(self);
 
-                if let Some(audio) = self.engine.resources.get_mut::<AudioEngine>() {
-                    audio.set_listener(cam_pos, cam_fwd);
-                    audio.update(dt);
-                }
+                // Audio
+                sdk_runner_phases::audio::run(self, cam_pos, cam_fwd, dt);
 
-                // Feed live data into dashboard panels
-                self.editor_shell.update_dashboards(&self.engine);
+                // Editor
+                sdk_runner_phases::editor::run(self);
 
-                // Apply any pending inspector edits
-                self.editor_shell.apply_inspector_edits(&mut self.engine);
-
-                if let Some(r) = self.renderer.as_mut() {
-                    let vp = self.camera.view_projection();
-                    let frustum = Frustum::from_view_projection(&vp);
-                    let instances = collect_entity_instances(
-                        &self.engine.ecs,
-                        &self.heightmap,
-                        [cam_pos.x, cam_pos.y, cam_pos.z],
-                        &frustum,
-                    );
-                    r.update_entities(&instances);
-
-                    let render_cam = RenderCamera {
-                        view_proj: vp.to_cols_array_2d(),
-                        inv_view_proj: vp.inverse().to_cols_array_2d(),
-                        position: [cam_pos.x, cam_pos.y, cam_pos.z],
-                        forward: {
-                            let f = self.camera.forward();
-                            [f.x, f.y, f.z]
-                        },
-                        near: self.camera.near,
-                        far: self.camera.far,
-                        day_progress: self.engine.time.day_progress(),
-                    };
-
-                    let telemetry = crate::core::perf::telemetry::Telemetry::new();
-                    let ecs_ref = &self.engine.ecs;
-                    let events_ref = &self.engine.events;
-                    let shell = &mut self.editor_shell;
-
-                    match r.render_with_egui(&render_cam, |ctx| {
-                        shell.draw_with_event_bus(ctx, ecs_ref, &telemetry, events_ref);
-                    }) {
-                        Ok(()) => {}
-                        Err(wgpu::SurfaceError::Lost) => {
-                            let (w, h) = r.size();
-                            r.resize(w, h);
-                        }
-                        Err(wgpu::SurfaceError::OutOfMemory) => event_loop.exit(),
-                        Err(e) => eprintln!("render error: {e}"),
-                    }
-                }
+                // Render
+                let vp = self.camera.view_projection();
+                sdk_runner_phases::render::run(self, vp, cam_pos, dt);
             }
             _ => {}
         }
@@ -346,7 +273,7 @@ impl ApplicationHandler for SdkApp {
     }
 }
 
-fn collect_entity_instances(
+pub fn collect_entity_instances(
     ecs: &crate::core::ecs::Ecs,
     heightmap: &Heightmap,
     camera_pos: [f32; 3],

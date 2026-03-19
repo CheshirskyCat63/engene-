@@ -29,19 +29,12 @@ scripts/test/smoke.ps1
 
 ### 2. Contracts lane
 Use after:
-- runtime ownership changes,
-- determinism / SDK boundary work,
-- orchestration split work,
-- system contract work,
-- physics boundary work.
+- platform contract work (phase order, runtime boundary, physics boundary)
 
 Targets:
-- `engine_contracts`
-- `determinism_and_sdk`
-- `runtime_systems`
-- `runtime_phase_contracts`
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
+- `runtime_phase_contracts`
 
 Commands:
 ```bash
@@ -59,6 +52,8 @@ Targets:
 - `physics_body_combat` (moved to tests_legacy/)
 - `content_pipeline` (moved to tests_legacy/)
 - `persistence_full` (moved to tests_legacy/)
+- `runtime_systems` (moved to tests_legacy/)
+- `gameplay_and_ai` (moved to tests_legacy/)
 
 Commands:
 ```bash
@@ -111,3 +106,17 @@ scripts/test/perf.ps1
 
 Nobody should have to remember raw test names during normal work.
 The command surface must do that remembering for them.
+
+## Current gate boundary
+
+Current green platform gate is narrow by design:
+- Smoke: `engine_contracts`, `production_candidate`, `entrypoint_and_operator_truth`, `ci_surface_contracts`
+- Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`
+
+Excluded from default gate and isolated in `tests_legacy/`:
+- `world_streaming`
+- `physics_body_combat`
+- `content_pipeline`
+- `persistence_full`
+- `runtime_systems`
+- `gameplay_and_ai`

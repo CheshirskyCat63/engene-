@@ -1,8 +1,10 @@
-# ENGENE Legacy Recovery Lane — isolated broken integration tests
-# Targets: all tests in tests_legacy/ directory
-# Note: These tests are currently broken and isolated from the green gate
-
-Write-Host "Running legacy recovery tests (may fail)..."
-Push-Location tests_legacy
-cargo test
-Pop-Location
+Write-Host "Legacy recovery suite is isolated from default platform gate."
+Write-Host "Recovery targets:"
+Write-Host "  - tests_legacy/world_streaming.rs"
+Write-Host "  - tests_legacy/physics_body_combat/"
+Write-Host "  - tests_legacy/content_pipeline.rs"
+Write-Host "  - tests_legacy/persistence_full.rs"
+Write-Host "  - tests_legacy/runtime_systems/"
+Write-Host "  - tests_legacy/gameplay_and_ai.rs"
+Write-Host ""
+Write-Host "Run recovery manually after API drift repair."

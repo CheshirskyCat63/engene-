@@ -58,6 +58,20 @@ scripts/test/certification.sh
 scripts/test/perf.sh
 ```
 
+## Legacy recovery
+
+For isolated broken legacy integration tests:
+
+**Canonical order:**
+```bash
+just legacy-recovery
+scripts/test/legacy_recovery.sh
+scripts/test/legacy_recovery.ps1
+```
+
+The legacy forest is isolated in `tests_legacy/` and is not part of default platform gate.
+It is a manual recovery surface after API drift repair, not a migration-readiness signal.
+
 ## Current structure truth
 
 ```
@@ -84,51 +98,50 @@ scripts/test/perf.sh
 
 ## Fast engine verification
 
-For quick validation after minor changes, use the smoke lane:
+1. `just smoke`
+2. `cargo smoke`
+3. `scripts/test/smoke.sh`
+4. `scripts/test/smoke.ps1`
 
-**Canonical order:**
+Smoke targets:
+- `engine_contracts`
+- `production_candidate`
+- `entrypoint_and_operator_truth`
+- `ci_surface_contracts`
+
+## Platform contracts
+
+1. `just contracts`
+2. `cargo contracts`
+3. `scripts/test/contracts.sh`
+4. `scripts/test/contracts.ps1`
+
+Contracts targets:
+- `physics_core_boundary_contracts`
+- `physics_bootstrap_contracts`
+- `runtime_phase_contracts`
+
+## Legacy recovery
+
+1. `just legacy-recovery`
+2. `scripts/test/legacy_recovery.sh`
+3. `scripts/test/legacy_recovery.ps1`
+
+## Narrow platform gate
+
+Current green gate is intentionally narrow and excludes legacy domain suites from default path.
+
+Smoke lane and contracts lane together are the current platform signal:
 ```bash
-just smoke
-cargo smoke
-scripts/test/smoke.sh
-scripts/test/smoke.ps1
+cargo test --test entrypoint_and_operator_truth
+cargo test --test ci_surface_contracts
+cargo test --test physics_core_boundary_contracts
+cargo test --test physics_bootstrap_contracts
+cargo test --test runtime_phase_contracts
 ```
 
-The smoke lane runs:
-- `engine_contracts` — core engine contracts
-- `production_candidate` — production readiness gate
-- `entrypoint_and_operator_truth` — exact doc/bin match
-
-## Fast platform gate verification
-
-For narrow green gate validation (physics/platform readiness):
-
-**Canonical order:**
-```bash
-cargo test entrypoint_and_operator_truth
-cargo test ci_surface_contracts
-cargo test physics_core_boundary_contracts
-cargo test physics_bootstrap_contracts
-cargo test runtime_phase_contracts
-```
-
-These tests validate the real physics seam and platform contracts without legacy interference.
-- `ci_surface_contracts` — CI structure verification
-
-**Contract lane** (slower, more thorough):
-```bash
-just contracts
-cargo contracts
-scripts/test/contracts.sh
-scripts/test/contracts.ps1
-```
-
-The contracts lane adds:
-- `determinism_and_sdk`
-- `runtime_systems`
-- `runtime_phase_contracts` — includes real production calls
-- `spatial_dirty_contracts` — uses production HierarchicalSpatialIndex
-- `wiring_boundary_contracts` — real system descriptors
+Migration is not finished while root shell ownership is still active.
+After stabilization, the next step is structural movement, not another audit pass.
 
 ## Version info
 

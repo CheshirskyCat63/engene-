@@ -10,7 +10,7 @@
 | `engine_world` | Active | world truth, spatial, persistence |
 | `engine_runtime` | Active | runtime orchestration |
 | `engine_render` | Active | rendering |
-| `engine_physics` | **Partial** | minimal bootstrap seam exists; not yet fully integrated |
+| `engine_physics` | **Active seam** | real minimal bootstrap seam (`enabled_minimal`, `disabled`, `validate`) |
 | `engine_audio` | Active | audio runtime |
 | `engine_content` | Active | content pipeline |
 | `engine_tools` | Active | maintenance tooling |
@@ -48,12 +48,9 @@ Targets:
 - `scripts/test/contracts.ps1`
 
 Targets:
-- `engine_contracts`
-- `determinism_and_sdk`
-- `runtime_systems`
-- `runtime_phase_contracts`
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
+- `runtime_phase_contracts`
 
 ### Legacy recovery lane
 - `just legacy-recovery`
@@ -65,6 +62,8 @@ Targets:
 - `physics_body_combat` (isolated in tests_legacy/)
 - `content_pipeline` (isolated in tests_legacy/)
 - `persistence_full` (isolated in tests_legacy/)
+- `runtime_systems` (isolated in tests_legacy/)
+- `gameplay_and_ai` (isolated in tests_legacy/)
 
 ### Certification lane
 - `just certification`
@@ -115,6 +114,8 @@ Targets: benches only.
 | `physics_body_combat.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
 | `content_pipeline.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
 | `persistence_full.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
+| `runtime_systems.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
+| `gameplay_and_ai.rs` | 🔄 Isolated in tests_legacy/ (broken legacy) |
 
 ## Current CI truth
 
@@ -123,7 +124,7 @@ Jobs in PR CI:
 - `clippy` — `cargo clippy --workspace --all-targets --all-features -- -D warnings`
 - `build` — `cargo build --verbose`
 - `smoke` — nextest, engine_contracts + production_candidate + entrypoint + ci_surface
-- `contracts` — nextest, engine_contracts + determinism + runtime_systems + runtime_phase + spatial + wiring + physics_boundary + physics_bootstrap
+- `contracts` — nextest, runtime_phase + physics_boundary + physics_bootstrap
 
 Jobs NOT in PR CI:
 - `certification`
@@ -136,12 +137,12 @@ Branches watched: `main`, `engene-2.0-transition`
 1. ~~physics-to-core boundary not documented~~ — ✅ Now exists: `PHYSICS_CORE_BOUNDARY.md`
 2. ~~physics bootstrap contract not documented~~ — ✅ Now exists: `PHYSICS_BOOTSTRAP_CONTRACT.md`
 3. ~~physics tests not present~~ — ✅ Now exists: `physics_core_boundary_contracts.rs`, `physics_bootstrap_contracts.rs`
-4. ~~runtime_phase_contracts uses text scan~~ — ✅ Now calls production `ToolsRuntimeAssembly::minimal()` and `doctor::run_doctor()`
+4. ~~runtime_phase_contracts uses text scan~~ — ✅ Includes real production calls (`ToolsRuntimeAssembly::minimal()`, `doctor::run_doctor()`)
 
 ## Exact "not yet true" statements
 
 1. `apps/*` packages are declared but **not** current canonical launch truth
-2. `engine_physics` is a stub placeholder, **not** real physics runtime
+2. `engine_physics` is a minimal seam, not a full physics stack migration endpoint
 3. Split is declared but **not** fully enforced
 4. Root package still hosts active execution and broad exports
 5. ~~No physics boundary tests exist~~ — ✅ Now exist
@@ -152,13 +153,16 @@ Branches watched: `main`, `engene-2.0-transition`
 
 **Cold path width:** Still wide because:
 - Root shell (`engene`) pulls all engine dependencies
-- Heavy transitive dependencies from root to physics stub
+- Heavy transitive dependencies from root to physics seam
 - No fast-engine-only crate to bypass root
 
 **Smoke lane:** Contains only fast tests, correct.
 **Contract lane:** Contains behavioral tests, correct.
 
-**Status:** Fast verification path is truthful but not maximally small due to root-shell architecture.
+**Status:** Fast verification path is truthful and currently green, but not maximally small due to root-shell architecture.
+
+Migration is not finished while root shell remains active.
+Next step after this stabilization pass is structural movement, not another audit pass.
 
 ## Rule
 

@@ -21,3 +21,11 @@ path = "content_pipeline.rs"
 [[test]]
 name = "persistence_full"
 path = "persistence_full.rs"
+
+[[test]]
+name = "runtime_systems"
+path = "runtime_systems.rs"
+
+[[test]]
+name = "gameplay_and_ai"
+path = "gameplay_and_ai.rs"

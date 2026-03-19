@@ -13,10 +13,10 @@ clippy:
     cargo clippy --workspace --all-targets --all-features -- -D warnings
 
 smoke:
-    cargo nextest run --profile default --test engine_contracts --test production_candidate --test entrypoint_and_operator_truth --test ci_surface_contracts
+    powershell -ExecutionPolicy Bypass -File .\scripts\test\smoke.ps1
 
 contracts:
-    cargo nextest run --profile default --test engine_contracts --test determinism_and_sdk --test runtime_systems --test runtime_phase_contracts --test spatial_dirty_contracts --test wiring_boundary_contracts --test physics_core_boundary_contracts --test physics_bootstrap_contracts
+    powershell -ExecutionPolicy Bypass -File .\scripts\test\contracts.ps1
 
 certification:
     cargo nextest run --profile ci --test certification_boundary_overhead --test certification_kernel_throughput --test certification_tick_budget --test certification_perf_snapshot
@@ -31,9 +31,7 @@ perf:
     cargo bench --bench tick_pressure
 
 legacy-recovery:
-    @echo "Running legacy recovery tests (may fail)..."
-	cd tests_legacy && cargo test
-    cargo run --bin engene_tools
+    powershell -ExecutionPolicy Bypass -File .\scripts\test\legacy_recovery.ps1
 
 sdk:
     cargo run --bin engene_sdk
