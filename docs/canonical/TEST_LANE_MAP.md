@@ -21,8 +21,8 @@ Commands:
 ```bash
 just smoke
 cargo smoke
-./scripts/test/smoke.sh
-./scripts/test/smoke.ps1
+scripts/test/smoke.sh
+scripts/test/smoke.ps1
 ```
 
 ### 2. Contract lane
@@ -41,8 +41,8 @@ Commands:
 ```bash
 just contracts
 cargo contracts
-./scripts/test/contracts.sh
-./scripts/test/contracts.ps1
+scripts/test/contracts.sh
+scripts/test/contracts.ps1
 ```
 
 ### 3. Certification lane
@@ -61,8 +61,8 @@ Commands:
 ```bash
 just certification
 cargo cert
-./scripts/test/certification.sh
-./scripts/test/certification.ps1
+scripts/test/certification.sh
+scripts/test/certification.ps1
 ```
 
 ### 4. Perf lane
@@ -81,8 +81,8 @@ Targets:
 Commands:
 ```bash
 just perf
-./scripts/test/perf.sh
-./scripts/test/perf.ps1
+scripts/test/perf.sh
+scripts/test/perf.ps1
 ```
 
 ## Rule

@@ -1,0 +1,15 @@
+# ENGENE Cargo Configuration
+# Operator convenience aliases
+
+[alias]
+smoke = "nextest run --profile default --test engine_contracts --test production_candidate"
+contracts = "nextest run --profile default --test engine_contracts --test determinism_and_sdk --test runtime_systems"
+cert = "nextest run --profile ci --test certification_boundary_overhead --test certification_kernel_throughput --test certification_tick_budget --test certification_perf_snapshot"
+
+[build]
+# Incremental builds for faster iteration
+incremental = true
+
+[term]
+# Better terminal output
+verbose = false
