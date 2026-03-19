@@ -1,144 +1,164 @@
 //! Runtime Phase Contracts
 //!
-//! These tests cement the phase order contract for SDK/game-style frame drivers.
-//! They verify that the order of responsibilities does not silently shift.
+//! These tests verify phase order in actual sdk_runner.rs code.
+//! They read the source file and verify the order of operations.
 
-use std::collections::HashSet;
+use std::fs;
 
-/// Phase order is explicit and stable.
-/// The canonical order is: tick -> streaming -> persistence -> spatial -> audio -> editor_update -> render
-#[test]
-fn phase_order_is_explicit_and_stable() {
-    let canonical_order = vec![
-        "tick",
-        "streaming", 
-        "persistence",
-        "spatial",
-        "audio",
-        "editor_update",
-        "render",
-    ];
-    
-    // Verify canonical order is documented and locked
-    assert!(!canonical_order.is_empty(), "Phase order must be defined");
-    assert_eq!(canonical_order.len(), 7, "Phase order must have exactly 7 phases");
-    
-    // Verify no duplicates
-    let unique: HashSet<_> = canonical_order.iter().cloned().collect();
-    assert_eq!(unique.len(), canonical_order.len(), "Phase order must not have duplicates");
-    
-    // Verify render is last
-    assert_eq!(canonical_order.last(), Some(&"render"), "Render must be the last phase");
-    
-    // Verify tick is first
-    assert_eq!(canonical_order.first(), Some(&"tick"), "Tick must be the first phase");
+const SDK_RUNNER_PATH: &str = "src/app/sdk_runner.rs";
+
+/// Find the byte position of a pattern in source code
+fn find_position(source: &str, pattern: &str) -> Option<usize> {
+    source.find(pattern)
 }
 
-/// Audio update does not depend on render completion.
-/// Audio must be able to run even if render fails.
+/// SDK runner redraw phase order matches contract.
+/// Verify that in RedrawRequested handler, operations occur in expected order:
+/// - camera.update (after dt calculation)
+/// - engine.tick (simulation)
+/// - asset poll
+/// - world streaming update
+/// - chunk persistence save/load
+/// - spatial rebuild
+/// - audio update
+/// - dashboard update
+/// - inspector edits
+/// - render
 #[test]
-fn audio_update_does_not_depend_on_render_completion() {
-    // Audio phase (index 4) comes before render phase (index 6)
-    let canonical_order = vec![
-        "tick",
-        "streaming",
-        "persistence", 
-        "spatial",
-        "audio",
-        "editor_update",
-        "render",
-    ];
-    
-    let audio_index = canonical_order.iter().position(|&p| p == "audio")
-        .expect("audio phase must exist");
-    let render_index = canonical_order.iter().position(|&p| p == "render")
-        .expect("render phase must exist");
-    
-    assert!(
-        audio_index < render_index,
-        "Audio (index {}) must come before render (index {})",
-        audio_index, render_index
-    );
+fn sdk_runner_redraw_phase_order_matches_contract() {
+    let source = fs::read_to_string(SDK_RUNNER_PATH)
+        .expect("src/app/sdk_runner.rs must exist");
+
+    // Find key operations in RedrawRequested handler
+    let redraw_pos = find_position(&source, "WindowEvent::RedrawRequested")
+        .expect("RedrawRequested handler must exist");
+
+    // Get the portion after RedrawRequested
+    let after_redraw = &source[redraw_pos..];
+
+    // Find positions of key operations
+    let tick_pos = find_position(after_redraw, "self.engine.tick")
+        .expect("engine.tick must be called");
+    let poll_pos = find_position(after_redraw, "am.poll()")
+        .or_else(|| find_position(after_redraw, ".poll()"))
+        .expect("asset poll must exist");
+    let streamer_pos = find_position(after_redraw, "streamer.update")
+        .expect("streamer.update must be called");
+    let persistence_pos = find_position(after_redraw, "persistence.save_and_unload")
+        .or_else(|| find_position(after_redraw, "ChunkPersistenceService"))
+        .expect("persistence must be used");
+    let spatial_pos = find_position(after_redraw, "spatial.clear")
+        .or_else(|| find_position(after_redraw, "HierarchicalSpatialIndex"))
+        .expect("spatial index must be used");
+    let audio_pos = find_position(after_redraw, "audio.update")
+        .or_else(|| find_position(after_redraw, "AudioEngine"))
+        .expect("audio must be updated");
+    let dashboard_pos = find_position(after_redraw, "update_dashboards")
+        .expect("update_dashboards must be called");
+    let inspector_pos = find_position(after_redraw, "apply_inspector_edits")
+        .expect("apply_inspector_edits must be called");
+    let render_pos = find_position(after_redraw, "render_with_egui")
+        .expect("render_with_egui must be called");
+
+    // Verify order: tick -> poll -> streaming -> persistence -> spatial -> audio -> dashboard -> inspector -> render
+    assert!(tick_pos < poll_pos, 
+        "engine.tick (pos {}) must come before asset poll (pos {})", tick_pos, poll_pos);
+    assert!(poll_pos < streamer_pos,
+        "asset poll (pos {}) must come before streamer.update (pos {})", poll_pos, streamer_pos);
+    assert!(streamer_pos < persistence_pos,
+        "streamer.update (pos {}) must come before persistence (pos {})", streamer_pos, persistence_pos);
+    assert!(persistence_pos < spatial_pos,
+        "persistence (pos {}) must come before spatial (pos {})", persistence_pos, spatial_pos);
+    assert!(spatial_pos < audio_pos,
+        "spatial (pos {}) must come before audio (pos {})", spatial_pos, audio_pos);
+    assert!(audio_pos < dashboard_pos,
+        "audio (pos {}) must come before dashboard (pos {})", audio_pos, dashboard_pos);
+    assert!(dashboard_pos < inspector_pos,
+        "dashboard (pos {}) must come before inspector (pos {})", dashboard_pos, inspector_pos);
+    assert!(inspector_pos < render_pos,
+        "inspector (pos {}) must come before render (pos {})", inspector_pos, render_pos);
 }
 
-/// Editor mutation happens after dashboard read phase.
-/// Inspector mutations must not affect dashboard state mid-read.
+/// Audio update occurs before render call.
 #[test]
-fn editor_mutation_happens_after_dashboard_read_phase() {
-    // Editor update phase (index 5) comes after spatial (index 3)
-    // Dashboard reads happen against stable post-sim state
-    let canonical_order = vec![
-        "tick",
-        "streaming",
-        "persistence",
-        "spatial",
-        "audio",
-        "editor_update",
-        "render",
-    ];
-    
-    let editor_index = canonical_order.iter().position(|&p| p == "editor_update")
-        .expect("editor_update phase must exist");
-    let spatial_index = canonical_order.iter().position(|&p| p == "spatial")
-        .expect("spatial phase must exist");
-    
-    assert!(
-        editor_index > spatial_index,
-        "Editor update (index {}) must happen after spatial (index {})",
-        editor_index, spatial_index
-    );
+fn audio_update_occurs_before_render_call() {
+    let source = fs::read_to_string(SDK_RUNNER_PATH)
+        .expect("src/app/sdk_runner.rs must exist");
+
+    let redraw_pos = find_position(&source, "WindowEvent::RedrawRequested")
+        .expect("RedrawRequested handler must exist");
+    let after_redraw = &source[redraw_pos..];
+
+    let audio_pos = find_position(after_redraw, "audio.update")
+        .or_else(|| find_position(after_redraw, "audio.set_listener"))
+        .expect("audio must be referenced");
+    let render_pos = find_position(after_redraw, "render_with_egui")
+        .expect("render_with_egui must be called");
+
+    assert!(audio_pos < render_pos,
+        "audio (pos {}) must come before render (pos {})", audio_pos, render_pos);
 }
 
-/// Streaming/persistence/spatial order is locked.
-/// These three must execute in this exact order.
+/// Dashboard update occurs before inspector edits.
 #[test]
-fn streaming_persistence_spatial_order_is_locked() {
-    let canonical_order = vec![
-        "tick",
-        "streaming",
-        "persistence",
-        "spatial",
-        "audio",
-        "editor_update",
-        "render",
-    ];
-    
-    let streaming_index = canonical_order.iter().position(|&p| p == "streaming")
-        .expect("streaming phase must exist");
-    let persistence_index = canonical_order.iter().position(|&p| p == "persistence")
-        .expect("persistence phase must exist");
-    let spatial_index = canonical_order.iter().position(|&p| p == "spatial")
-        .expect("spatial phase must exist");
-    
-    assert!(
-        streaming_index < persistence_index,
-        "Streaming must come before persistence"
-    );
-    assert!(
-        persistence_index < spatial_index,
-        "Persistence must come before spatial"
-    );
+fn dashboard_update_occurs_before_inspector_edits() {
+    let source = fs::read_to_string(SDK_RUNNER_PATH)
+        .expect("src/app/sdk_runner.rs must exist");
+
+    let redraw_pos = find_position(&source, "WindowEvent::RedrawRequested")
+        .expect("RedrawRequested handler must exist");
+    let after_redraw = &source[redraw_pos..];
+
+    let dashboard_pos = find_position(after_redraw, "update_dashboards")
+        .expect("update_dashboards must be called");
+    let inspector_pos = find_position(after_redraw, "apply_inspector_edits")
+        .expect("apply_inspector_edits must be called");
+
+    assert!(dashboard_pos < inspector_pos,
+        "update_dashboards (pos {}) must come before apply_inspector_edits (pos {})",
+        dashboard_pos, inspector_pos);
 }
 
-/// Tools mode required resources fail loudly or exist.
-/// Tools runtime should not silently lack required resources.
+/// Streaming/persistence/spatial order is locked in SDK runner.
 #[test]
-fn tools_mode_required_resources_fail_loudly_or_exist() {
-    // This test documents the contract that tools mode must either:
-    // 1. Have all required resources available
-    // 2. Fail with a clear error message if resources are missing
-    //
-    // Currently this is a documentation test. When tools mode is implemented,
-    // add actual resource checks here.
-    
-    let tools_required_resources = vec![
-        "diagnostics_module",
-        "maintenance_module",
-    ];
-    
-    // Document the contract
-    assert!(!tools_required_resources.is_empty(), "Tools must have defined required resources");
-    
-    // Future: check that resources exist or tools fails with clear message
-    // For now, this test passes as documentation
+fn streaming_persistence_spatial_order_is_locked_in_sdk_runner() {
+    let source = fs::read_to_string(SDK_RUNNER_PATH)
+        .expect("src/app/sdk_runner.rs must exist");
+
+    let redraw_pos = find_position(&source, "WindowEvent::RedrawRequested")
+        .expect("RedrawRequested handler must exist");
+    let after_redraw = &source[redraw_pos..];
+
+    let streamer_pos = find_position(after_redraw, "streamer.update")
+        .expect("streamer.update must be called");
+    let persistence_pos = find_position(after_redraw, "persistence")
+        .expect("persistence must be referenced");
+    let spatial_pos = find_position(after_redraw, "spatial")
+        .expect("spatial must be referenced");
+
+    assert!(streamer_pos < persistence_pos,
+        "streamer (pos {}) must come before persistence (pos {})", streamer_pos, persistence_pos);
+    assert!(persistence_pos < spatial_pos,
+        "persistence (pos {}) must come before spatial (pos {})", persistence_pos, spatial_pos);
+}
+
+/// Tools runtime contract is real - verify ToolsRuntimeAssembly::minimal exists.
+#[test]
+fn tools_runtime_contract_is_real_not_placeholder() {
+    let source = fs::read_to_string(SDK_RUNNER_PATH)
+        .expect("src/app/sdk_runner.rs must exist");
+
+    // Verify real production path is used
+    assert!(source.contains("ToolsRuntimeAssembly::minimal"),
+        "SDK runner must use ToolsRuntimeAssembly::minimal");
+
+    // Verify doctor is run with strict mode
+    assert!(source.contains("doctor::run_doctor"),
+        "SDK runner must run doctor validation");
+    assert!(source.contains("DoctorMode::Strict"),
+        "SDK runner must use strict doctor mode");
+
+    // Verify doctor report is checked
+    assert!(source.contains("doctor_report.error_count"),
+        "SDK runner must check doctor error count");
 }
