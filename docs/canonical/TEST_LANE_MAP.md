@@ -32,7 +32,8 @@ Use after:
 - runtime ownership changes,
 - determinism / SDK boundary work,
 - orchestration split work,
-- system contract work.
+- system contract work,
+- physics boundary work.
 
 Targets:
 - `engine_contracts`
@@ -41,6 +42,8 @@ Targets:
 - `runtime_phase_contracts`
 - `spatial_dirty_contracts`
 - `wiring_boundary_contracts`
+- `physics_core_boundary_contracts`
+- `physics_bootstrap_contracts`
 
 Commands:
 ```bash

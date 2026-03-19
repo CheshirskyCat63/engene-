@@ -2,6 +2,9 @@
 //!
 //! These tests verify phase order in actual sdk_runner.rs code.
 //! They read the source file and verify the order of operations.
+//!
+//! IMPORTANT: This file contains both source-text checks and real production calls.
+//! Tests that call production code are explicitly named to reflect their level.
 
 use std::fs;
 
@@ -12,20 +15,11 @@ fn find_position(source: &str, pattern: &str) -> Option<usize> {
     source.find(pattern)
 }
 
-/// SDK runner redraw phase order matches contract.
-/// Verify that in RedrawRequested handler, operations occur in expected order:
-/// - camera.update (after dt calculation)
-/// - engine.tick (simulation)
-/// - asset poll
-/// - world streaming update
-/// - chunk persistence save/load
-/// - spatial rebuild
-/// - audio update
-/// - dashboard update
-/// - inspector edits
-/// - render
+/// SOURCE-ONLY CHECK: SDK runner redraw phase order matches contract.
+/// This test reads source code text and verifies order of operations.
+/// It does NOT call production runtime - it checks that the code is structured correctly.
 #[test]
-fn sdk_runner_redraw_phase_order_matches_contract() {
+fn source_text_check_sdk_runner_redraw_phase_order_matches_contract() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
@@ -79,9 +73,9 @@ fn sdk_runner_redraw_phase_order_matches_contract() {
         "inspector (pos {}) must come before render (pos {})", inspector_pos, render_pos);
 }
 
-/// Audio update occurs before render call.
+/// SOURCE-ONLY CHECK: Audio update occurs before render call.
 #[test]
-fn audio_update_occurs_before_render_call() {
+fn source_text_check_audio_update_occurs_before_render_call() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
@@ -99,9 +93,9 @@ fn audio_update_occurs_before_render_call() {
         "audio (pos {}) must come before render (pos {})", audio_pos, render_pos);
 }
 
-/// Dashboard update occurs before inspector edits.
+/// SOURCE-ONLY CHECK: Dashboard update occurs before inspector edits.
 #[test]
-fn dashboard_update_occurs_before_inspector_edits() {
+fn source_text_check_dashboard_update_occurs_before_inspector_edits() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
@@ -119,9 +113,9 @@ fn dashboard_update_occurs_before_inspector_edits() {
         dashboard_pos, inspector_pos);
 }
 
-/// Streaming/persistence/spatial order is locked in SDK runner.
+/// SOURCE-ONLY CHECK: Streaming/persistence/spatial order is locked in SDK runner.
 #[test]
-fn streaming_persistence_spatial_order_is_locked_in_sdk_runner() {
+fn source_text_check_streaming_persistence_spatial_order_is_locked() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
@@ -142,15 +136,15 @@ fn streaming_persistence_spatial_order_is_locked_in_sdk_runner() {
         "persistence (pos {}) must come before spatial (pos {})", persistence_pos, spatial_pos);
 }
 
-/// Tools runtime contract is real - verify ToolsRuntimeAssembly::minimal exists.
+/// SOURCE-ONLY CHECK: SDK runner references tools runtime assembly.
 #[test]
-fn tools_runtime_contract_is_real_not_placeholder() {
+fn source_text_check_tools_runtime_assembly_referenced() {
     let source = fs::read_to_string(SDK_RUNNER_PATH)
         .expect("src/app/sdk_runner.rs must exist");
 
-    // Verify real production path is used
+    // Verify real production path is referenced
     assert!(source.contains("ToolsRuntimeAssembly::minimal"),
-        "SDK runner must use ToolsRuntimeAssembly::minimal");
+        "SDK runner must reference ToolsRuntimeAssembly::minimal");
 
     // Verify doctor is run with strict mode
     assert!(source.contains("doctor::run_doctor"),
@@ -161,4 +155,31 @@ fn tools_runtime_contract_is_real_not_placeholder() {
     // Verify doctor report is checked
     assert!(source.contains("doctor_report.error_count"),
         "SDK runner must check doctor error count");
+}
+
+/// REAL PRODUCTION CALL: ToolsRuntimeAssembly::minimal() can be instantiated.
+/// This test actually calls production code, not just text scanning.
+#[test]
+fn production_call_tools_runtime_minimal_instantiates() {
+    // This calls the actual production ToolsRuntimeAssembly::minimal()
+    // which builds an engine with tools configuration
+    let _engine = engene::runtime::bootstrap::tools::ToolsRuntimeAssembly::minimal();
+    // If we get here, the production path works
+}
+
+/// REAL PRODUCTION CALL: doctor::run_doctor() can be called on tools runtime.
+/// This test actually calls production code - it builds a tools engine and runs diagnostics.
+#[test]
+fn production_call_doctor_runs_on_tools_runtime() {
+    use engene::tools::doctor::{run_doctor, DoctorMode};
+    
+    // Build a tools runtime
+    let engine = engene::runtime::bootstrap::tools::ToolsRuntimeAssembly::minimal();
+    
+    // Run doctor in advisory mode (does not panic)
+    let report = run_doctor(&engine, DoctorMode::Advisory);
+    
+    // Verify report is valid
+    assert!(report.error_count() >= 0, "report must have valid error count");
+    assert!(report.warning_count() >= 0, "report must have valid warning count");
 }

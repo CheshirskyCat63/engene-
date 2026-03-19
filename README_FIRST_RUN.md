@@ -78,6 +78,42 @@ scripts/test/perf.sh
 - `docs/canonical/ENTRYPOINT_TRUTH.md`
 - `docs/canonical/RUNTIME_ROLE_MATRIX.md`
 - `docs/canonical/TEST_LANE_MAP.md`
+- `docs/canonical/PLATFORM_AUDIT.md`
+- `docs/canonical/PHYSICS_CORE_BOUNDARY.md`
+- `docs/canonical/PHYSICS_BOOTSTRAP_CONTRACT.md`
+
+## Fast engine verification
+
+For quick validation after minor changes, use the smoke lane:
+
+**Canonical order:**
+```bash
+just smoke
+cargo smoke
+scripts/test/smoke.sh
+scripts/test/smoke.ps1
+```
+
+The smoke lane runs:
+- `engine_contracts` — core engine contracts
+- `production_candidate` — production readiness gate
+- `entrypoint_and_operator_truth` — exact doc/bin match
+- `ci_surface_contracts` — CI structure verification
+
+**Contract lane** (slower, more thorough):
+```bash
+just contracts
+cargo contracts
+scripts/test/contracts.sh
+scripts/test/contracts.ps1
+```
+
+The contracts lane adds:
+- `determinism_and_sdk`
+- `runtime_systems`
+- `runtime_phase_contracts` — includes real production calls
+- `spatial_dirty_contracts` — uses production HierarchicalSpatialIndex
+- `wiring_boundary_contracts` — real system descriptors
 
 ## Version info
 

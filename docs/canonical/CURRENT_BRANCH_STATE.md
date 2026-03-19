@@ -63,6 +63,20 @@
 - `src/app/sdk_runner.rs` — multi-responsibility redraw orchestration
 - `src/runtime/wiring/integration.rs` — mixed-domain wiring catch-all
 - Root exports: animation, app, audio, body, content, core, engine, game, graphics, input, memory, navigation, network, physics, runtime, simulation, testsupport, tools, world
+- `crates/engine_physics` — stub placeholder, not real physics runtime
+- `crates/engine_tools` — stub placeholder, not real tools implementation
+
+## Current doc truth
+
+- `docs/canonical/PLATFORM_AUDIT.md` — platform audit (NEW)
+- `docs/canonical/PHYSICS_CORE_BOUNDARY.md` — physics boundary contract (NEW)
+- `docs/canonical/PHYSICS_BOOTSTRAP_CONTRACT.md` — physics bootstrap contract (NEW)
+
+## Current test truth
+
+- `tests/physics_core_boundary_contracts.rs` — physics boundary tests (NEW)
+- `tests/physics_bootstrap_contracts.rs` — physics bootstrap tests (NEW)
+- `tests/runtime_phase_contracts.rs` — now includes real production calls
 
 ## Explicit not-yet-true statements
 
@@ -73,6 +87,7 @@
 - `sdk_runner.rs` orchestration is **not** yet split into phase methods
 - `integration.rs` wiring is **not** yet decomposed into boundary modules
 - Full spatial rebuild in SDK redraw is **not** yet replaced by dirty-path incremental
+- `engine_physics` is **not** a real physics runtime, only a stub
 
 ## Rule
 
