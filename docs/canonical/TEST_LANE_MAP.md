@@ -114,6 +114,134 @@ Current green platform gate is narrow by design:
 - Smoke: `engine_contracts`, `production_candidate`, `entrypoint_and_operator_truth`, `ci_surface_contracts`
 - Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`, `spatial_dirty_contracts`
 
+### NEW: Expanded Lane Structure for 520+ Tests
+
+### 6. Architecture Lane
+Use for:
+- Ownership enforcement
+- Dependency direction validation
+- Root module contracts
+- Bootstrap purity
+
+Targets:
+- `architectural_gates`
+- `root_thin_shell_invariants`
+- `compat_hub_purity`
+- `forbidden_dependency_directions`
+- `bootstrap_contract`
+
+Commands:
+```bash
+just architecture
+cargo architecture
+scripts/test/architecture.sh
+scripts/test/architecture.ps1
+```
+
+### 7. Core Lane
+Use for:
+- Runtime profiles
+- Quality policies
+- Authority matrix
+- Performance contracts
+
+Targets:
+- `runtime_profile_and_quality_contracts`
+- `identity_and_authority_contracts`
+- `core_command_and_access_contracts`
+
+Commands:
+```bash
+just core
+cargo core
+scripts/test/core.sh
+scripts/test/core.ps1
+```
+
+### 8. ECS Lane
+Use for:
+- Entity lifecycle
+- Component operations
+- Access descriptors
+- Query contracts
+
+Targets:
+- `entity_lifecycle_contracts`
+- `persistent_identity_contracts`
+- `command_buffer_contracts`
+- `access_descriptor_contracts`
+- `query_contracts`
+
+Commands:
+```bash
+just ecs
+cargo ecs
+scripts/test/ecs.sh
+scripts/test/ecs.ps1
+```
+
+### 9. Events Lane
+Use for:
+- Event bus contracts
+- Sticky semantics
+- Frame lifecycle
+- Event aggregation
+
+Targets:
+- `event_bus_contracts`
+- `event_aggregation_contracts`
+- `event_tracing_contracts`
+
+Commands:
+```bash
+just events
+cargo events
+scripts/test/events.sh
+scripts/test/events.ps1
+```
+
+### 10. World Lane
+Use for:
+- Chunk persistence
+- Streaming contracts
+- Spatial contracts
+- World fields
+
+Targets:
+- `world_persistence_contracts`
+- `spatial_dirty_contracts`
+- `world_fields_contracts`
+- `streaming_contracts`
+
+Commands:
+```bash
+just world
+cargo world
+scripts/test/world.sh
+scripts/test/world.ps1
+```
+
+### 11. Tools Lane
+Use for:
+- Editor safe mode
+- Debug surface isolation
+- Profiler contracts
+- Dashboard isolation
+
+Targets:
+- `editor_safe_mode_contracts`
+- `debug_surface_contracts`
+- `profiler_contracts`
+- `dashboard_contracts`
+
+Commands:
+```bash
+just tools
+cargo tools
+scripts/test/tools.sh
+scripts/test/tools.ps1
+```
+
 Excluded from default gate and isolated in `tests_legacy/`:
 - `world_streaming`
 - `physics_body_combat`
