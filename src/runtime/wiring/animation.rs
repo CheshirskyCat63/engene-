@@ -6,7 +6,7 @@ use engine_physics::animation::locomotion::LocomotionMachine;
 use crate::core::ecs::Entity;
 use crate::core::events::canonical::BodyZoneDamaged;
 use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
 use crate::game::ai::body::BodyState;
 use crate::world::components::{AiState, Goal, LifeStage};
@@ -50,7 +50,7 @@ impl AnimationIntegrationSystem {
     }
 }
 
-impl EngineSystem for AnimationIntegrationSystem {
+impl LegacyEngineSystem for AnimationIntegrationSystem {
     fn name(&self) -> &str {
         "AnimationIntegration"
     }

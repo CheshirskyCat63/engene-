@@ -1,6 +1,6 @@
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 use engine_physics::animation::animation::ChannelProperty;
 use engine_physics::animation::animation::{
@@ -34,7 +34,7 @@ impl AnimationWireSystem {
     }
 }
 
-impl EngineSystem for AnimationWireSystem {
+impl LegacyEngineSystem for AnimationWireSystem {
     fn name(&self) -> &str {
         "AnimationWire"
     }

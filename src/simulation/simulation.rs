@@ -1,10 +1,10 @@
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext, ExtractContext};
+use engine_ecs::system_descriptor::{DeterminismTier, SystemDescriptor};
 use engine_runtime::simulation_core::{
     DeferredTransitionPolicy, DeferredTransitionQueue, TransitionRequest,
 };
-
-use crate::core::mutation_policy::*;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::simulation::activation;
 
 pub struct SimulationSystem {
@@ -29,7 +29,7 @@ impl SimulationSystem {
     }
 }
 
-impl EngineSystem for SimulationSystem {
+impl LegacyEngineSystem for SimulationSystem {
     fn name(&self) -> &str {
         "Simulation"
     }

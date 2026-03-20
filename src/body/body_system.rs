@@ -11,13 +11,13 @@ use crate::body::body_response::BodyPhysicalResponseCache as BodyResponseCache;
 use crate::body::body_store::BodyStateStore;
 use crate::body::death_pipeline::CorpseManager;
 use crate::core::ecs::Entity;
-use crate::core::events::canonical::{
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::events::canonical::{
     BodyZoneDamaged, CombatHit, EntityDied, GoreMeshSpawn, SoundTrigger, SoundTriggerKind,
 };
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::registry::Resources;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
 use crate::physics::damage_pipeline::response_aggregator::BodyZone;
 use crate::world::components::{SimLevel, SimulationLevel};
 
@@ -229,7 +229,7 @@ impl BodySystem {
     }
 }
 
-impl EngineSystem for BodySystem {
+impl LegacyEngineSystem for BodySystem {
     fn name(&self) -> &str {
         "BodySystem"
     }

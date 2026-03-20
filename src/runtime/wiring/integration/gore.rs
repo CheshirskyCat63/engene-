@@ -1,9 +1,10 @@
-use crate::core::events::canonical::*;
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
-use crate::graphics::gore_mesh::{GoreMeshInstance, GoreMeshSystem};
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_core::events::canonical::*;
+use engine_render::gore_mesh::{GoreMeshInstance, GoreMeshSystem};
 use crate::physics::damage_pipeline::response_aggregator::BodyZone;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 fn u8_to_body_zone(z: u8) -> BodyZone {
     match z {
@@ -25,7 +26,7 @@ fn u8_to_body_zone(z: u8) -> BodyZone {
 
 pub struct GoreWireSystem;
 
-impl EngineSystem for GoreWireSystem {
+impl LegacyEngineSystem for GoreWireSystem {
     fn name(&self) -> &str {
         "GoreWire"
     }

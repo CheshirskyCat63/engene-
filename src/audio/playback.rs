@@ -1,8 +1,9 @@
-use crate::audio::audio::{AudioEngine, SoundKind};
+use engine_audio::audio::{AudioEngine, SoundKind};
 use crate::audio::sound_bank::{SoundBank, SoundEvent};
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 fn sound_kind_to_event(kind: SoundKind) -> SoundEvent {
     match kind {
@@ -37,7 +38,7 @@ impl AudioPlaybackBridge {
     }
 }
 
-impl EngineSystem for AudioPlaybackBridge {
+impl LegacyEngineSystem for AudioPlaybackBridge {
     fn name(&self) -> &str {
         "AudioPlaybackBridge"
     }

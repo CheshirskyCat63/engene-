@@ -1,10 +1,10 @@
-use crate::core::events::canonical::*;
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_core::events::canonical::*;
 use engine_physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
 use crate::world::terrain_damage::CraterStamp;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 use glam::Vec3;
 
@@ -14,7 +14,7 @@ use glam::Vec3;
 
 pub struct DestructionTickSystem;
 
-impl EngineSystem for DestructionTickSystem {
+impl LegacyEngineSystem for DestructionTickSystem {
     fn name(&self) -> &str {
         "DestructionTick"
     }
@@ -79,7 +79,7 @@ impl EngineSystem for DestructionTickSystem {
 
 pub struct TerrainDeformationTickSystem;
 
-impl EngineSystem for TerrainDeformationTickSystem {
+impl LegacyEngineSystem for TerrainDeformationTickSystem {
     fn name(&self) -> &str {
         "TerrainDeformationTick"
     }

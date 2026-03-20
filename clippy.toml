@@ -2,3 +2,37 @@ msrv = "1.75.0"
 cognitive-complexity-threshold = 30
 too-many-arguments-threshold = 10
 type-complexity-threshold = 350
+
+# Architectural enforcement - deny legacy patterns
+# These lints will FAIL THE BUILD if legacy patterns are detected
+
+# Forbidden import patterns from root modules
+disallowed-names = [
+    # Legacy root module imports that should use canonical crates
+    "crate::graphics",
+    "crate::audio", 
+    "crate::world",
+    "crate::body",
+    "crate::tools",
+    "crate::game",
+    "crate::input",
+    "crate::memory",
+    "crate::navigation",
+    "crate::network",
+    "crate::simulation",
+    "crate::engine",
+]
+
+# Enforce crate ownership boundaries
+disallowed-methods = [
+    # Legacy EngineSystem from root core
+    "crate::core::system::EngineSystem",
+]
+
+# Forbidden types that should come from canonical crates  
+disallowed-types = [
+    # Types that should be imported from engine_* crates
+    "crate::graphics::",
+    "crate::audio::",
+    "crate::world::",
+]

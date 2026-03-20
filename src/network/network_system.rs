@@ -1,6 +1,7 @@
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::{DeterminismTier, SystemDescriptor};
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum NetworkMode {
@@ -42,7 +43,7 @@ impl NetworkSystem {
     }
 }
 
-impl EngineSystem for NetworkSystem {
+impl LegacyEngineSystem for NetworkSystem {
     fn name(&self) -> &str {
         "NetworkSystem"
     }

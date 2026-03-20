@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum GameAction {
@@ -159,7 +160,7 @@ impl InputActionSystem {
     }
 }
 
-impl EngineSystem for InputActionSystem {
+impl LegacyEngineSystem for InputActionSystem {
     fn name(&self) -> &str {
         "InputActionSystem"
     }

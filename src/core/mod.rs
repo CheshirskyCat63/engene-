@@ -1,53 +1,23 @@
-//! Core subsystem - ECS, engine, events, and system orchestration.
-//!
-//! # Status: production
-//! # Integration: enabled
-//! # Tests: unit + integration
-//!
-//! ## Modules
-//! - `ecs`, `engine`, `events` - production, core framework
-//! - `sparse_set`, `commands` - production, data structures
-//! - `scheduler`, `registry` - production, system management
-//! - `game_config`, `config` - production, configuration
-//! - `query` - production, ECS query layer
-//! - `metrics_registry` - production, observability (Phase C.7)
-//! - `replay`, `determinism_audit` - experimental, determinism
-//! - `systems` - production, extracted game systems (Phase A.4)
+//! Core subsystem - TEMPORARY COMPATIBILITY LAYER
+//! 
+//! This module is being dismantled. Components are moving to dedicated crates:
+//! - ECS → engine_ecs
+//! - Runtime/system orchestration → engine_runtime  
+//! - Core policies/config → engine_core
+//! - Tools/debug → engine_tools
+//! - SDK → sdk_app
+//! - AI → engine_ai (future) or game_framework
+//! - World → engine_world
+//! - Content → engine_content
 
-pub mod ai_emotions;
-pub mod ai_memory;
-pub mod ai_plan;
-pub mod budget_registry;
-pub mod component_registry;
-pub mod config;
-pub mod content_validation;
-pub mod ecs;
-pub mod ecs_internal;
-pub mod engine;
-pub mod events;
-pub mod game_config;
-pub mod job_graph;
-pub mod job_topology_report;
-pub mod material_truth;
-pub mod plugin;
-pub mod quality_governor;
-pub mod query;
-pub mod scheduler;
-pub mod system;
-pub mod systems;
+// RE-EXPORTS from canonical crates
+pub use engine_ecs::access;
+pub use engine_ecs::sparse_set;
+pub use engine_ecs::persistent_id;
+pub use engine_ecs::system_descriptor;
+pub use engine_ecs::commands;
+pub use engine_ecs::parallel_validation;
 
-pub mod async_services;
-pub mod debug;
-pub mod determinism_audit;
-pub mod jobs;
-pub mod mutation_policy;
-pub mod perf;
-pub mod replay;
-pub mod sdk;
-pub mod serialization;
-pub mod world_state_authority;
-
-pub use engine_startup::BuildManifest;
 pub use engine_core::data_policy;
 pub use engine_core::determinism_policy;
 pub use engine_core::deterministic_merge;
@@ -56,15 +26,49 @@ pub use engine_core::integration_matrix;
 pub use engine_core::metrics_registry;
 pub use engine_core::runtime_config;
 pub use engine_core::time;
-pub mod crash_telemetry;
-pub mod dirty_set;
-pub mod hot_reload;
 
-pub use engine_ecs::access;
-pub use engine_ecs::sparse_set;
+pub use engine_startup::BuildManifest;
 
-pub use engine_ecs::persistent_id;
-pub use engine_ecs::system_descriptor;
+// LEGACY MODULES - being moved/deleted
+// TODO: Move each module to its appropriate crate
 
-pub use engine_ecs::commands;
-pub use engine_ecs::parallel_validation;
+pub mod ai_emotions;     // → engine_ai or game_framework
+pub mod ai_memory;       // → engine_ai or game_framework  
+pub mod ai_plan;         // → engine_ai or game_framework
+
+pub mod budget_registry;      // → engine_core
+pub mod component_registry;   // → engine_ecs
+pub mod config;               // → engine_core
+pub mod content_validation;   // → engine_content
+
+pub mod ecs;              // DELETE - use engine_ecs
+pub mod ecs_internal;     // DELETE - use engine_ecs
+pub mod engine;           // DELETE - split between engine_core/engine_runtime
+
+pub mod events;           // → engine_core
+pub mod game_config;      // → engine_core
+pub mod job_graph;        // → engine_runtime
+pub mod job_topology_report; // → engine_tools
+pub mod material_truth;        // → engine_world
+pub mod plugin;           // → engine_core
+pub mod quality_governor;     // → engine_core
+
+pub mod query;            // DELETE - use engine_ecs
+pub mod scheduler;        // DELETE - use engine_runtime (deprecated)
+pub mod system;           // DELETE - use engine_runtime (deprecated)
+pub mod systems;          // DELETE - use engine_runtime
+
+pub mod async_services;       // → engine_runtime
+pub mod debug;                 // → engine_tools
+pub mod determinism_audit;    // → engine_core
+pub mod jobs;                 // → engine_runtime
+pub mod mutation_policy;      // → engine_core
+pub mod perf;                 // → engine_runtime
+pub mod replay;               // → engine_core
+pub mod sdk;                  // → sdk_app
+pub mod serialization;        // → engine_core
+pub mod world_state_authority; // → engine_world
+
+pub mod crash_telemetry;    // → engine_tools
+pub mod dirty_set;          // → engine_core
+pub mod hot_reload;         // → engine_tools

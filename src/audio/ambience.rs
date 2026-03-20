@@ -1,4 +1,4 @@
-use crate::audio::audio::{AudioEngine, SoundHandle, SoundKind};
+use engine_audio::audio::{AudioEngine, SoundHandle, SoundKind};
 use crate::world::biome::Biome;
 
 pub struct BiomeAmbience {

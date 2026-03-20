@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use std::sync::mpsc;
 use std::sync::Arc;
 
-use crate::graphics::model_loader::{self, LoadedModel};
+use engine_render::model_loader::{self, LoadedModel};
 
 pub type AssetHandle = u64;
 

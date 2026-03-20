@@ -1,9 +1,10 @@
-use crate::core::events::canonical::*;
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
-use crate::graphics::destruction_occlusion::{DestructionOcclusionSystem, OcclusionBreach};
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_core::events::canonical::*;
+use engine_render::destruction_occlusion::{DestructionOcclusionSystem, OcclusionBreach};
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 const NAV_CELL_SIZE: f32 = 8.0;
 
@@ -13,7 +14,7 @@ const NAV_CELL_SIZE: f32 = 8.0;
 
 pub struct NavDirtyTickSystem;
 
-impl EngineSystem for NavDirtyTickSystem {
+impl LegacyEngineSystem for NavDirtyTickSystem {
     fn name(&self) -> &str {
         "NavDirtyTick"
     }
@@ -75,7 +76,7 @@ impl EngineSystem for NavDirtyTickSystem {
 
 pub struct OcclusionWireSystem;
 
-impl EngineSystem for OcclusionWireSystem {
+impl LegacyEngineSystem for OcclusionWireSystem {
     fn name(&self) -> &str {
         "OcclusionWire"
     }

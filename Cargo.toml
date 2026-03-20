@@ -30,45 +30,50 @@ edition = "2021"
 autobins = false
 
 [features]
-default = ["full"]
+default = ["thin-shell"]
 
-# Target taxonomy (semantic truth)
-role_game = ["cap_physics", "cap_render", "cap_ai", "cap_audio", "tool_debug_ui", "body_sim", "advanced_anim", "scoring_ai"]
-role_sdk = ["role_game", "tool_sdk", "tool_doctor", "tool_editor_inspection"]
-role_headless = ["cap_physics", "cap_ai", "body_sim", "advanced_anim", "scoring_ai"]
-role_tools = ["tool_doctor"]
+# Minimal root features - apps own capabilities
+thin-shell = []
 
-cap_physics = ["physics"]
-cap_render = ["render"]
-cap_ai = ["ai"]
-cap_audio = ["audio"]
-cap_networking = ["networking"]
+# Transitional compatibility aliases (being removed)
+role_game = []
+role_sdk = []
+role_headless = []
+role_tools = []
 
-tool_debug_ui = ["debug_ui"]
-tool_sdk = ["sdk_tools"]
+# Legacy capability flags (moved to apps)
+cap_physics = []
+cap_render = []
+cap_ai = []
+cap_audio = []
+cap_networking = []
+
+tool_debug_ui = []
+tool_sdk = []
 tool_doctor = []
 tool_editor_inspection = []
 
-profile_low_spec = ["low_spec"]
-profile_ci = ["nightly-tests"]
-profile_release = ["full"]
+# Legacy profiles (moved to apps)
+profile_low_spec = []
+profile_ci = []
+profile_release = []
 
-# Backward-compatibility aliases (transitional)
+# Legacy feature backlog (being deleted)
 engine_core = []
-physics = ["engine_core", "engine_physics"]
-render = ["engine_core"]
-ai = ["engine_core"]
-audio = ["engine_core"]
-headless = ["role_headless"]
-debug_ui = ["render"]
-full = ["physics", "render", "ai", "audio", "debug_ui", "body_sim", "advanced_anim", "scoring_ai"]
+physics = []
+render = []
+ai = []
+audio = []
+headless = []
+debug_ui = []
+full = []
 nightly-tests = []
 body_sim = []
 advanced_anim = []
 networking = []
 scoring_ai = []
-low_spec = ["full"]
-sdk_tools = ["full", "debug_ui"]
+low_spec = []
+sdk_tools = []
 
 [[bench]]
 name = "engine_benchmarks"
@@ -114,12 +119,13 @@ lto = "off"
 codegen-units = 16
 
 [dependencies]
+# Core engine crates - minimal dependencies
 engine_core = { path = "crates/engine_core" }
-engine_content = { path = "crates/engine_content" }
 engine_ecs = { path = "crates/engine_ecs" }
 engine_runtime = { path = "crates/engine_runtime" }
-engine_physics = { path = "crates/engine_physics", optional = true }
 engine_startup = { path = "crates/engine_startup" }
+
+# External dependencies - reduced set
 rand = "0.8"
 glam = "0.30"
 bytemuck = { version = "1", features = ["derive"] }
@@ -129,19 +135,21 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 bincode = "1"
 ron = "0.8"
-puffin = "0.19"
 bitflags = "2"
-winit = "0.30"
-wgpu = "0.17"
-image = "0.25"
-egui = "0.23"
-egui-winit = "0.23"
-egui-wgpu = "0.23"
-tracing-subscriber = "0.3"
-rayon = "1.0"
-pollster = "0.3"
-pathfinding = "4.0"
 parking_lot = "0.12"
+
+# Optional heavy dependencies - move to apps
+# puffin = "0.19"  # → engine_tools/profiling
+# winit = "0.30"    # → apps/windowing
+# wgpu = "0.17"     # → engine_render
+# image = "0.25"     # → engine_content
+# egui = "0.23"      # → engine_tools/ui
+# egui-winit = "0.23" # → apps/windowing
+# egui-wgpu = "0.23"  # → engine_render/ui
+# tracing-subscriber = "0.3" # → apps/logging
+# rayon = "1.0"      # → engine_runtime/parallel
+# pollster = "0.3"    # → engine_async
+# pathfinding = "4.0" # → engine_navigation
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

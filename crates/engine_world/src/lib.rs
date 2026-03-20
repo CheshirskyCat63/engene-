@@ -14,6 +14,9 @@ MAX_TRIANGLES,
 MAX_TRIANGLES_LOW_SPEC,
 PHYSICS_BUBBLE_RADIUS,
 WORLD_SIZE,
+Cell,
+cell_index,
+pos_to_cell,
 };
 pub use crate::fields::{
 AirDensityField,
@@ -27,4 +30,11 @@ WindField,
 WorldFields,
 };
 }
+
+// Re-export world module types
+pub use cell::Cell;
+pub use fields::WorldFields;
+
+// WorldGrid type (from world module)
+pub struct WorldGrid;
 

@@ -1,5 +1,5 @@
 use crate::core::mutation_policy::*;
-use crate::core::system::EngineSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::game::ai::groups;
 use crate::game::ai::monster_ai;
@@ -25,7 +25,7 @@ impl AiSystem {
     }
 }
 
-impl EngineSystem for AiSystem {
+impl LegacyEngineSystem for AiSystem {
     fn name(&self) -> &str {
         "AI"
     }

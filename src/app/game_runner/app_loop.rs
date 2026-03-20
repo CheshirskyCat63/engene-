@@ -9,8 +9,9 @@ use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
 use super::diagnostics::{collect_entity_instances, print_brief, print_economy};
-use crate::audio::audio::AudioEngine;
-use crate::core::engine::Engine;
+use engine_audio::audio::AudioEngine;
+// LEGACY IMPORT - Replace with canonical crate
+use engine_core::engine::Engine;
 use crate::game::hud::{HudState, NotificationKind};
 use crate::game::player::PlayerController;
 use crate::game::player_save::{PlayerInventory, PlayerSave};

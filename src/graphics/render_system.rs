@@ -1,9 +1,12 @@
 use std::sync::Mutex;
 
-use crate::core::mutation_policy::{ExtractContext, FixedTickContext};
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
-use crate::graphics::mesh::EntityInstance;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext, ExtractContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_render::mesh::EntityInstance;
+use engine_render::renderer::Renderer;
+use engine_render::destruction_occlusion::DestructionOcclusionSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::world::components::EntityKind;
 
 pub struct RenderExtractData {
@@ -24,7 +27,7 @@ impl RenderExtractData {
 
 pub struct RenderSystem;
 
-impl EngineSystem for RenderSystem {
+impl LegacyEngineSystem for RenderSystem {
     fn name(&self) -> &str {
         "RenderSystem"
     }

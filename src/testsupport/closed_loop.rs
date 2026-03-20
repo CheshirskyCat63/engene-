@@ -5,11 +5,11 @@ use std::collections::HashMap;
 
 use crate::core::ecs::Ecs;
 use crate::core::engine::Engine;
-use crate::core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::plugin::EngineBuilder;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::game::economy::resource_flow;
 
 const SIM_DT: f32 = 1.0 / 20.0;
@@ -28,7 +28,7 @@ pub struct ClosedLoopRecorder {
 /// System that records canonical events each tick (runs in fixed_tick, before events are cleared).
 struct ClosedLoopRecorderSystem;
 
-impl EngineSystem for ClosedLoopRecorderSystem {
+impl LegacyEngineSystem for ClosedLoopRecorderSystem {
     fn name(&self) -> &str {
         "ClosedLoopRecorder"
     }

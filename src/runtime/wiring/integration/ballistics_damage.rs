@@ -1,9 +1,10 @@
-use crate::core::events::canonical::*;
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_core::events::canonical::*;
 use engine_physics::ballistics::{BallisticEvent, BallisticsSystem};
 use crate::world::fields::WorldFields;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -13,7 +14,7 @@ const SIM_DT: f32 = 1.0 / 20.0;
 
 pub struct BallisticsTickSystem;
 
-impl EngineSystem for BallisticsTickSystem {
+impl LegacyEngineSystem for BallisticsTickSystem {
     fn name(&self) -> &str {
         "BallisticsTick"
     }
@@ -110,7 +111,7 @@ impl EngineSystem for BallisticsTickSystem {
 
 pub struct DamageDispatchSystem;
 
-impl EngineSystem for DamageDispatchSystem {
+impl LegacyEngineSystem for DamageDispatchSystem {
     fn name(&self) -> &str {
         "DamageDispatch"
     }

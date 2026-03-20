@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::audio::audio::AudioEngine;
+use engine_audio::audio::AudioEngine;
 use engine_content::asset_budget::AssetBudget;
 use engine_content::prefabs::prefab_registry::PrefabRegistry;
 use crate::core::component_registry::ComponentRegistry;

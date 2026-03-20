@@ -1,6 +1,6 @@
 use glam::Vec3;
 
-use crate::audio::audio::{AudioEngine, SoundKind};
+use engine_audio::audio::{AudioEngine, SoundKind};
 use crate::core::ecs::Ecs;
 
 pub struct SpatialAudioSystem {

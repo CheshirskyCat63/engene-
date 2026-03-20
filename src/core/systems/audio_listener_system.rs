@@ -1,6 +1,6 @@
 //! Audio listener update system.
 
-use crate::audio::audio::AudioEngine;
+use engine_audio::audio::AudioEngine;
 use glam::Vec3;
 
 /// Updates audio engine listener position and orientation.

@@ -1,13 +1,13 @@
 use crate::core::ecs::Entity;
 use crate::core::mutation_policy::*;
-use crate::core::system::EngineSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::simulation::time_events::NewMonth;
 use crate::world::components::*;
 
 pub struct EconomySystem;
 
-impl EngineSystem for EconomySystem {
+impl LegacyEngineSystem for EconomySystem {
     fn name(&self) -> &str {
         "Economy"
     }

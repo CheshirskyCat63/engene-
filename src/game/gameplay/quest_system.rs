@@ -1,7 +1,7 @@
 // Phase 11: Quest system — generates quests, assigns, tracks progress.
 
 use crate::core::mutation_policy::*;
-use crate::core::system::EngineSystem;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
 use crate::game::gameplay::quests::{QuestRegistry, QuestStatus, QuestType};
 use crate::simulation::time_events::NewMonth;
@@ -19,7 +19,7 @@ impl QuestSystem {
     }
 }
 
-impl EngineSystem for QuestSystem {
+impl LegacyEngineSystem for QuestSystem {
     fn name(&self) -> &str {
         "QuestSystem"
     }

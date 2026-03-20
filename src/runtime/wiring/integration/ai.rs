@@ -1,6 +1,7 @@
-use crate::core::mutation_policy::FixedTickContext;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+// LEGACY IMPORTS - Use canonical crates instead
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 
 use crate::game::ai::body::BodyState;
 use crate::game::ai::combat::StaggerState;
@@ -26,7 +27,7 @@ use crate::game::ai::traits::{monster_trait_weight, npc_trait_weight};
 
 pub struct AiDecisionWireSystem;
 
-impl EngineSystem for AiDecisionWireSystem {
+impl LegacyEngineSystem for AiDecisionWireSystem {
     fn name(&self) -> &str {
         "AiDecisionWire"
     }
