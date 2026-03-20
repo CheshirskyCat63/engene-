@@ -11,12 +11,20 @@
 #[cfg(test)]
 mod aggregated_contracts {
     // Import tests from specialized suites
-    mod core_command_and_access_contracts;
-    mod event_bus_contracts;
-    mod identity_and_authority_contracts;
-    mod runtime_profile_and_quality_contracts;
-    mod world_persistence_contracts;
-    mod editor_safe_mode_contracts;
+    pub use core_command_and_access_contracts::*;
+    pub use event_bus_contracts::*;
+    pub use identity_and_authority_contracts::*;
+    pub use runtime_profile_and_quality_contracts::*;
+    pub use world_persistence_contracts::*;
+    pub use editor_safe_mode_contracts::*;
+    pub use ecs_lifecycle_contracts::*;
+    pub use ecs_authority_contracts::*;
+    pub use ecs_performance_contracts::*;
+    pub use camera_contracts::*;
+    pub use rendering_pipeline_contracts::*;
+    pub use player_controller_contracts::*;
+    pub use player_inventory_contracts::*;
+    pub use player_save_contracts::*;
     
     // Re-export critical tests for smoke lane
     pub use core_command_and_access_contracts::command_buffer_tests::command_buffer_spawn_and_despawn;
@@ -28,6 +36,7 @@ mod aggregated_contracts {
     pub use event_bus_contracts::frame_lifecycle_tests::event_bus_clear_removes_frame_events_not_sticky;
     
     pub use identity_and_authority_contracts::persistent_identity_tests::persistent_identity_survives_world_cycle;
+    pub use identity_and_authority_contracts::persistent_identity_tests::persistent_identity_survives_world_cycle;
     pub use identity_and_authority_contracts::authority_matrix_tests::authority_matrix_contains_transform_needs_destruction_spatial;
     
     pub use runtime_profile_and_quality_contracts::runtime_profile_tests::runtime_profile_headless_has_zero_render_budget;
@@ -37,6 +46,11 @@ mod aggregated_contracts {
     pub use world_persistence_contracts::streaming_contract_tests::streaming_four_region_cycle_preserves_identity_uniqueness;
     
     pub use editor_safe_mode_contracts::editor_safe_mode_tests::editor_safe_mode_disables_panel_after_three_panics;
+    
+    pub use ecs_lifecycle_contracts::ecs_lifecycle_tests::ecs_spawn_creates_entity;
+    pub use ecs_lifecycle_contracts::ecs_lifecycle_tests::ecs_despawn_removes_entity;
+    pub use ecs_authority_contracts::ecs_authority_tests::ecs_authority_matrix_prevents_unauthorized_access;
+    pub use ecs_performance_contracts::ecs_performance_tests::ecs_spawn_performance_under_budget;
 }
 
 // Legacy compatibility - re-export some critical tests
