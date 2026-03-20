@@ -1,9 +1,6 @@
-// World fields - weather and environmental simulation data
-// Migrated from root src/world/fields.rs
-
 use glam::Vec3;
 
-/// Minimal storm cell data for wind contribution
+/// Minimal storm cell data for wind contribution (avoids world depending on graphics).
 #[derive(Clone, Debug)]
 pub struct StormCellWind {
     pub position: Vec3,
@@ -30,6 +27,7 @@ impl WindField {
         }
     }
 
+    /// Sets storm_wind from the nearest active storm cell (by distance from origin).
     pub fn update_from_weather(&mut self, storm_cells: &[StormCellWind], _time: f32) {
         let origin = Vec3::ZERO;
         self.storm_wind = storm_cells
@@ -43,6 +41,33 @@ impl WindField {
             .unwrap_or(Vec3::ZERO);
     }
 
+    /// Curl noise approximation: sin/cos for CPU (no GPU noise).
+    fn curl_noise(&self, pos: Vec3, time: f32) -> Vec3 {
+        let curl_x = (pos.z * 0.01 + time).sin() * (pos.y * 0.02).cos();
+        let curl_y = (pos.x * 0.015 + time * 0.7).cos() * (pos.z * 0.012).sin();
+        let curl_z = (pos.y * 0.01 + time * 0.5).sin() * (pos.x * 0.02).cos();
+        Vec3::new(curl_x, curl_y, curl_z) * self.curl_turbulence
+    }
+
+    /// Terrain influence: valleys funnel (boost horizontal when below avg), ridges deflect (reduce wind at height).
+    /// Uses procedural local "avg" as proxy when no heightmap available.
+    fn terrain_influence(&self, pos: Vec3, base_wind: Vec3) -> Vec3 {
+        let local_avg = (pos.x * 0.005).sin() * 80.0 + (pos.z * 0.007).cos() * 60.0;
+        let height_above_avg = pos.y - local_avg;
+
+        if height_above_avg < 0.0 {
+            let valley_factor = 1.0 + (-height_above_avg / 100.0).min(0.5);
+            let mut horizontal = base_wind;
+            horizontal.y = 0.0;
+            let len = horizontal.length().max(0.001);
+            horizontal = horizontal.normalize() * len * valley_factor;
+            Vec3::new(horizontal.x, base_wind.y, horizontal.z)
+        } else {
+            let ridge_factor = 1.0 / (1.0 + height_above_avg * 0.002);
+            base_wind * ridge_factor
+        }
+    }
+
     pub fn sample(&self, pos: Vec3, time: f32) -> Vec3 {
         let phase = pos.x * 0.01 + pos.z * 0.013 + time * 0.5;
         let turb = Vec3::new(
@@ -52,14 +77,9 @@ impl WindField {
         );
         let global_wind = self.base_dir * self.strength + turb;
         let wind_with_storm = global_wind + self.storm_wind;
-        
-        // Simplified curl noise approximation
-        let curl_x = (pos.z * 0.01 + time).sin() * (pos.y * 0.02).cos();
-        let curl_y = (pos.x * 0.015 + time * 0.7).cos() * (pos.z * 0.012).sin();
-        let curl_z = (pos.y * 0.01 + time * 0.5).sin() * (pos.x * 0.02).cos();
-        let curl = Vec3::new(curl_x, curl_y, curl_z) * self.curl_turbulence;
-        
-        wind_with_storm + curl
+        let curl = self.curl_noise(pos, time);
+        let with_curl = wind_with_storm + curl;
+        self.terrain_influence(pos, with_curl)
     }
 }
 
@@ -187,11 +207,5 @@ impl WorldFields {
             rain: RainField::new(),
             anomaly: AnomalyField::new(),
         }
-    }
-}
-
-impl Default for WorldFields {
-    fn default() -> Self {
-        Self::new()
     }
 }

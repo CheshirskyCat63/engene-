@@ -1,12 +1,11 @@
 //! Core subsystem - TEMPORARY COMPATIBILITY LAYER
 //! 
-//! This module is being dismantled. Components are moving to dedicated crates:
+//! This module is being dismantled. Components have moved to dedicated crates:
 //! - ECS → engine_ecs
 //! - Runtime/system orchestration → engine_runtime  
 //! - Core policies/config → engine_core
 //! - Tools/debug → engine_tools
 //! - SDK → sdk_app
-//! - AI → engine_ai (future) or game_framework
 //! - World → engine_world
 //! - Content → engine_content
 
@@ -29,46 +28,22 @@ pub use engine_core::time;
 
 pub use engine_startup::BuildManifest;
 
-// LEGACY MODULES - being moved/deleted
-// TODO: Move each module to its appropriate crate
+// REMOVED MODULES - moved to dedicated crates
+// ✓ ai_emotions, ai_memory, ai_plan → engine_world
+// ✓ budget_registry, config, game_config, plugin, quality_governor → engine_core
+// ✓ component_registry → engine_ecs
+// ✓ content_validation → engine_content
+// ✓ job_graph, async_services, jobs, perf → engine_runtime
+// ✓ job_topology_report, crash_telemetry, hot_reload, debug → engine_tools
+// ✓ determinism_audit, mutation_policy, serialization, dirty_set, replay → engine_core
+// ✓ material_truth, world_state_authority, events → engine_world
+// ✓ sdk → sdk_app
 
-pub mod ai_emotions;     // → engine_ai or game_framework
-pub mod ai_memory;       // → engine_ai or game_framework  
-pub mod ai_plan;         // → engine_ai or game_framework
-
-pub mod budget_registry;      // → engine_core
-pub mod component_registry;   // → engine_ecs
-pub mod config;               // → engine_core
-pub mod content_validation;   // → engine_content
-
+// DEPRECATED MODULES - to be deleted
 pub mod ecs;              // DELETE - use engine_ecs
 pub mod ecs_internal;     // DELETE - use engine_ecs
 pub mod engine;           // DELETE - split between engine_core/engine_runtime
-
-pub mod events;           // → engine_core
-pub mod game_config;      // → engine_core
-pub mod job_graph;        // → engine_runtime
-pub mod job_topology_report; // → engine_tools
-pub mod material_truth;        // → engine_world
-pub mod plugin;           // → engine_core
-pub mod quality_governor;     // → engine_core
-
 pub mod query;            // DELETE - use engine_ecs
 pub mod scheduler;        // DELETE - use engine_runtime (deprecated)
 pub mod system;           // DELETE - use engine_runtime (deprecated)
 pub mod systems;          // DELETE - use engine_runtime
-
-pub mod async_services;       // → engine_runtime
-pub mod debug;                 // → engine_tools
-pub mod determinism_audit;    // → engine_core
-pub mod jobs;                 // → engine_runtime
-pub mod mutation_policy;      // → engine_core
-pub mod perf;                 // → engine_runtime
-pub mod replay;               // → engine_core
-pub mod sdk;                  // → sdk_app
-pub mod serialization;        // → engine_core
-pub mod world_state_authority; // → engine_world
-
-pub mod crash_telemetry;    // → engine_tools
-pub mod dirty_set;          // → engine_core
-pub mod hot_reload;         // → engine_tools
