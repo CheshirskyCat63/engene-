@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, serde::Serialize)]
 pub struct BuildManifest {
     pub version: String,
     pub build_time: String,
@@ -52,5 +52,29 @@ impl BuildManifest {
             }
         }
         println!("=====================");
+    }
+
+    pub fn handle_version_flag() -> bool {
+        std::env::args().any(|arg| arg == "--version" || arg == "-v")
+    }
+
+    pub fn ensure_data_dirs() {
+        let dirs = ["game", "game/logs", "game/crashes", "game/saves", "game/saves/chunks"];
+        for dir in dirs {
+            std::fs::create_dir_all(dir).unwrap_or_else(|e| {
+                eprintln!("Failed to create directory {}: {}", dir, e);
+            });
+        }
+    }
+
+    pub fn current() -> Self {
+        Self::new()
+    }
+
+    pub fn write_manifest_json(&self) {
+        let json = serde_json::to_string_pretty(self).unwrap();
+        std::fs::write("game/logs/last_manifest.json", json).unwrap_or_else(|e| {
+            eprintln!("Failed to write manifest: {}", e);
+        });
     }
 }

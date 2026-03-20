@@ -58,3 +58,7 @@ pub fn crash_telemetry() {
         }));
     });
 }
+
+pub fn install_panic_hook() {
+    crash_telemetry();
+}

@@ -1,6 +1,6 @@
 use crate::core::debug::debug_registry::DebugRegistry;
 use crate::core::mutation_policy::*;
-use crate::core::registry::Resources;
+use engine_core::registry::Resources;
 use crate::core::system_descriptor::SystemDescriptor;
 
 pub trait EngineSystem {

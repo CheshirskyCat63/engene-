@@ -6,7 +6,7 @@ use crate::core::job_graph::JobGraph;
 use crate::core::job_topology_report;
 use crate::core::jobs::WorkerPool;
 use crate::core::mutation_policy::*;
-use crate::core::registry::Resources;
+use engine_core::registry::Resources;
 use crate::core::scheduler::Scheduler;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;

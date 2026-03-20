@@ -2,6 +2,37 @@ use crate::core::ecs::Entity;
 use engine_physics::ballistics::MaterialId;
 use glam::Vec3;
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum BodyZone {
+    Head,
+    Neck,
+    Torso,
+    LeftArm,
+    RightArm,
+    LeftLeg,
+    RightLeg,
+    Pelvis,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum DecalType {
+    BulletHole,
+    Scratch,
+    Blood,
+    Dirt,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum SurfaceMaskType {
+    Dirt,
+    Grass,
+    Stone,
+    Wood,
+    Metal,
+    Concrete,
+    Water,
+}
+
 // ---------------------------------------------------------------------------
 // Event Classification: A = Authoritative, B = Consequence
 // Delivery Semantics per event type documented inline

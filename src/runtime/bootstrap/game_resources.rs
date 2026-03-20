@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
 use crate::audio::audio::AudioEngine;
-use crate::content::asset_budget::AssetBudget;
-use crate::content::prefabs::prefab_registry::PrefabRegistry;
+use engine_content::asset_budget::AssetBudget;
+use engine_content::prefabs::prefab_registry::PrefabRegistry;
 use crate::core::component_registry::ComponentRegistry;
 use crate::core::material_truth::MaterialTruthService;
-use crate::core::ownership_map::OwnershipMap;
 use crate::core::plugin::EngineBuilder;
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::navigation::hpa_star::HpaGraph;

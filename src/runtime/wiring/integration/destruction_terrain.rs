@@ -2,7 +2,7 @@ use crate::core::events::canonical::*;
 use crate::core::mutation_policy::FixedTickContext;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
-use crate::physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
+use engine_physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
 use crate::world::terrain_damage::CraterStamp;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
 

@@ -12,7 +12,7 @@ use std::sync::Arc;
 
 use winit::event_loop::EventLoop;
 
-use engine_startup::{BuildManifest, crash_telemetry, startup_tracing};
+use engine_startup::{BuildManifest, install_panic_hook};
 use engene::runtime::bootstrap::{EngineRuntimeAssembly, GameRuntimeAssembly};
 use engene::world::heightmap::Heightmap;
 use engene::world::world::WorldGrid;
@@ -22,7 +22,7 @@ pub fn run_from_env_args() {
         return;
     }
 
-    crash_telemetry::install_panic_hook();
+    install_panic_hook();
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
@@ -54,7 +54,7 @@ pub fn run_headless_from_env_args() {
         return;
     }
 
-    crash_telemetry::install_panic_hook();
+    install_panic_hook();
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

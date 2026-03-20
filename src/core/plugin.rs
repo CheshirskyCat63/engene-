@@ -2,7 +2,7 @@ use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
 use crate::core::ecs::Ecs;
-use crate::core::registry::Resources;
+use engine_core::registry::Resources;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
 

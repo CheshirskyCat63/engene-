@@ -18,7 +18,7 @@ use winit::event_loop::EventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
-use engine_startup::{BuildManifest, crash_telemetry, startup_tracing};
+use engine_startup::{BuildManifest, install_panic_hook};
 use engene::core::engine::Engine;
 use engene::graphics::camera::FlyCamera;
 use engene::graphics::lod::{LodConfig, LodLevel};
@@ -42,7 +42,7 @@ pub fn run_from_env_args() {
         return;
     }
 
-    crash_telemetry::install_panic_hook();
+    install_panic_hook();
 
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

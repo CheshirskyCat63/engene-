@@ -2,23 +2,19 @@ use crate::core::mutation_policy::FixedTickContext;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
 
-use crate::animation::active_ragdoll::{
-    ActiveRagdollController, BalanceSensor, BehavioralReaction, PdGains,
-};
-use crate::animation::animation::ChannelProperty;
-use crate::animation::animation::{
+use engine_physics::animation::animation::ChannelProperty;
+use engine_physics::animation::animation::{
     AnimationClip, AnimationPlayer, Channel, Joint, Keyframe, Skeleton,
 };
-use crate::animation::animation_ladder::AnimationLadder;
-use crate::animation::clip_map::{AnimationState, ClipMap};
-use crate::animation::foot_ik::FootIkSolver;
-use crate::animation::locomotion::LocomotionMachine;
-use crate::animation::micro_motion::{
+use engine_physics::animation::animation_ladder::AnimationLadder;
+use engine_physics::animation::clip_map::{AnimationState, ClipMap};
+use engine_physics::animation::locomotion::LocomotionMachine;
+use engine_physics::animation::micro_motion::{
     validate_motion_gating, MicroMotionComponent, MicroMotionSystem, MicroMotionType,
     ObjectMotionClass,
 };
-use crate::animation::procedural::{PerJointWeight, ProceduralLayer};
-use crate::animation::ragdoll::{RagdollConfig, RagdollState};
+use engine_physics::animation::procedural::{PerJointWeight, ProceduralLayer};
+use engine_physics::animation::ragdoll::{RagdollConfig, RagdollState};
 
 const SIM_DT: f32 = 1.0 / 20.0;
 

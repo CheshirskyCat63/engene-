@@ -7,7 +7,7 @@ use glam::Vec3;
 use rand::Rng;
 
 use crate::core::engine::Engine;
-use crate::physics::ballistics::BallisticsSystem;
+use engine_physics::ballistics::BallisticsSystem;
 use crate::runtime::bootstrap::GameRuntimeAssembly;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
 use crate::world::components::MonsterSpecies;
@@ -165,7 +165,7 @@ pub fn run_meat_grinder(ticks: u64) -> StressReport {
 
         if let Some(dest) = engine
             .resources
-            .get::<crate::physics::destruction::DestructionSystem>()
+            .get::<engine_physics::destruction::DestructionSystem>()
         {
             let obj_count = dest.objects.len();
             peak_destruction_objects = peak_destruction_objects.max(obj_count);

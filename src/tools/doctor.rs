@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 use crate::core::engine::Engine;
 use crate::core::runtime_config::RuntimeConfig;
-use crate::core::runtime_manifest::RuntimeManifest;
+use engine_core::runtime_manifest::RuntimeManifest;
 use crate::core::system_descriptor::SystemDescriptor;
 
 /// Doctor mode: Strict panics on critical errors; Advisory returns warnings and risk heatmap.

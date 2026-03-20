@@ -1,7 +1,7 @@
 use crate::core::commands::CommandBuffer;
 use crate::core::ecs::Ecs;
 use crate::core::events::EventBus;
-use crate::core::registry::Resources;
+use engine_core::registry::Resources;
 use crate::core::time::GameTime;
 
 pub struct StartupContext<'a> {

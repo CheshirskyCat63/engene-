@@ -2,7 +2,7 @@ use crate::core::events::canonical::*;
 use crate::core::mutation_policy::FixedTickContext;
 use crate::core::system::EngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
-use crate::physics::ballistics::{BallisticEvent, BallisticsSystem};
+use engine_physics::ballistics::{BallisticEvent, BallisticsSystem};
 use crate::world::fields::WorldFields;
 
 const SIM_DT: f32 = 1.0 / 20.0;

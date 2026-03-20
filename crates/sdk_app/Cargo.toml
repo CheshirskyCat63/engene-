@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 engine_core = { path = "../engine_core" }
 engine_startup = { path = "../engine_startup" }
+winit = "0.29"
+glam = "0.28"
+engene = { path = "../.." }
