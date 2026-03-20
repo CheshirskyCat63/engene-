@@ -131,24 +131,24 @@ impl EngineConsole {
         let output = match parts[0] {
             "scan_entity_refs" => {
                 let ecs = &engine.ecs;
-                let total = ecs.alive.len();
+                let total = ecs.alive().len();
                 let with_pid = ecs
-                    .alive
+                    .alive()
                     .iter()
-                    .filter(|&&e| ecs.identity.persistent_id_of(e).is_some())
+                    .filter(|&&e| ecs.identity().persistent_id_of(e).is_some())
                     .count();
                 let without_pid = total - with_pid;
                 let without_kind = ecs
-                    .alive
+                    .alive()
                     .iter()
                     .filter(|&&e| ecs.get_kind(e).is_none())
                     .count();
                 let without_transform = ecs
-                    .alive
+                    .alive()
                     .iter()
                     .filter(|&&e| ecs.get_transform(e).is_none())
                     .count();
-                let tombstones = ecs.identity.tombstone_count();
+                let tombstones = ecs.identity().tombstone_count();
                 format!(
                     "=== Entity Reference Audit ===\n\
                      Alive: {}\n\
@@ -174,7 +174,7 @@ impl EngineConsole {
             }
             "runtime_truth" => crate::tools::doctor::generate_runtime_truth_json(engine),
             "world_budget" | "entity_count" => {
-                let entities = engine.ecs.alive.len();
+                let entities = engine.ecs.alive().len();
                 let npcs = engine.ecs.count_npcs();
                 let monsters = engine.ecs.monsters().len();
                 format!(
@@ -294,7 +294,7 @@ impl EngineConsole {
                             .take::<crate::world::chunk_persistence::ChunkPersistenceService>()
                     {
                         let coord = crate::world::streaming::ChunkCoord { x: cx, z: cz };
-                        let tick = engine.ecs.tick;
+                        let tick = engine.ecs.tick();
                         let saved = persistence.save_and_unload(coord, &mut engine.ecs, tick);
                         engine.resources.insert_runtime(persistence);
                         format!("Saved chunk ({},{}) — {} entities", cx, cz, saved)

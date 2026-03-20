@@ -8,4 +8,4 @@ pub use engine_ecs::GenEntity;
 pub use engine_ecs::persistent_id::{DuplicateIdError, IdentityRegistry, PersistentEntityId};
 
 // Transitional alias for backward compatibility
-pub type IdentitySubsystem = engine_ecs::EcsMechanics;
+pub type IdentitySubsystem = engine_ecs::persistent_id::IdentityRegistry;

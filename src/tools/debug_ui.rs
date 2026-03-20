@@ -82,8 +82,8 @@ impl DebugUiState {
 
 pub fn draw_main_menu(ctx: &egui::Context, state: &mut DebugUiState) {
     egui::TopBottomPanel::top("debug_menu").show(ctx, |ui| {
-        egui::MenuBar::new().ui(ui, |ui| {
-            ui.menu_button("Debug", |ui| {
+        egui::MenuBar::new().ui(ui, |ui: &mut egui::Ui| {
+            ui.menu_button("Debug", |ui: &mut egui::Ui| {
                 ui.checkbox(&mut state.show_inspector, "Inspector");
                 ui.checkbox(&mut state.show_overlays, "Overlays");
                 ui.checkbox(&mut state.show_scene_hierarchy, "Scene Hierarchy");
@@ -95,13 +95,13 @@ pub fn draw_main_menu(ctx: &egui::Context, state: &mut DebugUiState) {
                 ui.separator();
                 ui.checkbox(&mut state.budget_aware, "Budget-aware throttling");
             });
-            ui.menu_button("Tools", |ui| {
+            ui.menu_button("Tools", |ui: &mut egui::Ui| {
                 ui.checkbox(&mut state.show_asset_browser, "Asset Browser");
                 ui.checkbox(&mut state.show_replay_browser, "Replay Browser");
                 ui.checkbox(&mut state.show_world_map, "World Map");
                 ui.checkbox(&mut state.show_prefab_placer, "Prefab Placer");
             });
-            ui.menu_button("Dashboards", |ui| {
+            ui.menu_button("Dashboards", |ui: &mut egui::Ui| {
                 ui.checkbox(&mut state.show_runtime_truth, "Runtime Truth");
                 ui.checkbox(&mut state.show_sim_metrics, "Sim Metrics");
                 ui.checkbox(&mut state.show_persistence, "Persistence");

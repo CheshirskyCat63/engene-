@@ -57,7 +57,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
             egui::ScrollArea::vertical()
                 .max_height(300.0)
                 .show(ui, |ui| {
-                    for &entity in &ecs.alive {
+                    for &entity in ecs.alive() {
                         let name = ecs
                             .get_name(entity)
                             .map(|n| n.0.as_str())
@@ -100,7 +100,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
 
                 ui.heading(format!("Entity {}", entity));
 
-                if let Some(pid) = ecs.identity.persistent_id_of(entity) {
+                if let Some(pid) = ecs.identity().persistent_id_of(entity) {
                     ui.label(format!("PID: {:?}", pid));
                 }
                 if let Some(name) = ecs.get_name(entity) {
@@ -152,7 +152,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                     .add(
                                         egui::DragValue::new(&mut state.edit_health)
                                             .speed(0.01)
-                                            .range(0.0..=1.0),
+                                            .clamp_range(0.0..=1.0),
                                     )
                                     .changed();
                             });
@@ -162,7 +162,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                     .add(
                                         egui::DragValue::new(&mut state.edit_hunger)
                                             .speed(0.01)
-                                            .range(0.0..=1.0),
+                                            .clamp_range(0.0..=1.0),
                                     )
                                     .changed();
                             });
@@ -172,7 +172,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                     .add(
                                         egui::DragValue::new(&mut state.edit_thirst)
                                             .speed(0.01)
-                                            .range(0.0..=1.0),
+                                            .clamp_range(0.0..=1.0),
                                     )
                                     .changed();
                             });
@@ -182,7 +182,7 @@ pub fn draw_inspector(ctx: &egui::Context, ecs: &Ecs, state: &mut InspectorState
                                     .add(
                                         egui::DragValue::new(&mut state.edit_energy)
                                             .speed(0.01)
-                                            .range(0.0..=1.0),
+                                            .clamp_range(0.0..=1.0),
                                     )
                                     .changed();
                             });

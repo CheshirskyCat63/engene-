@@ -1,66 +1,102 @@
 //! Entrypoint and Operator Truth Tests
 //!
-//! These tests verify that documentation matches reality exactly.
-//! They catch doc drift, broken operator paths, and inconsistent state.
+//! These tests verify that the `apps/*` entrypoint definitions and docs match reality.
 
+use std::collections::HashSet;
 use std::fs;
-use std::path::Path;
 
-/// Extract bin names from Cargo.toml
-fn extract_bin_names(cargo_toml: &str) -> Vec<String> {
-    let mut bins = Vec::new();
-    let mut in_bin_section = false;
-    
-    for line in cargo_toml.lines() {
-        if line.trim() == "[[bin]]" {
-            in_bin_section = true;
-        } else if line.trim().starts_with('[') && !line.trim().starts_with("[[bin]]") {
-            in_bin_section = false;
-        } else if in_bin_section && line.trim().starts_with("name =") {
-            let name = line.split('=').nth(1)
-                .map(|s| s.trim().trim_matches('"').to_string());
-            if let Some(n) = name {
-                bins.push(n);
+fn package_name_from_toml(path: &str) -> String {
+    let cargo = fs::read_to_string(path).unwrap_or_else(|_| panic!("Cannot read {}", path));
+    let mut in_package = false;
+    for line in cargo.lines() {
+        let trimmed = line.trim();
+        if trimmed == "[package]" {
+            in_package = true;
+            continue;
+        }
+        if in_package {
+            if trimmed.starts_with('[') {
+                break;
+            }
+            if let Some(name_value) = trimmed.strip_prefix("name =") {
+                return name_value.trim().trim_matches('"').to_string();
             }
         }
     }
-    bins
+    panic!("Could not parse [package] name from {}", path);
 }
 
-/// README mentions only real root bins.
 #[test]
-fn readme_mentions_only_real_root_bins() {
-    let readme = fs::read_to_string("README_FIRST_RUN.md")
-        .expect("README_FIRST_RUN.md must exist");
-    let cargo = fs::read_to_string("Cargo.toml")
-        .expect("Cargo.toml must exist");
-    
-    let bin_names = extract_bin_names(&cargo);
-    
-    // Verify all 4 bins are documented
-    assert!(bin_names.contains(&"engene_game".to_string()),
-        "Cargo.toml must define engene_game bin");
-    assert!(bin_names.contains(&"engene_sdk".to_string()),
-        "Cargo.toml must define engene_sdk bin");
-    assert!(bin_names.contains(&"engene_headless".to_string()),
-        "Cargo.toml must define engene_headless bin");
-    assert!(bin_names.contains(&"engene_tools".to_string()),
-        "Cargo.toml must define engene_tools bin");
+fn app_package_names_are_expected() {
+    let apps = vec![
+        "apps/engene_game/Cargo.toml",
+        "apps/engene_sdk/Cargo.toml",
+        "apps/engene_headless/Cargo.toml",
+        "apps/engene_bootstrap/Cargo.toml",
+    ];
 
-    // README must mention all bins
-    for bin in &bin_names {
-        assert!(readme.contains(bin),
-            "README must mention bin: {}", bin);
+    let package_names: HashSet<_> = apps.iter().map(|p| package_name_from_toml(p)).collect();
+
+    let expected: HashSet<_> = [
+        "app_engene_game".to_string(),
+        "app_engene_sdk".to_string(),
+        "app_engene_headless".to_string(),
+        "engene_bootstrap".to_string(),
+    ]
+    .into_iter()
+    .collect();
+
+    assert_eq!(package_names, expected, "apps package names must exactly match expected set");
+}
+
+#[test]
+fn no_engene_tools_package_or_docs_references() {
+    let tools_path = "apps/engene_tools/Cargo.toml";
+    assert!(!std::path::Path::new(tools_path).exists(), "apps/engene_tools must not exist in current tree");
+
+    let docs = vec![
+        "README_FIRST_RUN.md",
+        "docs/canonical/ENTRYPOINT_TRUTH.md",
+        "docs/canonical/CURRENT_BRANCH_STATE.md",
+    ];
+
+    for doc in docs {
+        let content = fs::read_to_string(doc).unwrap_or_else(|_| panic!("Cannot open {}", doc));
+        assert!(!content.contains("engene_tools"), "{} must not mention engene_tools", doc);
+        assert!(!content.contains("apps/engene_tools"), "{} must not mention apps/engene_tools", doc);
     }
+}
 
-    // README must NOT present apps/* as current canonical
-    assert!(!readme.contains("apps/engene_game") || readme.contains("future") || readme.contains("not"),
-        "README must not present apps/* as current canonical");
+#[test]
+fn docs_reference_real_app_package_names() {
+    let expected_packages = [
+        "app_engene_game",
+        "app_engene_sdk",
+        "app_engene_headless",
+        "engene_bootstrap",
+    ];
 
-    // README must clarify engene_test is not current
-    if readme.contains("engene_test") {
-        assert!(readme.contains("not") && (readme.contains("canonical") || readme.contains("current")),
-            "If engene_test is mentioned, must clarify it's not current canonical");
+    let docs = vec![
+        "README_FIRST_RUN.md",
+        "docs/canonical/ENTRYPOINT_TRUTH.md",
+        "docs/canonical/CURRENT_BRANCH_STATE.md",
+        "GAME_QUICKSTART.md",
+        "SDK_QUICKSTART.md",
+    ];
+
+    for doc in docs {
+        let content = fs::read_to_string(doc).unwrap_or_else(|_| panic!("Cannot open {}", doc));
+
+        for pkg in &expected_packages {
+            assert!(content.contains(pkg), "{} must mention {}", doc, pkg);
+        }
+
+        if doc == "GAME_QUICKSTART.md" {
+            assert!(content.contains("cargo run -p app_engene_game"), "{} must use cargo run -p app_engene_game", doc);
+        }
+        if doc == "SDK_QUICKSTART.md" {
+            assert!(content.contains("cargo run -p app_engene_sdk"), "{} must use cargo run -p app_engene_sdk", doc);
+        }
     }
 }
 

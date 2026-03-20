@@ -125,11 +125,11 @@ impl EditorShell {
             #[cfg(feature = "debug_ui")]
             {
                 let entities: Vec<(u32, String, Option<u32>)> = ecs
-                    .alive
+                    .alive()
                     .iter()
                     .map(|&e| {
                         let name = ecs
-                            .names
+                            .names()
                             .get(&e)
                             .map(|n| n.0.as_str())
                             .unwrap_or("unnamed")

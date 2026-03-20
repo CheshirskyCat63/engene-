@@ -256,11 +256,11 @@ fn check_schema_versions(out: &mut Vec<Diagnostic>) {
 }
 
 fn check_identity_health(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
-    let total_alive = ecs.alive.len();
+    let total_alive = ecs.alive().len();
     let with_pid = ecs
-        .alive
+        .alive()
         .iter()
-        .filter(|&&e| ecs.identity.persistent_id_of(e).is_some())
+        .filter(|&&e| ecs.identity().persistent_id_of(e).is_some())
         .count();
     let without_pid = total_alive - with_pid;
 
@@ -272,7 +272,7 @@ fn check_identity_health(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>)
             total_alive,
             with_pid,
             without_pid,
-            ecs.identity.tombstone_count()
+            ecs.identity().tombstone_count()
         ),
     });
 
@@ -606,7 +606,7 @@ fn check_canonical_wiring_invariants(
             .resources
             .get::<crate::core::material_truth::MaterialTruthService>()
         {
-            let fallback_primary = material_truth.is_fallback_primary_for(0);
+            let fallback_primary = material_truth.is_fallback_primary_for(0u16);
             out.push(Diagnostic {
                 severity: if fallback_primary {
                     DiagnosticSeverity::Warning
@@ -835,19 +835,19 @@ fn check_manifest_sanity(
 }
 
 fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
-    let total = ecs.alive.len();
+    let total = ecs.alive().len();
     let mut without_kind = 0;
     let mut without_transform = 0;
     let mut without_sim_level = 0;
 
-    for &e in &ecs.alive {
-        if ecs.get_kind(e).is_none() {
+    for &e in ecs.alive() {
+        if ecs.kind(e).is_none() {
             without_kind += 1;
         }
-        if ecs.get_transform(e).is_none() {
+        if ecs.transform(e).is_none() {
             without_transform += 1;
         }
-        if ecs.get_sim_level(e).is_none() {
+        if ecs.sim_level(e).is_none() {
             without_sim_level += 1;
         }
     }
@@ -886,10 +886,10 @@ fn check_spawn_policy(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
 }
 
 fn check_entity_ref_hygiene(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic>) {
-    let live_count = ecs.identity.live_count();
-    let total_count = ecs.identity.total_count();
-    let tombstone_count = ecs.identity.tombstone_count();
-    let alive_count = ecs.alive.len();
+    let live_count = ecs.identity().live_count();
+    let total_count = ecs.identity().total_count();
+    let tombstone_count = ecs.identity().tombstone_count();
+    let alive_count = ecs.alive().len();
 
     if live_count != alive_count {
         out.push(Diagnostic {
@@ -928,17 +928,17 @@ fn check_orphan_resolution(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic
     let mut orphaned_npcs = 0;
     let mut orphaned_monsters = 0;
 
-    for &e in &ecs.alive {
-        match ecs.get_kind(e) {
+    for &e in ecs.alive() {
+        match ecs.kind(e) {
             Some(crate::world::components::EntityKind::Npc) => {
-                let has_needs = ecs.get_needs(e).is_some();
+                let has_needs = ecs.needs(e).is_some();
                 let has_economy = ecs.get_npc_economy(e).is_some();
                 if !has_needs || !has_economy {
                     orphaned_npcs += 1;
                 }
             }
             Some(crate::world::components::EntityKind::Monster(_)) => {
-                let has_needs = ecs.get_needs(e).is_some() || ecs.get_ecosystem_needs(e).is_some();
+                let has_needs = ecs.needs(e).is_some() || ecs.ecosystem_needs(e).is_some();
                 if !has_needs {
                     orphaned_monsters += 1;
                 }
@@ -977,7 +977,7 @@ fn check_orphan_resolution(ecs: &crate::core::ecs::Ecs, out: &mut Vec<Diagnostic
 }
 
 fn check_world_budget(engine: &Engine, out: &mut Vec<Diagnostic>) {
-    let entity_count = engine.ecs.alive.len();
+    let entity_count = engine.ecs.alive().len();
     let npc_count = engine.ecs.count_npcs();
     let monster_count = engine.ecs.monsters().len();
 
@@ -1095,12 +1095,12 @@ pub fn generate_runtime_truth_json(engine: &Engine) -> String {
     let report = run_doctor(engine, DoctorMode::Advisory);
     let snap = crate::game::economy::resource_flow::snapshot(&engine.ecs);
 
-    let entity_count = engine.ecs.alive.len();
+    let entity_count = engine.ecs.alive().len();
     let npc_count = engine.ecs.count_npcs();
     let monster_count = engine.ecs.monsters().len();
-    let pid_live = engine.ecs.identity.live_count();
-    let pid_total = engine.ecs.identity.total_count();
-    let pid_tombstones = engine.ecs.identity.tombstone_count();
+    let pid_live = engine.ecs.identity().live_count();
+    let pid_total = engine.ecs.identity().total_count();
+    let pid_tombstones = engine.ecs.identity().tombstone_count();
 
     format!(
         r#"{{

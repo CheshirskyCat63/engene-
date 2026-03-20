@@ -3,7 +3,7 @@
 ## Canonical launch
 
 ```bash
-cargo run --bin engene_sdk
+cargo run -p app_engene_sdk
 ```
 
 Optional helper:

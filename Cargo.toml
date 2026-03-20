@@ -66,22 +66,6 @@ scoring_ai = []
 low_spec = ["full"]
 sdk_tools = ["full", "debug_ui"]
 
-[[bin]]
-name = "engene_game"
-path = "src/bin/engene_game.rs"
-bench = false
-[[bin]]
-name = "engene_sdk"
-path = "src/bin/engene_sdk.rs"
-bench = false
-[[bin]]
-name = "engene_headless"
-path = "src/bin/engene_headless.rs"
-bench = false
-[[bin]]
-name = "engene_tools"
-path = "src/bin/engene_tools.rs"
-bench = false
 [[bench]]
 name = "engine_benchmarks"
 harness = false

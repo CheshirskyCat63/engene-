@@ -37,7 +37,7 @@ impl EconomyDashboard {
             ..Default::default()
         };
 
-        for &e in &ecs.alive {
+        for &e in ecs.alive() {
             if !matches!(ecs.get_kind(e), Some(EntityKind::Npc)) {
                 continue;
             }

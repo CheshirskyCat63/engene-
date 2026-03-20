@@ -3,7 +3,7 @@
 ## Canonical launch
 
 ```bash
-cargo run --bin engene_game
+cargo run -p app_engene_game
 ```
 
 Optional helper:

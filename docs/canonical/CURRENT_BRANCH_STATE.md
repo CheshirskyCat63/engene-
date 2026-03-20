@@ -13,12 +13,12 @@
 
 ## Current entrypoint truth
 
-| Runtime role | Canonical command | Owner |
+| Runtime role | Canonical command | Current owner |
 |---|---|---|
-| Game | `cargo run --bin engene_game` | root package bin |
-| SDK | `cargo run --bin engene_sdk` | root package bin |
-| Headless | `cargo run --bin engene_headless -- --ticks 1200` | root package bin |
-| Tools | `cargo run --bin engene_tools` | root package bin |
+| Game | `cargo run -p app_engene_game` | apps/engene_game |
+| SDK | `cargo run -p app_engene_sdk` | apps/engene_sdk |
+| Headless | `cargo run -p app_engene_headless -- --ticks 1200` | apps/engene_headless |
+| Bootstrap | `cargo run -p engene_bootstrap` | apps/engene_bootstrap |
 
 ## Current architecture truth
 

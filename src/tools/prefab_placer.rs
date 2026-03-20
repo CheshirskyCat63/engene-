@@ -147,7 +147,7 @@ pub fn draw_prefab_placer(
                 ui.add(
                     egui::DragValue::new(&mut state.placement_scale)
                         .speed(0.05)
-                        .range(0.1..=10.0),
+                        .clamp_range(0.1..=10.0),
                 );
             });
 
@@ -155,7 +155,7 @@ pub fn draw_prefab_placer(
             ui.label("Group Placement");
             ui.horizontal(|ui| {
                 ui.label("Count:");
-                ui.add(egui::DragValue::new(&mut state.group_count).range(1..=20));
+                ui.add(egui::DragValue::new(&mut state.group_count).clamp_range(1..=20));
                 ui.label("Spacing:");
                 ui.add(
                     egui::DragValue::new(&mut state.group_spacing)

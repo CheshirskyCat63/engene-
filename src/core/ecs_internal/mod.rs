@@ -468,18 +468,53 @@ impl Ecs {
         self.storage.npc_economies.get(&entity)
     }
 
+    /// Get social needs (compatibility getter)
+    pub fn get_social_needs(&self, entity: Entity) -> Option<&crate::world::components::SocialNeeds> {
+        self.storage.social_needs.get(&entity)
+    }
+
+    /// Get ecosystem needs (compatibility getter)
+    pub fn get_ecosystem_needs(&self, entity: Entity) -> Option<&crate::world::components::EcosystemNeeds> {
+        self.storage.ecosystem_needs.get(&entity)
+    }
+
+    /// Get NPC traits (compatibility getter)
+    pub fn get_npc_traits(&self, entity: Entity) -> Option<&crate::world::components::NpcTraits> {
+        self.storage.npc_traits.get(&entity)
+    }
+
+    /// Get monster traits (compatibility getter)
+    pub fn get_monster_traits(&self, entity: Entity) -> Option<&crate::world::components::MonsterTraits> {
+        self.storage.monster_traits.get(&entity)
+    }
+
+    /// Get life info (compatibility getter)
+    pub fn get_life_info(&self, entity: Entity) -> Option<&crate::world::components::LifeInfo> {
+        self.storage.life_info.get(&entity)
+    }
+
+    /// Get emotions (compatibility getter)
+    pub fn get_emotions(&self, entity: Entity) -> Option<&crate::core::ai_emotions::Emotions> {
+        self.storage.emotions.get(&entity)
+    }
+
+    /// Get inventory (compatibility getter)
+    pub fn get_inventory(&self, entity: Entity) -> Option<&crate::world::components::Inventory> {
+        self.storage.inventories.get(&entity)
+    }
+
     // ========================================================================
     // IDENTITY ACCESSOR - Added for backward compatibility
     // ========================================================================
 
     /// Get identity subsystem (compatibility accessor)
     pub fn identity(&self) -> &crate::core::ecs_internal::identity::IdentitySubsystem {
-        &self.storage.identity
+        &self.lifecycle.ecs.identity
     }
 
     /// Get mutable identity subsystem (compatibility accessor)
     pub fn identity_mut(&mut self) -> &mut crate::core::ecs_internal::identity::IdentitySubsystem {
-        &mut self.storage.identity
+        &mut self.lifecycle.ecs.identity
     }
 
     // ========================================================================
