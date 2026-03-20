@@ -1,6 +1,6 @@
 use super::super::SdkApp;
-use crate::graphics::renderer::RenderCamera;
-use crate::graphics::visibility::Frustum;
+use engine_render::renderer::RenderCamera;
+use engine_render::visibility::Frustum;
 
 pub fn run(app: &mut SdkApp, vp: glam::Mat4, cam_pos: glam::Vec3, _dt: f32) {
     if let Some(r) = app.renderer.as_mut() {

@@ -6,8 +6,8 @@ use engine_core::events::canonical::BodyZoneDamaged;
 use engine_core::mutation_policy::FixedTickContext;
 use engine_core::system::EngineSystem as LegacyEngineSystem;
 use engine_core::system_descriptor::SystemDescriptor;
-use crate::game::ai::body::BodyState;
-use crate::world::components::{AiState, Goal, LifeStage};
+use engine_game::ai::body::BodyState;
+use engine_world::components::{AiState, Goal, LifeStage};
 use engine_ecs::Entity;
 use engine_physics::animation::locomotion::LocomotionMachine;
 

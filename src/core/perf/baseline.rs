@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
-use crate::runtime::bootstrap::GameRuntimeAssembly;
+use engine_runtime::bootstrap::GameRuntimeAssembly;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -28,7 +28,7 @@ pub struct PerformanceBaseline {
 
 /// Run headless for N ticks and measure timing and resource usage.
 pub fn measure_baseline(ticks: u64) -> PerformanceBaseline {
-    let grid = crate::world::world::WorldGrid::generate();
+    let grid = engine_world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let mut engine = GameRuntimeAssembly::headless(&biomes);
 
@@ -60,7 +60,7 @@ pub fn measure_baseline(ticks: u64) -> PerformanceBaseline {
     let active_body_count = engine.ecs.alive.len();
     let nav_dirty_count = engine
         .resources
-        .get::<crate::navigation::dynamic_nav_update::NavDirtyTracker>()
+        .get::<engine_navigation::dynamic_nav_update::NavDirtyTracker>()
         .map(|t| t.pending_count())
         .unwrap_or(0);
     let event_drop_count = engine.events.total_dropped();

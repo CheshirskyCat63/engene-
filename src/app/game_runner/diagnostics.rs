@@ -1,4 +1,4 @@
-use engine_runtime::engine::Engine;
+use engine_core::engine::Engine;
 use engine_runtime::query::WithMonster;
 use engine_game::ai::body as ai_body;
 use engine_game::economy::resource_flow;

@@ -3,15 +3,15 @@ use std::sync::Arc;
 
 use engine_core::config::{load_config, ConfigEnvelope};
 use engine_core::plugin::EngineBuilder;
-use crate::game::ai::combat_tactics::tactics::TacticProfile;
-use crate::game::ai_config::AiConfigPlugin;
-use crate::game::combat_plugin::CombatPlugin;
-use crate::game::economy_plugin::EconomyPlugin;
-use crate::game::population_plugin::PopulationPlugin;
-use crate::game::stalker_plugin::StalkerPlugin;
-use crate::game::weapons_plugin::WeaponsPlugin;
-use crate::navigation::cover_map::CoverMap;
-use crate::world::heightmap::Heightmap;
+use engine_game::ai::combat_tactics::tactics::TacticProfile;
+use engine_game::ai_config::AiConfigPlugin;
+use engine_game::combat_plugin::CombatPlugin;
+use engine_game::economy_plugin::EconomyPlugin;
+use engine_game::population_plugin::PopulationPlugin;
+use engine_game::stalker_plugin::StalkerPlugin;
+use engine_game::weapons_plugin::WeaponsPlugin;
+use engine_navigation::cover_map::CoverMap;
+use engine_world::heightmap::Heightmap;
 
 use crate::runtime::bootstrap::common::{insert_explicit_game_config, GAME_CONFIG_DIR};
 
@@ -39,7 +39,7 @@ pub(super) fn insert_game_content_and_plugins(
     builder.insert_resource(load_tactics_or_panic(GAME_CONFIG_DIR));
 
     let hm_ref = heightmap.clone();
-    let cover_map = CoverMap::precompute(crate::world::cell::WORLD_SIZE, 20.0, &|x, z| {
+    let cover_map = CoverMap::precompute(engine_world::cell::WORLD_SIZE, 20.0, &|x, z| {
         hm_ref.sample(x, z)
     });
     builder.insert_resource(cover_map);

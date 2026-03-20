@@ -12,18 +12,18 @@ use super::diagnostics::{collect_entity_instances, print_brief, print_economy};
 use engine_audio::audio::AudioEngine;
 // LEGACY IMPORT - Replace with canonical crate
 use engine_core::engine::Engine;
-use crate::game::hud::{HudState, NotificationKind};
-use crate::game::player::PlayerController;
-use crate::game::player_save::{PlayerInventory, PlayerSave};
-use crate::graphics::camera::FlyCamera;
-use crate::graphics::renderer::{RenderCamera, Renderer};
-use crate::graphics::visibility::Frustum;
-use crate::input::input::InputState;
-use crate::memory::asset_manager::AssetManager;
-use crate::world::chunk_persistence::ChunkPersistenceService;
-use crate::world::heightmap::Heightmap;
-use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
-use crate::world::streaming::WorldStreamer;
+use engine_game::hud::{HudState, NotificationKind};
+use engine_game::player::PlayerController;
+use engine_game::player_save::{PlayerInventory, PlayerSave};
+use engine_render::camera::FlyCamera;
+use engine_render::renderer::{RenderCamera, Renderer};
+use engine_render::visibility::Frustum;
+use engine_input::input::InputState;
+use engine_memory::asset_manager::AssetManager;
+use engine_world::chunk_persistence::ChunkPersistenceService;
+use engine_world::heightmap::Heightmap;
+use engine_world::hierarchical_spatial::HierarchicalSpatialIndex;
+use engine_world::streaming::WorldStreamer;
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -38,7 +38,7 @@ pub struct GameApp {
     sim_accum: f32,
     last_report_month: u32,
     heightmap: ArcHeightmap,
-    biomes: Vec<crate::world::biome::Biome>,
+    biomes: Vec<engine_world::biome::Biome>,
     player: PlayerController,
     player_inventory: PlayerInventory,
     hud: HudState,
@@ -50,7 +50,7 @@ impl GameApp {
     pub fn new(
         engine: Engine,
         heightmap: ArcHeightmap,
-        biomes: Vec<crate::world::biome::Biome>,
+        biomes: Vec<engine_world::biome::Biome>,
     ) -> Self {
         let spawn_pos = [500.0_f32, 50.0, 500.0];
         let mut app = Self {
@@ -236,7 +236,7 @@ impl ApplicationHandler for GameApp {
                 }
 
                 // Handle death/respawn at Rookie Camp per WORLD_SLICE_SPEC
-                if self.player.state == crate::game::player::PlayerState::Dead {
+                if self.player.state == engine_game::player::PlayerState::Dead {
                     if self.input.was_key_pressed(KeyCode::KeyR) {
                         let respawn = [500.0, 50.0, 500.0];
                         self.player.respawn(respawn);

@@ -3,23 +3,23 @@ use engine_core::system::EngineSystem as LegacyEngineSystem;
 use engine_ecs::system_descriptor::SystemDescriptor;
 use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
-use crate::game::ai::body::BodyState;
-use crate::game::ai::combat::StaggerState;
-use crate::game::ai::combat_tactics::coordination::{
+use engine_game::ai::body::BodyState;
+use engine_game::ai::combat::StaggerState;
+use engine_game::ai::combat_tactics::coordination::{
     assign_group_roles, find_group_members, GroupRole,
 };
-use crate::game::ai::combat_tactics::cover::{evaluate_cover_at, find_nearby_cover, CoverPoint};
-use crate::game::ai::combat_tactics::tactics::{select_tactic, Tactic, TacticProfile};
-use crate::game::ai::combat_tactics::threat::{assess_threats, ThreatEntry};
-use crate::game::ai::decision::{decide_monster, decide_npc};
-use crate::game::ai::goals::{pick_best, ScoredGoal};
-use crate::game::ai::needs::{heal, take_damage, urgency};
-use crate::game::ai::observability::{
+use engine_game::ai::combat_tactics::cover::{evaluate_cover_at, find_nearby_cover, CoverPoint};
+use engine_game::ai::combat_tactics::tactics::{select_tactic, Tactic, TacticProfile};
+use engine_game::ai::combat_tactics::threat::{assess_threats, ThreatEntry};
+use engine_game::ai::decision::{decide_monster, decide_npc};
+use engine_game::ai::goals::{pick_best, ScoredGoal};
+use engine_game::ai::needs::{heal, take_damage, urgency};
+use engine_game::ai::observability::{
     AiIntrospection, SimTestConfig, SimTestTier, StabilityMetrics,
 };
-use crate::game::ai::offline_simulation::offline_combat;
-use crate::game::ai::social::teach_skill;
-use crate::game::ai::traits::{monster_trait_weight, npc_trait_weight};
+use engine_game::ai::offline_simulation::offline_combat;
+use engine_game::ai::social::teach_skill;
+use engine_game::ai::traits::{monster_trait_weight, npc_trait_weight};
 
 // ---------------------------------------------------------------------------
 // 8. AiDecisionWireSystem — wires AI decision, combat tactics, goals, emotions
@@ -35,7 +35,7 @@ impl LegacyEngineSystem for AiDecisionWireSystem {
     fn descriptor(&self) -> SystemDescriptor {
         SystemDescriptor::new("AiDecisionWire")
             .reads_resource::<std::collections::HashMap<String, TacticProfile>>()
-            .reads_resource::<crate::navigation::cover_map::CoverMap>()
+            .reads_resource::<engine_navigation::cover_map::CoverMap>()
     }
 
     fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
@@ -54,7 +54,7 @@ impl LegacyEngineSystem for AiDecisionWireSystem {
 
         for &entity in &npc_sample {
             let _scored_goal_sample = ScoredGoal {
-                goal: crate::world::components::Goal::Rest,
+                goal: engine_world::components::Goal::Rest,
                 score: 0.5,
             };
             let _ = pick_best(&[_scored_goal_sample]);
@@ -96,7 +96,7 @@ impl LegacyEngineSystem for AiDecisionWireSystem {
 
                 let has_cover = if let Some(cover_map) =
                     ctx.resources
-                        .get::<crate::navigation::cover_map::CoverMap>()
+                        .get::<engine_navigation::cover_map::CoverMap>()
                 {
                     let my_pos = ctx
                         .ecs
@@ -138,7 +138,7 @@ impl LegacyEngineSystem for AiDecisionWireSystem {
                 if let Some(bb) = ctx.ecs.blackboard.get_mut(&entity) {
                     bb.entries.insert(
                         "combat_tactic".into(),
-                        crate::world::extension_components::Variant::Str(format!("{:?}", tactic)),
+                        engine_world::extension_components::Variant::Str(format!("{:?}", tactic)),
                     );
                 }
 
@@ -205,7 +205,7 @@ impl LegacyEngineSystem for AiDecisionWireSystem {
         // Wire Group fields: leader, members, formed_tick; memory cell_danger, opinion_of
         if frame % 200 == 0 {
             for &entity in &ctx.ecs.alive {
-                if let Some(g) = crate::game::ai::groups::find_or_form_group(ctx.ecs, entity) {
+                if let Some(g) = engine_game::ai::groups::find_or_form_group(ctx.ecs, entity) {
                     let _ = g.leader;
                     let _ = g.members;
                     let _ = g.formed_tick;

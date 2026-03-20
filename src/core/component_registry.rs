@@ -5,8 +5,8 @@ use std::any::TypeId;
 use engine_core::ai_emotions::Emotions;
 use engine_core::ai_memory::Memory;
 use engine_core::ai_plan::Plan;
-use crate::world::components::*;
-use crate::world::extension_components::{Attributes, Blackboard, EntityTags, StatusEffects};
+use engine_world::components::*;
+use engine_world::extension_components::{Attributes, Blackboard, EntityTags, StatusEffects};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum DataTemperature {

@@ -215,13 +215,13 @@ pub enum LessonContext {
     General,
 }
 
-pub fn context_for_kind(kind: &crate::world::components::EntityKind) -> LessonContext {
+pub fn context_for_kind(kind: &engine_world::components::EntityKind) -> LessonContext {
     match kind {
-        crate::world::components::EntityKind::Npc => LessonContext::VsNpc,
-        crate::world::components::EntityKind::Monster(s) => match s {
-            crate::world::components::MonsterSpecies::Wolf => LessonContext::VsWolf,
-            crate::world::components::MonsterSpecies::Boar => LessonContext::VsBoar,
-            crate::world::components::MonsterSpecies::Bloodsucker => LessonContext::VsBloodsucker,
+        engine_world::components::EntityKind::Npc => LessonContext::VsNpc,
+        engine_world::components::EntityKind::Monster(s) => match s {
+            engine_world::components::MonsterSpecies::Wolf => LessonContext::VsWolf,
+            engine_world::components::MonsterSpecies::Boar => LessonContext::VsBoar,
+            engine_world::components::MonsterSpecies::Bloodsucker => LessonContext::VsBloodsucker,
         },
     }
 }

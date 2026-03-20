@@ -1,5 +1,5 @@
 use super::super::SdkApp;
-use crate::world::hierarchical_spatial::{select_spatial_update_path, SpatialUpdatePath};
+use engine_world::hierarchical_spatial::{select_spatial_update_path, SpatialUpdatePath};
 
 fn collect_dirty_from_ecs_journal(app: &mut SdkApp) {
     for e in app.engine.ecs.drain_spatial_inserted_journal() {
@@ -17,7 +17,7 @@ fn rebuild_spatial_from_ecs(app: &mut SdkApp) {
     if let Some(spatial) = app
         .engine
         .resources
-        .get_mut::<crate::world::hierarchical_spatial::HierarchicalSpatialIndex>()
+        .get_mut::<engine_world::hierarchical_spatial::HierarchicalSpatialIndex>()
     {
         let mut entities = Vec::with_capacity(app.engine.ecs.alive.len());
         let mut applied_positions = std::collections::HashMap::with_capacity(app.engine.ecs.alive.len());
@@ -36,7 +36,7 @@ fn apply_incremental_update(app: &mut SdkApp) {
     if let Some(spatial) = app
         .engine
         .resources
-        .get_mut::<crate::world::hierarchical_spatial::HierarchicalSpatialIndex>()
+        .get_mut::<engine_world::hierarchical_spatial::HierarchicalSpatialIndex>()
     {
         for &e in &app.spatial_dirty_journal.removed {
             spatial.remove(e);
@@ -67,7 +67,7 @@ fn apply_incremental_update(app: &mut SdkApp) {
 }
 
 pub fn run(app: &mut SdkApp) {
-    if let Some(origin) = app.engine.resources.get::<crate::world::origin_shift::OriginShift>() {
+    if let Some(origin) = app.engine.resources.get::<engine_world::origin_shift::OriginShift>() {
         if origin.shift_count != app.spatial_last_origin_shift_count {
             app.spatial_dirty_journal.mark_force_rebuild();
             app.spatial_last_origin_shift_count = origin.shift_count;

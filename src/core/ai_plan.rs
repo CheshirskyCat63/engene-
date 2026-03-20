@@ -1,4 +1,4 @@
-use crate::world::components::Goal;
+use engine_world::components::Goal;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]

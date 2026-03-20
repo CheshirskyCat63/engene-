@@ -1,5 +1,5 @@
-use crate::world::material_bridge::{MaterialBridge, ValidationMode};
-use crate::world::surface_db::SurfaceDB;
+use engine_world::material_bridge::{MaterialBridge, ValidationMode};
+use engine_world::surface_db::SurfaceDB;
 
 pub struct ContentValidationReport {
     pub errors: Vec<String>,
@@ -62,12 +62,12 @@ pub fn validate_all_content(
 ) -> Result<(), ContentValidationReport> {
     let mut report = ContentValidationReport::new();
 
-    report.add_errors(crate::world::material_bridge::validate_material_bridge(
+    report.add_errors(engine_world::material_bridge::validate_material_bridge(
         surface_db, bridge,
     ));
 
     report.add_warnings(
-        crate::world::material_bridge::validate_material_consistency(surface_db, bridge),
+        engine_world::material_bridge::validate_material_consistency(surface_db, bridge),
     );
 
     match mode {

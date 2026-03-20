@@ -1,6 +1,6 @@
 use engine_core::system::EngineSystem as LegacyEngineSystem;
-use crate::world::terrain_damage::CraterStamp;
-use crate::world::terrain_deformation::TerrainDeformationSystem;
+use engine_world::terrain_damage::CraterStamp;
+use engine_world::terrain_deformation::TerrainDeformationSystem;
 use engine_core::events::canonical::*;
 use engine_ecs::system_descriptor::SystemDescriptor;
 use engine_physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};

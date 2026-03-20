@@ -3,17 +3,17 @@ use std::sync::Arc;
 use engine_core::component_registry::ComponentRegistry;
 use engine_core::material_truth::MaterialTruthService;
 use engine_core::plugin::EngineBuilder;
-use crate::navigation::dynamic_nav_update::NavDirtyTracker;
-use crate::navigation::hpa_star::HpaGraph;
+use engine_navigation::dynamic_nav_update::NavDirtyTracker;
+use engine_navigation::hpa_star::HpaGraph;
 use crate::runtime::bootstrap::common::insert_runtime_core;
-use crate::world::fields::{AnomalyForceType, AnomalyZone, WorldFields};
-use crate::world::heightmap::Heightmap;
-use crate::world::hierarchical_spatial::HierarchicalSpatialIndex;
-use crate::world::origin_shift::OriginShift;
-use crate::world::streaming::WorldStreamer;
-use crate::world::surface_state::SurfaceStateStore;
-use crate::world::terrain_deformation::TerrainDeformationSystem;
-use crate::world::terrain_truth::TerrainTruth;
+use engine_world::fields::{AnomalyForceType, AnomalyZone, WorldFields};
+use engine_world::heightmap::Heightmap;
+use engine_world::hierarchical_spatial::HierarchicalSpatialIndex;
+use engine_world::origin_shift::OriginShift;
+use engine_world::streaming::WorldStreamer;
+use engine_world::surface_state::SurfaceStateStore;
+use engine_world::terrain_deformation::TerrainDeformationSystem;
+use engine_world::terrain_truth::TerrainTruth;
 use engine_audio::audio::AudioEngine;
 use engine_content::asset_budget::AssetBudget;
 use engine_content::prefabs::prefab_registry::PrefabRegistry;
@@ -24,9 +24,9 @@ pub(super) fn insert_world_and_damage_resources(builder: &mut EngineBuilder) {
     let mut world_fields = WorldFields::new();
     world_fields.anomaly.zones.push(AnomalyZone {
         center: glam::Vec3::new(
-            crate::world::cell::WORLD_SIZE * 0.7,
+            engine_world::cell::WORLD_SIZE * 0.7,
             0.0,
-            crate::world::cell::WORLD_SIZE * 0.3,
+            engine_world::cell::WORLD_SIZE * 0.3,
         ),
         radius: 80.0,
         force_strength: 15.0,
@@ -53,7 +53,7 @@ pub(super) fn insert_vertical_runtime_resources(
     builder.insert_resource(heightmap.clone());
     builder.insert_resource(WorldStreamer::new(3000.0, 4000.0));
     builder.insert_resource(std::sync::Mutex::new(
-        crate::memory::asset_manager::AssetManager::new(),
+        engine_memory::asset_manager::AssetManager::new(),
     ));
     builder.insert_resource(AudioEngine::new());
     builder.insert_resource(HierarchicalSpatialIndex::new());
@@ -61,11 +61,11 @@ pub(super) fn insert_vertical_runtime_resources(
     builder.insert_resource(OriginShift::new());
     builder.insert_resource(NavDirtyTracker::new());
     builder
-        .insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
-    builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
+        .insert_resource(engine_render::destruction_occlusion::DestructionOcclusionSystem::new());
+    builder.insert_resource(engine_render::gore_mesh::GoreMeshSystem::new(256));
     builder.insert_resource(ComponentRegistry::default_registry());
     builder.insert_resource(canonical_material_truth_service(builder));
-    builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
+    builder.insert_resource(engine_render::surface_state_render::SurfaceStateRenderSystem::new());
 
     builder.insert_resource(authority_entries);
     builder.insert_resource(OwnershipMap::new());
@@ -85,7 +85,7 @@ pub(super) fn insert_headless_runtime_resources(
     builder.insert_resource(heightmap.clone());
     builder.insert_resource(WorldStreamer::new(3000.0, 4000.0));
     builder.insert_resource(std::sync::Mutex::new(
-        crate::memory::asset_manager::AssetManager::new(),
+        engine_memory::asset_manager::AssetManager::new(),
     ));
     builder.insert_resource(HierarchicalSpatialIndex::new());
     builder.insert_resource(HpaGraph::build());
@@ -105,21 +105,21 @@ pub(super) fn insert_headless_runtime_resources(
 }
 
 pub(super) fn insert_game_tail_resources(builder: &mut EngineBuilder, with_tools_metrics: bool) {
-    builder.insert_resource(crate::game::economy::item_registry::ItemRegistry::new());
-    builder.insert_resource(Vec::<crate::simulation::camp_simulation::CampState>::new());
-    builder.insert_resource(crate::audio::sound_bank::SoundBank::new());
+    builder.insert_resource(engine_game::economy::item_registry::ItemRegistry::new());
+    builder.insert_resource(Vec::<engine_simulation::camp_simulation::CampState>::new());
+    builder.insert_resource(engine_audio::sound_bank::SoundBank::new());
     builder.insert_resource(engine_core::perf::perf_budget::PerfBudgetManager::new(60));
-    builder.insert_resource(crate::simulation::world_milestones::WorldMilestoneTracker::new());
-    builder.insert_resource(crate::body::death_pipeline::CorpseManager::new());
-    builder.insert_resource(crate::animation::clip_map::ClipMap::new());
-    builder.insert_resource(crate::animation::animation_ladder::AnimationLadder::default());
-    builder.insert_resource(crate::game::gameplay::factions::FactionRelations::new());
+    builder.insert_resource(engine_simulation::world_milestones::WorldMilestoneTracker::new());
+    builder.insert_resource(engine_body::death_pipeline::CorpseManager::new());
+    builder.insert_resource(engine_animation::clip_map::ClipMap::new());
+    builder.insert_resource(engine_animation::animation_ladder::AnimationLadder::default());
+    builder.insert_resource(engine_game::gameplay::factions::FactionRelations::new());
     builder
         .insert_resource(engine_core::determinism_policy::DeterminismPolicyMatrix::build_default());
     builder.insert_resource(engine_core::build_manifest::SchemaMigrationRegistry::new());
     if with_tools_metrics {
         builder
-            .insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
+            .insert_resource(engine_tools::sim_metrics_dashboard::SimMetricsDashboard::default());
     }
     builder.insert_resource(engine_core::perf::sim_telemetry::SimTelemetry::new());
     builder.insert_resource(engine_core::dirty_set::ChunkDirtySet::default());

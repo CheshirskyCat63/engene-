@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use glam::Vec3;
 
 use engine_core::events::canonical::ImpactEvent;
-use crate::world::surface_db::MaterialId;
+use engine_world::surface_db::MaterialId;
 
 #[derive(Clone, Debug)]
 pub struct AggregatedImpact {

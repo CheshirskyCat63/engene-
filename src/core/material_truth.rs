@@ -1,11 +1,11 @@
 //! Material truth service: unified query layer over MaterialBridge with fallbacks.
 
 use engine_core::game_config::GameConfig;
-use crate::world::material_bridge::{
+use engine_world::material_bridge::{
     AudioMaterialMapping, MaterialBridge, MaterialBridgeData, ParticleMaterialMapping,
     RenderMaterialMapping,
 };
-use crate::world::surface_db::{MaterialId, SurfaceDB};
+use engine_world::surface_db::{MaterialId, SurfaceDB};
 
 pub struct MaterialTruthService {
     bridge: MaterialBridge,
@@ -136,7 +136,7 @@ impl MaterialTruthService {
 
     /// Validates bridge against SurfaceDB; returns list of validation errors.
     pub fn validate(&self, surface_db: &SurfaceDB) -> Vec<String> {
-        match crate::world::material_bridge::validate_material_bridge(surface_db, &self.bridge) {
+        match engine_world::material_bridge::validate_material_bridge(surface_db, &self.bridge) {
             Ok(()) => vec![],
             Err(e) => e,
         }

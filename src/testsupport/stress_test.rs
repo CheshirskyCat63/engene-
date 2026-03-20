@@ -6,12 +6,12 @@ use std::time::Instant;
 use glam::Vec3;
 use rand::Rng;
 
-use crate::runtime::bootstrap::GameRuntimeAssembly;
-use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
-use crate::world::components::MonsterSpecies;
-use crate::world::population;
+use engine_runtime::bootstrap::GameRuntimeAssembly;
+use engine_world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
+use engine_world::components::MonsterSpecies;
+use engine_world::population;
 use engine_physics::ballistics::BallisticsSystem;
-use engine_runtime::engine::Engine;
+use engine_core::engine::Engine;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
@@ -32,7 +32,7 @@ pub struct StressReport {
 
 /// Build headless and spawn extra entities for stress.
 fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> Engine {
-    let grid = crate::world::world::WorldGrid::generate();
+    let grid = engine_world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let mut engine = GameRuntimeAssembly::headless(&biomes);
 
@@ -43,7 +43,7 @@ fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> E
         let cy = rng.gen_range(0..GRID_SIZE);
         engine.ecs.set_transform(
             e,
-            crate::world::components::Transform {
+            engine_world::components::Transform {
                 x: cx as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
                 y: cy as f32 * CELL_SIZE + rng.gen_range(0.0..CELL_SIZE),
                 cell_x: cx,
@@ -52,34 +52,34 @@ fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> E
         );
         engine
             .ecs
-            .set_kind(e, crate::world::components::EntityKind::Npc);
+            .set_kind(e, engine_world::components::EntityKind::Npc);
         engine
             .ecs
-            .set_name(e, crate::world::components::Name("StressNPC".into()));
+            .set_name(e, engine_world::components::Name("StressNPC".into()));
         engine
             .ecs
-            .set_personal_needs(e, crate::world::components::PersonalNeeds::default_npc());
+            .set_personal_needs(e, engine_world::components::PersonalNeeds::default_npc());
         engine.ecs.set_npc_economy(
             e,
-            crate::world::components::NpcEconomy {
+            engine_world::components::NpcEconomy {
                 money: 50.0,
                 monthly_required: 50.0,
-                job: crate::world::components::Job::Guard,
+                job: engine_world::components::Job::Guard,
                 desperation: 0.0,
             },
         );
         engine.ecs.set_sim_level(
             e,
-            crate::world::components::SimLevel {
-                level: crate::world::components::SimulationLevel::L1,
+            engine_world::components::SimLevel {
+                level: engine_world::components::SimulationLevel::L1,
             },
         );
         engine
             .ecs
-            .set_ai_state(e, crate::world::components::AiState::Idle);
+            .set_ai_state(e, engine_world::components::AiState::Idle);
         engine
             .ecs
-            .set_inventory(e, crate::world::components::Inventory { items: Vec::new() });
+            .set_inventory(e, engine_world::components::Inventory { items: Vec::new() });
         engine
             .ecs
             .set_memory(e, engine_core::ai_memory::Memory::new());
@@ -88,7 +88,7 @@ fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> E
             .set_emotions(e, engine_core::ai_emotions::Emotions::new());
         engine.ecs.set_life_info(
             e,
-            crate::world::components::LifeInfo {
+            engine_world::components::LifeInfo {
                 age: 100.0,
                 max_age: 400.0,
                 last_mate_day: 0,
@@ -112,7 +112,7 @@ fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> E
 
 /// Run stress test: headless with extra entities, fire many ballistics per tick.
 pub fn run_meat_grinder(ticks: u64) -> StressReport {
-    let grid = crate::world::world::WorldGrid::generate();
+    let grid = engine_world::world::WorldGrid::generate();
     let _biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
     let mut engine = build_stress_world(50, 20);
 
@@ -122,7 +122,7 @@ pub fn run_meat_grinder(ticks: u64) -> StressReport {
 
     let weapons = engine
         .resources
-        .get::<crate::game::weapons_plugin::WeaponRegistry>()
+        .get::<engine_game::weapons_plugin::WeaponRegistry>()
         .cloned();
     let weapon_id = weapons
         .as_ref()

@@ -2,14 +2,14 @@ use super::super::SdkApp;
 
 pub fn run(
     app: &mut SdkApp,
-    to_load: &[crate::world::streaming::ChunkCoord],
-    to_unload: &[crate::world::streaming::ChunkCoord],
+    to_load: &[engine_world::streaming::ChunkCoord],
+    to_unload: &[engine_world::streaming::ChunkCoord],
 ) {
     if !to_unload.is_empty() || !to_load.is_empty() {
         if let Some(mut persistence) = app
             .engine
             .resources
-            .take::<crate::world::chunk_persistence::ChunkPersistenceService>()
+            .take::<engine_world::chunk_persistence::ChunkPersistenceService>()
         {
             let tick = app.engine.ecs.tick;
             for coord in to_unload {

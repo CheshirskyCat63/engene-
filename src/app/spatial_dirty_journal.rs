@@ -1,4 +1,4 @@
-use crate::world::hierarchical_spatial::SpatialDirtyInput;
+use engine_world::hierarchical_spatial::SpatialDirtyInput;
 use engine_ecs::Entity;
 
 #[derive(Debug, Default, Clone)]

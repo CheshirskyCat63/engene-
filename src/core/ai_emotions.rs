@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::world::components::{MonsterTraits, NpcTraits};
+use engine_world::components::{MonsterTraits, NpcTraits};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Emotions {

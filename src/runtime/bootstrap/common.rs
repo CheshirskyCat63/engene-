@@ -10,7 +10,7 @@ use engine_core::quality_governor::QualityGovernor;
 use engine_core::runtime_config::RuntimeConfig;
 use engine_core::sdk::EngineSDK;
 use engine_ecs::Ecs;
-use engine_runtime::engine::Engine;
+use engine_core::engine::Engine;
 
 pub(crate) const GAME_CONFIG_DIR: &str = "game/data";
 

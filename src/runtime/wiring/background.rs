@@ -1,6 +1,6 @@
-use crate::game::ai::offline_simulation;
-use crate::game::ecosystem::food_chain;
-use crate::world::components::{EntityKind, SimulationLevel};
+use engine_game::ai::offline_simulation;
+use engine_game::ecosystem::food_chain;
+use engine_world::components::{EntityKind, SimulationLevel};
 use engine_ecs::Ecs;
 
 pub fn process_l1_entities(ecs: &mut Ecs, elapsed: f32) {

@@ -1,6 +1,6 @@
 // LEGACY IMPORTS - Use canonical crates instead
 use engine_core::system::EngineSystem as LegacyEngineSystem;
-use crate::world::fields::WorldFields;
+use engine_world::fields::WorldFields;
 use engine_core::events::canonical::*;
 use engine_ecs::system_descriptor::SystemDescriptor;
 use engine_physics::ballistics::{BallisticEvent, BallisticsSystem};
@@ -37,7 +37,7 @@ impl LegacyEngineSystem for BallisticsTickSystem {
 
         let height_fn: Box<dyn Fn(f32, f32) -> f32> = if let Some(hm) = ctx
             .resources
-            .get::<std::sync::Arc<crate::world::heightmap::Heightmap>>()
+            .get::<std::sync::Arc<engine_world::heightmap::Heightmap>>()
         {
             let hm = hm.clone();
             Box::new(move |x, z| hm.sample(x, z))

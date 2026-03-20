@@ -4,10 +4,10 @@
 use std::collections::HashMap;
 
 use engine_ecs::Ecs;
-use engine_runtime::engine::Engine;
+use engine_core::engine::Engine;
 // LEGACY IMPORTS - Use canonical crates instead
 use engine_core::system::EngineSystem as LegacyEngineSystem;
-use crate::game::economy::resource_flow;
+use engine_game::economy::resource_flow;
 use engine_core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
 use engine_ecs::system_descriptor::SystemDescriptor;
 use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
@@ -101,41 +101,41 @@ pub struct ClosedLoopReport {
 }
 
 /// Build headless engine with ClosedLoopRecorder for validation.
-fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine {
-    let grid = crate::world::world::WorldGrid::generate();
-    let resource_grid = crate::world::resources::ResourceGrid::new(biomes);
-    let heightmap = std::sync::Arc::new(crate::world::heightmap::Heightmap::generate(biomes));
+fn build_headless_with_recorder(biomes: &[engine_world::biome::Biome]) -> Engine {
+    let grid = engine_world::world::WorldGrid::generate();
+    let resource_grid = engine_world::resources::ResourceGrid::new(biomes);
+    let heightmap = std::sync::Arc::new(engine_world::heightmap::Heightmap::generate(biomes));
 
     let mut builder = EngineBuilder::new();
     builder.insert_resource(resource_grid);
     builder.insert_resource(ClosedLoopRecorder::default());
 
-    let mut world_fields = crate::world::fields::WorldFields::new();
+    let mut world_fields = engine_world::fields::WorldFields::new();
     world_fields
         .anomaly
         .zones
-        .push(crate::world::fields::AnomalyZone {
+        .push(engine_world::fields::AnomalyZone {
             center: glam::Vec3::new(
-                crate::world::cell::WORLD_SIZE * 0.7,
+                engine_world::cell::WORLD_SIZE * 0.7,
                 0.0,
-                crate::world::cell::WORLD_SIZE * 0.3,
+                engine_world::cell::WORLD_SIZE * 0.3,
             ),
             radius: 80.0,
             force_strength: 15.0,
-            force_type: crate::world::fields::AnomalyForceType::Vortex,
+            force_type: engine_world::fields::AnomalyForceType::Vortex,
         });
     builder.insert_resource(world_fields);
-    builder.insert_resource(crate::physics::destruction::DestructionSystem::new());
-    builder.insert_resource(crate::world::terrain_deformation::TerrainDeformationSystem::new());
+    builder.insert_resource(engine_physics::destruction::DestructionSystem::new());
+    builder.insert_resource(engine_world::terrain_deformation::TerrainDeformationSystem::new());
 
-    builder.add_plugin(crate::game::stalker_plugin::StalkerPlugin::from_config(
+    builder.add_plugin(engine_game::stalker_plugin::StalkerPlugin::from_config(
         "game/data",
     ));
-    builder.add_plugin(crate::game::weapons_plugin::WeaponsPlugin::new("game/data"));
+    builder.add_plugin(engine_game::weapons_plugin::WeaponsPlugin::new("game/data"));
 
     {
         use engine_core::config::{load_config, ConfigEnvelope};
-        use crate::game::ai::combat_tactics::tactics::TacticProfile;
+        use engine_game::ai::combat_tactics::tactics::TacticProfile;
         use std::collections::HashMap;
         let tactics: HashMap<String, TacticProfile> =
             load_config::<ConfigEnvelope<HashMap<String, TacticProfile>>>("game/data/tactics.ron")
@@ -146,42 +146,42 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
 
     {
         let hm_ref = heightmap.clone();
-        let cover_map = crate::navigation::cover_map::CoverMap::precompute(
-            crate::world::cell::WORLD_SIZE,
+        let cover_map = engine_navigation::cover_map::CoverMap::precompute(
+            engine_world::cell::WORLD_SIZE,
             20.0,
             &|x, z| hm_ref.sample(x, z),
         );
         builder.insert_resource(cover_map);
     }
 
-    builder.insert_resource(crate::world::streaming::WorldStreamer::new(3000.0, 4000.0));
+    builder.insert_resource(engine_world::streaming::WorldStreamer::new(3000.0, 4000.0));
     builder.insert_resource(std::sync::Mutex::new(
-        crate::memory::asset_manager::AssetManager::new(),
+        engine_memory::asset_manager::AssetManager::new(),
     ));
-    builder.insert_resource(crate::audio::audio::AudioEngine::new());
-    builder.insert_resource(crate::world::hierarchical_spatial::HierarchicalSpatialIndex::new());
-    builder.insert_resource(crate::navigation::hpa_star::HpaGraph::build());
-    builder.insert_resource(crate::world::origin_shift::OriginShift::new());
-    builder.insert_resource(crate::navigation::dynamic_nav_update::NavDirtyTracker::new());
+    builder.insert_resource(engine_audio::audio::AudioEngine::new());
+    builder.insert_resource(engine_world::hierarchical_spatial::HierarchicalSpatialIndex::new());
+    builder.insert_resource(engine_navigation::hpa_star::HpaGraph::build());
+    builder.insert_resource(engine_world::origin_shift::OriginShift::new());
+    builder.insert_resource(engine_navigation::dynamic_nav_update::NavDirtyTracker::new());
     builder
-        .insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
-    builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
+        .insert_resource(engine_render::destruction_occlusion::DestructionOcclusionSystem::new());
+    builder.insert_resource(engine_render::gore_mesh::GoreMeshSystem::new(256));
     builder.insert_resource(engine_core::component_registry::ComponentRegistry::default_registry());
     builder.insert_resource(engine_core::material_truth::MaterialTruthService::empty());
-    builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
+    builder.insert_resource(engine_render::surface_state_render::SurfaceStateRenderSystem::new());
 
-    let center = crate::world::cell::WORLD_SIZE * 0.5;
+    let center = engine_world::cell::WORLD_SIZE * 0.5;
     builder.add_system_default(Box::new(
-        crate::simulation::simulation::SimulationSystem::new(center, center),
+        engine_simulation::simulation::SimulationSystem::new(center, center),
     ));
     builder.add_system_default(Box::new(
         crate::runtime::wiring::world_tick::WorldTickSystem::new(grid),
     ));
-    builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
-    builder.add_system_default(Box::new(crate::physics::physics::PhysicsSystem::new(
+    builder.add_system_default(Box::new(engine_game::ai::ai::AiSystem::new()));
+    builder.add_system_default(Box::new(engine_physics::physics::PhysicsSystem::new(
         heightmap,
     )));
-    builder.add_system_default(Box::new(crate::game::economy::economy::EconomySystem));
+    builder.add_system_default(Box::new(engine_game::economy::economy::EconomySystem));
     builder.add_system_default(Box::new(
         crate::runtime::wiring::integration::BallisticsTickSystem,
     ));
@@ -207,13 +207,13 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
         crate::runtime::wiring::animation::AnimationIntegrationSystem::new(),
     ));
     builder.add_system_default(Box::new(
-        crate::audio::audio_integration::AudioIntegrationSystem::new(),
+        engine_audio::audio_integration::AudioIntegrationSystem::new(),
     ));
     builder.add_system_default(Box::new(ClosedLoopRecorderSystem));
 
     let mut ecs = Ecs::new();
-    crate::world::population::spawn_npcs(&mut ecs);
-    crate::world::population::spawn_monsters(&mut ecs);
+    engine_world::population::spawn_npcs(&mut ecs);
+    engine_world::population::spawn_monsters(&mut ecs);
 
     let (systems, resources) = builder.build(&mut ecs);
     let mut engine = Engine::from_builder(systems, resources, ecs);
@@ -223,7 +223,7 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
 
 /// Run headless simulation for N ticks and produce a ClosedLoopReport.
 pub fn run_closed_loop(ticks: u64) -> ClosedLoopReport {
-    let grid = crate::world::world::WorldGrid::generate();
+    let grid = engine_world::world::WorldGrid::generate();
     let biomes: Vec<_> = grid.cells.iter().map(|c| c.biome).collect();
 
     let mut engine = build_headless_with_recorder(&biomes);
