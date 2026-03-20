@@ -6,7 +6,7 @@ use std::time::Instant;
 use glam::Vec3;
 use rand::Rng;
 
-use crate::core::engine::Engine;
+use engine_runtime::engine::Engine;
 use engine_physics::ballistics::BallisticsSystem;
 use crate::runtime::bootstrap::GameRuntimeAssembly;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};

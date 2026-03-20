@@ -1,6 +1,7 @@
-//! Core subsystem - TEMPORARY COMPATIBILITY LAYER
+//! Core subsystem - COMPATIBILITY HUB
 //! 
-//! This module is being dismantled. Components have moved to dedicated crates:
+//! This module provides re-exports from canonical crates for backward compatibility.
+//! Components have moved to dedicated crates:
 //! - ECS → engine_ecs
 //! - Runtime/system orchestration → engine_runtime  
 //! - Core policies/config → engine_core
@@ -27,23 +28,3 @@ pub use engine_core::runtime_config;
 pub use engine_core::time;
 
 pub use engine_startup::BuildManifest;
-
-// REMOVED MODULES - moved to dedicated crates
-// ✓ ai_emotions, ai_memory, ai_plan → engine_world
-// ✓ budget_registry, config, game_config, plugin, quality_governor → engine_core
-// ✓ component_registry → engine_ecs
-// ✓ content_validation → engine_content
-// ✓ job_graph, async_services, jobs, perf → engine_runtime
-// ✓ job_topology_report, crash_telemetry, hot_reload, debug → engine_tools
-// ✓ determinism_audit, mutation_policy, serialization, dirty_set, replay → engine_core
-// ✓ material_truth, world_state_authority, events → engine_world
-// ✓ sdk → sdk_app
-
-// DEPRECATED MODULES - to be deleted
-pub mod ecs;              // DELETE - use engine_ecs
-pub mod ecs_internal;     // DELETE - use engine_ecs
-pub mod engine;           // DELETE - split between engine_core/engine_runtime
-pub mod query;            // DELETE - use engine_ecs
-pub mod scheduler;        // DELETE - use engine_runtime (deprecated)
-pub mod system;           // DELETE - use engine_runtime (deprecated)
-pub mod systems;          // DELETE - use engine_runtime

@@ -5,7 +5,7 @@ use crate::simulation::simulation::SimulationSystem;
 
 impl EngineRuntimeAssembly {
     /// Engine-kernel bootstrap only. No game plugins, no game-data I/O, no world generation.
-    pub fn kernel_headless() -> crate::core::engine::Engine {
+    pub fn kernel_headless() -> engine_runtime::engine::Engine {
         let mut builder = EngineBuilder::new();
         insert_runtime_core(
             &mut builder,

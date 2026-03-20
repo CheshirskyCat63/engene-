@@ -3,8 +3,8 @@
 
 use std::collections::HashMap;
 
-use crate::core::ecs::Ecs;
-use crate::core::engine::Engine;
+use engine_ecs::Ecs;
+use engine_runtime::engine::Engine;
 // LEGACY IMPORTS - Use canonical crates instead
 use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 use engine_ecs::system_descriptor::SystemDescriptor;

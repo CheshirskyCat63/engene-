@@ -5,7 +5,7 @@ use crate::runtime::bootstrap::common::{finalize_builder, insert_runtime_core};
 
 impl ToolsRuntimeAssembly {
     /// Minimal runtime for tools/test harnesses.
-    pub fn minimal() -> crate::core::engine::Engine {
+    pub fn minimal() -> engine_runtime::engine::Engine {
         let mut builder = EngineBuilder::new();
         insert_runtime_core(
             &mut builder,

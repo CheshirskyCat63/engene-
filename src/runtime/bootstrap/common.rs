@@ -1,6 +1,6 @@
 use crate::core::budget_registry::create_default_registry;
-use crate::core::ecs::Ecs;
-use crate::core::engine::Engine;
+use engine_ecs::Ecs;
+use engine_runtime::engine::Engine;
 use crate::core::events::aggregation::EventAggregator;
 use crate::core::events::debug_bus::DebugBus;
 use crate::core::events::render_bus::RenderBus;

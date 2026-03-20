@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 
 use engine_physics::animation::locomotion::LocomotionMachine;
-use crate::core::ecs::Entity;
+use engine_ecs::Entity;
 use crate::core::events::canonical::BodyZoneDamaged;
 use crate::core::mutation_policy::FixedTickContext;
 use crate::core::system::EngineSystem as LegacyEngineSystem;

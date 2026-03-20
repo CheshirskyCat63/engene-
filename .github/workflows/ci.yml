@@ -37,16 +37,19 @@ jobs:
         run: cargo fmt --all -- --check
       
       - name: Run clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
       
-      - name: Check compilation
-        run: cargo check --all-targets --all-features
+      - name: Check compilation (workspace-wide)
+        run: cargo check --workspace --all-targets --all-features
 
       - name: ECS direct-access gate
         run: bash scripts/check_ecs_direct_access.sh
 
       - name: Dependency direction gate
         run: bash scripts/check_dependency_direction.sh
+
+      - name: Architectural gates
+        run: cargo test --test architectural_gates
 
 
   test:
@@ -70,8 +73,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
       
-      - name: Run tests
-        run: cargo test --all-features --no-fail-fast -- --test-threads=1
+      - name: Run tests (workspace-wide)
+        run: cargo test --workspace --all-features --no-fail-fast -- --test-threads=1
 
   docs:
     name: Documentation
@@ -83,5 +86,5 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       
-      - name: Build documentation
-        run: cargo doc --no-deps --all-features
+      - name: Build documentation (workspace-wide)
+        run: cargo doc --workspace --no-deps --all-features

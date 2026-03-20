@@ -25,7 +25,7 @@ impl GameRuntimeAssembly {
     pub fn vertical_slice(
         heightmap: Arc<Heightmap>,
         biomes: &[crate::world::biome::Biome],
-    ) -> crate::core::engine::Engine {
+    ) -> engine_runtime::engine::Engine {
         let grid = WorldGrid::generate();
         let authority_entries = world_state_authority::authority_matrix();
 
@@ -43,7 +43,7 @@ impl GameRuntimeAssembly {
     }
 
     /// Game simulation runtime without projection stack.
-    pub fn headless(biomes: &[crate::world::biome::Biome]) -> crate::core::engine::Engine {
+    pub fn headless(biomes: &[crate::world::biome::Biome]) -> engine_runtime::engine::Engine {
         let grid = WorldGrid::generate();
         let authority_entries = world_state_authority::authority_matrix();
         let heightmap = Arc::new(Heightmap::generate(biomes));

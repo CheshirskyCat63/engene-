@@ -1,4 +1,4 @@
-use crate::core::ecs::Ecs;
+use engine_ecs::Ecs;
 use crate::game::ai::offline_simulation;
 use crate::game::ecosystem::food_chain;
 use crate::world::components::{EntityKind, SimulationLevel};
