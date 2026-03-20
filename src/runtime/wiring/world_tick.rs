@@ -1,58 +1,22 @@
-use crate::core::mutation_policy::*;
-use crate::core::scheduler::Scheduler;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::{DeterminismTier, SystemDescriptor};
-use crate::game::ecosystem::environment;
-use crate::game::ecosystem::migration;
-use crate::runtime::wiring::background;
-use crate::world::resources::ResourceGrid;
-use crate::world::world::WorldGrid;
+//! World Tick Wiring - TRANSITIONAL
+//! Phase 3: Now re-exports from engine_runtime
+//!
+//! This module is transitional - the actual WorldTickSystem logic
+//! has been moved to engine_runtime. This file provides backward
+//! compatibility for root consumers.
 
-pub struct WorldTickSystem {
-    pub grid: WorldGrid,
-    scheduler: Scheduler,
-}
+pub use engine_runtime::simulation_core::systems::WorldTickSystem;
+pub use engine_runtime::simulation_core::systems::Scheduler;
+pub use engine_runtime::simulation_core::systems::EngineSystem;
 
-impl WorldTickSystem {
-    pub fn new(grid: WorldGrid) -> Self {
-        Self {
-            grid,
-            scheduler: Scheduler::new(5.0),
-        }
-    }
-}
+// Re-export context types for transitional compatibility
+pub use crate::core::system::FixedTickContext as WorldTickContext;
 
-impl EngineSystem for WorldTickSystem {
-    fn name(&self) -> &str {
-        "WorldTick"
-    }
-
-    fn descriptor(&self) -> SystemDescriptor {
-        SystemDescriptor::new("WorldTick")
-            .with_determinism(DeterminismTier::Hard)
-            .after("Simulation")
-            .before("AI")
-    }
-
-    fn fixed_tick(&mut self, ctx: &mut FixedTickContext) {
-        if !self.scheduler.accumulate(ctx.time.delta) {
-            return;
-        }
-
-        let season = ctx.time.season();
-        let food_mult = season.food_regen_mult();
-        let danger_mult = season.danger_mult();
-
-        self.grid.regenerate_food_scaled(5.0, food_mult);
-        environment::consume_food(ctx.ecs, &mut self.grid);
-        environment::update_cell_danger_scaled(ctx.ecs, &mut self.grid, danger_mult);
-        migration::process_migration(ctx.ecs, ctx.events, &self.grid);
-        background::process_l1_entities(ctx.ecs, 5.0);
-        background::process_l2_entities(ctx.ecs, 5.0);
-
-        let biomes: Vec<_> = self.grid.cells.iter().map(|c| c.biome).collect();
-        if let Some(resources) = ctx.resources.get_mut::<ResourceGrid>() {
-            resources.tick(5.0, &biomes);
-        }
-    }
-}
+// Note: The full implementation with WorldGrid, ResourceGrid, biome types
+// remains in root because those types are still in root (world::components).
+// When world types move to engine_world, this wiring can be fully replaced.
+// 
+// For now, root maintains game-specific world tick logic in:
+// - ecosystem::environment
+// - ecosystem::migration  
+// - background module

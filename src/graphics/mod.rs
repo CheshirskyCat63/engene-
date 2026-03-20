@@ -29,7 +29,6 @@ pub mod ibl;
 pub mod lighting;
 pub mod lod;
 pub mod mesh;
-pub mod model_loader;
 pub mod particles;
 pub mod pbr;
 pub mod postprocess;

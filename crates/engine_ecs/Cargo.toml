@@ -6,3 +6,4 @@ edition = "2021"
 [dependencies]
 engine_core = { path = "../engine_core" }
 serde = { version = "1", features = ["derive"] }
+slotmap = "1.0"

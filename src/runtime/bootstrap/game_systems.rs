@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use crate::core::plugin::EngineBuilder;
-use crate::physics::physics::PhysicsSystem;
+use engine_physics::physics::PhysicsSystem;
 use crate::runtime::wiring::animation::AnimationIntegrationSystem;
 use crate::runtime::wiring::integration::{
     AiDecisionWireSystem, AnimationWireSystem, BallisticsTickSystem, DamageDispatchSystem,

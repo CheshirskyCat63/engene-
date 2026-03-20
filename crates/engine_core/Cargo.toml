@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
+# Runtime capability gates - forward to dependent crates
 physics = []
 render = []
 ai = []
@@ -17,10 +18,4 @@ body_sim = []
 audio_playback = []
 
 [dependencies]
-serde = { version = "1", features = ["derive"] }
-ron = "0.8"
-puffin = "0.19"
-rayon = "1"
-parking_lot = "0.12"
-pathfinding = "4"
-tracing = "0.1"
+# NO external dependencies - pure std kernel

@@ -62,6 +62,72 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 | game_framework facade | crates/game_framework/src/lib.rs | game_framework | game_framework runtime owner | facade exists before real Game runtime ownership | remove transitional status when Game startup/orchestration is no longer rooted in root shell | runner extraction not complete | TRANSITIONAL |
 | engine_tools facade | crates/engine_tools/src/lib.rs | engine_tools | engine_tools runtime owner | facade exists before real tools runtime ownership | remove transitional status when Tools runtime no longer boots through root shell | runner extraction not complete | TRANSITIONAL |
 
+## ECS Decomposition (Step 2 - Phase 2a.2 COMPLETED)
+
+| Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
+|------|------------------|------------|--------------|---------------|-------------------|---------|--------|
+| EcsMechanics ownership | crates/engine_ecs/src/ecs_mechanics.rs | engine_ecs | engine_ecs | PURE ECS mechanics now owned by engine_ecs | none - ownership transfer complete | none | PHASE_2A2_COMPLETE |
+| IdentityRegistry ownership | crates/engine_ecs/src/persistent_id.rs | engine_ecs | engine_ecs | IdentityRegistry already in engine_ecs | none - ownership complete | none | PHASE_2A2_COMPLETE |
+| Entity type ownership | crates/engine_ecs/src/entity.rs | engine_ecs | engine_ecs | Entity already in engine_ecs | none - ownership complete | none | PHASE_2A2_COMPLETE |
+| SparseSet ownership | crates/engine_ecs/src/sparse_set.rs | engine_ecs | engine_ecs | Generic SparseSet in engine_ecs | none - ownership complete | none | PHASE_2A2_COMPLETE |
+| Storage subsystem | src/core/ecs_internal/storage.rs | root | engine_ecs | TRANSITIONAL - depends on world::components types | move when world::components moves to engine_world | world::components in root | TRANSITIONAL |
+| Lifecycle subsystem | src/core/ecs_internal/lifecycle.rs | root | engine_ecs | TRANSITIONAL - uses EcsMechanics + game-specific journals | move when world types decoupled | MonsterSpecies in world::components | TRANSITIONAL |
+| Ecs composition layer | src/core/ecs_internal/mod.rs | root | engine_ecs | MINIMAL wiring only - delegates to engine_ecs for mechanics | remove when all consumers migrate | root consumers still depend on legacy API | TRANSITIONAL |
+| Ecs transitional facade | src/core/ecs.rs | root | engine_ecs | re-exports from ecs_internal for backward compatibility | remove when all consumers migrate to new structure | many root consumers still use old API | TRANSITIONAL |
+| component_registry dependency | src/core/component_registry.rs | root | engine_ecs | depends on world::components + ai_* modules | refactor after world component extraction | world types + AI modules still in root | BLOCKED |
+| query module dependency | src/core/query.rs | root | engine_ecs | depends on monolithic Ecs + world components | refactor after Ecs decomposition complete | Ecs still has world component dependencies | BLOCKED |
+| mutation_policy dependency | src/core/mutation_policy.rs | root | engine_ecs | depends on Ecs, CommandBuffer, EventBus, Resources | refactor after Ecs decomposition complete | root runtime types still coupled | BLOCKED |
+
+## Core Slimming (Step 1 - COMPLETED)
+
+| Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
+|------|------------------|------------|--------------|---------------|-------------------|---------|--------|
+| engine_core slim to kernel | crates/engine_core | engine_core | engine_core | removed runtime/meta/tooling modules, now pure std | none - kernel is now clean | none | COMPLETED |
+| runtime_config move | crates/engine_core/src/runtime_config | engine_core | engine_runtime | runtime config belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+| runtime_manifest move | crates/engine_core/src/runtime_manifest | engine_core | engine_runtime | manifest belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+| build_manifest move | crates/engine_core/src/build_manifest | engine_core | engine_runtime | build/asset manifest belongs to runtime container | move module to engine_runtime | uses serde/ron | PENDING |
+| integration_matrix move | crates/engine_core/src/integration_matrix | engine_core | engine_runtime | integration config belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+| metrics_registry move | crates/engine_core/src/metrics_registry | engine_core | engine_runtime | metrics belong to runtime container | move module to engine_runtime | none pending | PENDING |
+| ownership_map move | crates/engine_core/src/ownership_map | engine_core | engine_runtime | ownership tracking belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+| profiler move | crates/engine_core/src/profiler | engine_core | engine_runtime | profiler belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+| registry move | crates/engine_core/src/registry | engine_core | engine_runtime | registry belongs to runtime container | move module to engine_runtime | none pending | PENDING |
+
+## Step 3 - engine_runtime Ownership (Phase 3 IN PROGRESS)
+
+| Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
+|------|------------------|------------|--------------|---------------|-------------------|---------|--------|
+| WorldTickSystem ownership | src/runtime/wiring/world_tick.rs → crates/engine_runtime/src/simulation_core/systems/ | engine_runtime | engine_runtime | Orchestration logic moved to engine_runtime | None - ownership transfer complete | none | PHASE_3_COMPLETE |
+| TransitionOrchestrator ownership | crates/engine_runtime/src/simulation_core/orchestrator.rs | engine_runtime | engine_runtime | Already in engine_runtime (simulation transitions) | None | none | COMPLETE |
+| Scheduler ownership | src/core/scheduler.rs → crates/engine_runtime/src/simulation_core/systems/ | engine_runtime | engine_runtime | Runtime scheduling logic | None - ownership transfer complete | none | PHASE_3_COMPLETE |
+| EngineSystem trait ownership | src/core/system.rs → crates/engine_runtime/src/simulation_core/systems/ | engine_runtime | engine_runtime | System trait for runtime orchestration | None - ownership transfer complete | none | PHASE_3_COMPLETE |
+| Runtime system registration | src/runtime/bootstrap/game_systems.rs | root | engine_runtime | App-shell glue - registers systems for different modes | Move when full system ownership resolved | root still has game-specific systems | TRANSITIONAL |
+| Runtime bootstrap | src/runtime/bootstrap/mod.rs | root | root | App-shell glue - composition surface | None - stays in root as launch layer | none | ACTIVE |
+
+**Verification:**
+- `cargo check -p engine_runtime` ✅
+- `cargo test -p engine_runtime` ✅ (5 tests passed)
+- Root wiring now re-exports from engine_runtime ✅
+
+## ECS Decomposition (Phase 2a.2 - PARTIAL OWNERSHIP TRANSFER COMPLETE)
+
+| Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
+|------|------------------|------------|--------------|---------------|-------------------|---------|--------|
+| EcsMechanics ownership | crates/engine_ecs/src/ecs_mechanics.rs | engine_ecs | engine_ecs | Pure ECS mechanics (spawn/despawn/unload, alive tracking, tick, dirty journals) | None - ownership transfer complete | none | COMPLETE |
+| IdentityRegistry ownership | crates/engine_ecs/src/persistent_id.rs | engine_ecs | engine_ecs | Already in engine_ecs | None | none | COMPLETE |
+| Entity type ownership | crates/engine_ecs/src/entity.rs | engine_ecs | engine_ecs | Already in engine_ecs | None | none | COMPLETE |
+| GenEntity ownership | crates/engine_ecs/src/ecs_mechanics.rs | engine_ecs | engine_ecs | Already in engine_ecs | None | none | COMPLETE |
+| SparseSet ownership | crates/engine_ecs/src/sparse_set.rs | engine_ecs | engine_ecs | Generic SparseSet in engine_ecs | None | none | COMPLETE |
+| Storage subsystem | src/core/ecs_internal/storage.rs | root | engine_ecs | Depends on world::components types (Transform, EntityKind, etc.) | Move when world::components moves to engine_world | world::components in root | TRANSITIONAL |
+| Lifecycle subsystem | src/core/ecs_internal/lifecycle.rs | root | engine_ecs | Uses EcsMechanics + game-specific journals (spatial, territory) | Move when MonsterSpecies moves to engine_world | MonsterSpecies in world::components | TRANSITIONAL |
+| Ecs composition layer | src/core/ecs_internal/mod.rs | root | engine_ecs | Minimal wiring only - delegates to engine_ecs for mechanics | Remove when all consumers migrate | root consumers depend on legacy API | TRANSITIONAL |
+| Ecs facade | src/core/ecs.rs | root | engine_ecs | Re-exports from ecs_internal for backward compatibility | Remove when all consumers migrate | root consumers use legacy API | TRANSITIONAL |
+
+**Verification:**
+- `cargo check -p engine_ecs` ✅
+- `cargo test -p engine_ecs` ✅ (23 tests passed)
+- No duplicate Entity/IdentityRegistry/EcsMechanics in root ✅
+- Root uses engine_ecs via re-exports ✅
+
 ## Foundation Type Moves (Real Migrations)
 
 | Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |

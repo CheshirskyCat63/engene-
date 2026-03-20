@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 engine_core = { path = "../engine_core" }
+glam = "0.30"

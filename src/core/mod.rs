@@ -22,6 +22,7 @@ pub mod component_registry;
 pub mod config;
 pub mod content_validation;
 pub mod ecs;
+pub mod ecs_internal;
 pub mod engine;
 pub mod events;
 pub mod game_config;
