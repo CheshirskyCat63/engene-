@@ -2,8 +2,8 @@
 
 use std::any::TypeId;
 
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+use engine_core::system::EngineSystem;
+use engine_core::system_descriptor::SystemDescriptor;
 
 #[derive(Clone, Debug)]
 pub enum ContentionKind {

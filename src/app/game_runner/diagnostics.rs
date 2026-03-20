@@ -1,12 +1,12 @@
-use crate::core::engine::Engine;
-use crate::core::query::WithMonster;
-use crate::game::ai::body as ai_body;
-use crate::game::economy::resource_flow;
-use crate::graphics::lod::{LodConfig, LodLevel};
-use crate::graphics::mesh::EntityInstance;
-use crate::graphics::visibility::Frustum;
-use crate::world::components::{AiState, EntityKind, MonsterSpecies};
-use crate::world::heightmap::Heightmap;
+use engine_runtime::engine::Engine;
+use engine_runtime::query::WithMonster;
+use engine_game::ai::body as ai_body;
+use engine_game::economy::resource_flow;
+use engine_render::lod::{LodConfig, LodLevel};
+use engine_render::mesh::EntityInstance;
+use engine_render::visibility::Frustum;
+use engine_world::components::{AiState, EntityKind, MonsterSpecies};
+use engine_world::heightmap::Heightmap;
 
 pub(super) fn print_brief(engine: &Engine, frame: u64) {
     let npcs: Vec<_> = engine.ecs.iter_npcs().collect();
@@ -52,7 +52,7 @@ pub(super) fn print_brief(engine: &Engine, frame: u64) {
 }
 
 pub(super) fn collect_entity_instances(
-    ecs: &crate::core::ecs::Ecs,
+    ecs: &engine_ecs::Ecs,
     heightmap: &Heightmap,
     camera_pos: [f32; 3],
     frustum: &Frustum,

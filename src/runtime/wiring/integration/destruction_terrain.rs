@@ -1,4 +1,4 @@
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::system::EngineSystem as LegacyEngineSystem;
 use crate::world::terrain_damage::CraterStamp;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
 use engine_core::events::canonical::*;

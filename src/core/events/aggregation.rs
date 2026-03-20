@@ -4,7 +4,7 @@ use std::collections::HashMap;
 
 use glam::Vec3;
 
-use crate::core::events::canonical::ImpactEvent;
+use engine_core::events::canonical::ImpactEvent;
 use crate::world::surface_db::MaterialId;
 
 #[derive(Clone, Debug)]

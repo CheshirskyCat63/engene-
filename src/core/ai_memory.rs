@@ -2,7 +2,7 @@ use std::collections::{HashMap, VecDeque};
 
 use serde::{Deserialize, Serialize};
 
-use crate::core::persistent_id::PersistentEntityId;
+use engine_core::persistent_id::PersistentEntityId;
 
 const MAX_EVENTS: usize = 30;
 const MAX_LESSONS: usize = 20;

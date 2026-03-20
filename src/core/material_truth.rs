@@ -1,6 +1,6 @@
 //! Material truth service: unified query layer over MaterialBridge with fallbacks.
 
-use crate::core::game_config::GameConfig;
+use engine_core::game_config::GameConfig;
 use crate::world::material_bridge::{
     AudioMaterialMapping, MaterialBridge, MaterialBridgeData, ParticleMaterialMapping,
     RenderMaterialMapping,

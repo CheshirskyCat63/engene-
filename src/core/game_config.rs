@@ -31,97 +31,97 @@ fn push_err<T, E: std::fmt::Display>(res: Result<T, E>, path: &str, errors: &mut
 }
 
 fn check_required_config_parsing(dir: &str) -> Vec<String> {
-    use crate::core::config::{load_config, ConfigEnvelope};
+    use engine_core::config::{load_config, ConfigEnvelope};
 
     let mut errors = Vec::new();
 
     let p = join_config_path(dir, "perception.ron");
     push_err(
-        load_config::<ConfigEnvelope<PerceptionConfig>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<PerceptionConfig>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "population.ron");
     push_err(
-        load_config::<ConfigEnvelope<PopulationConfig>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<PopulationConfig>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "economy.ron");
     push_err(
-        load_config::<ConfigEnvelope<EconomyConfig>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<EconomyConfig>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "simulation.ron");
     push_err(
-        load_config::<ConfigEnvelope<SimulationConfig>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<SimulationConfig>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "jobs.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, JobConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, JobConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "goals.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, GoalConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, GoalConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "biomes.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, BiomeConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "seasons.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, SeasonConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "materials.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, MaterialConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, MaterialConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "food_chain.ron");
     push_err(
-        load_config::<ConfigEnvelope<FoodChainConfig>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<FoodChainConfig>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "tactics.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, TacticsConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "rules.ron");
     push_err(
-        load_config::<ConfigEnvelope<RulesData>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<RulesData>>(&p),
         &p,
         &mut errors,
     );
 
     let p = join_config_path(dir, "weapons.ron");
     push_err(
-        load_config::<ConfigEnvelope<HashMap<String, WeaponConfig>>>(&p),
+        engine_core::config::load_config::<engine_core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>>(&p),
         &p,
         &mut errors,
     );
@@ -2563,57 +2563,57 @@ impl GameConfig {
         let mut config = Self::default();
 
         // Existing loaders
-        if let Ok(p) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<PerceptionConfig>,
+        if let Ok(p) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<PerceptionConfig>,
         >(&format!("{}/perception.ron", dir))
         {
             config.perception = p.data;
         }
 
-        if let Ok(p) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<PopulationConfig>,
+        if let Ok(p) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<PopulationConfig>,
         >(&format!("{}/population.ron", dir))
         {
             config.population = p.data;
         }
 
-        if let Ok(e) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<EconomyConfig>,
+        if let Ok(e) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<EconomyConfig>,
         >(&format!("{}/economy.ron", dir))
         {
             config.economy = e.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<SimulationConfig>,
+        if let Ok(s) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<SimulationConfig>,
         >(&format!("{}/simulation.ron", dir))
         {
             config.simulation = s.data;
         }
 
-        if let Ok(j) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, JobConfig>>,
+        if let Ok(j) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, JobConfig>>,
         >(&format!("{}/jobs.ron", dir))
         {
             config.jobs = j.data;
         }
 
-        if let Ok(g) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, GoalConfig>>,
+        if let Ok(g) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, GoalConfig>>,
         >(&format!("{}/goals.ron", dir))
         {
             config.goals = g.data;
         }
 
-        if let Ok(b) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>,
+        if let Ok(b) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>,
         >(&format!("{}/biomes.ron", dir))
         {
             config.biomes = b.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>,
+        if let Ok(s) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>,
         >(&format!("{}/seasons.ron", dir))
         {
             config.seasons = s.data;
@@ -2623,8 +2623,8 @@ impl GameConfig {
         // materials.ron stays as authored compatibility input, but runtime meaning is derived.
 
         // NEW loaders
-        if let Ok(fc) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<FoodChainConfig>,
+        if let Ok(fc) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<FoodChainConfig>,
         >(&format!("{}/food_chain.ron", dir))
         {
             config.food_chain = fc.data;
@@ -2634,22 +2634,22 @@ impl GameConfig {
             config.species = sp;
         }
 
-        if let Ok(t) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>,
+        if let Ok(t) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>,
         >(&format!("{}/tactics.ron", dir))
         {
             config.tactics = t.data;
         }
 
-        if let Ok(r) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<RulesData>,
+        if let Ok(r) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<RulesData>,
         >(&format!("{}/rules.ron", dir))
         {
             config.rules.data = r.data;
         }
 
-        if let Ok(w) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>,
+        if let Ok(w) = engine_core::config::load_config::<
+            engine_core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>,
         >(&format!("{}/weapons.ron", dir))
         {
             config.weapons = w.data;

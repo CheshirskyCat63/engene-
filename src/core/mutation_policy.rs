@@ -1,8 +1,8 @@
-use crate::core::commands::CommandBuffer;
-use crate::core::ecs::Ecs;
-use crate::core::events::EventBus;
+use engine_core::commands::CommandBuffer;
+use engine_ecs::Ecs;
+use engine_core::events::EventBus;
 use engine_core::registry::Resources;
-use crate::core::time::GameTime;
+use engine_core::time::GameTime;
 
 pub struct StartupContext<'a> {
     pub ecs: &'a mut Ecs,

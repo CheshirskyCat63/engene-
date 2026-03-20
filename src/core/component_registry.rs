@@ -2,9 +2,9 @@
 
 use std::any::TypeId;
 
-use crate::core::ai_emotions::Emotions;
-use crate::core::ai_memory::Memory;
-use crate::core::ai_plan::Plan;
+use engine_core::ai_emotions::Emotions;
+use engine_core::ai_memory::Memory;
+use engine_core::ai_plan::Plan;
 use crate::world::components::*;
 use crate::world::extension_components::{Attributes, Blackboard, EntityTags, StatusEffects};
 

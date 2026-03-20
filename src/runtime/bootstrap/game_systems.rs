@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::core::plugin::EngineBuilder;
+use engine_core::plugin::EngineBuilder;
 use crate::runtime::wiring::animation::AnimationIntegrationSystem;
 use crate::runtime::wiring::integration::{
     AiDecisionWireSystem, AnimationWireSystem, BallisticsTickSystem, DamageDispatchSystem,
@@ -20,7 +20,7 @@ pub(super) fn register_vertical_systems(
 ) {
     let center = crate::world::cell::WORLD_SIZE * 0.5;
     builder.add_system_default(Box::new(SimulationSystem::new(center, center)));
-    builder.add_system_default(Box::new(WorldTickSystem::new(grid)));
+    builder.add_system_default(Box::new(WorldTickSystem::new()));
     builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
     builder.add_system_default(Box::new(AiDecisionWireSystem));
     builder.add_system_default(Box::new(PhysicsSystem::new(heightmap)));
@@ -58,7 +58,7 @@ pub(super) fn register_headless_systems(
 ) {
     let center = crate::world::cell::WORLD_SIZE * 0.5;
     builder.add_system_default(Box::new(SimulationSystem::new(center, center)));
-    builder.add_system_default(Box::new(WorldTickSystem::new(grid)));
+    builder.add_system_default(Box::new(WorldTickSystem::new()));
     builder.add_system_default(Box::new(crate::game::ai::ai::AiSystem::new()));
     builder.add_system_default(Box::new(AiDecisionWireSystem));
     builder.add_system_default(Box::new(PhysicsSystem::new(heightmap)));

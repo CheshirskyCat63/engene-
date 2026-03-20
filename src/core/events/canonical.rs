@@ -1,4 +1,4 @@
-use crate::core::ecs::Entity;
+use engine_ecs::Entity;
 use engine_physics::ballistics::MaterialId;
 use glam::Vec3;
 

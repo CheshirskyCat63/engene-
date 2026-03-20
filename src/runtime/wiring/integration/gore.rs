@@ -1,5 +1,5 @@
 // LEGACY IMPORTS - Use canonical crates instead
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::system::EngineSystem as LegacyEngineSystem;
 use crate::physics::damage_pipeline::response_aggregator::BodyZone;
 use engine_core::events::canonical::*;
 use engine_ecs::system_descriptor::SystemDescriptor;

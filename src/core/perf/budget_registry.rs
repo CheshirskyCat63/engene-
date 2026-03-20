@@ -1,1 +1,1 @@
-pub use crate::core::budget_registry::*;
+pub use engine_core::budget_registry::*;

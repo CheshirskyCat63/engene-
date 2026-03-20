@@ -1,5 +1,5 @@
 // LEGACY IMPORTS - Use canonical crates instead
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::system::EngineSystem as LegacyEngineSystem;
 use engine_ecs::system_descriptor::SystemDescriptor;
 use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 

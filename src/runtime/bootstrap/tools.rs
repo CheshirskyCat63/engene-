@@ -1,6 +1,6 @@
 pub use crate::runtime::bootstrap::ToolsRuntimeAssembly;
 
-use crate::core::plugin::EngineBuilder;
+use engine_core::plugin::EngineBuilder;
 use crate::runtime::bootstrap::common::{finalize_builder, insert_runtime_core};
 
 impl ToolsRuntimeAssembly {
@@ -9,7 +9,7 @@ impl ToolsRuntimeAssembly {
         let mut builder = EngineBuilder::new();
         insert_runtime_core(
             &mut builder,
-            crate::core::runtime_config::RuntimeConfig::tools(),
+            engine_core::runtime_config::RuntimeConfig::tools(),
         );
 
         // Intentionally tools-only:

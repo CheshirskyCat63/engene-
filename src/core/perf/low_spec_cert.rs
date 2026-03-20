@@ -5,7 +5,7 @@
 //! - Acceptable degradation only (per degradation_order)
 //! - No runaway memory
 
-use crate::core::quality_governor::{
+use engine_core::quality_governor::{
     degradation_order, DegradationPriority, PressureLevel, QualityGovernor,
 };
 

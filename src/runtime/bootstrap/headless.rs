@@ -1,4 +1,4 @@
-use crate::core::plugin::EngineBuilder;
+use engine_core::plugin::EngineBuilder;
 use crate::runtime::bootstrap::common::{finalize_builder, insert_runtime_core};
 use crate::runtime::bootstrap::EngineRuntimeAssembly;
 use crate::simulation::simulation::SimulationSystem;
@@ -9,7 +9,7 @@ impl EngineRuntimeAssembly {
         let mut builder = EngineBuilder::new();
         insert_runtime_core(
             &mut builder,
-            crate::core::runtime_config::RuntimeConfig::headless(),
+            engine_core::runtime_config::RuntimeConfig::headless(),
         );
 
         let center = crate::world::cell::WORLD_SIZE * 0.5;

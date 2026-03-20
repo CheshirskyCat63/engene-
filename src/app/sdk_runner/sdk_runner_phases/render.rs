@@ -26,7 +26,7 @@ pub fn run(app: &mut SdkApp, vp: glam::Mat4, cam_pos: glam::Vec3, _dt: f32) {
             day_progress: app.engine.time.day_progress(),
         };
 
-        let telemetry = crate::core::perf::telemetry::Telemetry::new();
+        let telemetry = engine_core::perf::telemetry::Telemetry::new();
         let ecs_ref = &app.engine.ecs;
         let events_ref = &app.engine.events;
         let shell = &mut app.editor_shell;

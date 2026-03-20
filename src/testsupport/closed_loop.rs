@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use engine_ecs::Ecs;
 use engine_runtime::engine::Engine;
 // LEGACY IMPORTS - Use canonical crates instead
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::system::EngineSystem as LegacyEngineSystem;
 use crate::game::economy::resource_flow;
 use engine_core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
 use engine_ecs::system_descriptor::SystemDescriptor;
@@ -134,7 +134,7 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder.add_plugin(crate::game::weapons_plugin::WeaponsPlugin::new("game/data"));
 
     {
-        use crate::core::config::{load_config, ConfigEnvelope};
+        use engine_core::config::{load_config, ConfigEnvelope};
         use crate::game::ai::combat_tactics::tactics::TacticProfile;
         use std::collections::HashMap;
         let tactics: HashMap<String, TacticProfile> =
@@ -166,8 +166,8 @@ fn build_headless_with_recorder(biomes: &[crate::world::biome::Biome]) -> Engine
     builder
         .insert_resource(crate::graphics::destruction_occlusion::DestructionOcclusionSystem::new());
     builder.insert_resource(crate::graphics::gore_mesh::GoreMeshSystem::new(256));
-    builder.insert_resource(crate::core::component_registry::ComponentRegistry::default_registry());
-    builder.insert_resource(crate::core::material_truth::MaterialTruthService::empty());
+    builder.insert_resource(engine_core::component_registry::ComponentRegistry::default_registry());
+    builder.insert_resource(engine_core::material_truth::MaterialTruthService::empty());
     builder.insert_resource(crate::graphics::surface_state_render::SurfaceStateRenderSystem::new());
 
     let center = crate::world::cell::WORLD_SIZE * 0.5;

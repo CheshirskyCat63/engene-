@@ -81,11 +81,11 @@ pub fn run_multi_region_test(
     // Verify identity continuity
     for &(_, pid) in &initial_pids {
         match ecs.identity.presence(pid) {
-            crate::core::persistent_id::EntityPresence::Live(_) => {}
-            crate::core::persistent_id::EntityPresence::Unloaded => {
+            engine_core::persistent_id::EntityPresence::Live(_) => {}
+            engine_core::persistent_id::EntityPresence::Unloaded => {
                 // Entity was outside all test regions, still unloaded -- ok
             }
-            crate::core::persistent_id::EntityPresence::Dead => {
+            engine_core::persistent_id::EntityPresence::Dead => {
                 report.identity_preserved = false;
                 report
                     .details

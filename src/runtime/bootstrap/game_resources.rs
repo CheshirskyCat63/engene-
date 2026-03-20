@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
-use crate::core::component_registry::ComponentRegistry;
-use crate::core::material_truth::MaterialTruthService;
-use crate::core::plugin::EngineBuilder;
+use engine_core::component_registry::ComponentRegistry;
+use engine_core::material_truth::MaterialTruthService;
+use engine_core::plugin::EngineBuilder;
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::navigation::hpa_star::HpaGraph;
 use crate::runtime::bootstrap::common::insert_runtime_core;
@@ -40,7 +40,7 @@ pub(super) fn insert_world_and_damage_resources(builder: &mut EngineBuilder) {
 fn canonical_material_truth_service(builder: &EngineBuilder) -> MaterialTruthService {
     let cfg = builder
         .resources
-        .get::<crate::core::game_config::GameConfig>()
+        .get::<engine_core::game_config::GameConfig>()
         .expect("MaterialTruthService requires explicitly inserted GameConfig");
     MaterialTruthService::from_game_config(cfg)
 }
@@ -48,7 +48,7 @@ fn canonical_material_truth_service(builder: &EngineBuilder) -> MaterialTruthSer
 pub(super) fn insert_vertical_runtime_resources(
     builder: &mut EngineBuilder,
     heightmap: &Arc<Heightmap>,
-    authority_entries: Vec<crate::core::world_state_authority::StateAuthorityEntry>,
+    authority_entries: Vec<engine_core::world_state_authority::StateAuthorityEntry>,
 ) {
     builder.insert_resource(heightmap.clone());
     builder.insert_resource(WorldStreamer::new(3000.0, 4000.0));
@@ -69,7 +69,7 @@ pub(super) fn insert_vertical_runtime_resources(
 
     builder.insert_resource(authority_entries);
     builder.insert_resource(OwnershipMap::new());
-    insert_runtime_core(builder, crate::core::runtime_config::RuntimeConfig::game());
+    insert_runtime_core(builder, engine_core::runtime_config::RuntimeConfig::game());
     builder.insert_resource(TerrainTruth::grassland());
     builder.insert_resource(SurfaceStateStore::new());
     builder.insert_resource(DamageOrchestrator::new());
@@ -80,7 +80,7 @@ pub(super) fn insert_vertical_runtime_resources(
 pub(super) fn insert_headless_runtime_resources(
     builder: &mut EngineBuilder,
     heightmap: &Arc<Heightmap>,
-    authority_entries: Vec<crate::core::world_state_authority::StateAuthorityEntry>,
+    authority_entries: Vec<engine_core::world_state_authority::StateAuthorityEntry>,
 ) {
     builder.insert_resource(heightmap.clone());
     builder.insert_resource(WorldStreamer::new(3000.0, 4000.0));
@@ -96,7 +96,7 @@ pub(super) fn insert_headless_runtime_resources(
 
     builder.insert_resource(authority_entries);
     builder.insert_resource(OwnershipMap::new());
-    insert_runtime_core(builder, crate::core::runtime_config::RuntimeConfig::game());
+    insert_runtime_core(builder, engine_core::runtime_config::RuntimeConfig::game());
     builder.insert_resource(TerrainTruth::grassland());
     builder.insert_resource(SurfaceStateStore::new());
     builder.insert_resource(DamageOrchestrator::new());
@@ -108,22 +108,22 @@ pub(super) fn insert_game_tail_resources(builder: &mut EngineBuilder, with_tools
     builder.insert_resource(crate::game::economy::item_registry::ItemRegistry::new());
     builder.insert_resource(Vec::<crate::simulation::camp_simulation::CampState>::new());
     builder.insert_resource(crate::audio::sound_bank::SoundBank::new());
-    builder.insert_resource(crate::core::perf::perf_budget::PerfBudgetManager::new(60));
+    builder.insert_resource(engine_core::perf::perf_budget::PerfBudgetManager::new(60));
     builder.insert_resource(crate::simulation::world_milestones::WorldMilestoneTracker::new());
     builder.insert_resource(crate::body::death_pipeline::CorpseManager::new());
     builder.insert_resource(crate::animation::clip_map::ClipMap::new());
     builder.insert_resource(crate::animation::animation_ladder::AnimationLadder::default());
     builder.insert_resource(crate::game::gameplay::factions::FactionRelations::new());
     builder
-        .insert_resource(crate::core::determinism_policy::DeterminismPolicyMatrix::build_default());
-    builder.insert_resource(crate::core::build_manifest::SchemaMigrationRegistry::new());
+        .insert_resource(engine_core::determinism_policy::DeterminismPolicyMatrix::build_default());
+    builder.insert_resource(engine_core::build_manifest::SchemaMigrationRegistry::new());
     if with_tools_metrics {
         builder
             .insert_resource(crate::tools::sim_metrics_dashboard::SimMetricsDashboard::default());
     }
-    builder.insert_resource(crate::core::perf::sim_telemetry::SimTelemetry::new());
-    builder.insert_resource(crate::core::dirty_set::ChunkDirtySet::default());
-    builder.insert_resource(crate::core::dirty_set::NavDirtySet::default());
-    builder.insert_resource(crate::core::dirty_set::EntityDirtySet::default());
-    builder.insert_resource(crate::core::perf::low_spec_cert::LowSpecCertifier::default());
+    builder.insert_resource(engine_core::perf::sim_telemetry::SimTelemetry::new());
+    builder.insert_resource(engine_core::dirty_set::ChunkDirtySet::default());
+    builder.insert_resource(engine_core::dirty_set::NavDirtySet::default());
+    builder.insert_resource(engine_core::dirty_set::EntityDirtySet::default());
+    builder.insert_resource(engine_core::perf::low_spec_cert::LowSpecCertifier::default());
 }

@@ -1,1 +1,1 @@
-pub use crate::core::quality_governor::*;
+pub use engine_core::quality_governor::*;

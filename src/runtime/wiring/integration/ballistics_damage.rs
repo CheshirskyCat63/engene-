@@ -1,5 +1,5 @@
 // LEGACY IMPORTS - Use canonical crates instead
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::system::EngineSystem as LegacyEngineSystem;
 use crate::world::fields::WorldFields;
 use engine_core::events::canonical::*;
 use engine_ecs::system_descriptor::SystemDescriptor;
@@ -136,7 +136,7 @@ impl LegacyEngineSystem for DamageDispatchSystem {
         // Wire EventAggregator: spatial bucketing of impacts
         if let Some(aggregator) = ctx
             .resources
-            .get_mut::<crate::core::events::aggregation::EventAggregator>()
+            .get_mut::<engine_core::events::aggregation::EventAggregator>()
         {
             for ev in &impacts {
                 aggregator.submit(ev);

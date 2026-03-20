@@ -82,10 +82,10 @@ fn build_stress_world(extra_npcs: usize, extra_monsters_per_species: usize) -> E
             .set_inventory(e, crate::world::components::Inventory { items: Vec::new() });
         engine
             .ecs
-            .set_memory(e, crate::core::ai_memory::Memory::new());
+            .set_memory(e, engine_core::ai_memory::Memory::new());
         engine
             .ecs
-            .set_emotions(e, crate::core::ai_emotions::Emotions::new());
+            .set_emotions(e, engine_core::ai_emotions::Emotions::new());
         engine.ecs.set_life_info(
             e,
             crate::world::components::LifeInfo {

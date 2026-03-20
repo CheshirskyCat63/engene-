@@ -1,21 +1,21 @@
-use crate::core::budget_registry::create_default_registry;
-use crate::core::events::aggregation::EventAggregator;
-use crate::core::events::debug_bus::DebugBus;
-use crate::core::events::render_bus::RenderBus;
-use crate::core::events::sim_bus::SimBus;
-use crate::core::events::sticky::StickyEvents;
-use crate::core::events::tracing_hooks::EventTracer;
-use crate::core::plugin::EngineBuilder;
-use crate::core::quality_governor::QualityGovernor;
-use crate::core::runtime_config::RuntimeConfig;
-use crate::core::sdk::EngineSDK;
+use engine_core::budget_registry::create_default_registry;
+use engine_core::events::aggregation::EventAggregator;
+use engine_core::events::debug_bus::DebugBus;
+use engine_core::events::render_bus::RenderBus;
+use engine_core::events::sim_bus::SimBus;
+use engine_core::events::sticky::StickyEvents;
+use engine_core::events::tracing_hooks::EventTracer;
+use engine_core::plugin::EngineBuilder;
+use engine_core::quality_governor::QualityGovernor;
+use engine_core::runtime_config::RuntimeConfig;
+use engine_core::sdk::EngineSDK;
 use engine_ecs::Ecs;
 use engine_runtime::engine::Engine;
 
 pub(crate) const GAME_CONFIG_DIR: &str = "game/data";
 
 pub(crate) fn insert_explicit_game_config(builder: &mut EngineBuilder, dir: &str) {
-    builder.insert_resource(crate::core::game_config::GameConfig::load_from_dir(dir));
+    builder.insert_resource(engine_core::game_config::GameConfig::load_from_dir(dir));
 }
 
 pub(crate) fn insert_runtime_core(builder: &mut EngineBuilder, runtime_config: RuntimeConfig) {

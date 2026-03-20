@@ -2,8 +2,8 @@
 
 use std::sync::Arc;
 
-use crate::core::plugin::EngineBuilder;
-use crate::core::world_state_authority;
+use engine_core::plugin::EngineBuilder;
+use engine_core::world_state_authority;
 use crate::runtime::bootstrap::common::finalize_builder;
 use crate::runtime::bootstrap::game_plugins::{
     insert_game_content_and_plugins, register_game_plugins,

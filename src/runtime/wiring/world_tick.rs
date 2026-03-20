@@ -10,7 +10,7 @@ pub use engine_runtime::simulation_core::systems::Scheduler;
 pub use engine_runtime::simulation_core::systems::WorldTickSystem;
 
 // Re-export context types for transitional compatibility
-pub use crate::core::system::FixedTickContext as WorldTickContext;
+pub use engine_core::system::FixedTickContext as WorldTickContext;
 
 // Note: The full implementation with WorldGrid, ResourceGrid, biome types
 // remains in root because those types are still in root (world::components).

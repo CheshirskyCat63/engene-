@@ -27,8 +27,8 @@ pub fn disabled_physics_bootstrap_for_validation() -> engine_physics::bootstrap:
 
 #[cfg(feature = "physics")]
 /// Helper for minimal physics system registration in runtime wiring.
-pub fn physics_tick_system_descriptor() -> crate::core::system_descriptor::SystemDescriptor {
-    crate::core::system_descriptor::SystemDescriptor::new(
+pub fn physics_tick_system_descriptor() -> engine_core::system_descriptor::SystemDescriptor {
+    engine_core::system_descriptor::SystemDescriptor::new(
         engine_physics::systems::PHYSICS_TICK_SYSTEM_NAME,
     )
 }

@@ -1,10 +1,10 @@
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
-use crate::core::ecs::Ecs;
+use engine_ecs::Ecs;
 use engine_core::registry::Resources;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
+use engine_core::system::EngineSystem;
+use engine_core::system_descriptor::SystemDescriptor;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum TickFreq {

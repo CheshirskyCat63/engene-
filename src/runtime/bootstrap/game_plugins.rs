@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use crate::core::config::{load_config, ConfigEnvelope};
-use crate::core::plugin::EngineBuilder;
+use engine_core::config::{load_config, ConfigEnvelope};
+use engine_core::plugin::EngineBuilder;
 use crate::game::ai::combat_tactics::tactics::TacticProfile;
 use crate::game::ai_config::AiConfigPlugin;
 use crate::game::combat_plugin::CombatPlugin;

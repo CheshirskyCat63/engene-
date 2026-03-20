@@ -4,7 +4,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Instant;
 
-use crate::core::events::EventBus;
+use engine_core::events::EventBus;
 
 use super::metrics::{throughput, to_latency_stats, ScalingPoint, ThroughputMetrics};
 
