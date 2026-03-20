@@ -115,6 +115,9 @@ engine_content = { path = "crates/engine_content" }
 engine_ecs = { path = "crates/engine_ecs" }
 engine_runtime = { path = "crates/engine_runtime" }
 engine_physics = { path = "crates/engine_physics", optional = true }
+game_framework = { path = "crates/game_framework" }
+sdk_app = { path = "crates/sdk_app" }
+engine_tools = { path = "crates/engine_tools" }
 rand = "0.8"
 glam = "0.30"
 bytemuck = { version = "1", features = ["derive"] }

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-engene = { path = "../.." }
+game_framework = { path = "../../crates/game_framework" }
 
 [[bin]]
 name = "app_engene_headless"

@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-engene = { path = "../.." }
+sdk_app = { path = "../../crates/sdk_app" }
 
 [[bin]]
 name = "app_engene_sdk"

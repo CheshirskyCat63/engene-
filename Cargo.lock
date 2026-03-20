@@ -155,7 +155,7 @@ checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 name = "app_engene_game"
 version = "0.1.0"
 dependencies = [
- "engene",
+ "game_framework",
  "tracing-subscriber",
  "winit 0.28.7",
 ]
@@ -164,14 +164,14 @@ dependencies = [
 name = "app_engene_headless"
 version = "0.1.0"
 dependencies = [
- "engene",
+ "game_framework",
 ]
 
 [[package]]
 name = "app_engene_sdk"
 version = "0.1.0"
 dependencies = [
- "engene",
+ "sdk_app",
 ]
 
 [[package]]
@@ -1090,6 +1090,7 @@ dependencies = [
 name = "engine_tools"
 version = "0.1.0"
 dependencies = [
+ "engene",
  "engine_core",
 ]
 
@@ -1292,6 +1293,7 @@ dependencies = [
 name = "game_framework"
 version = "0.1.0"
 dependencies = [
+ "engene",
  "engine_core",
 ]
 
@@ -3600,6 +3602,7 @@ dependencies = [
 name = "sdk_app"
 version = "0.1.0"
 dependencies = [
+ "engene",
  "engine_core",
 ]
 
