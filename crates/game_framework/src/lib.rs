@@ -12,8 +12,7 @@ use std::sync::Arc;
 
 use winit::event_loop::EventLoop;
 
-use engene::core::build_manifest::BuildManifest;
-use engene::core::crash_telemetry;
+use engine_startup::{BuildManifest, crash_telemetry, startup_tracing};
 use engene::runtime::bootstrap::{EngineRuntimeAssembly, GameRuntimeAssembly};
 use engene::world::heightmap::Heightmap;
 use engene::world::world::WorldGrid;

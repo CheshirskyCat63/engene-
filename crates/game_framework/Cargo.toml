@@ -5,4 +5,4 @@ edition = "2021"
 
 [dependencies]
 engine_core = { path = "../engine_core" }
-engene = { path = "../.." }
+engine_startup = { path = "../engine_startup" }

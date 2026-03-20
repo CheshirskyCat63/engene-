@@ -3,7 +3,7 @@
 ## Status
 
 The root crate `engene` is a **migration shell**.
-Current branch status: **finish-ready shell** (active for compatibility, not for new ownership).
+Current branch status: **blocked transition** (active for compatibility, not for new ownership).
 
 It is not allowed to silently become the permanent architecture center.
 
@@ -34,6 +34,19 @@ Forbidden:
 2. Every compatibility export must have a removal target.
 3. Every new bin or entrypoint decision must update `ENTRYPOINT_TRUTH.md`.
 4. Root shell logic must move toward thin façade status, not toward renewed centrality.
+
+## Current blocker
+
+Role crates (`game_framework`, `sdk_app`) are transitional owners and still depend on root for:
+- `engene::core::build_manifest::BuildManifest`
+- `engene::core::crash_telemetry`
+- `engene::runtime::bootstrap::*`
+- `engene::world::heightmap::Heightmap`
+- `engene::world::world::WorldGrid`
+- `engene::app::game_runner::GameApp`
+- `engene::app::spatial_dirty_journal::SpatialDirtyJournal`
+- `engene::world::components::*`
+- `engene::world::hierarchical_spatial::SpatialUpdatePath`
 
 ## Exit criteria
 

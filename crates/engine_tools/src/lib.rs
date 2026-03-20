@@ -8,8 +8,7 @@ pub mod api {
     pub const TARGET_OWNER: &str = "engine_tools";
 }
 
-use engene::core::build_manifest::BuildManifest;
-use engene::core::crash_telemetry;
+use engine_startup::{BuildManifest, crash_telemetry};
 use engene::runtime::bootstrap::ToolsRuntimeAssembly;
 use engene::tools::doctor;
 

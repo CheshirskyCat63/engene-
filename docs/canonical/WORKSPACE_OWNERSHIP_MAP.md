@@ -18,9 +18,9 @@
 - `crates/game_framework`
 
 ### App shells
-- `apps/engene_game`
-- `apps/engene_sdk`
-- `apps/engene_headless`
+- `apps/engene_game` (transitional wrapper)
+- `apps/engene_sdk` (transitional wrapper)
+- `apps/engene_headless` (transitional wrapper)
 
 ### Migration shell
 - root package `.` (`engene`)
@@ -44,7 +44,21 @@
 ## Current mismatch to keep visible
 
 The root package still hosts active execution and broad exports.
+Role crates (`game_framework`, `sdk_app`) are transitional owners and still depend on root.
 That means the ownership map is **declared**, but not yet fully enforced.
+
+## Explicit note
+
+Role crates still depend on root for:
+- `engene::core::build_manifest::BuildManifest`
+- `engene::core::crash_telemetry`
+- `engene::runtime::bootstrap::*`
+- `engene::world::heightmap::Heightmap`
+- `engene::world::world::WorldGrid`
+- `engene::app::game_runner::GameApp`
+- `engene::app::spatial_dirty_journal::SpatialDirtyJournal`
+- `engene::world::components::*`
+- `engene::world::hierarchical_spatial::SpatialUpdatePath`
 
 ## Rule
 

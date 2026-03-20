@@ -12,12 +12,16 @@ members = [
     "crates/engine_tools",
     "crates/sdk_app",
     "crates/game_framework",
+    "crates/engine_startup",
     "apps/engene_game",
     "apps/engene_sdk",
     "apps/engene_headless",
     "apps/engene_bootstrap",
 ]
 resolver = "2"
+
+[workspace.dependencies]
+engine_startup = { path = "crates/engine_startup", version = "0.1.0" }
 
 [package]
 name = "engene"

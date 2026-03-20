@@ -36,9 +36,9 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 
 | Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
 |------|------------------|------------|--------------|---------------|-------------------|---------|--------|
-| engene_game bin | Cargo.toml | root | apps/engene_game | migration shell | apps become canonical | apps are transitional shells | ACTIVE |
-| engene_sdk bin | Cargo.toml | root | apps/engene_sdk | migration shell | apps become canonical | apps are transitional shells | ACTIVE |
-| engene_headless bin | Cargo.toml | root | apps/engene_headless | migration shell | apps become canonical | apps are transitional shells | ACTIVE |
+| engene_game bin | Cargo.toml | root | apps/engene_game | migration shell | apps become canonical | apps are transitional wrappers, not yet canonical | ACTIVE |
+| engene_sdk bin | Cargo.toml | root | apps/engene_sdk | migration shell | apps become canonical | apps are transitional wrappers, not yet canonical | ACTIVE |
+| engene_headless bin | Cargo.toml | root | apps/engene_headless | migration shell | apps become canonical | apps are transitional wrappers, not yet canonical | ACTIVE |
 | engene_tools bin | Cargo.toml | root | apps/engene_tools | migration shell | apps become canonical | apps are transitional shells | ACTIVE |
 
 ## Placeholder Crates
@@ -61,6 +61,7 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 | sdk_app facade | crates/sdk_app/src/lib.rs | sdk_app | sdk_app runtime owner | facade exists before real SDK runtime ownership | remove transitional status when SDK startup/orchestration is no longer rooted in root shell | runner extraction not complete | TRANSITIONAL |
 | game_framework facade | crates/game_framework/src/lib.rs | game_framework | game_framework runtime owner | facade exists before real Game runtime ownership | remove transitional status when Game startup/orchestration is no longer rooted in root shell | runner extraction not complete | TRANSITIONAL |
 | engine_tools facade | crates/engine_tools/src/lib.rs | engine_tools | engine_tools runtime owner | facade exists before real tools runtime ownership | remove transitional status when Tools runtime no longer boots through root shell | runner extraction not complete | TRANSITIONAL |
+| role crates root dependencies | crates/game_framework/src/lib.rs, crates/sdk_app/src/lib.rs | game_framework, sdk_app | game_framework, sdk_app | role crates still import from root crate | move dependencies to engine crates or role crates | engine crates not fully owned, world types not extracted | TRANSITIONAL |
 
 ## ECS Decomposition (Step 2 - Phase 2a.2 COMPLETED)
 
@@ -142,9 +143,9 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 
 | Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
 |------|------------------|------------|--------------|---------------|-------------------|---------|--------|
-| app_engene_game | apps/engene_game | root | self | transitional wrapper | package execution replaces root bins | root still canonical | ACTIVE |
-| app_engene_sdk | apps/engene_sdk | root | self | transitional wrapper | package execution replaces root bins | root still canonical | ACTIVE |
-| app_engene_headless | apps/engene_headless | root | self | transitional wrapper | package execution replaces root bins | root still canonical | ACTIVE |
+| app_engene_game | apps/engene_game | root | self | transitional wrapper | package execution replaces root bins | root still canonical, apps are transitional wrappers | ACTIVE |
+| app_engene_sdk | apps/engene_sdk | root | self | transitional wrapper | package execution replaces root bins | root still canonical, apps are transitional wrappers | ACTIVE |
+| app_engene_headless | apps/engene_headless | root | self | transitional wrapper | package execution replaces root bins | root still canonical, apps are transitional wrappers | ACTIVE |
 | app_engene_bootstrap | apps/engene_bootstrap | root | self | transitional wrapper | package execution replaces root bins | root still canonical | ACTIVE |
 
 ## Feature Model Temporary Aliases

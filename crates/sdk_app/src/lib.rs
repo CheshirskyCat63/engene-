@@ -18,8 +18,7 @@ use winit::event_loop::EventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
-use engene::core::build_manifest::BuildManifest;
-use engene::core::crash_telemetry;
+use engine_startup::{BuildManifest, crash_telemetry, startup_tracing};
 use engene::core::engine::Engine;
 use engene::graphics::camera::FlyCamera;
 use engene::graphics::lod::{LodConfig, LodLevel};
