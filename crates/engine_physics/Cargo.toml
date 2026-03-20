@@ -3,6 +3,10 @@ name = "engine_physics"
 version = "0.1.0"
 edition = "2021"
 
+[features]
+default = []
+advanced_anim = []
+
 [dependencies]
 engine_core = { path = "../engine_core" }
 engine_ecs = { path = "../engine_ecs" }

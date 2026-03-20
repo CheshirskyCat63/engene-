@@ -27,12 +27,35 @@ autobins = false
 
 [features]
 default = ["full"]
+
+# Target taxonomy (semantic truth)
+role_game = ["cap_physics", "cap_render", "cap_ai", "cap_audio", "tool_debug_ui", "body_sim", "advanced_anim", "scoring_ai"]
+role_sdk = ["role_game", "tool_sdk", "tool_doctor", "tool_editor_inspection"]
+role_headless = ["cap_physics", "cap_ai", "body_sim", "advanced_anim", "scoring_ai"]
+role_tools = ["tool_doctor"]
+
+cap_physics = ["physics"]
+cap_render = ["render"]
+cap_ai = ["ai"]
+cap_audio = ["audio"]
+cap_networking = ["networking"]
+
+tool_debug_ui = ["debug_ui"]
+tool_sdk = ["sdk_tools"]
+tool_doctor = []
+tool_editor_inspection = []
+
+profile_low_spec = ["low_spec"]
+profile_ci = ["nightly-tests"]
+profile_release = ["full"]
+
+# Backward-compatibility aliases (transitional)
 engine_core = []
 physics = ["engine_core", "engine_physics"]
 render = ["engine_core"]
 ai = ["engine_core"]
 audio = ["engine_core"]
-headless = ["engine_core", "physics", "ai"]
+headless = ["role_headless"]
 debug_ui = ["render"]
 full = ["physics", "render", "ai", "audio", "debug_ui", "body_sim", "advanced_anim", "scoring_ai"]
 nightly-tests = []

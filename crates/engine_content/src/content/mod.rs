@@ -8,10 +8,10 @@
 //! - `import`, `cooking` - partial, content pipeline
 //! - `prefabs`, `validation` - partial, content management
 
-pub use engine_content::asset_budget;
-pub use engine_content::cooking;
-pub use engine_content::import;
-pub use engine_content::pipeline;
-pub use engine_content::prefabs;
-pub use engine_content::schema_governance;
-pub use engine_content::validation;
+pub use crate::asset_budget;
+pub use crate::cooking;
+pub use crate::import;
+pub use crate::pipeline;
+pub use crate::prefabs;
+pub use crate::schema_governance;
+pub use crate::validation;

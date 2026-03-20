@@ -9,6 +9,10 @@ pub mod contracts;
 pub mod resources;
 pub mod systems;
 
-// moved from root
-pub mod physics;
+// Animation - self-contained
 pub mod animation;
+
+// TEMPORARY: physics module disabled - depends on types (Ecs, Entity, WorldFields, etc.)
+// that exist in root but not in crate structure (engine_ecs doesn't have Ecs, engine_world is placeholder)
+// See MIGRATION_LEDGER.md for tracking
+// pub mod physics;

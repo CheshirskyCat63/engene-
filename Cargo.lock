@@ -580,6 +580,7 @@ name = "engine_world"
 version = "0.1.0"
 dependencies = [
  "engine_core",
+ "glam 0.30.10",
 ]
 
 [[package]]

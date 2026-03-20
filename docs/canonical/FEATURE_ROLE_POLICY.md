@@ -1,55 +1,59 @@
 # FEATURE_ROLE_POLICY
 
-## Problem
+## Rule
 
-Current feature language mixes unrelated kinds of switches:
+Every switch must be classified as exactly one of:
+- `role_*`
+- `cap_*`
+- `tool_*`
+- `profile_*`
 
-- capability: `physics`, `render`, `ai`, `audio`, `networking`
-- runtime mode: `headless`
-- tooling overlay: `debug_ui`, `sdk_tools`
-- quality profile: `low_spec`
-- bundle alias: `full`
+No new mixed-purpose feature names may be introduced.
 
-This is ambiguous and causes architectural drift.
+## Current target taxonomy
 
-## Required separation
-
-### 1. Runtime role selectors
-Examples:
+### Runtime roles
 - `role_game`
 - `role_sdk`
 - `role_headless`
 - `role_tools`
 
-### 2. Capabilities
-Examples:
-- `cap_render`
+### Capabilities
 - `cap_physics`
+- `cap_render`
 - `cap_ai`
 - `cap_audio`
 - `cap_networking`
 
-### 3. Tooling overlays
-Examples:
+### Tooling overlays
 - `tool_debug_ui`
-- `tool_editor_inspection`
+- `tool_sdk`
 - `tool_doctor`
+- `tool_editor_inspection`
 
-### 4. Profiles
-Examples:
+### Profiles
 - `profile_low_spec`
 - `profile_ci`
 - `profile_release`
 
-## Policy
+## Transitional compatibility rule
 
-- A role may enable multiple capabilities.
-- A capability may not define the runtime role by itself.
-- Tooling overlays must never be described as core engine identity.
-- A profile may tune behavior, but must not redefine ownership.
+Legacy aliases may remain temporarily:
+- `physics`
+- `render`
+- `ai`
+- `audio`
+- `headless`
+- `debug_ui`
+- `full`
+- `low_spec`
+- `sdk_tools`
 
-## Current practical rule
+But they are compatibility aliases only, not the target semantic model.
 
-Before renaming features in Cargo, use this document as the semantic policy:
-every new switch or configuration option must be classified as one of the four categories above.
-If classification is unclear, it does not get added yet.
+## Hard rules
+
+1. Capability is not runtime role.
+2. Tool overlay is not engine identity.
+3. Profile is not ownership.
+4. Any alias kept for compatibility must be recorded in `MIGRATION_LEDGER.md` with a removal condition.

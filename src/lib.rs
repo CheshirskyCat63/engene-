@@ -1,18 +1,21 @@
-pub mod animation;
+//! ENGENE root package = thin migration shell.
+//! Public surface is intentionally narrow.
+//! Internal legacy/domain modules remain mounted privately until ownership handoff completes.
 pub mod app;
-pub mod audio;
-pub mod body;
-pub mod content;
 pub mod core;
-pub mod game;
-pub mod graphics;
-pub mod input;
-pub mod memory;
-pub mod navigation;
-pub mod network;
-pub mod physics;
 pub mod runtime;
-pub mod simulation;
 pub mod testsupport;
-pub mod tools;
-pub mod world;
+mod animation;
+mod audio;
+mod body;
+mod content;
+mod game;
+mod graphics;
+mod input;
+mod memory;
+mod navigation;
+mod network;
+mod physics;
+mod simulation;
+mod tools;
+mod world;

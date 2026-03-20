@@ -1,17 +1,8 @@
-//! Application layer - game/tools/headless runners and platform integration.
-//!
-//! # Status: production
-//! # Integration: enabled
-//! # Tests: integration only
-//!
-//! ## Modules
-//! - `game_runner` - game app lifecycle and event loop
-//! - `headless_runner` - deterministic kernel/headless runtime
-//! - `sdk_runner` - SDK workstation runtime
-//! - `tools_runner` - tools diagnostics runtime
-
+//! Root application shell.
+//! Current canonical root bins enter here.
+//! This module is transitional and remains in root only as a migration shell.
 pub mod game_runner;
 pub mod headless_runner;
 pub mod sdk_runner;
-pub mod spatial_dirty_journal;
 pub mod tools_runner;
+pub(crate) mod spatial_dirty_journal;

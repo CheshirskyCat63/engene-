@@ -1,0 +1,23 @@
+FAST COMMAND POLICY
+preferred:
+- cargo check -p <crate>
+- cargo test -p <crate> <target>
+- cargo test <specific_test_name>
+- cargo clippy -p <crate> -- -D warnings
+- git diff -- <path>
+- git status
+
+avoid by default:
+- cargo test
+- cargo build
+- full workspace clippy
+- git push
+- destructive git operations
+
+project root helpers present:
+- run_game.ps1
+- run_sdk.ps1
+- build_release.ps1
+- package_release.ps1
+- Justfile
+

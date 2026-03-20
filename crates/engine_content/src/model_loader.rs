@@ -2,10 +2,10 @@ use std::path::Path;
 
 use glam::{Mat4, Quat, Vec3};
 
-use crate::animation::animation::{
+use crate::animation::{
     AnimationClip, Channel, ChannelProperty, Joint, Keyframe, Skeleton,
 };
-use crate::graphics::skinning::SkinVertex;
+use crate::graphics::SkinVertex;
 
 pub struct LoadedModel {
     pub vertices: Vec<SkinVertex>,

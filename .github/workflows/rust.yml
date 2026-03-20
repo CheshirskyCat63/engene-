@@ -57,4 +57,4 @@ jobs:
       with:
         tool: nextest
     - name: Run contract tests
-      run: cargo nextest run --profile ci --test engine_contracts --test determinism_and_sdk --test runtime_systems --test runtime_phase_contracts --test spatial_dirty_contracts --test wiring_boundary_contracts
+      run: cargo nextest run --profile ci --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts --test spatial_dirty_contracts

@@ -2,9 +2,7 @@
 
 ## Rule
 
-There must be **one** canonical description of how ENGENE starts in the current branch.
-
-That description lives here.
+There must be one canonical description of how ENGENE starts in the current branch.
 
 ## Current canonical entrypoints
 
@@ -17,36 +15,17 @@ That description lives here.
 
 ## Not current truth
 
-The following are **not** current canonical launch truths in this branch:
-
-- `cargo run --bin engene_test`
-- package-level execution through `apps/*` as the primary documented start path
+The following are not canonical launch truths in this branch:
+- package-level execution through `apps/*`
+- any undocumented `test` / `sandbox` / `demo` bin
 
 ## Ownership statement
 
-The workspace may already declare `apps/engene_game`, `apps/engene_sdk`, and `apps/engene_headless`,
-but until package-level execution replaces the root-package bins in actual operator use,
-the documentation must describe the root-package bins as canonical.
+Root bins are the current operator truth.
+Root is still a thin migration shell.
+This does not mean root owns long-term runtime architecture.
 
-Current root behavior is constrained to thin compatibility shell ownership.
-New runtime policy decisions must not be introduced in root.
+## Transition rule
 
-## Transition policy
-
-When package-level entrypoints become the active truth, this file changes in one step:
-
-1. package commands become canonical,
-2. root-package bin paths become compatibility-only,
-3. old commands are marked deprecated with removal criteria.
-
-No document may advertise a future entrypoint as current truth.
-
-## Validation checklist
-
-Any doc that describes launch paths must pass all of these:
-
-- names only currently declared bins or packages,
-- matches Cargo reality,
-- does not invent `test/sandbox` binaries,
-- explicitly distinguishes current path vs. target path,
-- points back to this file.
+When package-level runtime ownership becomes real, this file changes in one step.
+Until then, no document may advertise future package-level commands as current truth.
