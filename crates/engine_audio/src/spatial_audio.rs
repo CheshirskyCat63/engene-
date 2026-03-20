@@ -1,7 +1,7 @@
 use glam::Vec3;
 
-use engine_audio::audio::{AudioEngine, SoundKind};
 use crate::core::ecs::Ecs;
+use engine_audio::audio::{AudioEngine, SoundKind};
 
 pub struct SpatialAudioSystem {
     pub max_audible_distance: f32,

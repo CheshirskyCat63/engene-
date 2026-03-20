@@ -1,7 +1,7 @@
-use engine_ecs::Ecs;
 use crate::game::ai::offline_simulation;
 use crate::game::ecosystem::food_chain;
 use crate::world::components::{EntityKind, SimulationLevel};
+use engine_ecs::Ecs;
 
 pub fn process_l1_entities(ecs: &mut Ecs, elapsed: f32) {
     let entities: Vec<_> = ecs

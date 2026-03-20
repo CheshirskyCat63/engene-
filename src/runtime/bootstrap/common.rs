@@ -1,6 +1,4 @@
 use crate::core::budget_registry::create_default_registry;
-use engine_ecs::Ecs;
-use engine_runtime::engine::Engine;
 use crate::core::events::aggregation::EventAggregator;
 use crate::core::events::debug_bus::DebugBus;
 use crate::core::events::render_bus::RenderBus;
@@ -11,6 +9,8 @@ use crate::core::plugin::EngineBuilder;
 use crate::core::quality_governor::QualityGovernor;
 use crate::core::runtime_config::RuntimeConfig;
 use crate::core::sdk::EngineSDK;
+use engine_ecs::Ecs;
+use engine_runtime::engine::Engine;
 
 pub(crate) const GAME_CONFIG_DIR: &str = "game/data";
 

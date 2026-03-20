@@ -1,10 +1,10 @@
 // LEGACY IMPORTS - Use canonical crates instead
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
-use engine_core::events::canonical::*;
-use engine_render::destruction_occlusion::{DestructionOcclusionSystem, OcclusionBreach};
-use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
+use crate::navigation::dynamic_nav_update::NavDirtyTracker;
+use engine_core::events::canonical::*;
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_render::destruction_occlusion::{DestructionOcclusionSystem, OcclusionBreach};
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 const NAV_CELL_SIZE: f32 = 8.0;
 

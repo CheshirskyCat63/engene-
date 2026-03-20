@@ -1,10 +1,10 @@
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
-use engine_core::events::canonical::*;
-use engine_physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
+use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::world::terrain_damage::CraterStamp;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
-use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::events::canonical::*;
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_physics::destruction::{DestructionEvent, DestructionLod, DestructionSystem};
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 use glam::Vec3;
 

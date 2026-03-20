@@ -1,5 +1,5 @@
-use engine_ecs::Entity;
 use crate::world::hierarchical_spatial::SpatialDirtyInput;
+use engine_ecs::Entity;
 
 #[derive(Debug, Default, Clone)]
 pub struct SpatialDirtyJournal {

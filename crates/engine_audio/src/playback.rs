@@ -1,9 +1,9 @@
-use engine_audio::audio::{AudioEngine, SoundKind};
 use crate::audio::sound_bank::{SoundBank, SoundEvent};
+use engine_audio::audio::{AudioEngine, SoundKind};
 // LEGACY IMPORTS - Use canonical crates instead
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 fn sound_kind_to_event(kind: SoundKind) -> SoundEvent {
     match kind {

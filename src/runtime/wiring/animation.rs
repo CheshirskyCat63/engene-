@@ -2,14 +2,14 @@
 
 use std::collections::{HashMap, HashSet};
 
-use engine_physics::animation::locomotion::LocomotionMachine;
-use engine_ecs::Entity;
 use crate::core::events::canonical::BodyZoneDamaged;
 use crate::core::mutation_policy::FixedTickContext;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::core::system_descriptor::SystemDescriptor;
 use crate::game::ai::body::BodyState;
 use crate::world::components::{AiState, Goal, LifeStage};
+use engine_ecs::Entity;
+use engine_physics::animation::locomotion::LocomotionMachine;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 

@@ -8,4 +8,4 @@ pub mod api {
 }
 
 // Re-export systems for transitional access from root
-pub use simulation_core::systems::{EngineSystem, WorldTickSystem, Scheduler, FixedTickContext};
+pub use simulation_core::systems::{EngineSystem, FixedTickContext, Scheduler, WorldTickSystem};

@@ -1,8 +1,8 @@
-use engine_ecs::Ecs;
-use engine_ecs::Entity;
-use engine_ecs::persistent_id::PersistentEntityId;
 use crate::world::chunk_persistence::ChunkPersistenceService;
 use crate::world::streaming::{ChunkCoord, WorldStreamer};
+use engine_ecs::persistent_id::PersistentEntityId;
+use engine_ecs::Ecs;
+use engine_ecs::Entity;
 
 /// Report from multi-region streaming test
 #[derive(Debug)]

@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use crate::core::plugin::EngineBuilder;
-use engine_physics::physics::PhysicsSystem;
 use crate::runtime::wiring::animation::AnimationIntegrationSystem;
 use crate::runtime::wiring::integration::{
     AiDecisionWireSystem, AnimationWireSystem, BallisticsTickSystem, DamageDispatchSystem,
@@ -12,6 +11,7 @@ use crate::runtime::wiring::world_tick::WorldTickSystem;
 use crate::simulation::simulation::SimulationSystem;
 use crate::world::heightmap::Heightmap;
 use crate::world::world::WorldGrid;
+use engine_physics::physics::PhysicsSystem;
 
 pub(super) fn register_vertical_systems(
     builder: &mut EngineBuilder,

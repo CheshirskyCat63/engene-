@@ -57,7 +57,7 @@ pub mod visibility;
 pub mod volumetric;
 
 // Re-export main types
-pub use renderer::Renderer;
-pub use mesh::EntityInstance;
 pub use destruction_occlusion::{DestructionOcclusionSystem, OcclusionBreach};
 pub use gore_mesh::{GoreMeshInstance, GoreMeshSystem};
+pub use mesh::EntityInstance;
+pub use renderer::Renderer;

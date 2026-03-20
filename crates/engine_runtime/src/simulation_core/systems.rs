@@ -1,8 +1,8 @@
 //! Runtime Systems Module.
 //! Phase 3: Ownership transfer from root runtime.
-//! 
+//!
 //! Contains runtime orchestration systems that belong to engine_runtime.
-//! 
+//!
 //! Structure:
 //! - `engine_system.rs` - Core EngineSystem trait (owned by engine_runtime)
 //! - `scheduler.rs` - Time-based scheduling (owned by engine_runtime)

@@ -13,14 +13,14 @@ pub use ecs_mechanics::GenEntity;
 pub use entity::Entity;
 
 pub mod api {
-/// Stable crate identifier.
-pub const CRATE: &str = "engine_ecs";
-pub use crate::access;
-pub use crate::commands;
-pub use crate::entity::Entity;
-pub use crate::parallel_validation;
-pub use crate::persistent_id;
-pub use crate::query_contract;
-pub use crate::sparse_set;
-pub use crate::system_descriptor;
+    /// Stable crate identifier.
+    pub const CRATE: &str = "engine_ecs";
+    pub use crate::access;
+    pub use crate::commands;
+    pub use crate::entity::Entity;
+    pub use crate::parallel_validation;
+    pub use crate::persistent_id;
+    pub use crate::query_contract;
+    pub use crate::sparse_set;
+    pub use crate::system_descriptor;
 }

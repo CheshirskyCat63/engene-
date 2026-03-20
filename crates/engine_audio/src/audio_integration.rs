@@ -1,13 +1,13 @@
 //! Phase 5: Audio wiring - connects SoundTrigger events to AudioEngine with occlusion.
 
-use engine_audio::audio::{AudioEngine, SoundKind};
 use crate::audio::occlusion::OcclusionSystem;
+use engine_audio::audio::{AudioEngine, SoundKind};
 // LEGACY IMPORTS - Use canonical crates instead
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
-use engine_core::events::canonical::{SoundTrigger, SoundTriggerKind};
-use engine_render::destruction_occlusion::DestructionOcclusionSystem;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_core::events::canonical::{SoundTrigger, SoundTriggerKind};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_render::destruction_occlusion::DestructionOcclusionSystem;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 fn map_trigger_to_sound(kind: &SoundTriggerKind) -> SoundKind {
     match kind {

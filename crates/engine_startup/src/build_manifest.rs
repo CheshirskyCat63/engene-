@@ -59,7 +59,13 @@ impl BuildManifest {
     }
 
     pub fn ensure_data_dirs() {
-        let dirs = ["game", "game/logs", "game/crashes", "game/saves", "game/saves/chunks"];
+        let dirs = [
+            "game",
+            "game/logs",
+            "game/crashes",
+            "game/saves",
+            "game/saves/chunks",
+        ];
         for dir in dirs {
             std::fs::create_dir_all(dir).unwrap_or_else(|e| {
                 eprintln!("Failed to create directory {}: {}", dir, e);

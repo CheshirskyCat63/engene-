@@ -18,7 +18,7 @@ use winit::event_loop::EventLoop;
 use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{CursorGrabMode, Window};
 
-use engine_startup::{BuildManifest, install_panic_hook};
+use engene::app::spatial_dirty_journal::SpatialDirtyJournal;
 use engene::core::engine::Engine;
 use engene::graphics::camera::FlyCamera;
 use engene::graphics::lod::{LodConfig, LodLevel};
@@ -30,10 +30,10 @@ use engene::memory::asset_manager::AssetManager;
 use engene::runtime::bootstrap::ToolsRuntimeAssembly;
 use engene::tools::doctor;
 use engene::tools::editor_shell::EditorShell;
-use engene::app::spatial_dirty_journal::SpatialDirtyJournal;
 use engene::world::components::*;
 use engene::world::heightmap::Heightmap;
 use engene::world::hierarchical_spatial::SpatialUpdatePath;
+use engine_startup::{install_panic_hook, BuildManifest};
 
 type ArcHeightmap = Arc<Heightmap>;
 
@@ -237,10 +237,10 @@ impl ApplicationHandler for SdkApp {
                 }
                 self.frame += 1;
 
-                if let Some(am) =
-                    self.engine
-                        .resources
-                        .get_mut::<std::sync::Mutex<AssetManager>>()
+                if let Some(am) = self
+                    .engine
+                    .resources
+                    .get_mut::<std::sync::Mutex<AssetManager>>()
                 {
                     if let Ok(mut am) = am.lock() {
                         am.poll();
@@ -251,10 +251,13 @@ impl ApplicationHandler for SdkApp {
                 let cam_fwd = self.camera.forward();
 
                 // World streaming
-                let (to_load, to_unload) = engene::app::sdk_runner::sdk_runner_phases::streaming::run(self, cam_pos);
+                let (to_load, to_unload) =
+                    engene::app::sdk_runner::sdk_runner_phases::streaming::run(self, cam_pos);
 
                 // Persistence
-                engene::app::sdk_runner::sdk_runner_phases::persistence::run(self, &to_load, &to_unload);
+                engene::app::sdk_runner::sdk_runner_phases::persistence::run(
+                    self, &to_load, &to_unload,
+                );
 
                 // Audio
                 engene::app::sdk_runner::sdk_runner_phases::audio::run(self, cam_pos, cam_fwd, dt);

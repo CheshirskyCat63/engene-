@@ -1,15 +1,10 @@
 use std::sync::Arc;
 
-use engine_audio::audio::AudioEngine;
-use engine_content::asset_budget::AssetBudget;
-use engine_content::prefabs::prefab_registry::PrefabRegistry;
 use crate::core::component_registry::ComponentRegistry;
 use crate::core::material_truth::MaterialTruthService;
 use crate::core::plugin::EngineBuilder;
 use crate::navigation::dynamic_nav_update::NavDirtyTracker;
 use crate::navigation::hpa_star::HpaGraph;
-use engine_physics::damage_pipeline::DamageOrchestrator;
-use engine_physics::destruction::DestructionSystem;
 use crate::runtime::bootstrap::common::insert_runtime_core;
 use crate::world::fields::{AnomalyForceType, AnomalyZone, WorldFields};
 use crate::world::heightmap::Heightmap;
@@ -19,6 +14,11 @@ use crate::world::streaming::WorldStreamer;
 use crate::world::surface_state::SurfaceStateStore;
 use crate::world::terrain_deformation::TerrainDeformationSystem;
 use crate::world::terrain_truth::TerrainTruth;
+use engine_audio::audio::AudioEngine;
+use engine_content::asset_budget::AssetBudget;
+use engine_content::prefabs::prefab_registry::PrefabRegistry;
+use engine_physics::damage_pipeline::DamageOrchestrator;
+use engine_physics::destruction::DestructionSystem;
 
 pub(super) fn insert_world_and_damage_resources(builder: &mut EngineBuilder) {
     let mut world_fields = WorldFields::new();

@@ -12,10 +12,10 @@ use std::sync::Arc;
 
 use winit::event_loop::EventLoop;
 
-use engine_startup::{BuildManifest, install_panic_hook};
 use engene::runtime::bootstrap::{EngineRuntimeAssembly, GameRuntimeAssembly};
 use engene::world::heightmap::Heightmap;
 use engene::world::world::WorldGrid;
+use engine_startup::{install_panic_hook, BuildManifest};
 
 pub fn run_from_env_args() {
     if BuildManifest::handle_version_flag() {
@@ -91,4 +91,3 @@ pub fn run_headless_from_env_args() {
 mod game_runner {
     pub use engene::app::game_runner::GameApp;
 }
-

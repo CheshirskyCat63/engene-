@@ -15,22 +15,19 @@ pub struct ToolsRuntimeAssembly;
 ///
 /// This is a small, real production seam that tests can call to ensure
 /// physics bootstrap path is available in platform code.
-pub fn minimal_physics_bootstrap_for_validation(
-) -> engine_physics::bootstrap::PhysicsBootstrap {
+pub fn minimal_physics_bootstrap_for_validation() -> engine_physics::bootstrap::PhysicsBootstrap {
     engine_physics::bootstrap::PhysicsBootstrap::enabled_minimal()
 }
 
 #[cfg(feature = "physics")]
 /// Helper to get a disabled physics bootstrap object for validation.
-pub fn disabled_physics_bootstrap_for_validation(
-) -> engine_physics::bootstrap::PhysicsBootstrap {
+pub fn disabled_physics_bootstrap_for_validation() -> engine_physics::bootstrap::PhysicsBootstrap {
     engine_physics::bootstrap::PhysicsBootstrap::disabled()
 }
 
 #[cfg(feature = "physics")]
 /// Helper for minimal physics system registration in runtime wiring.
-pub fn physics_tick_system_descriptor(
-) -> crate::core::system_descriptor::SystemDescriptor {
+pub fn physics_tick_system_descriptor() -> crate::core::system_descriptor::SystemDescriptor {
     crate::core::system_descriptor::SystemDescriptor::new(
         engine_physics::systems::PHYSICS_TICK_SYSTEM_NAME,
     )

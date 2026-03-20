@@ -1,8 +1,8 @@
 //! Architectural Gates - Enforces crate ownership rules
-//! 
+//!
 //! These tests FAIL if legacy patterns are used.
 //! Run with: cargo test --test architectural_gates
-//! 
+//!
 //! GATE 1: No legacy imports from root modules
 //! GATE 2: No root ownership growth  
 //! GATE 3: Apps launch only from canonical crates
@@ -16,7 +16,7 @@ mod gates {
 
     fn scan_files_for_pattern(dir: &str, pattern: &str) -> Vec<String> {
         let mut matches = Vec::new();
-        
+
         if let Ok(entries) = fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
@@ -27,7 +27,12 @@ mod gates {
                         if let Ok(content) = fs::read_to_string(&path) {
                             for (line_num, line) in content.lines().enumerate() {
                                 if line.contains(pattern) {
-                                    matches.push(format!("{}:{}: {}", path.display(), line_num + 1, line.trim()));
+                                    matches.push(format!(
+                                        "{}:{}: {}",
+                                        path.display(),
+                                        line_num + 1,
+                                        line.trim()
+                                    ));
                                 }
                             }
                         }
@@ -42,10 +47,10 @@ mod gates {
     fn gate_1_no_legacy_imports() {
         // This test searches for forbidden legacy import patterns
         // If any are found, the test FAILS
-        
+
         let forbidden_patterns = [
             "use crate::graphics::",
-            "use crate::audio::", 
+            "use crate::audio::",
             "use crate::world::",
             "use crate::body::",
             "use crate::tools::",
@@ -94,10 +99,19 @@ mod gates {
             "pub mod scheduler;",
             "pub mod system;",
             "pub mod systems;",
+            // Inline references (not just use statements)
+            "crate::core::ecs::",
+            "crate::core::query::",
+            "crate::core::scheduler::",
+            "crate::core::system::",
+            "crate::core::systems::",
+            "crate::core::engine::",
+            // Protection against new module declarations in core/mod.rs
+            "pub mod ",
         ];
 
         let mut violations = Vec::new();
-        
+
         for pattern in &forbidden_patterns {
             let matches = scan_files_for_pattern("src", pattern);
             if !matches.is_empty() {
@@ -106,7 +120,10 @@ mod gates {
         }
 
         if !violations.is_empty() {
-            panic!("GATE 1 VIOLATIONS - Legacy imports detected:\n\n{}", violations.join("\n\n"));
+            panic!(
+                "GATE 1 VIOLATIONS - Legacy imports detected:\n\n{}",
+                violations.join("\n\n")
+            );
         }
     }
 
@@ -114,28 +131,29 @@ mod gates {
     fn gate_2_no_root_ownership_growth() {
         // This test ensures root doesn't grow new owner-like modules
         // Root should only contain thin compat layers
-        
+
         let allowed_root_modules = [
-            "app",      // transitional app layer
-            "runtime",  // transitional runtime layer  
-            "core",     // transitional core layer
+            "app",         // transitional app layer
+            "runtime",     // transitional runtime layer
+            "core",        // transitional core layer
             "testsupport", // testing compatibility
         ];
 
         let lib_path = "src/lib.rs";
-        let content = fs::read_to_string(lib_path)
-            .expect("Could not read src/lib.rs");
+        let content = fs::read_to_string(lib_path).expect("Could not read src/lib.rs");
 
         let mut found_modules = Vec::new();
-        
+
         for line in content.lines() {
             let trimmed = line.trim();
             // Check for both pub mod and private mod
             if trimmed.starts_with("pub mod ") || trimmed.starts_with("mod ") {
-                let module_name = trimmed.strip_prefix("pub mod ").unwrap_or_else(|| {
-                    trimmed.strip_prefix("mod ").unwrap()
-                })
-                    .split(';').next().unwrap()
+                let module_name = trimmed
+                    .strip_prefix("pub mod ")
+                    .unwrap_or_else(|| trimmed.strip_prefix("mod ").unwrap())
+                    .split(';')
+                    .next()
+                    .unwrap()
                     .trim();
                 found_modules.push(module_name.to_string());
             }
@@ -156,9 +174,11 @@ mod gates {
                 if path.is_dir() {
                     if let Some(dir_name) = path.file_name() {
                         if let Some(name_str) = dir_name.to_str() {
-                            if !allowed_root_modules.contains(&name_str) && 
+                            if !allowed_root_modules.contains(&name_str) &&
                                name_str != "bin" && // Allow bin directory
-                               !name_str.starts_with('.') { // Skip hidden dirs
+                               !name_str.starts_with('.')
+                            {
+                                // Skip hidden dirs
                                 violations.push(format!("{} (physical directory)", name_str));
                             }
                         }
@@ -176,11 +196,14 @@ mod gates {
     #[test]
     fn gate_3_apps_launch_from_canonical_crates() {
         // This test ensures apps only use canonical crates for launch
-        
+
         let expected_app_launches = [
             ("engene_game", "game_framework::run_from_env_args"),
-            ("engene_sdk", "sdk_app::run_from_env_args"), 
-            ("engene_headless", "game_framework::run_headless_from_env_args"),
+            ("engene_sdk", "sdk_app::run_from_env_args"),
+            (
+                "engene_headless",
+                "game_framework::run_headless_from_env_args",
+            ),
         ];
 
         let mut violations = Vec::new();
@@ -188,7 +211,7 @@ mod gates {
         // Check regular apps
         for (app_name, expected_launch) in &expected_app_launches {
             let main_path = format!("apps/{}/src/main.rs", app_name);
-            
+
             if !Path::new(&main_path).exists() {
                 violations.push(format!("{}: missing main.rs", app_name));
                 continue;
@@ -199,19 +222,21 @@ mod gates {
 
             // Check for the expected launch pattern
             if !content.contains(expected_launch) {
-                violations.push(format!("{}: does not contain expected launch '{}'", app_name, expected_launch));
+                violations.push(format!(
+                    "{}: does not contain expected launch '{}'",
+                    app_name, expected_launch
+                ));
             }
 
             // Check for forbidden patterns (direct root usage)
-            let forbidden_patterns = [
-                "use engene::",
-                "use crate::",
-                "engene::run",
-            ];
+            let forbidden_patterns = ["use engene::", "use crate::", "engene::run"];
 
             for pattern in &forbidden_patterns {
                 if content.contains(pattern) {
-                    violations.push(format!("{}: contains forbidden pattern '{}'", app_name, pattern));
+                    violations.push(format!(
+                        "{}: contains forbidden pattern '{}'",
+                        app_name, pattern
+                    ));
                 }
             }
         }
@@ -223,26 +248,31 @@ mod gates {
                 .unwrap_or_else(|_| panic!("Could not read {}", bootstrap_path));
 
             // Bootstrap should NOT use canonical crate launches (it launches other apps)
-            let forbidden_bootstrap_patterns = [
-                "game_framework::run",
-                "sdk_app::run",
-                "use engene::",
-            ];
+            let forbidden_bootstrap_patterns =
+                ["game_framework::run", "sdk_app::run", "use engene::"];
 
             for pattern in &forbidden_bootstrap_patterns {
                 if content.contains(pattern) {
-                    violations.push(format!("engene_bootstrap: contains forbidden pattern '{}'", pattern));
+                    violations.push(format!(
+                        "engene_bootstrap: contains forbidden pattern '{}'",
+                        pattern
+                    ));
                 }
             }
 
             // Bootstrap should use Command::new to launch other executables
             if !content.contains("Command::new") {
-                violations.push("engene_bootstrap: should use Command::new to launch other apps".to_string());
+                violations.push(
+                    "engene_bootstrap: should use Command::new to launch other apps".to_string(),
+                );
             }
         }
 
         if !violations.is_empty() {
-            panic!("GATE 3 VIOLATIONS - App launch verification failed:\n\n{}", violations.join("\n"));
+            panic!(
+                "GATE 3 VIOLATIONS - App launch verification failed:\n\n{}",
+                violations.join("\n")
+            );
         }
 
         println!("GATE 3: All app entrypoints verified successfully");

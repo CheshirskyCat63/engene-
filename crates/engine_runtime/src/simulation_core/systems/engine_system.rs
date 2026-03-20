@@ -5,19 +5,19 @@
 //! It is owned by engine_runtime and used by both engine_runtime and root transitional code.
 
 /// Core trait for all engine systems.
-/// 
+///
 /// Systems are the fundamental unit of runtime logic in the engine.
 /// Each system operates on ECS data during tick cycles.
 pub trait EngineSystem {
     /// Returns the unique name of this system.
     fn name(&self) -> &str;
-    
+
     /// Called on each tick (default: no-op).
     fn tick(&mut self, _ctx: &mut SystemTickContext) {}
-    
+
     /// Called on fixed tick intervals (default: no-op).
     fn fixed_tick(&mut self, _ctx: &mut FixedTickContext) {}
-    
+
     /// Called on render tick (default: no-op).
     fn render_tick(&mut self, _ctx: &mut RenderTickContext) {}
 }
@@ -35,7 +35,7 @@ impl SystemTickContext {
 }
 
 /// Context for fixed-interval system ticks.
-/// 
+///
 /// Uses generic time type to avoid coupling to engine_core.
 /// Root transitional code will provide concrete time implementation.
 pub struct FixedTickContext<T = ()> {
@@ -46,7 +46,11 @@ pub struct FixedTickContext<T = ()> {
 
 impl<T> FixedTickContext<T> {
     pub fn new(delta: f32, time: T) -> Self {
-        Self { delta, time, ecs: () }
+        Self {
+            delta,
+            time,
+            ecs: (),
+        }
     }
 }
 
@@ -72,24 +76,26 @@ mod tests {
         fn check_name(system: &dyn EngineSystem) -> String {
             system.name().to_string()
         }
-        
+
         struct DummySystem;
         impl EngineSystem for DummySystem {
-            fn name(&self) -> &str { "Dummy" }
+            fn name(&self) -> &str {
+                "Dummy"
+            }
         }
-        
+
         assert_eq!(check_name(&DummySystem), "Dummy");
     }
-    
+
     #[test]
     fn test_context_creation() {
         let tick_ctx = SystemTickContext::new(0.016);
         assert_eq!(tick_ctx.delta, 0.016);
-        
+
         // Using () as placeholder time type for tests
         let fixed_ctx = FixedTickContext::new(0.016, ());
         assert_eq!(fixed_ctx.delta, 0.016);
-        
+
         let render_ctx = RenderTickContext::new(0.016);
         assert_eq!(render_ctx.delta, 0.016);
     }

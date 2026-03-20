@@ -46,11 +46,13 @@ fn main() -> ExitCode {
 
     let child_args: Vec<_> = args.iter().skip(1).collect();
 
-    println!("bootstrapping into '{}' with args: {:?}", profile.target_exe(), child_args);
+    println!(
+        "bootstrapping into '{}' with args: {:?}",
+        profile.target_exe(),
+        child_args
+    );
 
-    let status = Command::new(profile.target_exe())
-        .args(child_args)
-        .status();
+    let status = Command::new(profile.target_exe()).args(child_args).status();
 
     match status {
         Ok(status) if status.success() => ExitCode::SUCCESS,

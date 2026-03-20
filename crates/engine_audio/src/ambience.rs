@@ -1,5 +1,5 @@
-use engine_audio::audio::{AudioEngine, SoundHandle, SoundKind};
 use crate::world::biome::Biome;
+use engine_audio::audio::{AudioEngine, SoundHandle, SoundKind};
 
 pub struct BiomeAmbience {
     current_biome: Option<Biome>,

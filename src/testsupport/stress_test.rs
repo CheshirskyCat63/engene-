@@ -6,12 +6,12 @@ use std::time::Instant;
 use glam::Vec3;
 use rand::Rng;
 
-use engine_runtime::engine::Engine;
-use engine_physics::ballistics::BallisticsSystem;
 use crate::runtime::bootstrap::GameRuntimeAssembly;
 use crate::world::cell::{CELL_SIZE, GRID_SIZE, WORLD_SIZE};
 use crate::world::components::MonsterSpecies;
 use crate::world::population;
+use engine_physics::ballistics::BallisticsSystem;
+use engine_runtime::engine::Engine;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 

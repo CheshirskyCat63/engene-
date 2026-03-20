@@ -1,6 +1,6 @@
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 use engine_physics::animation::animation::ChannelProperty;
 use engine_physics::animation::animation::{

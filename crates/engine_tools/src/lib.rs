@@ -8,9 +8,9 @@ pub mod api {
     pub const TARGET_OWNER: &str = "engine_tools";
 }
 
-use engine_startup::{BuildManifest, crash_telemetry};
 use engene::runtime::bootstrap::ToolsRuntimeAssembly;
 use engene::tools::doctor;
+use engine_startup::{crash_telemetry, BuildManifest};
 
 pub fn run_from_env_args() {
     if BuildManifest::handle_version_flag() {
@@ -40,4 +40,3 @@ pub fn run_from_env_args() {
     );
     report.print();
 }
-

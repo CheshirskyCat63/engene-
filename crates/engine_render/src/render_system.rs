@@ -1,13 +1,15 @@
 use std::sync::Mutex;
 
 // LEGACY IMPORTS - Use canonical crates instead
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext, ExtractContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
-use engine_render::mesh::EntityInstance;
-use engine_render::renderer::Renderer;
-use engine_render::destruction_occlusion::DestructionOcclusionSystem;
 use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::world::components::EntityKind;
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_render::destruction_occlusion::DestructionOcclusionSystem;
+use engine_render::mesh::EntityInstance;
+use engine_render::renderer::Renderer;
+use engine_runtime::simulation_core::systems::engine_system::{
+    EngineSystem, ExtractContext, FixedTickContext,
+};
 
 pub struct RenderExtractData {
     pub instances: Vec<EntityInstance>,

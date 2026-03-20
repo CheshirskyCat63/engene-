@@ -24,7 +24,9 @@ impl PhysicsBootstrap {
             mode: PhysicsBootstrapMode::Disabled,
             runtime_state: PhysicsRuntimeState { enabled: false },
             world_handle: PhysicsWorldHandle { initialized: false },
-            registration: PhysicsRegistrationState { systems_registered: false },
+            registration: PhysicsRegistrationState {
+                systems_registered: false,
+            },
         }
     }
 
@@ -34,7 +36,9 @@ impl PhysicsBootstrap {
             mode: PhysicsBootstrapMode::Enabled,
             runtime_state: PhysicsRuntimeState { enabled: true },
             world_handle: PhysicsWorldHandle { initialized: true },
-            registration: PhysicsRegistrationState { systems_registered: true },
+            registration: PhysicsRegistrationState {
+                systems_registered: true,
+            },
         }
     }
 

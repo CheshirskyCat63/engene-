@@ -17,15 +17,17 @@ fn physics_bootstrap_contract_doc_exists() {
 fn physics_bootstrap_contract_is_not_future_fanfic() {
     let bootstrap_contract = fs::read_to_string("docs/canonical/PHYSICS_BOOTSTRAP_CONTRACT.md")
         .expect("PHYSICS_BOOTSTRAP_CONTRACT.md must exist");
-    
+
     // Verify it describes current state, not just future
-    let has_current_state = bootstrap_contract.to_lowercase().contains("current") ||
-                            bootstrap_contract.to_lowercase().contains("as of") ||
-                            bootstrap_contract.to_lowercase().contains("status") ||
-                            bootstrap_contract.to_lowercase().contains("not yet");
-    
-    assert!(has_current_state,
-        "PHYSICS_BOOTSTRAP_CONTRACT must describe current state, not just future");
+    let has_current_state = bootstrap_contract.to_lowercase().contains("current")
+        || bootstrap_contract.to_lowercase().contains("as of")
+        || bootstrap_contract.to_lowercase().contains("status")
+        || bootstrap_contract.to_lowercase().contains("not yet");
+
+    assert!(
+        has_current_state,
+        "PHYSICS_BOOTSTRAP_CONTRACT must describe current state, not just future"
+    );
 }
 
 /// Physics bootstrap preconditions are explicit.
@@ -33,20 +35,28 @@ fn physics_bootstrap_contract_is_not_future_fanfic() {
 fn physics_bootstrap_preconditions_are_explicit() {
     let bootstrap_contract = fs::read_to_string("docs/canonical/PHYSICS_BOOTSTRAP_CONTRACT.md")
         .expect("PHYSICS_BOOTSTRAP_CONTRACT.md must exist");
-    
+
     // Verify preconditions section exists
-    assert!(bootstrap_contract.contains("Preconditions") ||
-            bootstrap_contract.contains("preconditions") ||
-            bootstrap_contract.contains("must exist"),
-        "PHYSICS_BOOTSTRAP_CONTRACT must have preconditions section");
+    assert!(
+        bootstrap_contract.contains("Preconditions")
+            || bootstrap_contract.contains("preconditions")
+            || bootstrap_contract.contains("must exist"),
+        "PHYSICS_BOOTSTRAP_CONTRACT must have preconditions section"
+    );
 }
 
 /// Physics bootstrap has a disabled path that validates.
 #[test]
 fn physics_bootstrap_disabled_path_is_defined() {
     let disabled = engine_physics::bootstrap::PhysicsBootstrap::disabled();
-    assert!(!disabled.is_enabled(), "disabled bootstrap should not be enabled");
-    assert!(disabled.validate().is_ok(), "disabled bootstrap should validate");
+    assert!(
+        !disabled.is_enabled(),
+        "disabled bootstrap should not be enabled"
+    );
+    assert!(
+        disabled.validate().is_ok(),
+        "disabled bootstrap should validate"
+    );
 }
 
 /// Runtime exposes a minimal physics bootstrap helper.
@@ -67,8 +77,14 @@ fn runtime_physics_system_descriptor_is_available() {
 #[test]
 fn physics_bootstrap_enabled_minimal_path_validates() {
     let enabled = engine_physics::bootstrap::PhysicsBootstrap::enabled_minimal();
-    assert!(enabled.is_enabled(), "enabled_minimal should report enabled");
-    assert!(enabled.validate().is_ok(), "enabled_minimal should validate");
+    assert!(
+        enabled.is_enabled(),
+        "enabled_minimal should report enabled"
+    );
+    assert!(
+        enabled.validate().is_ok(),
+        "enabled_minimal should validate"
+    );
 }
 
 /// Physics bootstrap validate fails loudly when state is invalid.
@@ -78,11 +94,17 @@ fn physics_bootstrap_loud_fail_exists_for_invalid_enabled_state() {
 
     let mut broken = engine_physics::bootstrap::PhysicsBootstrap::enabled_minimal();
     broken.runtime_state.enabled = false;
-    assert!(matches!(broken.validate(), Err(PhysicsBootstrapFailure::MissingRuntimeState)));
+    assert!(matches!(
+        broken.validate(),
+        Err(PhysicsBootstrapFailure::MissingRuntimeState)
+    ));
 
     let mut broken = engine_physics::bootstrap::PhysicsBootstrap::enabled_minimal();
     broken.registration.systems_registered = false;
-    assert!(matches!(broken.validate(), Err(PhysicsBootstrapFailure::InvalidRegistration)));
+    assert!(matches!(
+        broken.validate(),
+        Err(PhysicsBootstrapFailure::InvalidRegistration)
+    ));
 }
 
 /// Current branch state does not overclaim physics bootstrap.
@@ -90,22 +112,23 @@ fn physics_bootstrap_loud_fail_exists_for_invalid_enabled_state() {
 fn current_branch_state_does_not_overclaim_physics_bootstrap() {
     let branch_state = fs::read_to_string("docs/canonical/CURRENT_BRANCH_STATE.md")
         .expect("CURRENT_BRANCH_STATE.md must exist");
-    
+
     // If physics is mentioned, verify it's not claimed as fully integrated
     if branch_state.to_lowercase().contains("physics") {
-        let has_disclaimer = branch_state.to_lowercase().contains("not") ||
-                             branch_state.to_lowercase().contains("stub") ||
-                             branch_state.to_lowercase().contains("not yet") ||
-                             branch_state.to_lowercase().contains("placeholder");
-        
-        let claims_physics_active = (branch_state.contains("physics") && 
-                                     branch_state.contains("active")) ||
-                                    (branch_state.contains("physics") && 
-                                     branch_state.contains("working"));
-        
+        let has_disclaimer = branch_state.to_lowercase().contains("not")
+            || branch_state.to_lowercase().contains("stub")
+            || branch_state.to_lowercase().contains("not yet")
+            || branch_state.to_lowercase().contains("placeholder");
+
+        let claims_physics_active = (branch_state.contains("physics")
+            && branch_state.contains("active"))
+            || (branch_state.contains("physics") && branch_state.contains("working"));
+
         if claims_physics_active {
-            assert!(has_disclaimer,
-                "CURRENT_BRANCH_STATE must not claim physics is active without disclaimer");
+            assert!(
+                has_disclaimer,
+                "CURRENT_BRANCH_STATE must not claim physics is active without disclaimer"
+            );
         }
     }
 }
@@ -115,12 +138,14 @@ fn current_branch_state_does_not_overclaim_physics_bootstrap() {
 fn fast_verification_docs_do_not_claim_physics_is_done() {
     let platform_audit = fs::read_to_string("docs/canonical/PLATFORM_AUDIT.md")
         .expect("PLATFORM_AUDIT.md must exist");
-    
-    let has_physics_truth = platform_audit.to_lowercase().contains("physics") &&
-                            (platform_audit.to_lowercase().contains("stub") ||
-                             platform_audit.to_lowercase().contains("not") ||
-                             platform_audit.to_lowercase().contains("not yet"));
-    
-    assert!(has_physics_truth,
-        "PLATFORM_AUDIT must accurately describe physics readiness");
+
+    let has_physics_truth = platform_audit.to_lowercase().contains("physics")
+        && (platform_audit.to_lowercase().contains("stub")
+            || platform_audit.to_lowercase().contains("not")
+            || platform_audit.to_lowercase().contains("not yet"));
+
+    assert!(
+        has_physics_truth,
+        "PLATFORM_AUDIT must accurately describe physics readiness"
+    );
 }

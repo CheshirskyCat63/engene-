@@ -2,8 +2,8 @@
 //!
 //! Real production checks for spatial dirty policy and index behavior.
 
-use engene::core::ecs::Entity;
 use engene::app::spatial_dirty_journal::SpatialDirtyJournal;
+use engene::core::ecs::Entity;
 use engene::world::hierarchical_spatial::{
     select_spatial_update_path, HierarchicalSpatialIndex, SpatialDirtyInput, SpatialUpdatePath,
 };
@@ -90,7 +90,10 @@ fn origin_shift_forces_rebuild_trigger() {
 #[test]
 fn no_dirty_input_means_no_spatial_work() {
     let dirty = SpatialDirtyInput::default();
-    assert_eq!(select_spatial_update_path(&dirty), SpatialUpdatePath::NoWork);
+    assert_eq!(
+        select_spatial_update_path(&dirty),
+        SpatialUpdatePath::NoWork
+    );
 }
 
 #[test]

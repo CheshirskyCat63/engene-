@@ -68,4 +68,3 @@ mod tests {
         assert_eq!(system.interval(), 10.0);
     }
 }
-

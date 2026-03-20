@@ -49,4 +49,3 @@ pub mod world;
 pub use cell::{Cell, CELL_SIZE, GRID_SIZE, WORLD_SIZE};
 pub use fields::WorldFields;
 pub use world::WorldGrid;
-

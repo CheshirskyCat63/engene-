@@ -19,11 +19,11 @@ pub struct EcsMechanics {
     pub tick: u64,
     pub gen_alloc: SlotMap<GenEntity, Entity>,
     pub identity: IdentityRegistry,
-    
+
     // Lifecycle - purely runtime, no world types
     alive: Vec<Entity>,
     alive_set: HashSet<Entity>,
-    
+
     // Journals for dirty tracking (component-agnostic)
     dirty_inserted: HashSet<Entity>,
     dirty_moved: HashSet<Entity>,
@@ -255,20 +255,23 @@ mod tests {
 
         assert!(!ecs.is_alive(entity));
         // Presence should be Unloaded, not Dead
-        assert!(matches!(ecs.identity.presence(pid), crate::persistent_id::EntityPresence::Unloaded));
+        assert!(matches!(
+            ecs.identity.presence(pid),
+            crate::persistent_id::EntityPresence::Unloaded
+        ));
     }
 
     #[test]
     fn test_spawn_restored_with_existing_pid() {
         let mut ecs = EcsMechanics::new();
-        
+
         // First spawn and despawn
         let (e1, pid) = ecs.spawn_new();
         ecs.despawn(e1);
-        
+
         // Restore with same PID
         let e2 = ecs.spawn_restored(pid).expect("restore should succeed");
-        
+
         assert_eq!(ecs.identity.persistent_id_of(e2), Some(pid));
         assert!(ecs.is_alive(e2));
     }
@@ -276,11 +279,11 @@ mod tests {
     #[test]
     fn test_spawn_restored_duplicate_pid_fails() {
         let mut ecs = EcsMechanics::new();
-        
+
         // Create two entities
         let (e1, pid) = ecs.spawn_new();
         let _e2 = ecs.spawn();
-        
+
         // Try to restore second entity with same PID - should fail
         let result = ecs.spawn_restored(pid);
         assert!(result.is_err());
@@ -289,17 +292,17 @@ mod tests {
     #[test]
     fn test_lifecycle_invariants_maintained() {
         let mut ecs = EcsMechanics::new();
-        
+
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
-        
+
         // Valid state
         assert!(ecs.validate_invariants().is_ok());
-        
+
         // After despawn, validate should still pass
         ecs.despawn(e1);
         assert!(ecs.validate_invariants().is_ok());
-        
+
         // Despawn all should still pass
         ecs.despawn(e2);
         assert!(ecs.validate_invariants().is_ok());
@@ -308,24 +311,24 @@ mod tests {
     #[test]
     fn test_dirty_journals_work() {
         let mut ecs = EcsMechanics::new();
-        
+
         let e1 = ecs.spawn();
         let e2 = ecs.spawn();
-        
+
         // Initially should have inserted journal
         let inserted = ecs.drain_dirty_inserted();
         assert_eq!(inserted.len(), 2);
         assert!(inserted.contains(&e1));
         assert!(inserted.contains(&e2));
-        
+
         // After draining, should be empty
         assert!(ecs.dirty_inserted.is_empty());
-        
+
         // Mark dirty and drain
         ecs.mark_dirty(e1);
         let moved = ecs.drain_dirty_moved();
         assert_eq!(moved, vec![e1]);
-        
+
         ecs.despawn(e2);
         let removed = ecs.drain_dirty_removed();
         assert_eq!(removed, vec![e2]);
@@ -334,12 +337,12 @@ mod tests {
     #[test]
     fn test_tick_advancement() {
         let mut ecs = EcsMechanics::new();
-        
+
         assert_eq!(ecs.tick, 0);
-        
+
         ecs.advance_tick();
         assert_eq!(ecs.tick, 1);
-        
+
         ecs.set_tick(100);
         assert_eq!(ecs.tick, 100);
     }
@@ -347,23 +350,23 @@ mod tests {
     #[test]
     fn test_identity_live_entities() {
         let mut ecs = EcsMechanics::new();
-        
+
         let (e1, pid1) = ecs.spawn_new();
         let (e2, pid2) = ecs.spawn_new();
-        
+
         let live: Vec<_> = ecs.identity.live_entities().collect();
         assert_eq!(live.len(), 2);
-        
+
         // Check pid1 -> e1 mapping exists
         let has_e1 = live.iter().any(|(pid, e)| *pid == pid1 && *e == e1);
         assert!(has_e1, "should have pid1 -> e1 mapping");
-        
+
         // Check pid2 -> e2 mapping exists
         let has_e2 = live.iter().any(|(pid, e)| *pid == pid2 && *e == e2);
         assert!(has_e2, "should have pid2 -> e2 mapping");
-        
+
         ecs.despawn(e1);
-        
+
         let live_after: Vec<_> = ecs.identity.live_entities().collect();
         assert_eq!(live_after.len(), 1);
         assert_eq!(live_after[0].1, e2);

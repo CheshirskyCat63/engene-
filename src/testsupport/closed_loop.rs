@@ -6,11 +6,11 @@ use std::collections::HashMap;
 use engine_ecs::Ecs;
 use engine_runtime::engine::Engine;
 // LEGACY IMPORTS - Use canonical crates instead
-use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
-use engine_ecs::system_descriptor::SystemDescriptor;
-use engine_core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
 use crate::core::system::EngineSystem as LegacyEngineSystem;
 use crate::game::economy::resource_flow;
+use engine_core::events::canonical::{EntityDied, ImpactEvent, NavUpdated, WorldTopologyChanged};
+use engine_ecs::system_descriptor::SystemDescriptor;
+use engine_runtime::simulation_core::systems::engine_system::{EngineSystem, FixedTickContext};
 
 const SIM_DT: f32 = 1.0 / 20.0;
 
