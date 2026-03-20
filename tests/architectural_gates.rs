@@ -93,8 +93,11 @@ mod gates {
         
         for line in content.lines() {
             let trimmed = line.trim();
-            if trimmed.starts_with("pub mod ") {
-                let module_name = trimmed.strip_prefix("pub mod ").unwrap()
+            // Check for both pub mod and private mod
+            if trimmed.starts_with("pub mod ") || trimmed.starts_with("mod ") {
+                let module_name = trimmed.strip_prefix("pub mod ").unwrap_or_else(|| {
+                    trimmed.strip_prefix("mod ").unwrap()
+                })
                     .split(';').next().unwrap()
                     .trim();
                 found_modules.push(module_name.to_string());
@@ -108,8 +111,28 @@ mod gates {
             }
         }
 
+        // Also check for physical directories that shouldn't exist
+        let src_dir = "src";
+        if let Ok(entries) = fs::read_dir(src_dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if path.is_dir() {
+                    if let Some(dir_name) = path.file_name() {
+                        if let Some(name_str) = dir_name.to_str() {
+                            if !allowed_root_modules.contains(&name_str) && 
+                               name_str != "bin" && // Allow bin directory
+                               !name_str.starts_with('.') { // Skip hidden dirs
+                                violations.push(format!("{} (physical directory)", name_str));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         if !violations.is_empty() {
-            panic!("GATE 2 VIOLATIONS - Disallowed root modules found: {:?}\nAllowed: {:?}", violations, allowed_root_modules);
+            panic!("GATE 2 VIOLATIONS - Disallowed root modules found: {:?}\nFound modules: {:?}\nAllowed: {:?}", 
+                   violations, found_modules, allowed_root_modules);
         }
     }
 
@@ -118,29 +141,47 @@ mod gates {
         // This test ensures apps only use canonical crates for launch
         
         let expected_app_launches = [
-            ("app_engene_game", "game_framework::run_from_env_args"),
-            ("app_engene_sdk", "sdk_app::run_from_env_args"), 
-            ("app_engene_headless", "game_framework::run_from_env_args"),
+            ("engene_game", "game_framework::run_from_env_args"),
+            ("engene_sdk", "sdk_app::run_from_env_args"), 
+            ("engene_headless", "game_framework::run_headless_from_env_args"),
         ];
 
-        // For now, just verify the app directories exist
-        let app_dirs = [
-            "src/app/game_runner",
-            "src/app/sdk_runner", 
-        ];
+        let mut violations = Vec::new();
 
-        let mut missing_apps = Vec::new();
-        for app_dir in &app_dirs {
-            if !Path::new(app_dir).exists() {
-                missing_apps.push(app_dir);
+        for (app_name, expected_launch) in &expected_app_launches {
+            let main_path = format!("apps/{}/src/main.rs", app_name);
+            
+            if !Path::new(&main_path).exists() {
+                violations.push(format!("{}: missing main.rs", app_name));
+                continue;
+            }
+
+            let content = fs::read_to_string(&main_path)
+                .unwrap_or_else(|_| panic!("Could not read {}", main_path));
+
+            // Check for the expected launch pattern
+            if !content.contains(expected_launch) {
+                violations.push(format!("{}: does not contain expected launch '{}'", app_name, expected_launch));
+            }
+
+            // Check for forbidden patterns (direct root usage)
+            let forbidden_patterns = [
+                "use engene::",
+                "use crate::",
+                "engene::run",
+            ];
+
+            for pattern in &forbidden_patterns {
+                if content.contains(pattern) {
+                    violations.push(format!("{}: contains forbidden pattern '{}'", app_name, pattern));
+                }
             }
         }
 
-        if !missing_apps.is_empty() {
-            panic!("GATE 3 VIOLATIONS - Missing app directories: {:?}", missing_apps);
+        if !violations.is_empty() {
+            panic!("GATE 3 VIOLATIONS - App launch verification failed:\n\n{}", violations.join("\n"));
         }
 
-        // TODO: Scan app main.rs files for correct launch patterns
-        println!("GATE 3: App directory structure verified (launch pattern scanning TODO)");
+        println!("GATE 3: All app entrypoints verified successfully");
     }
 }
