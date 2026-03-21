@@ -44,7 +44,7 @@
 - sdk_app/lib_complex.rs: 10 engene:: imports
 - engine_tools/src/lib.rs: 2 engene:: imports
 - game_framework: Uses stubs, not real engine
-**ACTION: QUARANTINE UNTIL ENGINE STABLE**
+**ACTION: EXCLUDE FROM ENGINE PATH UNTIL CORE STABLE**
 
 ## 🎯 ARCHITECTURAL VIOLATIONS IDENTIFIED
 
@@ -71,7 +71,7 @@
 ## 🚨 URGENT RECOVERY SEQUENCE
 
 ### STEP 1: FREEZE NON-ENGINE CRATES
-- sdk_app, game_framework, engine_tools → QUARANTINE
+- sdk_app, game_framework, engine_tools → OUT OF CURRENT ENGINE SCOPE
 - Do not touch until engine path stable
 
 ### STEP 2: TRIM ENGINE_CORE TO TINY

@@ -48,7 +48,7 @@
 
 **Achievements:**
 1. **Terminology Unified** - Only REMOVED/KEPT/KEPT TEMP used across all docs
-2. Core truth documents use normalized physical-status terminology; remaining quarantine wording exists only in historical audit/recovery documents
+2. Core truth documents use normalized physical-status terminology; some historical audit/recovery documents still retain legacy wording.
 3. **All statuses reflect actual file system state**
 4. **Both canonical documents use identical terminology**
 5. **Complete matrix created for verification**

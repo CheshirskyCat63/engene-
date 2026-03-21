@@ -42,9 +42,9 @@
 ### 4. ✅ engine_ecs - UNTOUCHED (ALREADY GOOD)
 **Status:** Most real component, kept as-is
 
-### 5. ✅ Consumer Crates - QUARANTINED
+### 5. ✅ Consumer Crates - OUT OF CURRENT RECOVERY SCOPE
 **Status:** sdk_app, game_framework, engine_tools isolated
-**Action:** Frozen until engine path stable
+**Action:** Excluded until engine path stable
 
 ## 📊 VERIFICATION RESULTS
 
@@ -101,7 +101,7 @@ cargo test -p engine_runtime engine_deterministic_replay
 **Current engine cannot:**
 1. ❌ Run real world logic (stub world)
 2. ❌ Process physics (decoupled)
-3. ❌ Handle consumer applications (quarantined)
+3. ❌ Handle consumer applications (out of current scope)
 
 ## 🎯 NEXT PHASE: READY FOR REAL DEVELOPMENT
 

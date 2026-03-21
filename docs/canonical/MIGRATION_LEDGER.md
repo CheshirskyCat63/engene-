@@ -166,12 +166,12 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 
 | Item | Current Location | Temp Owner | Target Owner | Why Temporary | Removal Condition | Blocker | Status |
 |------|------------------|------------|--------------|---------------|-------------------|---------|--------|
-| world_streaming tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
-| physics_body_combat tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
-| content_pipeline tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
-| persistence_full tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
-| runtime_systems tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
-| gameplay_and_ai tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+| world_streaming tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
+| physics_body_combat tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
+| content_pipeline tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
+| persistence_full tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
+| runtime_systems tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
+| gameplay_and_ai tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | LEGACY |
 
 ## Temporary Disabled Features
 
@@ -197,7 +197,7 @@ Format: `item | current_location | temporary_owner | target_owner | why_temporar
 
 1. Any new temporary item must be added to this ledger immediately.
 2. Items without removal condition are not allowed.
-3. Status must be: ACTIVE, PENDING, QUARANTINE, or COMPLETE.
+3. Status must be: ACTIVE, PENDING, LEGACY, ARCHIVED, or COMPLETE.
 4. Blocker column must explain why item can't be removed now.
 5. This file is the source of truth for migration debt.
 
