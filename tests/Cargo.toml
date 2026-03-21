@@ -14,8 +14,16 @@ name = "runtime_phase_contracts"
 path = "runtime_phase_contracts.rs"
 
 [[bin]]
-name = "streaming_contract_laws"
-path = "streaming_contract_laws.rs"
+name = "streaming_semantic_laws"
+path = "streaming_semantic_laws.rs"
+
+[[bin]]
+name = "streaming_resource_laws"
+path = "streaming_resource_laws.rs"
+
+[[bin]]
+name = "streaming_determinism_laws"
+path = "streaming_determinism_laws.rs"
 
 [[bin]]
 name = "streaming_implementation_shape"
