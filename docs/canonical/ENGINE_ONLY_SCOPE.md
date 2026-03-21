@@ -9,9 +9,9 @@
 - `engine_world` - ONLY minimum truth: basic world data/types, spatial/state surfaces for core needs
 - `engine_physics` - ONLY minimum boundary: pure simulation boundary, deterministic update contracts
 
-## QUARANTINE LIST - FORBIDDEN IN ENGINE PATH
+## OUT-OF-SCOPE LIST - FORBIDDEN IN ENGINE PATH
 
-**Immediately quarantined:**
+**Immediately excluded from engine path:**
 - `sdk_app` - SDK, requires window/event/render/editor boot
 - `game_framework` - Game framework, app glue
 - `engine_tools` - Tooling, editor-related
@@ -23,8 +23,8 @@
 - `docs/testing vanity files` - Documentation vanity
 - `editor-related tests` - Editor tests requiring UI/render
 
-**Quarantine rules:**
-1. No engine decisions influenced by quarantined crates
+**Scope rules:**
+1. No engine decisions influenced by out-of-scope crates
 2. No architectural compromises for SDK/editor comfort
 3. No render/UI dependencies in core path
 4. No app boot requirements for engine compilation

@@ -1,14 +1,14 @@
 # ENGENE Workspace Status
 
-**Current HEAD:** engene-2.0-transition  
-**Last Updated:** 2026-03-21 (tiny core achieved - no external dependencies)
+**Tracked Branch:** cleanup/core-physical-delete
+**Last Updated:** 2026-03-21 (engine_core physical residue removed - 21 dead files deleted)
 
 ## Stable Crates (✅ Compile Clean)
 
 | Crate | Status | Notes |
 |-------|--------|-------|
-| engine_core | ✅ Compiles | Tiny core - only 5 modules, no external deps |
-| engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts |
+| engine_core | ✅ Compiles | Tiny core - only 5 modules, no external deps, physical residue removed |
+| engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts (component_registry.rs removed) |
 | engine_runtime | ✅ Compiles | Phase execution spine (clean role, assembly separated) |
 | engine_world | ✅ Compiles | World data contracts (data-only) |
 | engine_startup | ✅ Compiles | Startup contracts, panic hooks |
@@ -34,11 +34,13 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - Clean separation: phase spine in lib.rs, assembly in internal module
 - Role cleanup completed: no assembly logic inline in public API
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/
+- **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 **World Data Owner:** `engine_world`  
 - Data-only layer: coords, chunk, world_state, terrain
-- Removed: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
-- Kept temp: heightmap (test consumers), material_truth (engine_core consumers)
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
+- **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 
 **Composition Owner:** `game_framework`
 - Uses engine_runtime::assembly for runtime state
@@ -48,23 +50,23 @@
 **Core Primitives Owner:** `engine_core`
 - Tiny core: only 5 modules (data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time)
 - Zero external dependencies - uses only std
-- All "fat" modules quarantined (physically exist but not exported)
+- Legacy fat modules physically removed
 
-## Quarantined Zones
+## Module Status Summary
 
 **engine_runtime:**
-- perf/ (test consumers)
-- wiring/ (test consumers)
-- assembly/ (internal bootstrap glue)
+- **KEPT**: perf/ (test consumers)
+- **KEPT**: wiring/ (test consumers)  
+- **KEPT**: assembly.rs (internal bootstrap glue)
 
 **engine_world:**
-- heightmap.rs (test consumers)
-- material_truth.rs (engine_core consumers)
-- events/, fields.rs, resources.rs (support systems)
+- **KEPT TEMP**: heightmap.rs (test consumers)
+- **KEPT TEMP**: material_truth.rs (engine_core consumers)
+- **KEPT**: events/, fields.rs, resources.rs (support systems)
 
 **engine_render:**
-- terrain.rs, vegetation.rs (potentially used)
-- destruction_occlusion.rs, gore_mesh.rs (active consumers)
+- **KEPT**: terrain.rs, vegetation.rs (potentially used / not yet removed)
+- **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Next Cleanup Targets
 
@@ -80,8 +82,8 @@
 - ✅ engine_ecs: Mechanics-only, unchanged
 - ✅ engine_runtime: Clean phase spine + separated assembly
 - ✅ game_framework: Uses assembly path, stateful streaming loop
-- ✅ All core crates compile and test successfully
-- ✅ Documentation synchronized with code reality
+- ✅ All core crates compile clean in current core path
+- ✅ Core truth documentation synchronized with current cleanup state
 
 ## Architecture Laws Enforced
 

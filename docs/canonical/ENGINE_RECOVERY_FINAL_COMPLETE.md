@@ -2,7 +2,7 @@
 
 ## ✅ ENGINE-ONLY SCOPE ESTABLISHED AND WORKING
 
-**Consumer crates quarantined. Engine core restored. Minimal runtime verified.**
+**Consumer crates excluded from current recovery scope. Engine core restored. Minimal runtime verified.**
 
 ### 🎯 FINAL VERIFICATION RESULTS
 
@@ -35,7 +35,7 @@ cargo test -p engine_world
 
 **✅ engine_core - TRULY TINY NOW**
 - **5 modules only:** time, data_policy, determinism_policy, deterministic_merge, failure_taxonomy
-- **Zero framework bloat:** All fat modules removed to quarantine
+- **Zero framework bloat:** All fat modules removed from core path
 - **Clean dependencies:** Only essential external crates
 
 **✅ engine_ecs - SOLID MECHANICS**
@@ -53,7 +53,7 @@ cargo test -p engine_world
 - **No fake claims:** Explicitly marked as placeholder
 - **Minimal interface:** Just enough for engine compilation
 
-### 🚫 QUARANTINE STATUS: ENFORCED
+### 🚫 RECOVERY SCOPE BOUNDARY: ENFORCED
 
 **Consumer crates completely isolated from engine recovery:**
 - ❌ sdk_app - NOT TOUCHED during engine-only recovery
@@ -85,7 +85,7 @@ cargo test -p engine_world
 
 **All engine-only recovery objectives achieved:**
 
-1. ✅ **Scope Definition** - Engine-only vs quarantine clearly separated
+1. ✅ **Scope Definition** - Engine-only vs out-of-scope layers clearly separated
 2. ✅ **Core Trimming** - engine_core reduced to essential 5 modules  
 3. ✅ **Runtime Decoupling** - Physics removed from minimal path
 4. ✅ **Stub Honesty** - engine_world declared as compile scaffold
@@ -115,7 +115,7 @@ cargo test -p engine_world
 - ✅ **Deterministic runtime** - Proven repeatability
 - ✅ **Clean compilation** - No hidden dependencies
 - ✅ **Honest stubs** - No fake "truth" claims
-- ✅ **Protected scope** - Consumer noise quarantined
+- ✅ **Protected scope** - Consumer noise kept out of current engine recovery scope
 
 **What we eliminated:**
 - ❌ Fake "minimum truth" world claims
@@ -139,5 +139,5 @@ cargo test -p engine_world
 ---
 
 **ENGINE-ONLY RECOVERY: ✅ COMPLETE**  
-**QUARANTINE: ✅ ENFORCED**  
+**SCOPE BOUNDARY: ✅ ENFORCED**  
 **NEXT PHASE: REAL ENGINE DEVELOPMENT**

@@ -1,13 +1,12 @@
 # ENGENE — First Run Guide
 
-ENGENE currently exposes four real cargo entrypoints from the root package.
+ENGENE currently exposes three real cargo entrypoints from the workspace.
 
 | Product | Canonical command | Purpose |
 |---|---|---|
-| **ENGENE Game** | `cargo run -p app_engene_game` | canonical runtime (apps/engene_game) |
-| **ENGENE SDK** | `cargo run -p app_engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
-| **ENGENE Headless** | `cargo run -p app_engene_headless -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_headless) |
-| **ENGENE Bootstrap** | `cargo run -p engene_bootstrap` | minimal bootstrap path (apps/engene_bootstrap) |
+| **ENGENE Game** | `cargo run -p engene_game` | canonical runtime (apps/engene_game) |
+| **ENGENE SDK** | `cargo run -p engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
+| **ENGENE Headless** | `cargo run -p engene_run -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_run) |
 
 ## Reality rule
 
@@ -19,10 +18,9 @@ Do not present it as a first-run entrypoint until it exists in Cargo again.
 ### Canonical launch paths
 
 ```bash
-cargo run -p app_engene_game
-cargo run -p app_engene_sdk
-cargo run -p app_engene_headless -- --ticks 1200
-cargo run -p engene_bootstrap
+cargo run -p engene_game
+cargo run -p engene_sdk
+cargo run -p engene_run -- --ticks 1200
 ```
 
 ### Operator shortcuts
@@ -78,7 +76,7 @@ It is a manual recovery surface after API drift repair, not a migration-readines
 /ENGENE_ROOT
   /apps                 # future package-owned runtime shells
   /crates               # workspace engine/game/sdk crates
-  /src                  # current root package code + migration shell
+  /src                  # migration shell (no root package)
   /tests                # integration / contract / certification tests
   /benches              # performance benchmarks
   /docs/canonical       # authoritative current-state docs
@@ -142,16 +140,15 @@ cargo test --test runtime_phase_contracts
 cargo test --test spatial_dirty_contracts
 ```
 
-Migration is not finished while root shell ownership is still active as canonical launch path.
-Current state is finish-ready for migration handoff, with root constrained to thin compatibility shell duties.
+Migration is complete. Package-level ownership is active.
 
 ## Version info
 
 ```bash
-cargo run --bin engene_game -- --version
+cargo run -p engene_game -- --version
 ```
 
-## Warning
+## Note
 
-The workspace already declares `apps/*`, but the active cargo entrypoints are still the root-package bins.
-Until package-level launch ownership is complete, documentation must describe **current execution truth**, not intended end state.
+The workspace declares `apps/*` as the canonical entrypoints for package-level runtime ownership.
+Package-level launch ownership is complete.

@@ -1,6 +1,6 @@
 # ENGINE-ONLY RECOVERY AUDIT
 
-## QUARANTINE LIST - FROZEN
+## FROZEN NON-CORE FINDINGS
 
 **Non-engine crates (DO NOT TOUCH during recovery):**
 - sdk_app - Still uses engene::* imports, lives in old architecture
@@ -70,7 +70,7 @@
 
 ## NEXT STEPS (HARDCODED ORDER)
 
-1. **FREEZE** - Mark non-engine crates as quarantine
+1. **FREEZE** - Mark non-engine crates as out of current recovery scope
 2. **DEFINE** - Fix real engine-only target surface  
 3. **TRIM** - Cut engine_core to tiny core
 4. **AUDIT** - Decide engine_world: stub vs truth

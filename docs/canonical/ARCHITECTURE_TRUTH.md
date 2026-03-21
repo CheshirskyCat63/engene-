@@ -14,9 +14,8 @@
 **Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
 - **CANONICAL**: coords, chunk, world_state, terrain
-- **QUARANTINE** (not exported): population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
-- These modules exist but are NOT public API - checking for hidden consumers
 
 ## Role/Composition Crates
 
@@ -55,15 +54,15 @@
 **engine_render canonical exports:**
 - renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
 - **REMOVED**: decal_system, decals, model_loader
-- **QUARANTINE** (not exported): gpu_culling, gpu_jobs, ibl, lod, particles, postprocess, quality, render_validation, skinning, skybox, surface_state_render, vegetation_semantics, visibility
-- **KEPT TEMP**: destruction_occlusion (active consumers), gore_mesh (active consumers)
+- **KEPT**: terrain.rs, vegetation.rs (potentially used / not yet removed)
+- **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
 - `*_enhanced` modules - removed
-- `streaming_owner`, `chunk_persistence` - QUARANTINE (checking for consumers)
+- `streaming_owner`, `chunk_persistence` - KEPT TEMP (not part of canonical public API)
 - `bootstrap/`, `simulation_core/`, `performance_law.rs`, `minimal_runtime_test.rs` - removed
-- Render modules in quarantine: art_direction, atmosphere, gore_mesh, etc. - 26 modules not exported
+- Render modules removed: art_direction, atmosphere, etc. - 26 modules not exported
 
 ## Current Phase Loop (game_framework)
 
@@ -73,4 +72,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: Tiny core achieved - engine_core has zero external dependencies
+**Last updated**: Engine core physical residue removed - 21 dead files deleted, component_registry.rs removed from engine_ecs

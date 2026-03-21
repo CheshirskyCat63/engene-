@@ -2,9 +2,9 @@ name: Rust
 
 on:
   push:
-    branches: [ "main", "engene-2.0-transition" ]
+    branches: [ "main", "engene-2.0-transition", "cleanup/core-physical-delete" ]
   pull_request:
-    branches: [ "main", "engene-2.0-transition" ]
+    branches: [ "main", "engene-2.0-transition", "cleanup/core-physical-delete" ]
 
 env:
   CARGO_TERM_COLOR: always
