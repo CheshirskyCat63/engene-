@@ -1,13 +1,12 @@
 # ENGENE — First Run Guide
 
-ENGENE currently exposes four real cargo entrypoints from the root package.
+ENGENE currently exposes three real cargo entrypoints from the root package.
 
 | Product | Canonical command | Purpose |
 |---|---|---|
-| **ENGENE Game** | `cargo run -p app_engene_game` | canonical runtime (apps/engene_game) |
-| **ENGENE SDK** | `cargo run -p app_engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
-| **ENGENE Headless** | `cargo run -p app_engene_headless -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_headless) |
-| **ENGENE Bootstrap** | `cargo run -p engene_bootstrap` | minimal bootstrap path (apps/engene_bootstrap) |
+| **ENGENE Game** | `cargo run -p engene_game` | canonical runtime (apps/engene_game) |
+| **ENGENE SDK** | `cargo run -p engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
+| **ENGENE Headless** | `cargo run -p engene_run -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_run) |
 
 ## Reality rule
 
@@ -19,10 +18,9 @@ Do not present it as a first-run entrypoint until it exists in Cargo again.
 ### Canonical launch paths
 
 ```bash
-cargo run -p app_engene_game
-cargo run -p app_engene_sdk
-cargo run -p app_engene_headless -- --ticks 1200
-cargo run -p engene_bootstrap
+cargo run -p engene_game
+cargo run -p engene_sdk
+cargo run -p engene_run -- --ticks 1200
 ```
 
 ### Operator shortcuts
