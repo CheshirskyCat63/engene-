@@ -19,7 +19,7 @@ Successfully eliminated legacy infrastructure debt and established clean operati
 ### 2. Legacy Code Archive
 - **Processed**: `legacy/` directory structure
 - **Archived to**: `archive/code_history/pre_engine_crate_migration/`
-  - Contents: quarantine/, phase0/, crash data
+  - Contents: archived recovery data, phase0/, crash data
   - Result: ✅ Clean archival with proper documentation
 - **Removed**: Original `legacy/` directory
   - Result: ✅ No more ambiguous legacy folder
