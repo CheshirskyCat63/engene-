@@ -800,15 +800,6 @@ dependencies = [
 [[package]]
 name = "engine_core"
 version = "0.1.0"
-dependencies = [
- "anyhow",
- "glam 0.28.0",
- "puffin",
- "ron",
- "serde",
- "serde_json",
- "thiserror 1.0.69",
-]
 
 [[package]]
 name = "engine_ecs"

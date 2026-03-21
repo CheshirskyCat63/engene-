@@ -1,13 +1,13 @@
 # ENGENE Workspace Status
 
 **Current HEAD:** engene-2.0-transition  
-**Last Updated:** 2026-03-21 (engine_runtime role cleanup completed)
+**Last Updated:** 2026-03-21 (tiny core achieved - no external dependencies)
 
 ## Stable Crates (✅ Compile Clean)
 
 | Crate | Status | Notes |
 |-------|--------|-------|
-| engine_core | ✅ Compiles | Core primitives, determinism, failure taxonomy |
+| engine_core | ✅ Compiles | Tiny core - only 5 modules, no external deps |
 | engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts |
 | engine_runtime | ✅ Compiles | Phase execution spine (clean role, assembly separated) |
 | engine_world | ✅ Compiles | World data contracts (data-only) |
@@ -43,7 +43,12 @@
 **Composition Owner:** `game_framework`
 - Uses engine_runtime::assembly for runtime state
 - Uses engine_runtime::phase for phase execution
-- Headless game loop verified
+- Headless game loop verified with stateful streaming loop
+
+**Core Primitives Owner:** `engine_core`
+- Tiny core: only 5 modules (data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time)
+- Zero external dependencies - uses only std
+- All "fat" modules quarantined (physically exist but not exported)
 
 ## Quarantined Zones
 
@@ -67,6 +72,16 @@
 2. **engine_audio fix campaign** - Resolve missing internal modules  
 3. **sdk_app migration** - Remove legacy imports, migrate to engine_* crates
 4. **CI normalization** - Create core/extended/broken lanes
+
+## Core Readiness Achieved ✅
+
+**All core requirements met:**
+- ✅ engine_core: Tiny core with 5 modules, zero external dependencies
+- ✅ engine_ecs: Mechanics-only, unchanged
+- ✅ engine_runtime: Clean phase spine + separated assembly
+- ✅ game_framework: Uses assembly path, stateful streaming loop
+- ✅ All core crates compile and test successfully
+- ✅ Documentation synchronized with code reality
 
 ## Architecture Laws Enforced
 
