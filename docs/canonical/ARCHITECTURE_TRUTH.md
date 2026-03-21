@@ -1,46 +1,51 @@
-# Architecture Truth
+# Architecture Truth (FACTUAL - VERIFIED)
 
 ## Phase Execution Ownership
 
 **Canonical owner**: `engine_runtime`
 
 - Phase execution lives in `engine_runtime::phase`
-- Current active phases: tick, streaming, persistence, spatial, audio, editor, render
-- All phase entrypoints are public APIs in `engine_runtime`
+- Active phases: tick, streaming, persistence, spatial, audio, editor, render
+- game_framework uses engine_runtime::phase::* entrypoints
+- **Stateful loop**: game_framework passes known_loaded_chunks to streaming
 
 ## World Truth/Data Ownership
 
-**Canonical owner**: `engine_world`
+**Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
-- World data lives in `engine_world`
-- Core modules: coords, chunk, world_state, terrain
-- Note: engine_world has compile errors (132+) - needs separate fix
+- **CANONICAL**: coords, chunk, world_state, terrain
+- **QUARANTINE** (not exported): chunk_persistence, streaming_owner, ai_*, authored_*, etc.
+- These modules exist but are NOT public API - checking for hidden consumers
 
 ## Role/Composition Crates
 
-| Crate | Role |
-|-------|------|
-| `game_framework` | Game composition, launches runtime |
-| `sdk_app` | Editor composition, launches runtime |
-| `engine_runtime` | Phase execution contract |
-| `engine_world` | World data/truth |
-| `engine_core` | Core primitives |
-| `engine_ecs` | Entity component system |
+| Crate | Role | Status |
+|-------|------|--------|
+| `game_framework` | Game composition | ✅ Compiles |
+| `sdk_app` | Editor composition | ✅ Compiles |
+| `engine_runtime` | Phase execution | ✅ Compiles |
+| `engine_world` | World data | ✅ Compiles (data-only) |
+| `engine_core` | Core primitives | ✅ Compiles |
+| `engine_ecs` | ECS | ✅ Compiles |
+| `engine_startup` | Startup | ✅ Compiles |
+| `engine_tools` | Tooling | ✅ Compiles |
+| `engine_content` | Content | ✅ Compiles |
+| `engine_render` | Render | ❌ 137 errors (existing) |
+| `engine_audio` | Audio | ❌ 17 errors (existing) |
 
-## Forbidden Patterns
+## Removed/Forbidden (VERIFIED)
 
-- `*_enhanced` modules - removed (no consumers)
-- Direct phase orchestration in game_framework - use engine_runtime
-- engine_world depending on runtime concerns - forbidden
-- engine_runtime::phase modules depending on engine_world when broken - temporary
+- `*_enhanced` modules - removed
+- `streaming_owner`, `chunk_persistence` - QUARANTINE (checking for consumers)
+- `bootstrap/`, `simulation_core/`, `performance_law.rs`, `minimal_runtime_test.rs` - removed
+- Render modules in quarantine: art_direction, atmosphere, gore_mesh, etc. - 26 modules not exported
 
-## Current Status
+## Current Phase Loop (game_framework)
 
-- ✅ tick, streaming, persistence phases extracted to engine_runtime
-- ✅ game_framework uses engine_runtime::phase::* entrypoints
-- ⚠️ engine_world has 132+ compile errors (separate fix needed)
-- ⚠️ engine_render, engine_audio have existing issues
+```
+tick → streaming (with known_loaded_chunks) → persistence (with completed_loads/unloads)
+```
 
 ---
 
-**Last updated**: Phase extraction stabilization
+**Last updated**: After narrow public surface cleanup - world/data/runtime spine verified

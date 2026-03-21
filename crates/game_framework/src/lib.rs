@@ -50,24 +50,36 @@ pub fn run_headless_from_env_args() {
         // Phase 1: Tick phase
         let _tick_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
         
-        // Phase 2: Streaming phase (using engine_runtime)
-        let _streaming_result = engine_runtime::phase::run_streaming(
+        // Phase 2: Streaming phase - stateful loop with known_loaded_chunks
+        let streaming_output = engine_runtime::phase::run_streaming(
             engine_runtime::phase::StreamingInput {
                 tick,
                 player_position: Some([0.0, 0.0, 0.0]),
                 view_distance_chunks: 4,
-                pending_unload_count: 0,
+                pending_unload_count: 2,
                 residency_budget: 16,
-                known_loaded_chunks: Vec::new(),
+                known_loaded_chunks: resident_chunks.clone(),
             }
         );
         
-        // Phase 3: Persistence phase
+        // Update resident_chunks from streaming decisions
+        // Remove unloaded chunks
+        for chunk in &streaming_output.chunks_to_unload {
+            resident_chunks.retain(|c| c != chunk);
+        }
+        // Add newly loaded chunks
+        for chunk in &streaming_output.chunks_to_load {
+            if !resident_chunks.contains(chunk) {
+                resident_chunks.push(*chunk);
+            }
+        }
+        
+        // Phase 3: Persistence phase - report completed transitions
         let _persistence_result = engine_runtime::phase::run_persistence(
             engine_runtime::phase::PersistenceInput {
                 tick,
-                completed_loads: Vec::new(),
-                completed_unloads: Vec::new(),
+                completed_loads: streaming_output.chunks_to_load.clone(),
+                completed_unloads: streaming_output.chunks_to_unload.clone(),
                 dirty_chunk_count: 0,
                 save_enabled: true,
             }
