@@ -889,6 +889,7 @@ version = "0.1.0"
 dependencies = [
  "engine_core",
  "engine_ecs",
+ "engine_world",
  "rapier3d 0.17.2",
 ]
 

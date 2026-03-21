@@ -1,51 +1,57 @@
-//! World subsystem - terrain, streaming, persistence, and spatial indexing.
-//!
-//! # Status: production
-//! # Integration: enabled
-//! # Tests: unit + integration
-//!
-//! ## Modules
-//! - `world`, `heightmap`, `biome` - production, world generation
-//! - `streaming`, `chunk_persistence` - production, chunk management
-//! - `hierarchical_spatial`, `spatial_index` - production, spatial queries
-//! - `components` - production, ECS components (split into sub-modules)
-//! - `surface_db`, `material_bridge` - partial, material truth
+//! Engine World - MINIMUM TRUTH ONLY
+//! 
+//! Only what engine path needs:
+//! - Basic world data/types
+//! - Spatial/state surfaces for core needs
+//! - No content carnival
 
 pub mod api {
-    /// Stable crate identifier.
     pub const CRATE: &str = "engine_world";
 }
 
-pub mod authored_sets;
-pub mod authoring;
-pub mod biome;
-pub mod cell;
-pub mod chunk_package;
-pub mod chunk_persistence;
-pub mod chunk_schema;
-pub mod components;
-pub mod damage_profiles;
-pub mod extension_components;
-pub mod fields;
-pub mod heightmap;
-pub mod hierarchical_spatial;
-pub mod io_budget;
-pub mod material_bridge;
-pub mod origin_shift;
-pub mod persistence;
-pub mod population;
-pub mod resources;
-pub mod spatial_index;
-pub mod streaming;
-pub mod surface_db;
-pub mod surface_state;
-pub mod terrain_damage;
-pub mod terrain_deformation;
-pub mod terrain_masks;
-pub mod terrain_truth;
-pub mod world;
+// MINIMUM WORLD TRUTH
+pub mod cell {
+    /// Basic cell data for engine needs
+    #[derive(Debug, Clone, Copy)]
+    pub struct Cell {
+        pub position: (i32, i32),
+        pub biome_id: u8,
+    }
+    
+    pub const CELL_SIZE: f32 = 1.0;
+    pub const GRID_SIZE: usize = 100;
+}
 
-// Re-export main types
-pub use cell::{Cell, CELL_SIZE, GRID_SIZE, WORLD_SIZE};
-pub use fields::WorldFields;
+pub mod world {
+    use super::cell::Cell;
+    
+    /// Minimal world grid for engine path
+    #[derive(Debug)]
+    pub struct WorldGrid {
+        pub cells: Vec<Cell>,
+    }
+    
+    impl WorldGrid {
+        pub fn new() -> Self {
+            Self { cells: Vec::new() }
+        }
+        
+        pub fn generate() -> Self {
+            let mut world = Self::new();
+            // Generate some cells for engine path
+            for x in 0..10 {
+                for y in 0..10 {
+                    world.cells.push(Cell {
+                        position: (x, y),
+                        biome_id: 0,
+                    });
+                }
+            }
+            world
+        }
+    }
+}
+
+// Re-exports for engine path
+pub use cell::{Cell, CELL_SIZE, GRID_SIZE};
 pub use world::WorldGrid;

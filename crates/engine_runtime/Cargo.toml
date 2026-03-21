@@ -6,4 +6,5 @@ edition = "2021"
 [dependencies]
 engine_core = { path = "../engine_core" }
 engine_ecs = { path = "../engine_ecs" }
+engine_world = { path = "../engine_world" }
 rapier3d = "0.17"

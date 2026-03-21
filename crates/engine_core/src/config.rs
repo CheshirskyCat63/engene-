@@ -7,6 +7,21 @@ pub struct ConfigEnvelope<T> {
     pub data: T,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameConfig {
+    pub tick_rate: f32,
+    pub max_entities: usize,
+}
+
+impl Default for GameConfig {
+    fn default() -> Self {
+        Self {
+            tick_rate: 60.0,
+            max_entities: 10000,
+        }
+    }
+}
+
 pub fn load_config<T: DeserializeOwned>(path: &str) -> Result<T, String> {
     let contents = std::fs::read_to_string(path)
         .map_err(|e| format!("Failed to read config '{}': {}", path, e))?;
