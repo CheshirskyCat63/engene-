@@ -55,14 +55,15 @@
 **engine_render canonical exports:**
 - renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
 - **REMOVED**: decal_system, decals, model_loader (physically deleted)
-- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used), destruction_occlusion.rs, gore_mesh.rs (active consumers)
+- **KEPT**: terrain.rs, vegetation.rs (potentially used)
+- **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
 - `*_enhanced` modules - removed
-- `streaming_owner`, `chunk_persistence` - QUARANTINE (checking for consumers)
+- `streaming_owner`, `chunk_persistence` - REMOVED (checking for consumers)
 - `bootstrap/`, `simulation_core/`, `performance_law.rs`, `minimal_runtime_test.rs` - removed
-- Render modules in quarantine: art_direction, atmosphere, gore_mesh, etc. - 26 modules not exported
+- Render modules removed: art_direction, atmosphere, gore_mesh, etc. - 26 modules not exported
 
 ## Current Phase Loop (game_framework)
 
