@@ -586,38 +586,6 @@ mod world_persistence_tests {
 }
 
 // Mock implementations for types not yet available in engine_world
-impl Heightmap {
-    fn from_world_grid(grid: &WorldGrid) -> Self {
-        Self {
-            heights: vec![0.0; grid.cells.len()],
-            width: (grid.cells.len() as f32).sqrt() as usize,
-            height: (grid.cells.len() as f32).sqrt() as usize,
-        }
-    }
-    
-    fn width(&self) -> usize {
-        self.width
-    }
-    
-    fn height(&self) -> usize {
-        self.height
-    }
-    
-    fn min_height(&self) -> f32 {
-        *self.heights.iter().min().unwrap()
-    }
-    
-    fn max_height(&self) -> f32 {
-        *self.heights.iter().max().unwrap()
-    }
-    
-    fn sample_height(&self, x: f32, z: f32) -> f32 {
-        let ix = (x as usize).min(self.width - 1);
-        let iz = (z as usize).min(self.height - 1);
-        self.heights[iz * self.width + ix]
-    }
-}
-
 impl WorldStreamer {
     fn new() -> Self {
         Self {
