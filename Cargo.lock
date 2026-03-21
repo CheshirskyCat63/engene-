@@ -859,6 +859,7 @@ dependencies = [
  "engine_core",
  "engine_ecs",
  "engine_world",
+ "tracing",
 ]
 
 [[package]]
