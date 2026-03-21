@@ -17,6 +17,8 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 ## 2. Current Entrypoint Truth
 
+### Canonical Operator Commands (package-based)
+
 | Runtime role | Canonical command | First called crate | Runner location | Status |
 |---|---|---|---|---|
 | Game | `cargo run -p app_engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
@@ -24,11 +26,24 @@ If a claim in any other doc contradicts this file, **this file wins**.
 | Headless | `cargo run -p app_engene_headless -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
 | Bootstrap | `cargo run -p engene_bootstrap` | `engene_bootstrap` | `apps/engene_bootstrap/src/main.rs` | app shell |
 
+### Root Bins (compatibility only)
+
+| Command | Status |
+|---------|--------|
+| `cargo run --bin engene_game` | deprecated, compatibility only |
+| `cargo run --bin engene_sdk` | deprecated, compatibility only |
+| `cargo run --bin engene_headless` | deprecated, compatibility only |
+| `cargo run --bin engene_tools` | deprecated, compatibility only |
+
+### Active Runtime Implementation
+
+- **SDK runtime**: `crates/sdk_app/src/lib_complex.rs` (contains sdk_runner logic)
+- This is NOT in apps/* — it's the actual runtime implementation that package-based entrypoints call
+
 ### What is NOT current truth
 
-- `cargo run --bin engene_game` (root bin) — not canonical, deprecated
-- `cargo run --bin engene_sdk` (root bin) — not canonical, deprecated
-- `apps/*` as primary documented path — transitional shells, not primary launch surface
+- `apps/*` as runtime implementation — they are thin launchers, not the actual runtime
+- Root bins as canonical — they are deprecated compatibility
 
 ---
 

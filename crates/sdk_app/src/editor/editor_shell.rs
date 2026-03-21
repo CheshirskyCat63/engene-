@@ -57,10 +57,13 @@ impl EditorShell {
     }
     
     /// Update dashboards with current state.
-    pub fn update_dashboards(&mut self, _engine: &super::Engine) {
+    /// OWNER: sdk_app::editor
+    /// This is editor-only - does NOT mutate world truth.
+    pub fn update_dashboards(&mut self) {
         // TODO: Update performance dashboard
         // TODO: Update entity count dashboard
         // TODO: Update memory dashboard
+        // This is purely display state - no world mutation
     }
 }
 

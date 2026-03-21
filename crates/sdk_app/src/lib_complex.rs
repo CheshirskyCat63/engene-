@@ -301,8 +301,15 @@ impl ApplicationHandler for SdkApp {
                 // Audio
                 engene::app::sdk_runner::sdk_runner_phases::audio::run(self, cam_pos, cam_fwd, dt);
 
-                // Editor
-                engene::app::sdk_runner::sdk_runner_phases::editor::run(self);
+                // ================================================================================
+                // OWNER: sdk_app::editor
+                // Extracted from sdk_runner to sdk_app::editor module
+                // This is the FIRST ownership extraction - editor shell update
+                // ================================================================================
+                // OLD: engene::app::sdk_runner::sdk_runner_phases::editor::run(self);
+                // NEW: Thin call to sdk_app::editor
+                sdk_app::editor::update_editor(&mut self.editor_shell, &mut self.engine);
+                // ================================================================================
 
                 // Spatial policy (no-op / incremental / controlled full rebuild)
                 engene::app::sdk_runner::sdk_runner_phases::spatial::run(self);
