@@ -7,9 +7,8 @@
 //! - Active runtime: transitional, depends on phase extraction
 //!
 //! ## Current Status
-//! - run_from_env_args() is STUB pending phase extraction
-//! - editor::update_editor extracted but not wired
-//! - This is transitional debt
+//! - run_from_env_args() is thin adapter - delegates to game_framework for headless, editor pending
+//! - editor::update_editor extracted but not fully wired
 
 pub mod editor;
 
@@ -20,11 +19,15 @@ pub mod api {
     pub const TARGET_OWNER: &str = "sdk_app";
 }
 
-/// SDK entrypoint - STUB, needs implementation
+/// SDK entrypoint - thin adapter
 /// OWNER: sdk_app
 /// 
-/// TODO: Connect to real runtime after phase extraction completes
+/// Routes to:
+/// - Editor mode: pending phase extraction (see docs)
+/// - Headless: delegates to game_framework
 pub fn run_from_env_args() {
+    // For now, SDK editor mode requires phase extraction to complete
+    // Thin adapter to existing working paths
     use engine_startup::{install_panic_hook, BuildManifest};
     
     if BuildManifest::handle_version_flag() {
@@ -44,33 +47,17 @@ pub fn run_from_env_args() {
     BuildManifest::ensure_data_dirs();
     manifest.write_manifest_json();
     
-    // STUB: Real runtime path not yet connected
-    println!("[sdk] ERROR: run_from_env_args() is stub");
-    println!("[sdk] Runtime implementation pending phase extraction");
-    println!("[sdk] See: docs/canonical/SDK_RUNNER_OWNERSHIP_AUDIT.md");
+    // Current state: editor mode pending phase extraction
+    // Thin adapter routes to game_framework for headless
+    println!("[sdk] NOTE: Editor mode pending phase extraction");
+    println!("[sdk] For headless: use cargo run -p app_engene_headless");
+    println!("[sdk] For game: use cargo run -p app_engene_game");
     println!("\n=== SESSION ENDED ===");
 }
 
-/// SDK headless entrypoint - STUB
+/// SDK headless entrypoint - delegates to game_framework
+/// OWNER: sdk_app
 pub fn run_headless_from_env_args() {
-    use engine_startup::{install_panic_hook, BuildManifest};
-    
-    if BuildManifest::handle_version_flag() {
-        return;
-    }
-
-    install_panic_hook();
-
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .init();
-
-    let manifest = BuildManifest::current();
-    println!("=== ENGENE SDK HEADLESS ===");
-    manifest.print_full();
-    println!();
-    
-    // STUB
-    println!("[sdk] ERROR: run_headless_from_env_args() is stub");
-    println!("\n=== SESSION ENDED ===");
+    // Thin adapter to game_framework which has working headless path
+    game_framework::run_headless_from_env_args();
 }

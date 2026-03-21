@@ -17,16 +17,16 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 ## 2. Current Entrypoint Truth
 
-### Canonical Operator Commands (package-based)
+### Package Commands (current canonical operator path)
 
-| Runtime role | Canonical command | First called crate | Runner location | Status |
+| Runtime role | Command | First called crate | Runner location | Status |
 |---|---|---|---|---|
 | Game | `cargo run -p app_engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
 | SDK | `cargo run -p app_engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | transitional |
 | Headless | `cargo run -p app_engene_headless -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
 | Bootstrap | `cargo run -p engene_bootstrap` | `engene_bootstrap` | `apps/engene_bootstrap/src/main.rs` | app shell |
 
-### Root Bins (compatibility only)
+### Root Bins (deprecated, compatibility only)
 
 | Command | Status |
 |---------|--------|
@@ -34,6 +34,15 @@ If a claim in any other doc contradicts this file, **this file wins**.
 | `cargo run --bin engene_sdk` | deprecated, compatibility only |
 | `cargo run --bin engene_headless` | deprecated, compatibility only |
 | `cargo run --bin engene_tools` | deprecated, compatibility only |
+
+### Apps (transitional shells)
+
+| App | Purpose | Status |
+|---|---|---|
+| `apps/engene_game` | game launch wrapper | transitional shell |
+| `apps/engene_sdk` | SDK launch wrapper | transitional shell |
+| `apps/engene_headless` | headless launch wrapper | transitional shell |
+| `apps/engene_bootstrap` | bootstrap entrypoint | transitional shell |
 
 ### Active Runtime Implementation
 
@@ -183,7 +192,7 @@ tick -> streaming -> persistence -> spatial -> audio -> editor_update -> render
 
 This document becomes obsolete when ALL of:
 
-- [ ] `apps/*` become primary launch surface (no root bins as canonical)
+- [ ] Package commands remain the canonical operator path (not root bins)
 - [ ] role crates (`game_framework`, `sdk_app`) have zero root dependencies
 - [ ] root crate is either thin shell or removed
 - [ ] `sdk_runner.rs` replaced with explicit phase methods

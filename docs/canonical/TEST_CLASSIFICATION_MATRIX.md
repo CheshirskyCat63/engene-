@@ -52,6 +52,7 @@ These tests verify API contracts between crates. They evolve with the API.
 |------|-----------------|-------|--------|
 | `tests/spatial_dirty_contracts.rs` | Spatial dirty model contracts | CONTRACT | ✅ Keep |
 | `tests/determinism_and_sdk.rs` | Determinism audit, SDK contracts | CONTRACT | ✅ Keep |
+| `tests/runtime_phase_contracts.rs` | Phase module invariants, phase order validation | CONTRACT | ✅ Keep (was MIGRATION, rewritten) |
 | `tests/ecs_lifecycle_contracts.rs` | Entity lifecycle contracts | CONTRACT | ✅ Keep |
 | `tests/ecs_authority_contracts.rs` | ECS authority contracts | CONTRACT | ✅ Keep |
 | `tests/entity_lifecycle_contracts.rs` | Entity lifecycle API | CONTRACT | ✅ Keep |
@@ -87,11 +88,10 @@ These tests verify API contracts between crates. They evolve with the API.
 
 | Path | Current Purpose | Class | Should Rewrite? | Sunset Condition |
 |------|-----------------|-------|-----------------|------------------|
-| `tests/runtime_phase_contracts.rs` | ~~Verifies phase order in `sdk_runner.rs` SOURCE TEXT~~ | ~~MIGRATION~~ | ✅ REWRITTEN → `tests/runtime_phase_contracts_new.rs` (CONTRACT) | Done - now tests runtime contract, not file text |
 | `tests/entrypoint_and_operator_truth.rs` | Verifies specific transition files (README, docs, Cargo.toml) | MIGRATION | ⚠️ YES - rewrite as structural test | After apps/* become canonical |
 | `tests/runtime_infrastructure.rs` | Tests transition infrastructure | MIGRATION | ⚠️ MAYBE | After handoff complete |
 
-**UPDATE**: `runtime_phase_contracts.rs` has been rewritten to `runtime_phase_contracts_new.rs` - now a CONTRACT test that verifies phase module behavior, not source text.
+**Note**: `runtime_phase_contracts.rs` moved to CONTRACT - now tests phase module invariants, not source text.
 
 ### What makes a test MIGRATION
 
@@ -157,8 +157,8 @@ All 13 unknown tests have been classified:
 | Class | Count | Action |
 |-------|-------|--------|
 | TRUTH | 9 | Keep permanently (+1: root_not_runtime_brain.rs) |
-| CONTRACT | ~24 | Keep, evolve with API |
-| MIGRATION | 3 | **Rewrite or delete after handoff** |
+| CONTRACT | ~25 | Keep, evolve with API (+1: runtime_phase_contracts) |
+| MIGRATION | 2 | **Rewrite or delete after handoff** |
 | PERF | 10 | Keep permanently |
 | UNKNOWN | ✅ 0 | All classified |
 
