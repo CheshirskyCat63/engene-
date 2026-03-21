@@ -37,62 +37,29 @@ jobs:
     - name: Build workspace (all features)
       run: cargo build --workspace --all-features
 
-  build_apps:
+  check:
     runs-on: ubuntu-latest
-    needs: [fmt, clippy]
+    needs: [fmt, clippy, build]
     steps:
     - uses: actions/checkout@v4
-    - name: Build engene_game
-      run: cargo build -p engene_game
-    - name: Build engene_sdk
-      run: cargo build -p engene_sdk
-    - name: Build engene_headless
-      run: cargo build -p engene_headless
-    - name: Build engene_bootstrap
-      run: cargo build -p engene_bootstrap
-
-  legacy_path_check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - name: Check for forbidden legacy root-core paths
+    - name: ECS direct-access gate
+      run: bash scripts/check_ecs_direct_access.sh
+    - name: Dependency direction gate
+      run: bash scripts/check_dependency_direction.sh
+    - name: Architectural gates
+      run: cargo test --test architectural_gates
+    - name: Transition path gate
+      run: bash scripts/check_transition_speed_law.sh
+    - name: Build apps
       run: |
-        echo "Checking for forbidden legacy root-core paths..."
-        if rg --quiet "crate::core::ecs" src/; then
-          echo "ERROR: Found crate::core::ecs usage"
-          rg "crate::core::ecs" src/
-          exit 1
-        fi
-        if rg --quiet "crate::core::query" src/; then
-          echo "ERROR: Found crate::core::query usage"
-          rg "crate::core::query" src/
-          exit 1
-        fi
-        if rg --quiet "crate::core::scheduler" src/; then
-          echo "ERROR: Found crate::core::scheduler usage"
-          rg "crate::core::scheduler" src/
-          exit 1
-        fi
-        if rg --quiet "crate::core::system" src/; then
-          echo "ERROR: Found crate::core::system usage"
-          rg "crate::core::system" src/
-          exit 1
-        fi
-        if rg --quiet "crate::core::systems" src/; then
-          echo "ERROR: Found crate::core::systems usage"
-          rg "crate::core::systems" src/
-          exit 1
-        fi
-        if rg --quiet "crate::core::engine" src/; then
-          echo "ERROR: Found crate::core::engine usage"
-          rg "crate::core::engine" src/
-          exit 1
-        fi
-        echo "No forbidden legacy paths found"
+        cargo build -p engene_game
+        cargo build -p engene_sdk
+        cargo build -p engene_headless
+        cargo build -p engene_bootstrap
 
   smoke:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [check]
     steps:
     - uses: actions/checkout@v4
     - name: Install nextest
@@ -104,7 +71,7 @@ jobs:
 
   contracts:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [check]
     steps:
     - uses: actions/checkout@v4
     - name: Install nextest
@@ -116,7 +83,7 @@ jobs:
 
   architectural_gates:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [check]
     steps:
     - uses: actions/checkout@v4
     - name: Install nextest
@@ -128,7 +95,7 @@ jobs:
 
   world:
     runs-on: ubuntu-latest
-    needs: [build]
+    needs: [check]
     steps:
     - uses: actions/checkout@v4
     - name: Install nextest
@@ -140,7 +107,7 @@ jobs:
 
   full_test:
     runs-on: ubuntu-latest
-    needs: [fmt, clippy, build]
+    needs: [check]
     steps:
     - uses: actions/checkout@v4
     - name: Install Rust toolchain
