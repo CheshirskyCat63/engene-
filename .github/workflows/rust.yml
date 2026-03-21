@@ -18,9 +18,23 @@ jobs:
     - name: Check formatting
       run: cargo fmt --all -- --check
 
-  core_check:
+  narrow_check:
     runs-on: ubuntu-latest
     needs: [fmt]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Narrow check core packages
+      run: |
+        cargo check -p engine_core
+        cargo check -p engine_runtime
+        cargo check -p game_framework
+        cargo check -p sdk_app
+        cargo check -p engene_sdk
+        cargo check -p engene_run
+
+  core_check:
+    runs-on: ubuntu-latest
+    needs: [fmt, narrow_check]
     steps:
     - uses: actions/checkout@v4
     - name: Check core packages
