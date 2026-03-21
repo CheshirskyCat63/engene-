@@ -14,8 +14,7 @@
 **Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
 - **CANONICAL**: coords, chunk, world_state, terrain
-- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
-- **QUARANTINE** (not exported): chunk_persistence, streaming_owner, ai_*, authored_*, etc.
+- **QUARANTINE** (not exported): population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 - These modules exist but are NOT public API - checking for hidden consumers
 
@@ -41,22 +40,23 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - PhaseContext, PhaseResult, PhaseTrait
 - EngineRuntimeAssembly (minimal stub)
-- REMOVED: async_services, job_graph, phase_runner, jobs/, streaming/
-- KEPT: perf/ (test consumers), wiring/ (test consumers)
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/
+- **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 ## World Surface (CLEANED)
 
 **engine_world canonical exports:**
 - coords, chunk, world_state, terrain
-- REMOVED: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
-- KEPT TEMP: heightmap (test consumers), material_truth (engine_core consumers)
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
+- **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 
 ## Render Surface (NARROWED)
 
 **engine_render canonical exports:**
 - renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
-- REMOVED: gpu_culling, gpu_jobs, ibl, lod, particles, postprocess, quality, render_validation, skinning, skybox, surface_state_render, vegetation_semantics, visibility
-- KEPT TEMP: destruction_occlusion (active consumers), gore_mesh (active consumers)
+- **REMOVED**: decal_system, decals, model_loader
+- **QUARANTINE** (not exported): gpu_culling, gpu_jobs, ibl, lod, particles, postprocess, quality, render_validation, skinning, skybox, surface_state_render, vegetation_semantics, visibility
+- **KEPT TEMP**: destruction_occlusion (active consumers), gore_mesh (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
@@ -73,4 +73,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: After safe file cleanup - engine_world, engine_runtime, engine_render residue removed
+**Last updated**: Physical cleanup completed - engine_world, engine_runtime cleaned; engine_render partially cleaned
