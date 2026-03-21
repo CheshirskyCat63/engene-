@@ -14,9 +14,9 @@
 
 | Runtime role | Binary entrypoint | First called crate | Current runner body location | Canonical owner | Status |
 |---|---|---|---|---|
-| Game | `cargo run -p engene_game` | `engene_game` | `apps/engene_game/src/main.rs` | `engene_game` | app entrypoint |
-| SDK | `cargo run -p engene_sdk` | `engene_sdk` | `apps/engene_sdk/src/main.rs` | `engene_sdk` | app entrypoint |
-| Headless | `cargo run -p engene_run -- --ticks 1200` | `engene_run` | `apps/engene_run/src/main.rs` | `engene_run` | app entrypoint |
+| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
+| SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | app entrypoint |
+| Headless | `cargo run -p engene_run -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
 
 ## Current architecture truth
 

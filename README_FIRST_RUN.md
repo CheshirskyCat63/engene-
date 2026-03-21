@@ -74,7 +74,7 @@ It is a manual recovery surface after API drift repair, not a migration-readines
 
 ```
 /ENGENE_ROOT
-  /apps                 # future package-owned runtime shells
+  /apps                 # package-owned runtime shells
   /crates               # workspace engine/game/sdk crates
   /src                  # migration shell (no root package)
   /tests                # integration / contract / certification tests

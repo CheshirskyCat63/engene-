@@ -8,23 +8,16 @@ There must be one canonical description of how ENGENE starts in the current bran
 
 | Runtime role | Binary entrypoint | First called crate | Current runner body location | Canonical owner | Status |
 |---|---|---|---|---|---|
-| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
-| SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | transitional role crate |
-| Headless | `cargo run -p engene_run -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
+| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
+| SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | app entrypoint |
+| Headless | `cargo run -p engene_run -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
 
-## Not current truth
+## Current truth
 
-The following are not canonical launch truths in this branch:
-- package-level execution through `apps/*` (apps are transitional shells)
-- any undocumented `test` / `sandbox` / `demo` bin
-- root bins as long-term operator truth
-
-## Ownership statement
-
-Root bins are the current operator truth.
-Root is still a thin migration shell.
-Role crates (`game_framework`, `sdk_app`) are transitional owners.
-Ownership handoff is incomplete.
+Package-level execution through `apps/*` is canonical launch truth.
+Apps are real entrypoints, not transitional shells.
+Root bins are not current operator truth.
+Ownership handoff is complete.
 
 ## Explicit note
 
