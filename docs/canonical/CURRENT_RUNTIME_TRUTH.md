@@ -88,7 +88,7 @@ If a claim in any other doc contradicts this file, **this file wins**.
 |---|---|
 | Root package `.` | migration shell — still hosts active bins |
 | Root re-exports | broad monolith module tree — deprecated |
-| Root bins | `engene_game`, `engene_sdk`, `engene_headless`, `engene_tools` — still active for compatibility |
+| Root bins | `engene_game`, `engene_sdk`, `engene_run` — still active for compatibility |
 
 ---
 
