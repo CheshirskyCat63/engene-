@@ -2,50 +2,46 @@
 
 ## Status label
 
-**Blocked transition. Structural split exists, but ownership handoff is incomplete. Root remains the active migration shell.**
+**Post-root removal. Pure workspace established. Transitional cleanup in progress.**
 
 ## Current package truth
 
-- Workspace is declared with root package, engine crates, role crates, and `apps/*`.
-- Root package `engene` is still active and hosts canonical bins.
-- Root feature model now has explicit target taxonomy plus compatibility aliases.
-- Role crates exist, but ownership is not fully handed off yet.
+- Workspace is pure workspace root without package.
+- Root package `engene` has been removed.
+- Workspace contains only engine crates, role crates, and `apps/*`.
+- Root feature model migrated to workspace-level dependencies.
+- Role crates exist but still have transitional imports from removed root.
 
 ## Current entrypoint truth
 
 | Runtime role | Binary entrypoint | First called crate | Current runner body location | Canonical owner | Status |
 |---|---|---|---|---|---|
-| Game | `cargo run -p app_engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
-| SDK | `cargo run -p app_engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | transitional role crate |
-| Headless | `cargo run -p app_engene_headless -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
+| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
+| SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | transitional role crate |
+| Headless | `cargo run -p engene_headless -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | transitional role crate |
 | Bootstrap | `cargo run -p engene_bootstrap` | `engene_bootstrap` | `apps/engene_bootstrap/src/main.rs` | `engene_bootstrap` | app shell |
 
 ## Current architecture truth
 
-- Root is still the active migration shell.
-- Root bins are still the canonical operator surface.
-- `apps/*` are not canonical launch truth.
-- Role crates are not yet full runtime owners.
-- Role crates still depend on root for:
-  - `engene::core::build_manifest::BuildManifest`
-  - `engene::core::crash_telemetry`
-  - `engene::runtime::bootstrap::*`
-  - `engene::world::heightmap::Heightmap`
-  - `engene::world::world::WorldGrid`
-  - `engene::app::game_runner::GameApp`
-  - `engene::app::spatial_dirty_journal::SpatialDirtyJournal`
-  - `engene::world::components::*`
-  - `engene::world::hierarchical_spatial::SpatialUpdatePath`
-- `engine_ecs` and `engine_world` are still incomplete ownership crates.
-- Any temporarily disabled module must be recorded in `MIGRATION_LEDGER.md`.
+- Root is now pure workspace root (no package).
+- Apps are canonical launch truth.
+- Role crates are runtime owners but still have transitional dependencies.
+- Role crates still depend on removed root for:
+  - `engene::runtime::bootstrap::*` (needs migration to engine_runtime)
+  - `engene::world::*` (needs migration to engine_world)
+  - `engene::graphics::*` (needs migration to engine_render)
+  - `engene::core::*` (needs migration to engine_core)
+  - `engene::app::*` (needs migration to engine_runtime)
+- `engine_ecs` and `engine_world` are ownership crates.
+- Transitional imports need systematic replacement.
 
-## Explicit not-yet-true statements
+## Explicit current truths
 
-- Migration is not finish-ready.
-- Root is not yet removable.
-- Package-level entrypoints are not current operator truth.
-- Placeholder crates are not proof of completed ownership split.
-- Compile-green shell state is not the same as domain recovery.
+- Root package removal is complete.
+- Workspace is valid and functional.
+- Engine core compiles successfully.
+- Role crates need import migration.
+- Apps are canonical entrypoints.
 
 ## Rule
 

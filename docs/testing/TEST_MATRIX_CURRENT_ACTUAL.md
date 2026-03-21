@@ -66,9 +66,9 @@ This document provides the **actual** current state of tests, not aspirational t
 
 ## STATISTICS
 
-- **Total suites**: 37 (35 active, 2 to split, 1 aggregator)
+- **Total suites**: 39 (37 active, 2 to split, 1 aggregator)
 - **Megasuites remaining**: 2 (need splitting)
-- **Lane distribution**: smoke (4), contracts (26), tools (3), perf (2), certification (4)
+- **Lane distribution**: smoke (6), contracts (26), tools (3), perf (2), certification (4)
 - **Average suite size**: ~280 lines (down from ~1,200 lines)
 
 ## MIGRATION STATUS
@@ -82,3 +82,14 @@ This document provides the **actual** current state of tests, not aspirational t
 ### 🔄 REMAINING WORK
 - `save_load_torture.rs` - Split needed (441 lines)
 - `determinism_and_sdk.rs` - Split needed (408 lines)
+
+## CANONICAL LANE MODEL
+
+The canonical lane structure is:
+- **smoke**: Basic functionality, entry points, architecture validation
+- **contracts**: Domain-specific contract tests (primary lane)
+- **tools**: Editor and tooling-specific tests
+- **perf**: Performance and load testing
+- **certification**: Release certification and compliance
+
+All tests should conform to this lane model.
