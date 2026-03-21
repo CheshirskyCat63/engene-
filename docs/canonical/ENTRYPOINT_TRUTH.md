@@ -19,20 +19,6 @@ Apps are real entrypoints, not transitional shells.
 Root bins are not current operator truth.
 Ownership handoff is complete.
 
-## Explicit note
-
-Role crates still depend on root for:
-- `engene::core::build_manifest::BuildManifest`
-- `engene::core::crash_telemetry`
-- `engene::runtime::bootstrap::*`
-- `engene::world::heightmap::Heightmap`
-- `engene::world::world::WorldGrid`
-- `engene::app::game_runner::GameApp`
-- `engene::app::spatial_dirty_journal::SpatialDirtyJournal`
-- `engene::world::components::*`
-- `engene::world::hierarchical_spatial::SpatialUpdatePath`
-
 ## Transition rule
 
-When package-level runtime ownership becomes real, this file changes in one step.
-Until then, no document may advertise future package-level commands as current truth.
+Package-level runtime ownership is real. This file reflects current truth.
