@@ -35,7 +35,7 @@ pub fn run_headless_from_env_args() {
 
     println!("[headless] kernel tick soak: {} ticks", ticks);
 
-    let mut engine = engine_runtime::EngineRuntimeAssembly::kernel_headless();
+    let mut engine = engine_runtime::assembly::EngineRuntimeAssembly::kernel_headless();
     let sim_dt = 1.0 / 20.0_f32;
     
     // Stateful resident set for streaming (owner between ticks)
