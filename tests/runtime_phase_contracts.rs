@@ -103,7 +103,8 @@ fn tick_phase_has_public_entrypoint() {
     
     // Verify entrypoint exists and returns valid result
     let result = run_tick(0, 1.0/60.0);
-    assert!(result.is_ok());
+    assert!(result.success);
+    assert!(result.duration_ms >= 0.0);
 }
 
 /// TICK EXTRACTION: Tick is first phase in canonical order
@@ -126,6 +127,7 @@ fn streaming_phase_has_public_entrypoint() {
         view_distance_chunks: 4,
         pending_unload_count: 0,
         residency_budget: 16,
+        known_loaded_chunks: Vec::new(),
     };
     
     let output = run_streaming(input);
@@ -156,6 +158,7 @@ fn streaming_respects_residency_budget() {
         view_distance_chunks: 10, // Would be 100+ chunks without budget
         pending_unload_count: 0,
         residency_budget: 4,      // Very small budget
+        known_loaded_chunks: Vec::new(),
     };
     
     let output = run_streaming(input);

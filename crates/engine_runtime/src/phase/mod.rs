@@ -31,6 +31,10 @@ pub mod audio;
 pub mod editor;
 pub mod render;
 
+// Include streaming contract tests
+#[cfg(test)]
+mod streaming_test;
+
 pub use tick::TickPhase;
 pub use streaming::{StreamingPhase, run_streaming, StreamingInput, StreamingOutput};
 pub use persistence::PersistencePhase;

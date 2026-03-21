@@ -93,9 +93,9 @@ mod tests {
         let mut scheduler = Scheduler::new(1.0);
 
         // Should trigger twice
-        assert!(scheduler.accumulate(2.5));
-        assert!(scheduler.accumulate(0.5)); // 0.0 + 0.5 = 0.5, not enough
-        assert!(scheduler.accumulate(0.6)); // 0.5 + 0.6 = 1.1 >= 1.0, triggers
+        assert_eq!(scheduler.accumulate(2.5), 2); // 2.5 >= 1.0, triggers twice, leaves 0.5
+        assert_eq!(scheduler.accumulate(0.5), 1); // 0.5 + 0.5 = 1.0, triggers once
+        assert_eq!(scheduler.accumulate(0.6), 0); // 0.0 + 0.6 = 0.6, not enough
     }
 
     #[test]
@@ -105,7 +105,7 @@ mod tests {
         scheduler.reset();
 
         assert_eq!(scheduler.accumulated(), 0.0);
-        assert!(!scheduler.accumulate(0.5));
+        assert_eq!(scheduler.accumulate(0.5), 0); // Not enough for one tick
     }
 
     #[test]
@@ -114,8 +114,8 @@ mod tests {
         scheduler.set_interval(2.0);
 
         assert_eq!(scheduler.interval(), 2.0);
-        assert!(!scheduler.accumulate(1.5));
-        assert!(scheduler.accumulate(0.6));
+        assert_eq!(scheduler.accumulate(1.5), 0); // Not enough for 2.0 interval
+        assert_eq!(scheduler.accumulate(0.6), 1); // 1.5 + 0.6 = 2.1 >= 2.0, triggers once
     }
 
     #[test]

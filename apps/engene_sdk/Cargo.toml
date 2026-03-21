@@ -1,5 +1,5 @@
 [package]
-name = "app_engene_sdk"
+name = "engene_sdk"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,5 @@ edition = "2021"
 sdk_app = { path = "../../crates/sdk_app" }
 
 [[bin]]
-name = "app_engene_sdk"
+name = "engene_sdk"
 path = "src/main.rs"

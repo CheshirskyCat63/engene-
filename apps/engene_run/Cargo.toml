@@ -1,5 +1,5 @@
 [package]
-name = "app_engene_headless"
+name = "engene_run"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,5 @@ edition = "2021"
 game_framework = { path = "../../crates/game_framework" }
 
 [[bin]]
-name = "app_engene_headless"
+name = "engene_run"
 path = "src/main.rs"

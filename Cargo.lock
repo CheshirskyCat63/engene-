@@ -140,29 +140,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7f202df86484c868dbad7eaa557ef785d5c66295e41b460ef922eca0723b842c"
 
 [[package]]
-name = "app_engene_game"
-version = "0.1.0"
-dependencies = [
- "game_framework",
- "tracing-subscriber",
- "winit 0.28.7",
-]
-
-[[package]]
-name = "app_engene_headless"
-version = "0.1.0"
-dependencies = [
- "game_framework",
-]
-
-[[package]]
-name = "app_engene_sdk"
-version = "0.1.0"
-dependencies = [
- "sdk_app",
-]
-
-[[package]]
 name = "approx"
 version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -771,8 +748,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "engene_bootstrap"
+name = "engene_game"
 version = "0.1.0"
+dependencies = [
+ "game_framework",
+ "tracing-subscriber",
+ "winit 0.28.7",
+]
+
+[[package]]
+name = "engene_run"
+version = "0.1.0"
+dependencies = [
+ "game_framework",
+]
+
+[[package]]
+name = "engene_sdk"
+version = "0.1.0"
+dependencies = [
+ "sdk_app",
+]
 
 [[package]]
 name = "engine_audio"

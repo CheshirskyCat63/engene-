@@ -32,6 +32,7 @@ pub struct StreamingInput {
     pub view_distance_chunks: u32,
     pub pending_unload_count: u32,
     pub residency_budget: u32,
+    pub known_loaded_chunks: Vec<[i32; 2]>, // Current resident set
 }
 
 /// Streaming phase output results.
@@ -74,7 +75,7 @@ pub fn run_streaming(input: StreamingInput) -> StreamingOutput {
 }
 
 impl StreamingPhase {
-    fn execute_with_input(&self, ctx: &PhaseContext, input: StreamingInput) -> StreamingOutput {
+    fn execute_with_input(&self, _ctx: &PhaseContext, input: StreamingInput) -> StreamingOutput {
         let start = std::time::Instant::now();
         
         // ========================================================================
@@ -95,7 +96,12 @@ impl StreamingPhase {
                 for dz in -view_radius..=view_radius {
                     let chunk_x = center_x + dx;
                     let chunk_z = center_z + dz;
-                    chunks_to_load.push([chunk_x, chunk_z]);
+                    let chunk_coord = [chunk_x, chunk_z];
+                    
+                    // Only load if not already resident
+                    if !input.known_loaded_chunks.contains(&chunk_coord) {
+                        chunks_to_load.push(chunk_coord);
+                    }
                 }
             }
             
@@ -107,10 +113,21 @@ impl StreamingPhase {
             // Mark budget saturation if we hit the limit
             let budget_saturation = chunks_to_load.len() >= budget;
             
-            // Process pending unload intents
+            // Process pending unload intents - unload chunks far from player
             let unload_count = input.pending_unload_count.min(10); // Cap per tick
-            for _ in 0..unload_count {
-                chunks_to_unload.push([0, 0]); // Placeholder coords
+            for loaded_chunk in &input.known_loaded_chunks {
+                if chunks_to_unload.len() >= unload_count as usize {
+                    break;
+                }
+                
+                let chunk_x = loaded_chunk[0];
+                let chunk_z = loaded_chunk[1];
+                let dist_from_player = ((chunk_x - center_x).abs() + (chunk_z - center_z).abs()) as f32;
+                
+                // Unload if far from player (outside view distance + margin)
+                if dist_from_player > (view_radius + 4) as f32 {
+                    chunks_to_unload.push(*loaded_chunk);
+                }
             }
             
             let load_decisions = chunks_to_load.len() as u32;
@@ -156,6 +173,7 @@ impl PhaseTrait for StreamingPhase {
             view_distance_chunks: 8,
             pending_unload_count: 0,
             residency_budget: 16,
+            known_loaded_chunks: Vec::new(),
         };
         
         let output = self.execute_with_input(ctx, input);

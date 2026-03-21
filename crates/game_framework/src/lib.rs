@@ -135,6 +135,7 @@ pub fn run_headless_from_env_args() {
                 view_distance_chunks: 8,
                 pending_unload_count: 0,
                 residency_budget: 16,
+                known_loaded_chunks: Vec::new(),
             }
         );
         

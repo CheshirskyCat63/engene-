@@ -21,10 +21,9 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 | Runtime role | Command | First called crate | Runner location | Status |
 |---|---|---|---|---|
-| Game | `cargo run -p app_engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
-| SDK | `cargo run -p app_engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | transitional |
-| Headless | `cargo run -p app_engene_headless -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
-| Bootstrap | `cargo run -p engene_bootstrap` | `engene_bootstrap` | `apps/engene_bootstrap/src/main.rs` | app shell |
+| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
+| SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | transitional |
+| Run | `cargo run -p engene_run` | `game_framework` | `crates/game_framework/src/lib.rs` | headless runtime |
 
 ### Root Bins (deprecated, compatibility only)
 
@@ -35,14 +34,13 @@ If a claim in any other doc contradicts this file, **this file wins**.
 | `cargo run --bin engene_headless` | deprecated, compatibility only |
 | `cargo run --bin engene_tools` | deprecated, compatibility only |
 
-### Apps (transitional shells)
+### Apps (canonical structure)
 
 | App | Purpose | Status |
 |---|---|---|
 | `apps/engene_game` | game launch wrapper | transitional shell |
 | `apps/engene_sdk` | SDK launch wrapper | transitional shell |
-| `apps/engene_headless` | headless launch wrapper | transitional shell |
-| `apps/engene_bootstrap` | bootstrap entrypoint | transitional shell |
+| `apps/engene_run` | headless runtime | canonical |
 
 ### Active Runtime Implementation
 
@@ -75,14 +73,13 @@ If a claim in any other doc contradicts this file, **this file wins**.
 | `game_framework` | playable runtime composition | transitional — depends on root |
 | `sdk_app` | editor shell, inspectors, dashboards | transitional — depends on root |
 
-### App shells (thin launchers only)
+### App shells (canonical structure)
 
 | App | Purpose | Status |
 |---|---|---|
 | `apps/engene_game` | game launch wrapper | transitional shell |
 | `apps/engene_sdk` | SDK launch wrapper | transitional shell |
-| `apps/engene_headless` | headless launch wrapper | transitional shell |
-| `apps/engene_bootstrap` | bootstrap entrypoint | transitional shell |
+| `apps/engene_run` | headless runtime | canonical |
 
 ### Root crate
 
