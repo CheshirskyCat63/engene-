@@ -1054,6 +1054,7 @@ name = "game_framework"
 version = "0.1.0"
 dependencies = [
  "engine_core",
+ "engine_runtime",
  "engine_startup",
  "puffin",
  "tracing-subscriber",

@@ -113,7 +113,15 @@ pub fn run_headless_from_env_args() {
     let mut engine = EngineRuntimeAssembly::kernel_headless();
     let sim_dt = 1.0 / 20.0_f32;
 
-    for _ in 0..ticks {
+    for tick in 0..ticks {
+        // ========================================================================
+        // THIN CALLER: Call new phase entrypoint from engine_runtime
+        // This is the first extraction - tick phase in engine_runtime::phase
+        // Old path remains for now, this demonstrates ownership transfer
+        // ========================================================================
+        let _phase_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
+        
+        // Old path continues for now
         engine.tick(sim_dt);
     }
 
