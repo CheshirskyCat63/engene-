@@ -8,11 +8,11 @@
 
 #[cfg(test)]
 mod simulation_integration_tests {
-    use engene::simulation::camp_simulation::CampState;
-    use engene::simulation::role_simulation::{NpcRole, RoleBehavior};
-    use engene::simulation::world_milestones::WorldMilestoneTracker;
-    use engene::core::ecs::Ecs;
-    use engene::world::components::{Transform, PersonalNeeds, NpcEconomy};
+    use engine_simulation::camp_simulation::CampState;
+    use engine_simulation::role_simulation::{NpcRole, RoleBehavior};
+    use engine_simulation::world_milestones::WorldMilestoneTracker;
+    use engine_ecs::ecs::Ecs;
+    use engine_world::components::{Transform, PersonalNeeds, NpcEconomy};
 
     #[test]
     fn e2e_camp_simulation_lifecycle() {
@@ -387,9 +387,9 @@ mod simulation_integration_tests {
 
 #[cfg(test)]
 mod simulation_performance_tests {
-    use engene::simulation::camp_simulation::CampState;
-    use engene::simulation::role_simulation::RoleBehavior;
-    use engene::core::ecs::Ecs;
+    use engine_simulation::camp_simulation::CampState;
+    use engine_simulation::role_simulation::RoleBehavior;
+    use engine_ecs::ecs::Ecs;
 
     #[test]
     fn e2e_large_camp_performance() {
@@ -460,20 +460,20 @@ mod simulation_performance_tests {
         
         // Create entities with different roles
         let roles = vec![
-            engene::simulation::role_simulation::NpcRole::Hunter,
-            engene::simulation::role_simulation::NpcRole::Gatherer,
-            engene::simulation::role_simulation::NpcRole::Builder,
-            engene::simulation::role_simulation::NpcRole::Guard,
-            engene::simulation::role_simulation::NpcRole::Trader,
+            engine_simulation::role_simulation::NpcRole::Hunter,
+            engine_simulation::role_simulation::NpcRole::Gatherer,
+            engine_simulation::role_simulation::NpcRole::Builder,
+            engine_simulation::role_simulation::NpcRole::Guard,
+            engine_simulation::role_simulation::NpcRole::Trader,
         ];
         
         let start = std::time::Instant::now();
         
         for i in 0..10000 {
             let entity = ecs.spawn();
-            ecs.add_component(entity, engene::world::components::Transform::default());
-            ecs.add_component(entity, engene::world::components::PersonalNeeds::default());
-            ecs.add_component(entity, engene::world::components::NpcEconomy::default());
+            ecs.add_component(entity, engine_world::components::Transform::default());
+            ecs.add_component(entity, engine_world::components::PersonalNeeds::default());
+            ecs.add_component(entity, engine_world::components::NpcEconomy::default());
             
             let role = roles[i % roles.len()];
             role_system.assign_role(entity, role).unwrap();
@@ -574,14 +574,14 @@ impl RoleBehavior {
     
     fn update_npc_behavior(&mut self, npc_id: u32, ecs: &mut Ecs, delta_time: f32) -> Result<(), String> {
         // Mock behavior update
-        if let Some(transform) = ecs.components::<engene::world::components::Transform>().get_mut(npc_id) {
+        if let Some(transform) = ecs.components::<engine_world::components::Transform>().get_mut(npc_id) {
             // Move NPC slightly
             transform.position[0] += delta_time;
             transform.position[2] += delta_time;
         }
         
         // Update needs
-        if let Some(needs) = ecs.components::<engene::world::components::PersonalNeeds>().get_mut(npc_id) {
+        if let Some(needs) = ecs.components::<engine_world::components::PersonalNeeds>().get_mut(npc_id) {
             needs.hunger = (needs.hunger - delta_time * 0.1).max(0.0);
             needs.thirst = (needs.thirst - delta_time * 0.15).max(0.0);
             needs.fatigue = (needs.fatigue + delta_time * 0.05).min(100.0);

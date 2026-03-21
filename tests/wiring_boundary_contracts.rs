@@ -5,13 +5,13 @@
 //!
 //! IMPORTANT: Uses real production code, not text scanning.
 
-use engene::core::system::EngineSystem;
-use engene::physics::ballistics::BallisticsSystem;
-use engene::runtime::wiring::integration::{
+use engine_core::system::EngineSystem;
+use engine_physics::ballistics::BallisticsSystem;
+use engine_runtime::wiring::integration::{
     AiDecisionWireSystem, AnimationWireSystem, BallisticsTickSystem, DamageDispatchSystem,
     DestructionTickSystem, GoreWireSystem, NavDirtyTickSystem, OcclusionWireSystem,
 };
-use engene::world::fields::WorldFields;
+use engine_world::fields::WorldFields;
 use std::any::TypeId;
 
 /// Ballistics tick descriptor matches boundary contract.
