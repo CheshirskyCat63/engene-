@@ -1,0 +1,36 @@
+docs/canonical/DOC_CONSISTENCY_MATRIX.md:51:2. **QUARANTINE terminology eliminated** - Replaced with accurate physical reality
+docs/canonical/ENGINE_AUDIT_FINDINGS.md:3:## QUARANTINE LIST - FROZEN
+docs/canonical/ENGINE_AUDIT_FINDINGS.md:73:1. **FREEZE** - Mark non-engine crates as quarantine
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:3:## ЁЯЪи QUARANTINE ORDER - IMMEDIATE
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:5:**All consumer/tooling crates are now QUARANTINED from engine recovery.**
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:7:### тЭМ QUARANTINED (DO NOT TOUCH)
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:81:**Quarantined validation:**
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:84:# cargo check -p sdk_app          # тЭМ QUARANTINED
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:85:# cargo check -p game_framework    # тЭМ QUARANTINED  
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:86:# cargo check -p engine_tools      # тЭМ QUARANTINED
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:87:# cargo test -p engene_sdk       # тЭМ QUARANTINED
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:100:### Tier 2 - Quarantined (Consumer Layer)
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:111:### 1. NO FIXES FOR QUARANTINED CRATES
+docs/canonical/ENGINE_ONLY_RECOVERY_SCOPE.md:158:"QUARANTINED during engine-only recovery. Not part of current scope."
+docs/canonical/ENGINE_ONLY_SCOPE.md:12:## QUARANTINE LIST - FORBIDDEN IN ENGINE PATH
+docs/canonical/ENGINE_ONLY_SCOPE.md:14:**Immediately quarantined:**
+docs/canonical/ENGINE_ONLY_SCOPE.md:26:**Quarantine rules:**
+docs/canonical/ENGINE_ONLY_SCOPE.md:27:1. No engine decisions influenced by quarantined crates
+docs/canonical/ENGINE_PATH_FINAL_AUDIT.md:47:**ACTION: QUARANTINE UNTIL ENGINE STABLE**
+docs/canonical/ENGINE_PATH_FINAL_AUDIT.md:74:- sdk_app, game_framework, engine_tools тЖТ QUARANTINE
+docs/canonical/ENGINE_RECOVERY_COMPLETE.md:45:### 5. тЬЕ Consumer Crates - QUARANTINED
+docs/canonical/ENGINE_RECOVERY_COMPLETE.md:104:3. тЭМ Handle consumer applications (quarantined)
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:5:**Consumer crates quarantined. Engine core restored. Minimal runtime verified.**
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:38:- **Zero framework bloat:** All fat modules removed to quarantine
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:56:### ЁЯЪл QUARANTINE STATUS: ENFORCED
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:88:1. тЬЕ **Scope Definition** - Engine-only vs quarantine clearly separated
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:118:- тЬЕ **Protected scope** - Consumer noise quarantined
+docs/canonical/ENGINE_RECOVERY_FINAL_COMPLETE.md:142:**QUARANTINE: тЬЕ ENFORCED**  
+docs/canonical/INFRASTRUCTURE_CLEANUP_REPORT.md:22:  - Contents: quarantine/, phase0/, crash data
+docs/canonical/MIGRATION_LEDGER.md:169:| world_streaming tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:170:| physics_body_combat tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:171:| content_pipeline tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:172:| persistence_full tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:173:| runtime_systems tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:174:| gameplay_and_ai tests | tests_legacy/ | legacy | TBD | old integration tests | migrate or remove | API drift | QUARANTINE |
+docs/canonical/MIGRATION_LEDGER.md:200:3. Status must be: ACTIVE, PENDING, QUARANTINE, or COMPLETE.
