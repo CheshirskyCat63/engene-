@@ -1,17 +1,22 @@
-//! Engine World - MINIMUM TRUTH ONLY
+//! Engine World - COMPILE SCAFFOLD
 //! 
-//! Only what engine path needs:
-//! - Basic world data/types
-//! - Spatial/state surfaces for core needs
-//! - No content carnival
+//! This is a temporary stub for engine path compilation.
+//! NOT A REAL WORLD IMPLEMENTATION.
+//! 
+//! Purpose: Allow engine_core + engine_ecs + engine_runtime to compile
+//! Status: Placeholder until real world layer is designed
+//! 
+//! DO NOT USE FOR PRODUCTION WORLD LOGIC
+//! DO NOT CONSIDER THIS "MINIMUM TRUTH"
+//! THIS IS A COMPILE-TIME PLACEHOLDER
 
 pub mod api {
     pub const CRATE: &str = "engine_world";
 }
 
-// MINIMUM WORLD TRUTH
+// COMPILE SCAFFOLD ONLY - NOT REAL WORLD
 pub mod cell {
-    /// Basic cell data for engine needs
+    /// Basic cell data for compilation scaffolding
     #[derive(Debug, Clone, Copy)]
     pub struct Cell {
         pub position: (i32, i32),
@@ -25,7 +30,7 @@ pub mod cell {
 pub mod world {
     use super::cell::Cell;
     
-    /// Minimal world grid for engine path
+    /// Minimal world grid for compilation scaffolding
     #[derive(Debug)]
     pub struct WorldGrid {
         pub cells: Vec<Cell>,
@@ -38,12 +43,12 @@ pub mod world {
         
         pub fn generate() -> Self {
             let mut world = Self::new();
-            // Generate some cells for engine path
+            // Generate placeholder cells for compilation
             for x in 0..10 {
                 for y in 0..10 {
                     world.cells.push(Cell {
                         position: (x, y),
-                        biome_id: 0,
+                        biome_id: 0, // Uniform biome - NOT REAL WORLD LOGIC
                     });
                 }
             }
@@ -52,6 +57,6 @@ pub mod world {
     }
 }
 
-// Re-exports for engine path
+// Re-exports for engine compilation
 pub use cell::{Cell, CELL_SIZE, GRID_SIZE};
 pub use world::WorldGrid;

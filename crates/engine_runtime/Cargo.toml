@@ -7,4 +7,4 @@ edition = "2021"
 engine_core = { path = "../engine_core" }
 engine_ecs = { path = "../engine_ecs" }
 engine_world = { path = "../engine_world" }
-rapier3d = "0.17"
+# rapier3d = "0.17"  # REMOVED: Physics not needed for minimal runtime

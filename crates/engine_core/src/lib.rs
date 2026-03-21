@@ -10,26 +10,17 @@ pub mod api {
     pub use crate::time;
 }
 
-pub mod budget_registry;
-pub mod build_manifest;
-pub mod config;
+// REAL CORE MODULES ONLY
 pub mod data_policy;
-pub mod deterministic_merge;
-pub mod determinism_audit;
 pub mod determinism_policy;
-pub mod dirty_set;
+pub mod deterministic_merge;
 pub mod failure_taxonomy;
-pub mod game_config;
-pub mod integration_matrix;
-pub mod metrics_registry;
-pub mod mutation_policy;
-pub mod ownership_map;
-pub mod plugin;
-pub mod profiler;
-pub mod quality_governor;
-pub mod registry;
-pub mod replay;
-pub mod runtime_config;
-pub mod runtime_manifest;
-pub mod serialization;
 pub mod time;
+
+// REMOVED FAT MODULES:
+// budget_registry, build_manifest, config, determinism_audit, dirty_set,
+// game_config, integration_matrix, metrics_registry, mutation_policy,
+// ownership_map, plugin, profiler, quality_governor, registry,
+// replay, runtime_config, runtime_manifest, serialization
+// 
+// These belong in framework crates, not core.

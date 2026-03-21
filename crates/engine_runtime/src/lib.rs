@@ -11,7 +11,12 @@ pub mod api {
 // Re-export systems for transitional access from root
 pub use simulation_core::systems::{EngineSystem, FixedTickContext, Scheduler, WorldTickSystem};
 
-use engine_core::config::GameConfig;
+// Minimal config for engine path (temporary until proper config crate)
+#[derive(Debug, Clone, Default)]
+pub struct GameConfig {
+    pub tick_rate: f32,
+    pub max_entities: usize,
+}
 
 // Minimal EngineRuntime for headless path
 pub struct EngineRuntime {
