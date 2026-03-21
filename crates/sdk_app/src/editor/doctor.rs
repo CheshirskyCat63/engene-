@@ -24,7 +24,7 @@ pub enum DoctorMode {
 /// This is tools-only functionality.
 /// Note: Engine reference would be proper type in real implementation
 pub fn run_doctor(_engine: &Engine, mode: DoctorMode) -> DoctorReport {
-    let mut report = DoctorReport::new();
+    let report = DoctorReport::new();
     
     // TODO: Run actual diagnostics
     // - Check for missing resources

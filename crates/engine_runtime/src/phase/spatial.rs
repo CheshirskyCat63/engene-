@@ -21,7 +21,11 @@ impl Default for SpatialPhase {
 }
 
 impl PhaseTrait for SpatialPhase {
-    fn execute(&self, ctx: &PhaseContext) -> PhaseResult {
+    fn should_run(&self, _ctx: &PhaseContext) -> bool {
+        true
+    }
+
+    fn execute(&self, _ctx: &PhaseContext) -> PhaseResult {
         // TODO: Implement spatial update logic
         // - Use dirty input model (not full rebuild)
         // - Update spatial index from entity changes

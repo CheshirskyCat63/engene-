@@ -92,5 +92,5 @@ fn test_streaming_respects_known_loaded() {
     // Should not reload already known chunks
     // This is a basic test - more sophisticated testing would require
     // access to the actual chunks_to_load list
-    assert!(output.load_decisions >= 0, "Load decisions should be non-negative");
+    assert!(output.load_decisions > 0, "Load decisions should be positive");
 }

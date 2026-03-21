@@ -36,6 +36,12 @@ pub mod world {
         pub cells: Vec<Cell>,
     }
     
+    impl Default for WorldGrid {
+        fn default() -> Self {
+            Self::new()
+        }
+    }
+    
     impl WorldGrid {
         pub fn new() -> Self {
             Self { cells: Vec::new() }

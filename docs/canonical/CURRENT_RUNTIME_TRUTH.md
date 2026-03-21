@@ -46,8 +46,8 @@ If a claim in any other doc contradicts this file, **this file wins**.
 ### Active Runtime Implementation
 
 - **SDK runtime**: `crates/sdk_app/src/lib.rs` — thin router, stub pending phase extraction
-- **Game runtime**: `crates/game_framework/src/lib.rs` — transitional
-- Actual runtime logic: root's sdk_runner still contains orchestration
+- **Game runtime**: `crates/game_framework/src/lib.rs` — headless orchestration via engine_runtime phases
+- Runtime state: `engine_runtime::EngineRuntimeAssembly` — engine-owned
 
 ### Transition Status
 
@@ -71,14 +71,14 @@ If a claim in any other doc contradicts this file, **this file wins**.
 | `engine_audio` | audio runtime | functional |
 | `engine_content` | assets, content pipeline | functional |
 | `engine_tools` | doctor, diagnostics, audits | functional |
-| `game_framework` | playable runtime composition | transitional — depends on root |
+| `game_framework` | playable runtime composition | game_role_owner |
 | `sdk_app` | editor shell, inspectors, dashboards | transitional — depends on root |
 
 ### App shells (canonical structure)
 
 | App | Purpose | Status |
 |---|---|---|
-| `apps/engene_game` | game launch wrapper | transitional shell |
+| `apps/engene_game` | game launch deprecated stub | deprecated - shows message only |
 | `apps/engene_sdk` | SDK launch wrapper | transitional shell |
 | `apps/engene_run` | headless runtime | canonical |
 

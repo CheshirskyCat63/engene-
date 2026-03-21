@@ -21,7 +21,7 @@ impl Default for AudioPhase {
 }
 
 impl PhaseTrait for AudioPhase {
-    fn execute(&self, ctx: &PhaseContext) -> PhaseResult {
+    fn execute(&self, _ctx: &PhaseContext) -> PhaseResult {
         // TODO: Implement audio update logic
         // - Update listener position from player
         // - Process 3D audio positioning
@@ -35,7 +35,7 @@ impl PhaseTrait for AudioPhase {
     }
     
     /// Audio should run even in headless mode.
-    fn should_run(&self, ctx: &PhaseContext) -> bool {
+    fn should_run(&self, _ctx: &PhaseContext) -> bool {
         // Audio can run in any mode
         true
     }

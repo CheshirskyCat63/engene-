@@ -20,7 +20,7 @@ impl Default for PersistencePhase {
 }
 
 impl PhaseTrait for PersistencePhase {
-    fn execute(&self, ctx: &PhaseContext) -> PhaseResult {
+    fn execute(&self, _ctx: &PhaseContext) -> PhaseResult {
         // TODO: Implement persistence logic
         // - Save completed chunk transitions
         // - Write dirty data to disk

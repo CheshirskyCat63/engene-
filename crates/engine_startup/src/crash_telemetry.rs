@@ -1,7 +1,6 @@
 use chrono::Utc;
 use std::fs;
 use std::panic;
-use std::path::Path;
 use std::sync::Once;
 
 static INIT_CRASH_HANDLER: Once = Once::new();

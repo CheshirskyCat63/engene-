@@ -9,6 +9,12 @@ pub struct BuildManifest {
     pub dependencies: HashMap<String, String>,
 }
 
+impl Default for BuildManifest {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BuildManifest {
     pub fn new() -> Self {
         Self {

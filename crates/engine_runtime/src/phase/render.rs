@@ -21,7 +21,7 @@ impl Default for RenderPhase {
 }
 
 impl PhaseTrait for RenderPhase {
-    fn execute(&self, ctx: &PhaseContext) -> PhaseResult {
+    fn execute(&self, _ctx: &PhaseContext) -> PhaseResult {
         // TODO: Implement render logic
         // - Extract renderable data from world state
         // - Submit to GPU
@@ -36,6 +36,6 @@ impl PhaseTrait for RenderPhase {
     
     fn should_run(&self, ctx: &PhaseContext) -> bool {
         // Skip in headless mode
-        !ctx.is_editor_mode || cfg!(feature = "render")
+        !ctx.is_editor_mode
     }
 }

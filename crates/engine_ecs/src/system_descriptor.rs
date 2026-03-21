@@ -7,18 +7,13 @@ pub enum DeterminismTier {
     NonDeterministic,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Copy)]
+#[derive(Clone, Debug, PartialEq, Eq, Copy, Default)]
 pub enum LowSpecPolicy {
     Off,
     ReducedCadence,
+    #[default]
     SimplifiedPath,
     NeverCut,
-}
-
-impl Default for LowSpecPolicy {
-    fn default() -> Self {
-        Self::SimplifiedPath
-    }
 }
 
 #[derive(Clone, Debug, Default)]
