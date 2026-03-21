@@ -1,14 +1,14 @@
 # ENGENE Workspace Status
 
 **Current HEAD:** engene-2.0-transition  
-**Last Updated:** 2026-03-21 (tiny core verified - zero external dependencies)
+**Last Updated:** 2026-03-21 (engine_core physical residue removed - 21 dead files deleted)
 
 ## Stable Crates (✅ Compile Clean)
 
 | Crate | Status | Notes |
 |-------|--------|-------|
-| engine_core | ✅ Compiles | Tiny core - only 5 modules, no external deps |
-| engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts |
+| engine_core | ✅ Compiles | Tiny core - only 5 modules, no external deps, physical residue removed |
+| engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts (component_registry.rs removed) |
 | engine_runtime | ✅ Compiles | Phase execution spine (clean role, assembly separated) |
 | engine_world | ✅ Compiles | World data contracts (data-only) |
 | engine_startup | ✅ Compiles | Startup contracts, panic hooks |
@@ -34,11 +34,13 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - Clean separation: phase spine in lib.rs, assembly in internal module
 - Role cleanup completed: no assembly logic inline in public API
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/ (physically deleted)
+- **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 **World Data Owner:** `engine_world`  
 - Data-only layer: coords, chunk, world_state, terrain
-- Removed: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
-- Kept temp: heightmap (test consumers), material_truth (engine_core consumers)
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial (physically deleted)
+- **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 
 **Composition Owner:** `game_framework`
 - Uses engine_runtime::assembly for runtime state
@@ -63,8 +65,8 @@
 - events/, fields.rs, resources.rs (support systems)
 
 **engine_render:**
-- terrain.rs, vegetation.rs (potentially used)
-- destruction_occlusion.rs, gore_mesh.rs (active consumers)
+- **REMOVED**: decal_system, decals, model_loader (physically deleted)
+- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used), destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Next Cleanup Targets
 

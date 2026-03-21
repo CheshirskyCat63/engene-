@@ -14,7 +14,7 @@
 **Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
 - **CANONICAL**: coords, chunk, world_state, terrain
-- **QUARANTINE** (not exported): population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial (physically deleted)
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 - These modules exist but are NOT public API - checking for hidden consumers
 
@@ -40,7 +40,7 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - PhaseContext, PhaseResult, PhaseTrait
 - EngineRuntimeAssembly (minimal stub)
-- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/ (physically deleted)
 - **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 ## World Surface (CLEANED)
@@ -54,9 +54,8 @@
 
 **engine_render canonical exports:**
 - renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
-- **REMOVED**: decal_system, decals, model_loader
-- **QUARANTINE** (not exported): gpu_culling, gpu_jobs, ibl, lod, particles, postprocess, quality, render_validation, skinning, skybox, surface_state_render, vegetation_semantics, visibility
-- **KEPT TEMP**: destruction_occlusion (active consumers), gore_mesh (active consumers)
+- **REMOVED**: decal_system, decals, model_loader (physically deleted)
+- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used), destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
@@ -73,4 +72,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: Tiny core verified - engine_core has zero external dependencies, all core crates compile clean
+**Last updated**: Engine core physical residue removed - 21 dead files deleted, component_registry.rs removed from engine_ecs
