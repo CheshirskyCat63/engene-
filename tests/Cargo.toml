@@ -1,0 +1,14 @@
+[package]
+name = "engene_tests"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+engine_runtime = { path = "../crates/engine_runtime" }
+sdk_app = { path = "../crates/sdk_app" }
+
+[[bin]]
+name = "runtime_phase_contracts"
+path = "runtime_phase_contracts.rs"

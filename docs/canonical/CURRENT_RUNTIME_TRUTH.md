@@ -31,7 +31,6 @@ If a claim in any other doc contradicts this file, **this file wins**.
 |---------|--------|
 | `cargo run --bin engene_game` | deprecated, compatibility only |
 | `cargo run --bin engene_sdk` | deprecated, compatibility only |
-| `cargo run --bin engene_headless` | deprecated, compatibility only |
 | `cargo run --bin engene_tools` | deprecated, compatibility only |
 
 ### Apps (canonical structure)
