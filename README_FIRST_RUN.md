@@ -146,10 +146,10 @@ Current state is finish-ready for migration handoff, with root constrained to th
 ## Version info
 
 ```bash
-cargo run --bin engene_game -- --version
+cargo run -p engene_game -- --version
 ```
 
-## Warning
+## Note
 
-The workspace already declares `apps/*`, but the active cargo entrypoints are still the root-package bins.
-Until package-level launch ownership is complete, documentation must describe **current execution truth**, not intended end state.
+The workspace declares `apps/*` as the canonical entrypoints for package-level runtime ownership.
+Package-level launch ownership is complete.
