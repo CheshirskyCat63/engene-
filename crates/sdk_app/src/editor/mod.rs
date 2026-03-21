@@ -18,7 +18,8 @@
 pub mod editor_shell;
 pub mod doctor;
 
-pub use editor_shell::EditorShell;
+// Re-export for external use
+pub use editor_shell::{DoctorReport, EditorShell};
 
 /// Update editor state - called every frame in editor mode.
 /// OWNER: sdk_app (this is the first extraction from sdk_runner)
@@ -34,6 +35,6 @@ pub fn update_editor(editor_shell: &mut EditorShell, _engine: &mut doctor::Engin
 
 /// Initialize editor with doctor report from startup.
 /// This is called once at editor startup.
-pub fn init_editor_with_doctor_report(editor_shell: &mut EditorShell, report: doctor::DoctorReport) {
+pub fn init_editor_with_doctor_report(editor_shell: &mut EditorShell, report: DoctorReport) {
     editor_shell.last_doctor_report = Some(report);
 }

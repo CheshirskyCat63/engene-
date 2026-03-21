@@ -3,7 +3,9 @@
 //! OWNER: sdk_app / engine_tools
 //! This is purely tooling functionality. Not needed in game runtime.
 
-use super::editor_shell::{Diagnostic, DiagnosticSeverity, DoctorReport};
+use super::editor_shell::DoctorReport;
+// TODO: Use Diagnostic and DiagnosticSeverity when doctor implementation is complete
+// use super::editor_shell::{Diagnostic, DiagnosticSeverity};
 
 /// Doctor mode for diagnostics.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16,7 +18,8 @@ pub enum DoctorMode {
 
 /// Run doctor diagnostics on the engine.
 /// This is tools-only functionality.
-pub fn run_doctor(_engine: &super::Engine, mode: DoctorMode) -> DoctorReport {
+/// Note: Engine reference would be proper type in real implementation
+pub fn run_doctor(_engine: &Engine, mode: DoctorMode) -> DoctorReport {
     let mut report = DoctorReport::new();
     
     // TODO: Run actual diagnostics

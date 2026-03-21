@@ -3,7 +3,8 @@
 //! OWNER: sdk_app
 //! This is SDK/editor-only. Must NOT be used by game runtime.
 
-use std::sync::Arc;
+// Note: Arc would be used for shared state in real implementation
+// use std::sync::Arc;
 
 /// Editor shell state - contains all editor UI state.
 /// This is purely SDK/editor functionality.
@@ -52,8 +53,10 @@ impl EditorShell {
     }
     
     /// Apply pending edits from inspector.
-    pub fn apply_inspector_edits(&mut self, _ecs: &mut super::Ecs) {
+    /// Note: ECS access would come from engine world in real implementation
+    pub fn apply_inspector_edits(&mut self) {
         // TODO: Apply pending entity edits
+        // In real implementation, this would mutate world through proper channels
     }
     
     /// Update dashboards with current state.

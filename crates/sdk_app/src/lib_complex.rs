@@ -1,12 +1,12 @@
 //! SDK role owner crate.
 //! This crate is transitioning to own SDK runtime and editor startup.
+//!
+//! ## Ownership Structure
+//! - Editor logic: sdk_app::editor (extracted from sdk_runner)
+//! - Runtime phases: engine_runtime::phase (in progress)
 
-pub mod api {
-    pub const CRATE: &str = "sdk_app";
-    pub const STATUS: &str = "transitional_role_owner";
-    pub const CURRENT_OPERATOR_OWNER: &str = "sdk_app";
-    pub const TARGET_OWNER: &str = "sdk_app";
-}
+pub mod api;
+pub mod editor; // Re-export editor module for ownership extraction
 
 use std::collections::HashMap;
 use std::sync::Arc;
@@ -50,7 +50,7 @@ pub struct ToolsRuntimeAssembly;
 pub mod doctor {
     pub fn run() { println!("Doctor check needed"); }
 }
-pub struct EditorShell;
+// REMOVED: pub struct EditorShell; -- now using editor::EditorShell
 pub struct SpatialUpdatePath;
 
 // Additional stubs for entity types
