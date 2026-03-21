@@ -129,7 +129,7 @@ The following are **tolerated temporarily** but must have removal conditions:
 | Scaffold | Purpose | Removal condition |
 |---|---|---|
 | Root re-exports | compatibility façade | role crates stop depending on root |
-| Root active bins | operator continuity | apps/* become primary launch surface |
+| Root active bins | operator continuity | package commands remain canonical |
 | Role crate root dependencies | migration adapters | direct crate-to-crate ownership |
 | `sdk_runner.rs` orchestration | world-kitchen phase driver | explicit phase methods replace redraw handling |
 | `integration.rs` catch-all | domain wiring hub | boundary modules replace mixed-domain file |
