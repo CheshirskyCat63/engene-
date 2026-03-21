@@ -12,7 +12,7 @@
 | engine_runtime | ✅ Compiles | Phase execution spine (clean role, assembly separated) |
 | engine_world | ✅ Compiles | World data contracts (data-only) |
 | engine_startup | ✅ Compiles | Startup contracts, panic hooks |
-| game_framework | ✅ Compiles | Game composition, headless runtime |
+| game_framework | ✅ Compiles | Game composition, future game-specific launch paths |
 
 ## Transitional Crates (⚠️ Need Work)
 
@@ -43,9 +43,9 @@
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 
 **Composition Owner:** `game_framework`
-- Uses engine_runtime::assembly for runtime state
-- Uses engine_runtime::phase for phase execution
-- Headless game loop verified with stateful streaming loop
+- Uses engine_runtime::assembly for game runtime state
+- Uses engine_runtime::phase for game-specific phase execution
+- Headless runtime ownership moved to `runtime_headless`
 
 **Core Primitives Owner:** `engine_core`
 - Tiny core: only 5 modules (data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time)
