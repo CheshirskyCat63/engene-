@@ -37,13 +37,17 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 ### Active Runtime Implementation
 
-- **SDK runtime**: `crates/sdk_app/src/lib_complex.rs` (contains sdk_runner logic)
-- This is NOT in apps/* — it's the actual runtime implementation that package-based entrypoints call
+- **SDK runtime**: `crates/sdk_app/src/lib.rs` — stub, pending phase extraction
+- **Game runtime**: `crates/game_framework/src/lib.rs` — transitional
+- Actual runtime logic is still distributed across:
+  - `sdk_app::lib_complex` (draft, depends on non-existent engene crate)
+  - Root's sdk_runner (still contains orchestration)
 
-### What is NOT current truth
+### Transition Status
 
-- `apps/*` as runtime implementation — they are thin launchers, not the actual runtime
-- Root bins as canonical — they are deprecated compatibility
+- Phase extraction in progress (engine_runtime::phase)
+- Editor slice extracted to sdk_app::editor
+- Full handoff pending
 
 ---
 

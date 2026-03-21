@@ -1,23 +1,15 @@
 //! SDK role owner crate.
 //! This crate is transitioning to own SDK runtime and editor startup.
 //!
-//! ## Ownership
-//! - Editor shell: sdk_app::editor
-//! - Inspector: sdk_app::editor
-//! - Dashboard: sdk_app::editor
-//! - Doctor: sdk_app::editor
+//! ## Ownership Structure
+//! - Editor logic: sdk_app::editor (extracted from sdk_runner)  
+//! - Runtime phases: engine_runtime::phase (in progress)
+//! - Active runtime: transitional, depends on phase extraction
 //!
-//! ## What belongs here (sdk_app)
-//! - Editor UI state and surfaces
-//! - Inspector mutation paths
-//! - Dashboard updates
-//! - Tooling-only commands
-//!
-//! ## What does NOT belong here
-//! - Simulation truth
-//! - World mutation
-//! - Phase ordering logic
-//! - Render implementation
+//! ## Current Status
+//! - run_from_env_args() is STUB pending phase extraction
+//! - editor::update_editor extracted but not wired
+//! - This is transitional debt
 
 pub mod editor;
 
@@ -28,38 +20,22 @@ pub mod api {
     pub const TARGET_OWNER: &str = "sdk_app";
 }
 
-use std::collections::HashMap;
-use std::sync::Arc;
-use std::time::Instant;
-
-use winit::event_loop::EventLoop;
-use winit::keyboard::{KeyCode, PhysicalKey};
-use winit::window::{CursorGrabMode, Window};
-
-use winit::event::{DeviceEvent, DeviceId, ElementState, KeyEvent, MouseButton, WindowEvent};
-
-use engine_startup::{install_panic_hook, BuildManifest};
-
-// Minimal stubs for compilation
-pub struct SpatialDirtyJournal {
-    pub force_rebuild: bool,
-}
-impl Default for SpatialDirtyJournal {
-    fn default() -> Self {
-        Self { force_rebuild: false }
-    }
-}
-
+/// SDK entrypoint - STUB, needs implementation
+/// OWNER: sdk_app
+/// 
+/// TODO: Connect to real runtime after phase extraction completes
 pub fn run_from_env_args() {
+    use engine_startup::{install_panic_hook, BuildManifest};
+    
     if BuildManifest::handle_version_flag() {
         return;
     }
 
     install_panic_hook();
+
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .init();
-    puffin::set_scopes_on(true);
 
     let manifest = BuildManifest::current();
     println!("=== ENGENE SDK ===");
@@ -67,12 +43,18 @@ pub fn run_from_env_args() {
     println!();
     BuildManifest::ensure_data_dirs();
     manifest.write_manifest_json();
-
-    println!("SDK app needs proper implementation");
+    
+    // STUB: Real runtime path not yet connected
+    println!("[sdk] ERROR: run_from_env_args() is stub");
+    println!("[sdk] Runtime implementation pending phase extraction");
+    println!("[sdk] See: docs/canonical/SDK_RUNNER_OWNERSHIP_AUDIT.md");
     println!("\n=== SESSION ENDED ===");
 }
 
+/// SDK headless entrypoint - STUB
 pub fn run_headless_from_env_args() {
+    use engine_startup::{install_panic_hook, BuildManifest};
+    
     if BuildManifest::handle_version_flag() {
         return;
     }
@@ -87,7 +69,8 @@ pub fn run_headless_from_env_args() {
     println!("=== ENGENE SDK HEADLESS ===");
     manifest.print_full();
     println!();
-
-    println!("SDK headless needs proper implementation");
+    
+    // STUB
+    println!("[sdk] ERROR: run_headless_from_env_args() is stub");
     println!("\n=== SESSION ENDED ===");
 }
