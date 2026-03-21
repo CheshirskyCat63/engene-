@@ -81,7 +81,7 @@
 - ✅ engine_core: Tiny core with 5 modules, zero external dependencies
 - ✅ engine_ecs: Mechanics-only, unchanged
 - ✅ engine_runtime: Clean phase spine + separated assembly
-- ✅ game_framework: Uses assembly path, stateful streaming loop
+- ✅ game_framework: Reserved for game composition; headless ownership moved to runtime_headless
 - ✅ All core crates compile clean
 - ✅ Entrypoint documentation synchronized with workspace apps
 
