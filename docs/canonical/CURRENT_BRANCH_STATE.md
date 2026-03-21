@@ -17,7 +17,6 @@
 | Game | `cargo run -p engene_game` | `runtime_headless` | `crates/runtime_headless/src/lib.rs` | `runtime_headless` | app entrypoint |
 | SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | app entrypoint |
 | Headless | `cargo run -p engene_run -- --ticks 1200` | `runtime_headless` | `crates/runtime_headless/src/lib.rs` | `runtime_headless` | app entrypoint |
-
 ## Current architecture truth
 
 - Root is pure workspace root (no package).
