@@ -2,7 +2,7 @@
 
 ## Status label
 
-**Post-root removal. Pure workspace established. Transitional cleanup in progress.**
+**Post-root removal. Pure workspace established. Canonical architecture achieved.**
 
 ## Current package truth
 
@@ -10,7 +10,7 @@
 - Root package `engene` has been removed.
 - Workspace contains only engine crates, role crates, and `apps/*`.
 - Root feature model migrated to workspace-level dependencies.
-- Role crates exist but still have transitional imports from removed root.
+- Role crates have canonical ownership structure.
 
 ## Current entrypoint truth
 
@@ -25,22 +25,16 @@
 
 - Root is now pure workspace root (no package).
 - Apps are canonical launch truth.
-- Role crates are runtime owners but still have transitional dependencies.
-- Role crates still depend on removed root for:
-  - `engene::runtime::bootstrap::*` (needs migration to engine_runtime)
-  - `engene::world::*` (needs migration to engine_world)
-  - `engene::graphics::*` (needs migration to engine_render)
-  - `engene::core::*` (needs migration to engine_core)
-  - `engene::app::*` (needs migration to engine_runtime)
-- `engine_ecs` and `engine_world` are ownership crates.
-- Transitional imports need systematic replacement.
+- Role crates have clear ownership boundaries.
+- Legacy isolated in tests_legacy/ and legacy/quarantine/.
 
 ## Explicit current truths
 
 - Root package removal is complete.
 - Workspace is valid and functional.
 - Engine core compiles successfully.
-- Role crates need import migration.
+- Role crates have canonical ownership structure.
+- Legacy properly isolated.
 - Apps are canonical entrypoints.
 
 ## Rule
