@@ -31,7 +31,7 @@ fn push_err<T, E: std::fmt::Display>(res: Result<T, E>, path: &str, errors: &mut
 }
 
 fn check_required_config_parsing(dir: &str) -> Vec<String> {
-    use crate::core::config::{load_config, ConfigEnvelope};
+    use crate::config::{load_config, ConfigEnvelope};
 
     let mut errors = Vec::new();
 
@@ -2563,57 +2563,57 @@ impl GameConfig {
         let mut config = Self::default();
 
         // Existing loaders
-        if let Ok(p) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<PerceptionConfig>,
+        if let Ok(p) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<PerceptionConfig>,
         >(&format!("{}/perception.ron", dir))
         {
             config.perception = p.data;
         }
 
-        if let Ok(p) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<PopulationConfig>,
+        if let Ok(p) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<PopulationConfig>,
         >(&format!("{}/population.ron", dir))
         {
             config.population = p.data;
         }
 
-        if let Ok(e) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<EconomyConfig>,
+        if let Ok(e) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<EconomyConfig>,
         >(&format!("{}/economy.ron", dir))
         {
             config.economy = e.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<SimulationConfig>,
+        if let Ok(s) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<SimulationConfig>,
         >(&format!("{}/simulation.ron", dir))
         {
             config.simulation = s.data;
         }
 
-        if let Ok(j) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, JobConfig>>,
+        if let Ok(j) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, JobConfig>>,
         >(&format!("{}/jobs.ron", dir))
         {
             config.jobs = j.data;
         }
 
-        if let Ok(g) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, GoalConfig>>,
+        if let Ok(g) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, GoalConfig>>,
         >(&format!("{}/goals.ron", dir))
         {
             config.goals = g.data;
         }
 
-        if let Ok(b) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, BiomeConfig>>,
+        if let Ok(b) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, BiomeConfig>>,
         >(&format!("{}/biomes.ron", dir))
         {
             config.biomes = b.data;
         }
 
-        if let Ok(s) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, SeasonConfig>>,
+        if let Ok(s) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, SeasonConfig>>,
         >(&format!("{}/seasons.ron", dir))
         {
             config.seasons = s.data;
@@ -2623,8 +2623,8 @@ impl GameConfig {
         // materials.ron stays as authored compatibility input, but runtime meaning is derived.
 
         // NEW loaders
-        if let Ok(fc) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<FoodChainConfig>,
+        if let Ok(fc) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<FoodChainConfig>,
         >(&format!("{}/food_chain.ron", dir))
         {
             config.food_chain = fc.data;
@@ -2634,22 +2634,22 @@ impl GameConfig {
             config.species = sp;
         }
 
-        if let Ok(t) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, TacticsConfig>>,
+        if let Ok(t) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, TacticsConfig>>,
         >(&format!("{}/tactics.ron", dir))
         {
             config.tactics = t.data;
         }
 
-        if let Ok(r) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<RulesData>,
+        if let Ok(r) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<RulesData>,
         >(&format!("{}/rules.ron", dir))
         {
             config.rules.data = r.data;
         }
 
-        if let Ok(w) = crate::core::config::load_config::<
-            crate::core::config::ConfigEnvelope<HashMap<String, WeaponConfig>>,
+        if let Ok(w) = crate::config::load_config::<
+            crate::config::ConfigEnvelope<HashMap<String, WeaponConfig>>,
         >(&format!("{}/weapons.ron", dir))
         {
             config.weapons = w.data;

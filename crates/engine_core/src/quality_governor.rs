@@ -1,4 +1,4 @@
-use crate::core::runtime_config::QualityTier;
+use crate::runtime_config::QualityTier;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum PressureLevel {

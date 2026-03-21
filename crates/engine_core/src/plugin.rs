@@ -1,16 +1,58 @@
 use std::any::TypeId;
 use std::collections::{HashMap, HashSet};
 
-use crate::core::ecs::Ecs;
-use engine_core::registry::Resources;
-use crate::core::system::EngineSystem;
-use crate::core::system_descriptor::SystemDescriptor;
-
 #[derive(Clone, Debug, PartialEq)]
 pub enum TickFreq {
     EveryFrame,
     EveryN(u32),
     OnEvent,
+}
+
+// Temporary stubs for cross-module dependencies
+pub struct Ecs;
+pub struct EventBus;
+pub trait EngineSystem {
+    fn name(&self) -> &str;
+    fn descriptor(&self) -> SystemDescriptor;
+}
+
+#[derive(Clone, Debug)]
+pub struct DeterminismAuditEntry {
+    pub name: &'static str,
+    pub parallel_safe: bool,
+    pub reads_components: Vec<std::any::TypeId>,
+    pub writes_components: Vec<std::any::TypeId>,
+    pub reads_resources: Vec<std::any::TypeId>,
+}
+
+use crate::registry::Resources;
+
+#[derive(Clone, Debug, PartialEq, Copy)]
+pub enum DeterminismTier {
+    Pure,
+    Deterministic,
+    Safe,
+    Hard,
+    Soft,
+    NonDeterministic,
+}
+
+pub struct SystemDescriptor {
+    pub name: &'static str,
+    pub parallel_safe: bool,
+    pub reads_components: Vec<std::any::TypeId>,
+    pub writes_components: Vec<std::any::TypeId>,
+    pub reads_resources: Vec<std::any::TypeId>,
+    pub writes_resources: Vec<std::any::TypeId>,
+    pub ordering: SystemOrdering,
+    pub determinism: DeterminismTier,
+    pub headless_compatible: bool,
+}
+
+pub struct SystemOrdering {
+    pub before: Vec<&'static str>,
+    pub after: Vec<&'static str>,
+    pub requires: Vec<&'static str>,
 }
 
 pub struct SystemMeta {

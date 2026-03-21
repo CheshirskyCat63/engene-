@@ -1,4 +1,4 @@
-use super::system_descriptor::{DeterminismTier, SystemDescriptor};
+use crate::plugin::{SystemDescriptor, DeterminismTier};
 
 #[derive(Clone, Debug)]
 pub struct DeterminismAuditEntry {
@@ -56,6 +56,12 @@ pub fn audit_determinism_tiers(descriptors: &[SystemDescriptor]) -> DeterminismA
             }
             DeterminismTier::NonDeterministic => {
                 non_count += 1;
+            }
+            DeterminismTier::Pure | DeterminismTier::Deterministic | DeterminismTier::Safe => {
+                // Handle these cases appropriately
+                if matches!(desc.determinism, DeterminismTier::Pure) {
+                    hard_count += 1;
+                }
             }
         }
 

@@ -7,4 +7,3 @@ edition = "2021"
 engine_core = { path = "../engine_core" }
 engine_startup = { path = "../engine_startup" }
 winit = "0.29"
-engene = { path = "../.." }

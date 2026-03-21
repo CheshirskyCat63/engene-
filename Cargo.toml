@@ -29,24 +29,3 @@ engine_startup = { path = "crates/engine_startup", version = "0.1.0" }
 # pollster = "0.3"    # → engine_async
 # pathfinding = "4.0" # → engine_navigation
 
-[dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
-glob = "0.3"
-tempfile = "3"
-
-[[bench]]
-name = "simulation_transition_core"
-harness = false
-
-
-[[bench]]
-name = "kernel_throughput"
-harness = false
-
-[[bench]]
-name = "boundary_cost"
-harness = false
-
-[[bench]]
-name = "tick_pressure"
-harness = false

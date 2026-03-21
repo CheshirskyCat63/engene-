@@ -1,8 +1,10 @@
-use crate::core::commands::CommandBuffer;
-use crate::core::ecs::Ecs;
-use crate::core::events::EventBus;
-use engine_core::registry::Resources;
-use crate::core::time::GameTime;
+// Temporary stubs for cross-module dependencies
+pub struct CommandBuffer;
+pub struct Ecs;
+pub struct EventBus;
+
+use crate::registry::Resources;
+use crate::time::GameTime;
 
 pub struct StartupContext<'a> {
     pub ecs: &'a mut Ecs,
