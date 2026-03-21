@@ -73,4 +73,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: Tiny core achieved - engine_core has zero external dependencies
+**Last updated**: Tiny core verified - engine_core has zero external dependencies, all core crates compile clean
