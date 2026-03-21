@@ -112,7 +112,7 @@ jobs:
       with:
         tool: nextest
     - name: Run contract tests
-      run: cargo nextest run --profile ci --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts --test spatial_dirty_contracts
+      run: cargo nextest run --profile ci --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts --test streaming_semantic_laws --test streaming_resource_laws --test streaming_determinism_laws --test tick_deterministic_smoke --test spatial_dirty_contracts
 
   architectural_gates:
     runs-on: ubuntu-latest
@@ -125,3 +125,37 @@ jobs:
         tool: nextest
     - name: Run architectural gates
       run: cargo nextest run --profile ci --test architectural_gates
+
+  world:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: nextest
+    - name: Run world tests
+      run: cargo nextest run --profile ci --test world_persistence_contracts --test spatial_dirty_contracts --test world_fields_contracts --test streaming_implementation_shape
+
+  full_test:
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy, build]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+      
+    - name: Run full test suite (deterministic single-threaded)
+      run: cargo test --workspace --all-features --no-fail-fast -- --test-threads=1
