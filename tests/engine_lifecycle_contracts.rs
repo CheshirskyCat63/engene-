@@ -8,8 +8,8 @@
 
 #[cfg(test)]
 mod engine_lifecycle_tests {
-    use engene::runtime::bootstrap::{GameRuntimeAssembly, ToolsRuntimeAssembly};
-    use engene::world::world::WorldGrid;
+    use engine_runtime::bootstrap::{GameRuntimeAssembly, ToolsRuntimeAssembly};
+    use engine_world::world::WorldGrid;
 
     #[test]
     fn e2e_tools_boots() {
@@ -17,7 +17,7 @@ mod engine_lifecycle_tests {
         assert!(engine.is_running());
         assert!(engine
             .resources
-            .get::<engene::world::resources::ResourceGrid>()
+            .get::<ResourceGrid>()
             .is_none());
     }
 
@@ -29,7 +29,7 @@ mod engine_lifecycle_tests {
         assert!(engine.is_running());
         assert!(engine
             .resources
-            .get::<engene::world::resources::ResourceGrid>()
+            .get::<ResourceGrid>()
             .is_some());
     }
 
@@ -41,9 +41,9 @@ mod engine_lifecycle_tests {
         assert!(engine.is_running());
         
         // Full game should have all major systems
-        assert!(engine.resources.get::<engene::world::resources::ResourceGrid>().is_some());
-        assert!(engine.resources.get::<engene::audio::audio::AudioEngine>().is_some());
-        assert!(engine.resources.get::<engene::physics::ballistics::BallisticsSystem>().is_some());
+        assert!(engine.resources.get::<ResourceGrid>().is_some());
+        assert!(engine.resources.get::<engine_audio::audio::AudioEngine>().is_some());
+        assert!(engine.resources.get::<engine_physics::ballistics::BallisticsSystem>().is_some());
     }
 
     #[test]
@@ -119,7 +119,7 @@ mod engine_lifecycle_tests {
     #[test]
     fn e2e_engine_configuration_persistence() {
         // Test that engine configuration persists across restarts
-        let config1 = engene::core::runtime_config::RuntimeConfig::default();
+        let config1 = use engine_core::runtime_config::RuntimeConfig::default();
         
         let engine1 = ToolsRuntimeAssembly::with_config(config1.clone());
         assert!(engine1.is_running());
@@ -218,9 +218,9 @@ mod engine_lifecycle_tests {
 #[cfg(test)]
 mod engine_integration_tests {
     use engene::runtime::bootstrap::GameRuntimeAssembly;
-    use engene::world::world::WorldGrid;
-    use engene::core::ecs::Ecs;
-    use engene::world::components::Transform;
+    use engine_world::world::WorldGrid;
+    use engine_ecs::ecs::Ecs;
+    use engine_world::components::Transform;
 
     #[test]
     fn e2e_world_grid_integration() {
@@ -239,7 +239,7 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_ecs_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let ecs = engine.resources.get::<Ecs>().unwrap();
@@ -257,10 +257,10 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_audio_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
-        let audio = engine.resources.get::<engene::audio::audio::AudioEngine>();
+        let audio = engine.resources.get::<engine_audio::audio::AudioEngine>();
         assert!(audio.is_some());
         
         if let Some(audio_engine) = audio {
@@ -274,10 +274,10 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_physics_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
-        let physics = engine.resources.get::<engene::physics::ballistics::BallisticsSystem>();
+        let physics = engine.resources.get::<engine_physics::ballistics::BallisticsSystem>();
         assert!(physics.is_some());
         
         if let Some(ballistics) = physics {
@@ -291,36 +291,35 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_streaming_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
-        let streamer = engine.resources.get::<engene::world::streaming::WorldStreamer>();
         assert!(streamer.is_some());
-        
+            
         if let Some(world_streamer) = streamer {
             // Should be able to stream chunks
-            let coord = engene::world::streaming::ChunkCoord::new(0, 0);
+            let coord = engine_world::streaming::ChunkCoord::new(0, 0);
             let result = world_streamer.load_chunk(coord);
             assert!(result.is_ok() || result.is_err()); // Either works or gracefully fails
         }
-        
+            
         engine.shutdown();
     }
 
     #[test]
     fn e2e_persistence_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
-        
-        let persistence = engine.resources.get::<engene::world::chunk_persistence::ChunkPersistenceService>();
+            
+        let persistence = engine.resources.get::<engine_world::chunk_persistence::ChunkPersistenceService>();
         assert!(persistence.is_some());
-        
+            
         if let Some(persistence_service) = persistence {
             // Should be able to save/load chunks
-            let coord = engene::world::streaming::ChunkCoord::new(0, 0);
+            let coord = engine_world::streaming::ChunkCoord::new(0, 0);
             let save_result = persistence_service.save_chunk(coord, &[]);
             assert!(save_result.is_ok() || save_result.is_err());
-            
+                
             let load_result = persistence_service.load_chunk(coord);
             assert!(load_result.is_ok() || load_result.is_err());
         }
@@ -330,17 +329,17 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_tools_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         // Tools should be available
-        let console = engine.resources.get::<engene::tools::console::EngineConsole>();
+        let console = engine.resources.get::<engine_tools::console::EngineConsole>();
         assert!(console.is_some());
         
-        let doctor = engine.resources.get::<engene::tools::doctor::DoctorMode>();
+        let doctor = engine.resources.get::<engine_tools::doctor::DoctorMode>();
         assert!(doctor.is_some());
         
-        let safe_mode = engine.resources.get::<engene::tools::editor_safe_mode::EditorSafeMode>();
+        let safe_mode = engine.resources.get::<engine_tools::editor_safe_mode::EditorSafeMode>();
         assert!(safe_mode.is_some());
         
         engine.shutdown();
@@ -348,13 +347,13 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_simulation_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         // Simulation systems should be available
-        let camp_sim = engine.resources.get::<engene::simulation::camp_simulation::CampState>();
-        let role_sim = engine.resources.get::<engene::simulation::role_simulation::RoleBehavior>();
-        let milestones = engine.resources.get::<engene::simulation::world_milestones::WorldMilestoneTracker>();
+        let camp_sim = engine.resources.get::<engine_simulation::camp_simulation::CampState>();
+        let role_sim = engine.resources.get::<engine_simulation::role_simulation::RoleBehavior>();
+        let milestones = engine.resources.get::<engine_simulation::world_milestones::WorldMilestoneTracker>();
         
         assert!(camp_sim.is_some());
         assert!(role_sim.is_some());
@@ -365,7 +364,7 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_navigation_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let navigation = engine.resources.get::<engene::navigation::world_graph::WorldGraph>();
@@ -384,11 +383,11 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_body_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
-        let body_store = engine.resources.get::<engene::body::body_store::BodyStateStore>();
-        let response_cache = engine.resources.get::<engene::body::body_response::BodyPhysicalResponseCache>();
+        let body_store = engine.resources.get::<engine_body::body_store::BodyStateStore>();
+        let response_cache = engine.resources.get::<engine_body::body_response::BodyPhysicalResponseCache>();
         let corpse_manager = engine.resources.get::<engene::body::death_pipeline::CorpseManager>();
         
         assert!(body_store.is_some());
@@ -400,11 +399,11 @@ mod engine_integration_tests {
 
     #[test]
     fn e2e_destruction_integration() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
-        let destruction = engine.resources.get::<engene::physics::destruction::DestructionSystem>();
-        let fire_grid = engine.resources.get::<engene::physics::fire::FireGrid>();
+        let destruction = engine.resources.get::<engine_physics::destruction::DestructionSystem>();
+        let fire_grid = engine.resources.get::<engine_physics::fire::FireGrid>();
         
         assert!(destruction.is_some());
         assert!(fire_grid.is_some());
@@ -422,11 +421,11 @@ mod engine_integration_tests {
         // All major systems should be available
         assert!(engine.resources.get::<engene::core::ecs::Ecs>().is_some());
         assert!(engine.resources.get::<engene::world::world::WorldGrid>().is_some());
-        assert!(engine.resources.get::<engene::audio::audio::AudioEngine>().is_some());
-        assert!(engine.resources.get::<engene::physics::ballistics::BallisticsSystem>().is_some());
-        assert!(engine.resources.get::<engene::world::streaming::WorldStreamer>().is_some());
-        assert!(engine.resources.get::<engene::world::chunk_persistence::ChunkPersistenceService>().is_some());
-        assert!(engine.resources.get::<engene::tools::console::EngineConsole>().is_some());
+        assert!(engine.resources.get::<engine_audio::audio::AudioEngine>().is_some());
+        assert!(engine.resources.get::<engine_physics::ballistics::BallisticsSystem>().is_some());
+        assert!(engine.resources.get::<use engine_world::streaming::WorldStreamer>().is_some());
+        assert!(engine.resources.get::<use engine_world::chunk_persistence::ChunkPersistenceService>().is_some());
+        assert!(engine.resources.get::<use engine_tools::console::EngineConsole>().is_some());
         
         engine.shutdown();
     }
@@ -435,14 +434,14 @@ mod engine_integration_tests {
 #[cfg(test)]
 mod engine_performance_tests {
     use engene::runtime::bootstrap::GameRuntimeAssembly;
-    use engene::core::ecs::Ecs;
-    use engene::world::components::Transform;
+    use engine_ecs::ecs::Ecs;
+    use engine_world::components::Transform;
 
     #[test]
     fn e2e_engine_boot_performance() {
         let start = std::time::Instant::now();
         
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         
         let boot_time = start.elapsed();
         assert!(boot_time.as_millis() < 2000, "Full engine should boot in < 2 seconds");
@@ -453,7 +452,7 @@ mod engine_performance_tests {
 
     #[test]
     fn e2e_engine_shutdown_performance() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let start = std::time::Instant::now();
@@ -466,7 +465,7 @@ mod engine_performance_tests {
 
     #[test]
     fn e2e_entity_spawn_performance() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let ecs = engine.resources.get::<Ecs>().unwrap();
@@ -486,7 +485,7 @@ mod engine_performance_tests {
 
     #[test]
     fn e2e_component_add_performance() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let ecs = engine.resources.get::<Ecs>().unwrap();
@@ -513,7 +512,7 @@ mod engine_performance_tests {
 
     #[test]
     fn e2e_query_performance() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let ecs = engine.resources.get::<Ecs>().unwrap();
@@ -538,7 +537,7 @@ mod engine_performance_tests {
 
     #[test]
     fn e2e_memory_usage_under_control() {
-        let engine = GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest]);
+        let engine = GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest]);
         assert!(engine.is_running());
         
         let initial_memory = engine.memory_usage();
@@ -571,7 +570,7 @@ mod engine_performance_tests {
         use std::sync::{Arc, Mutex};
         use std::thread;
         
-        let engine = Arc::new(Mutex::new(GameRuntimeAssembly::headless(&[engene::world::biomes::Biome::Forest])));
+        let engine = Arc::new(Mutex::new(GameRuntimeAssembly::headless(&[engine_world::biomes::Biome::Forest])));
         let mut handles = vec![];
         
         let start = std::time::Instant::now();
@@ -612,11 +611,11 @@ impl ToolsRuntimeAssembly {
     fn minimal() -> Self {
         Self {
             running: true,
-            resources: engene::core::ecs::Resources::new(),
+            resources: engine_ecs::Resources::new(),
         }
     }
     
-    fn with_config(config: engene::core::runtime_config::RuntimeConfig) -> Self {
+    fn with_config(config: use engine_core::runtime_config::RuntimeConfig) -> Self {
         let mut assembly = Self::minimal();
         // Apply configuration
         assembly
@@ -631,8 +630,8 @@ impl ToolsRuntimeAssembly {
         self.resources.clear();
     }
     
-    fn current_config(&self) -> engene::core::runtime_config::RuntimeConfig {
-        engene::core::runtime_config::RuntimeConfig::default()
+    fn current_config(&self) -> use engine_core::runtime_config::RuntimeConfig {
+        use engine_core::runtime_config::RuntimeConfig::default()
     }
     
     fn simulate_error(&self, error: &str) -> Result<(), String> {
@@ -646,17 +645,17 @@ impl ToolsRuntimeAssembly {
 }
 
 impl GameRuntimeAssembly {
-    fn headless(biomes: &[engene::world::biomes::Biome]) -> Self {
+    fn headless(biomes: &[engine_world::biomes::Biome]) -> Self {
         Self {
             running: true,
-            resources: engene::core::ecs::Resources::new(),
+            resources: engine_ecs::Resources::new(),
         }
     }
     
-    fn full(biomes: &[engene::world::biomes::Biome]) -> Self {
+    fn full(biomes: &[engine_world::biomes::Biome]) -> Self {
         Self {
             running: true,
-            resources: engene::core::ecs::Resources::new(),
+            resources: engine_ecs::Resources::new(),
         }
     }
     
