@@ -46,11 +46,9 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 ### Active Runtime Implementation
 
-- **SDK runtime**: `crates/sdk_app/src/lib.rs` — stub, pending phase extraction
+- **SDK runtime**: `crates/sdk_app/src/lib.rs` — thin router, stub pending phase extraction
 - **Game runtime**: `crates/game_framework/src/lib.rs` — transitional
-- Actual runtime logic is still distributed across:
-  - `sdk_app::lib_complex` (draft, depends on non-existent engene crate)
-  - Root's sdk_runner (still contains orchestration)
+- Actual runtime logic: root's sdk_runner still contains orchestration
 
 ### Transition Status
 

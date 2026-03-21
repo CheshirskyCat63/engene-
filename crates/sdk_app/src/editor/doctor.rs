@@ -1,6 +1,10 @@
 //! Doctor diagnostics - tools-only functionality.
 //!
-//! OWNER: sdk_app / engine_tools
+//! ## OWNER STATUS: UNRESOLVED - TEMPORARY DEBT
+//! Current: dual owner candidate (sdk_app / engine_tools)
+//! Target: engine_tools (doctor is diagnostic tool, not editor UI)
+//! This file is TEMPORARY until owner decision is finalized.
+//! 
 //! This is purely tooling functionality. Not needed in game runtime.
 
 use super::editor_shell::DoctorReport;

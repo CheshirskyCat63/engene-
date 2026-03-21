@@ -148,12 +148,14 @@ pub fn run_all_phases<'a>(
     
     for phase in phases {
         let result = phase.execute(ctx);
-        results.push(result);
         
         // Stop on first error (configurable - could continue)
         if !result.success {
+            results.push(result);
             break;
         }
+        
+        results.push(result);
     }
     
     results

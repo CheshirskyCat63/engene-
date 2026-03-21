@@ -95,3 +95,22 @@ fn audio_phase_runs_regardless_of_mode() {
     let ctx = PhaseContext { tick: 0, delta_seconds: 1.0/60.0, is_editor_mode: false };
     assert!(phase.should_run(&ctx));
 }
+
+/// TICK EXTRACTION: Tick phase has public entrypoint
+#[test]
+fn tick_phase_has_public_entrypoint() {
+    use engine_runtime::phase::tick::run_tick;
+    
+    // Verify entrypoint exists and returns valid result
+    let result = run_tick(0, 1.0/60.0);
+    assert!(result.is_ok());
+}
+
+/// TICK EXTRACTION: Tick is first phase in canonical order
+#[test]
+fn tick_is_first_phase() {
+    use engine_runtime::phase::Phase;
+    
+    let phases = Phase::all();
+    assert_eq!(phases.first(), Some(&Phase::Tick));
+}
