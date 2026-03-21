@@ -9,40 +9,40 @@
 
 ## Engine Core Modules
 
-| Module | Final Status | Physical Reality | Reflected in WORKSPACE_STATUS | Reflected in ARCHITECTURE_TRUTH | Notes |
-|--------|-------------|------------------|------------------------------|--------------------------------|-------|
-| data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time | **KEPT** | ✅ Physically exist | ✅ | ✅ | Core modules - only 5 remaining |
-| All other pre-cleanup modules (budget_registry, game_config, etc.) | **REMOVED** | ✅ Physically deleted | ✅ | ✅ | 21 files deleted in cleanup |
+| Module | Final Status | WORKSPACE_STATUS | ARCHITECTURE_TRUTH | Notes |
+|--------|-------------|------------------|------------------------------|-------|
+| data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time | **KEPT** | ✅ | ✅ | Core modules - only 5 remaining |
+| All other pre-cleanup modules (budget_registry, game_config, etc.) | **REMOVED** | ✅ | ✅ | 21 files deleted in cleanup |
 
 ## Engine Runtime Modules
 
-| Module | Final Status | Physical Reality | Reflected in WORKSPACE_STATUS | Reflected in ARCHITECTURE_TRUTH | Notes |
-|--------|-------------|------------------|------------------------------|--------------------------------|-------|
-| async_services, job_graph, phase_runner, jobs/, streaming/ | **REMOVED** | ✅ Physically deleted | ✅ | ✅ | Runtime assembly residue removed |
-| perf/, wiring/ | **KEPT** | ✅ Physically exist | ✅ | ✅ | Test consumers |
-| assembly/ | **KEPT** | ✅ Physically exist | ✅ | ✅ | Internal bootstrap glue |
+| Module | Final Status | WORKSPACE_STATUS | ARCHITECTURE_TRUTH | Notes |
+|--------|-------------|------------------|------------------------------|-------|
+| async_services, job_graph, phase_runner, jobs/, streaming/ | **REMOVED** | ✅ | ✅ | Runtime assembly residue removed |
+| perf/, wiring/ | **KEPT** | ✅ | ✅ | Test consumers |
+| assembly/ | **KEPT** | ✅ | ✅ | Internal bootstrap glue |
 
 ## Engine World Modules
 
-| Module | Final Status | Physical Reality | Reflected in WORKSPACE_STATUS | Reflected in ARCHITECTURE_TRUTH | Notes |
-|--------|-------------|------------------|------------------------------|--------------------------------|-------|
-| population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial | **REMOVED** | ✅ Physically deleted | ✅ | ✅ | World data residue removed |
-| heightmap, material_truth | **KEPT TEMP** | ✅ Physically exist | ✅ | ✅ | Test/engine_core consumers |
-| events/, fields.rs, resources.rs | **KEPT** | ✅ Physically exist | ✅ | ✅ | Support systems |
+| Module | Final Status | WORKSPACE_STATUS | ARCHITECTURE_TRUTH | Notes |
+|--------|-------------|------------------|------------------------------|-------|
+| population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial | **REMOVED** | ✅ | ✅ | World data residue removed |
+| heightmap, material_truth | **KEPT TEMP** | ✅ | ✅ | Test/engine_core consumers |
+| events/, fields.rs, resources.rs | **KEPT** | ✅ | ✅ | Support systems |
 
 ## Engine Render Modules
 
-| Module | Final Status | Physical Reality | Reflected in WORKSPACE_STATUS | Reflected in ARCHITECTURE_TRUTH | Notes |
-|--------|-------------|------------------|------------------------------|--------------------------------|-------|
-| decal_system, decals, model_loader | **REMOVED** | ✅ Physically deleted | ✅ | ✅ | Render residue removed |
-| terrain, vegetation | **KEPT** | ✅ Physically exist | ✅ | ✅ | Potentially used |
-| destruction_occlusion, gore_mesh | **KEPT TEMP** | ✅ Physically exist | ✅ | ✅ | Active consumers |
+| Module | Final Status | WORKSPACE_STATUS | ARCHITECTURE_TRUTH | Notes |
+|--------|-------------|------------------|------------------------------|-------|
+| decal_system, decals, model_loader | **REMOVED** | ✅ | ✅ | Render residue removed |
+| terrain, vegetation | **KEPT** | ✅ | ✅ | Potentially used |
+| destruction_occlusion, gore_mesh | **KEPT TEMP** | ✅ | ✅ | Active consumers |
 
 ## Engine ECS Modules
 
-| Module | Final Status | Physical Reality | Reflected in WORKSPACE_STATUS | Reflected in ARCHITECTURE_TRUTH | Notes |
-|--------|-------------|------------------|------------------------------|--------------------------------|-------|
-| component_registry | **REMOVED** | ✅ Physically deleted | ✅ | ✅ | ECS residue removed |
+| Module | Final Status | WORKSPACE_STATUS | ARCHITECTURE_TRUTH | Notes |
+|--------|-------------|------------------|------------------------------|-------|
+| component_registry | **REMOVED** | ✅ | ✅ | ECS residue removed |
 
 ## Consistency Status: ✅ FULLY SYNCHRONIZED
 
@@ -53,7 +53,7 @@
 4. **Both canonical documents use identical terminology**
 5. **Complete matrix created for verification**
 
-**No contradictions remain between WORKSPACE_STATUS.md and ARCHITECTURE_TRUTH.md**
+**Pending final terminology cleanup in ARCHITECTURE_TRUTH.md**
 
 ---
 
