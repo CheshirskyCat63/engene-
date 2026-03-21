@@ -54,8 +54,7 @@ jobs:
       run: |
         cargo build -p engene_game
         cargo build -p engene_sdk
-        cargo build -p engene_headless
-        cargo build -p engene_bootstrap
+        cargo build -p engene_run
 
   smoke:
     runs-on: ubuntu-latest
