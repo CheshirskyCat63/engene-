@@ -14,9 +14,13 @@ name = "runtime_phase_contracts"
 path = "runtime_phase_contracts.rs"
 
 [[bin]]
-name = "streaming_behavior"
-path = "streaming_behavior.rs"
+name = "streaming_contract_laws"
+path = "streaming_contract_laws.rs"
 
 [[bin]]
-name = "tick_behavior"
-path = "tick_behavior.rs"
+name = "streaming_implementation_shape"
+path = "streaming_implementation_shape.rs"
+
+[[bin]]
+name = "tick_deterministic_smoke"
+path = "tick_deterministic_smoke.rs"
