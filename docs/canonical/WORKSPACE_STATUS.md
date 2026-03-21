@@ -50,23 +50,22 @@
 **Core Primitives Owner:** `engine_core`
 - Tiny core: only 5 modules (data_policy, determinism_policy, deterministic_merge, failure_taxonomy, time)
 - Zero external dependencies - uses only std
-- All removed modules physically deleted - no quarantine terminology
+- Legacy fat modules physically removed
 
 ## Module Status Summary
 
 **engine_runtime:**
 - **KEPT**: perf/ (test consumers)
 - **KEPT**: wiring/ (test consumers)  
-- **KEPT**: assembly/ (internal bootstrap glue)
+- **KEPT**: assembly.rs (internal bootstrap glue)
 
 **engine_world:**
-- **KEPT**: heightmap.rs (test consumers)
-- **KEPT**: material_truth.rs (engine_core consumers)
+- **KEPT TEMP**: heightmap.rs (test consumers)
+- **KEPT TEMP**: material_truth.rs (engine_core consumers)
 - **KEPT**: events/, fields.rs, resources.rs (support systems)
 
 **engine_render:**
-- **REMOVED**: decal_system, decals, model_loader (physically deleted)
-- **KEPT**: terrain.rs, vegetation.rs (potentially used)
+- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used)
 - **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Next Cleanup Targets

@@ -14,9 +14,8 @@
 **Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
 - **CANONICAL**: coords, chunk, world_state, terrain
-- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial (physically deleted)
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
-- These modules exist but are NOT public API - checking for hidden consumers
 
 ## Role/Composition Crates
 
@@ -40,7 +39,7 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - PhaseContext, PhaseResult, PhaseTrait
 - EngineRuntimeAssembly (minimal stub)
-- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/ (physically deleted)
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/
 - **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 ## World Surface (CLEANED)
@@ -54,14 +53,13 @@
 
 **engine_render canonical exports:**
 - renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
-- **REMOVED**: decal_system, decals, model_loader (physically deleted)
-- **KEPT**: terrain.rs, vegetation.rs (potentially used)
-- **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
+- **REMOVED**: decal_system, decals, model_loader
+- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used), destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
 - `*_enhanced` modules - removed
-- `streaming_owner`, `chunk_persistence` - REMOVED (checking for consumers)
+- `streaming_owner`, `chunk_persistence` - KEPT TEMP (not part of canonical public API)
 - `bootstrap/`, `simulation_core/`, `performance_law.rs`, `minimal_runtime_test.rs` - removed
 - Render modules removed: art_direction, atmosphere, gore_mesh, etc. - 26 modules not exported
 
