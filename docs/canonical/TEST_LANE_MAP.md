@@ -35,6 +35,10 @@ Targets:
 - `physics_core_boundary_contracts`
 - `physics_bootstrap_contracts`
 - `runtime_phase_contracts`
+- `streaming_semantic_laws`
+- `streaming_resource_laws`
+- `streaming_determinism_laws`
+- `tick_deterministic_smoke`
 - `spatial_dirty_contracts`
 
 Commands:
@@ -112,7 +116,7 @@ The command surface must do that remembering for them.
 
 Current green platform gate is narrow by design:
 - Smoke: `engine_contracts`, `production_candidate`, `entrypoint_and_operator_truth`, `ci_surface_contracts`
-- Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`, `spatial_dirty_contracts`
+- Contracts: `physics_core_boundary_contracts`, `physics_bootstrap_contracts`, `runtime_phase_contracts`, `streaming_semantic_laws`, `streaming_resource_laws`, `streaming_determinism_laws`, `tick_deterministic_smoke`, `spatial_dirty_contracts`
 
 ### NEW: Expanded Lane Structure for 520+ Tests
 
@@ -211,7 +215,7 @@ Targets:
 - `world_persistence_contracts`
 - `spatial_dirty_contracts`
 - `world_fields_contracts`
-- `streaming_contracts`
+- `streaming_implementation_shape`
 
 Commands:
 ```bash
