@@ -1,6 +1,6 @@
 # ENGENE Workspace Status
 
-**Current HEAD:** engene-2.0-transition  
+**Tracked Branch:** cleanup/core-physical-delete
 **Last Updated:** 2026-03-21 (engine_core physical residue removed - 21 dead files deleted)
 
 ## Stable Crates (✅ Compile Clean)
@@ -65,7 +65,7 @@
 - **KEPT**: events/, fields.rs, resources.rs (support systems)
 
 **engine_render:**
-- **KEPT TEMP**: terrain.rs, vegetation.rs (potentially used)
+- **KEPT**: terrain.rs, vegetation.rs (potentially used / not yet removed)
 - **KEPT TEMP**: destruction_occlusion.rs, gore_mesh.rs (active consumers)
 
 ## Next Cleanup Targets
@@ -82,8 +82,8 @@
 - ✅ engine_ecs: Mechanics-only, unchanged
 - ✅ engine_runtime: Clean phase spine + separated assembly
 - ✅ game_framework: Uses assembly path, stateful streaming loop
-- ✅ All core crates compile and test successfully
-- ✅ Documentation synchronized with code reality
+- ✅ All core crates compile clean in current core path
+- ✅ Core truth documentation synchronized with current cleanup state
 
 ## Architecture Laws Enforced
 
