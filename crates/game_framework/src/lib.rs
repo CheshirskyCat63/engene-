@@ -1,36 +1,14 @@
 //! Game role owner crate.
-//! This crate is transitioning to own game launch and headless behavior.
+//! This crate provides game launch and headless behavior composition.
 
 pub mod api {
     pub const CRATE: &str = "game_framework";
-    pub const STATUS: &str = "transitional_role_owner";
+    pub const STATUS: &str = "game_role_owner";
     pub const CURRENT_OPERATOR_OWNER: &str = "game_framework";
     pub const TARGET_OWNER: &str = "game_framework";
 }
 
 use engine_startup::{install_panic_hook, BuildManifest};
-pub struct EngineEcs {
-    pub tick: u32,
-    pub alive: Vec<u32>,
-}
-
-pub struct EngineRuntimeAssembly {
-    ecs: EngineEcs,
-}
-
-impl EngineRuntimeAssembly {
-    pub fn kernel_headless() -> Self { 
-        Self { 
-            ecs: EngineEcs { tick: 0, alive: vec![] }
-        } 
-    }
-    
-    pub fn tick(&mut self, _dt: f32) {}
-    
-    pub fn ecs(&mut self) -> &mut EngineEcs {
-        &mut self.ecs
-    }
-}
 
 pub fn run_headless_from_env_args() {
     if BuildManifest::handle_version_flag() {
@@ -57,7 +35,7 @@ pub fn run_headless_from_env_args() {
 
     println!("[headless] kernel tick soak: {} ticks", ticks);
 
-    let mut engine = EngineRuntimeAssembly::kernel_headless();
+    let mut engine = engine_runtime::EngineRuntimeAssembly::kernel_headless();
     let sim_dt = 1.0 / 20.0_f32;
     
     // Stateful resident set for streaming (owner between ticks)

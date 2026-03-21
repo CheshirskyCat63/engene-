@@ -21,7 +21,7 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 | Runtime role | Command | First called crate | Runner location | Status |
 |---|---|---|---|---|
-| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | transitional |
+| Game | `cargo run -p engene_game` | `engene_game` (deprecated stub) | `apps/engene_game/src/main.rs` | deprecated - shows message |
 | SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | transitional |
 | Run | `cargo run -p engene_run` | `game_framework` | `crates/game_framework/src/lib.rs` | headless runtime |
 
@@ -39,7 +39,7 @@ If a claim in any other doc contradicts this file, **this file wins**.
 
 | App | Purpose | Status |
 |---|---|---|
-| `apps/engene_game` | game launch wrapper | transitional shell |
+| `apps/engene_game` | game launch deprecated stub | deprecated - shows message only |
 | `apps/engene_sdk` | SDK launch wrapper | transitional shell |
 | `apps/engene_run` | headless runtime | canonical |
 
