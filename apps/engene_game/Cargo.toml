@@ -1,0 +1,12 @@
+[package]
+name = "engene_game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+game_framework = { path = "../../crates/game_framework" }
+winit = "0.28"
+tracing-subscriber = "0.3"
+[[bin]]
+name = "engene_game"
+path = "src/main.rs"

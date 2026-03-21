@@ -1,0 +1,11 @@
+[package]
+name = "engene_run"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+game_framework = { path = "../../crates/game_framework" }
+
+[[bin]]
+name = "engene_run"
+path = "src/main.rs"

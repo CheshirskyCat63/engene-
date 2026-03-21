@@ -1,0 +1,19 @@
+FAST TEST POLICY
+order:
+1. cargo check -p <crate>
+2. focused test
+3. broader crate test
+4. workspace validation only if needed
+
+use fast mode for:
+- local compile fix
+- local test repair
+- small refactor
+- path/import issue
+
+report:
+- changed files
+- command run
+- result
+- remaining risk
+

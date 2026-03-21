@@ -10,17 +10,20 @@ fn economy_dashboard_empty() {
 fn economy_dashboard_record_snapshot() {
     use engene::core::ecs::Ecs;
     use engene::tools::economy_dashboard::EconomyDashboard;
-    use engene::world::components::{EntityKind, NpcEconomy, Job};
+    use engene::world::components::{EntityKind, Job, NpcEconomy};
 
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 100.0,
-        monthly_required: 50.0,
-        job: Job::Guard,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 100.0,
+            monthly_required: 50.0,
+            job: Job::Guard,
+            desperation: 0.0,
+        },
+    );
 
     let mut dashboard = EconomyDashboard::default();
     dashboard.record_snapshot(&ecs, 1);
@@ -36,17 +39,20 @@ fn economy_dashboard_record_snapshot() {
 fn economy_dashboard_wealth_trend() {
     use engene::core::ecs::Ecs;
     use engene::tools::economy_dashboard::EconomyDashboard;
-    use engene::world::components::{EntityKind, NpcEconomy, Job};
+    use engene::world::components::{EntityKind, Job, NpcEconomy};
 
     let mut ecs = Ecs::new();
     let e = ecs.spawn();
     ecs.kinds.insert(e, EntityKind::Npc);
-    ecs.npc_economies.insert(e, NpcEconomy {
-        money: 50.0,
-        monthly_required: 50.0,
-        job: Job::Guard,
-        desperation: 0.0,
-    });
+    ecs.npc_economies.insert(
+        e,
+        NpcEconomy {
+            money: 50.0,
+            monthly_required: 50.0,
+            job: Job::Guard,
+            desperation: 0.0,
+        },
+    );
 
     let mut dashboard = EconomyDashboard::new(10);
     dashboard.record_snapshot(&ecs, 1);

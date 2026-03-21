@@ -1,0 +1,8 @@
+FAST PATHS
+runtime -> apps/, crates/, game/, .cline/memory-bank/runtimeMap.md
+canon -> .cline/memory-bank/canonIndex.md, .cline/fast/canon.fast.md, docs/canonical/*
+run/build -> .cline/src/root/ROOT_DOCS_INDEX.txt, GAME_QUICKSTART.md, SDK_QUICKSTART.md, README_FIRST_RUN.md
+tests -> tests/, crate tests, .cline/fast/tests.fast.txt
+legacy -> legacy/quarantine/ read-only default
+sync -> .cline/sync/*
+

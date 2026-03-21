@@ -2,21 +2,126 @@ name: Rust
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "engene-2.0-transition" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "engene-2.0-transition" ]
 
 env:
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
 
 jobs:
-  build:
-
+  fmt:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+    - name: Check formatting
+      run: cargo fmt --all -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install clippy
+      run: rustup component add clippy
+    - name: Run clippy
+      run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build workspace (all targets)
+      run: cargo build --workspace --all-targets
+    - name: Build workspace (all features)
+      run: cargo build --workspace --all-features
+
+  check:
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy, build]
+    steps:
+    - uses: actions/checkout@v4
+    - name: ECS direct-access gate
+      run: bash scripts/check_ecs_direct_access.sh
+    - name: Dependency direction gate
+      run: bash scripts/check_dependency_direction.sh
+    - name: Architectural gates
+      run: cargo test --test architectural_gates
+    - name: Transition path gate
+      run: bash scripts/check_transition_speed_law.sh
+    - name: Build apps
+      run: |
+        cargo build -p engene_game
+        cargo build -p engene_sdk
+        cargo build -p engene_run
+
+  smoke:
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: nextest
+    - name: Run smoke tests
+      run: cargo nextest run --profile ci --test engine_contracts --test production_candidate --test entrypoint_and_operator_truth --test ci_surface_contracts
+
+  contracts:
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: nextest
+    - name: Run contract tests
+      run: cargo nextest run --profile ci --test physics_core_boundary_contracts --test physics_bootstrap_contracts --test runtime_phase_contracts --test streaming_semantic_laws --test streaming_resource_laws --test streaming_determinism_laws --test tick_deterministic_smoke --test spatial_dirty_contracts
+
+  architectural_gates:
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: nextest
+    - name: Run architectural gates
+      run: cargo nextest run --profile ci --test architectural_gates
+
+  world:
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install nextest
+      uses: taiki-e/install-action@v2
+      with:
+        tool: nextest
+    - name: Run world tests
+      run: cargo nextest run --profile ci --test world_persistence_contracts --test spatial_dirty_contracts --test world_fields_contracts --test streaming_implementation_shape
+
+  full_test:
+    runs-on: ubuntu-latest
+    needs: [check]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install Rust toolchain
+      uses: dtolnay/rust-toolchain@stable
+      
+    - name: Cache cargo registry
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+      
+    - name: Run full test suite (deterministic single-threaded)
+      run: cargo test --workspace --all-features --no-fail-fast -- --test-threads=1

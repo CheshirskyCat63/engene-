@@ -1,0 +1,22 @@
+[package]
+name = "engine_core"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+# Runtime capability gates - forward to dependent crates
+physics = []
+render = []
+ai = []
+audio = []
+debug_ui = []
+headless = []
+sdk_tools = []
+low_spec = []
+networking = []
+body_sim = []
+audio_playback = []
+
+[dependencies]
+# No external dependencies needed for core modules
+# Core modules only use std

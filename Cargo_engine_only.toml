@@ -1,0 +1,28 @@
+[workspace]
+members = [
+    # ENGINE CORE - CRITICAL PATH
+    "crates/engine_core",
+    "crates/engine_ecs", 
+    "crates/engine_runtime",
+    
+    # ENGINE MINIMUM TRUTH
+    "crates/engine_world",
+    "crates/engine_physics",
+    
+    # QUARANTINE - NOT ALLOWED IN ENGINE PATH
+    # "crates/engine_render",     # Render luxury
+    # "crates/engine_audio",      # Audio comfort  
+    # "crates/engine_content",    # Content carnival
+    # "crates/engine_tools",      # Tooling
+    # "crates/sdk_app",           # SDK
+    # "crates/game_framework",    # Game framework
+    # "crates/engine_startup",   # App glue
+    # "apps/*",                  # All apps
+]
+resolver = "2"
+
+[workspace.dependencies]
+engine_startup = { path = "crates/engine_startup", version = "0.1.0" }
+
+# ENGINE ONLY DEPENDENCIES
+# Core dependencies only - no render/audio/ui/tooling

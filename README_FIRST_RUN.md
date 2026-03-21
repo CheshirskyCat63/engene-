@@ -1,80 +1,157 @@
 # ENGENE — First Run Guide
 
-ENGENE is a three-product platform:
+ENGENE currently exposes four real cargo entrypoints from the root package.
 
-| Product | Executable | Purpose |
-|---------|-----------|---------|
-| **TEST** | `TEST.exe` | Destruction Sandbox 50x50 — double-click to launch sandbox proving ground |
-| **ENGENE Game** | `ENGENE_Game.exe` | Standalone playable world — player, quests, combat, trading, save/load |
-| **ENGENE SDK** | `ENGENE_SDK.exe` | World editor — chunk authoring, inspector, doctor, profiler, runtime truth |
-| **ENGENE Headless** | `ENGENE_Headless.exe` | CI/balance simulation — no window, pure sim for testing and validation |
+| Product | Canonical command | Purpose |
+|---|---|---|
+| **ENGENE Game** | `cargo run -p app_engene_game` | canonical runtime (apps/engene_game) |
+| **ENGENE SDK** | `cargo run -p app_engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
+| **ENGENE Headless** | `cargo run -p app_engene_headless -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_headless) |
+| **ENGENE Bootstrap** | `cargo run -p engene_bootstrap` | minimal bootstrap path (apps/engene_bootstrap) |
 
-## Quick Start
+## Reality rule
 
-### Option A: Pre-built executables
+`engene_test` is **not** a current canonical bin in the transition branch.
+Do not present it as a first-run entrypoint until it exists in Cargo again.
 
-If `.exe` files exist in the project root or `dist/release/`:
+## Quick start
 
+### Canonical launch paths
+
+```bash
+cargo run -p app_engene_game
+cargo run -p app_engene_sdk
+cargo run -p app_engene_headless -- --ticks 1200
+cargo run -p engene_bootstrap
 ```
-TEST.exe                 # launch Destruction Sandbox 50x50 (proving ground)
-ENGENE_Game.exe          # launch the game (full world)
-ENGENE_Game.exe --layout destruction_sandbox_50x50   # game in sandbox mode
-ENGENE_SDK.exe           # launch the editor
-ENGENE_Headless.exe --months 6   # run 6-month headless sim
+
+### Operator shortcuts
+
+**Bash (Linux/macOS/Git Bash):**
+```bash
+just smoke
+just contracts
+just certification
+just perf
 ```
 
-### Option B: Build from source
-
-Prerequisites: Rust toolchain (stable), Git.
-
+**PowerShell (Windows):**
 ```powershell
-# Build all three
-.\build_release.ps1
-
-# Package into dist/release/ and project root
-.\package_release.ps1
-
-# Or build and run directly
-cargo run --bin engene_game
-cargo run --bin engene_sdk --features sdk_tools
-cargo run --bin engene_headless -- --months 12
+scripts/test/smoke.ps1
+scripts/test/contracts.ps1
+scripts/test/certification.ps1
+scripts/test/perf.ps1
 ```
 
-### Option C: PowerShell launchers
-
-```powershell
-.\run_game.ps1            # launch game (uses .exe if available, else cargo run)
-.\run_sdk.ps1             # launch SDK
-.\run_game.ps1 -Build     # build then launch
+**Cargo aliases:**
+```bash
+cargo smoke
+cargo contracts
+cargo cert
 ```
 
-## Project Structure
+**Bash scripts:**
+```bash
+scripts/test/smoke.sh
+scripts/test/contracts.sh
+scripts/test/certification.sh
+scripts/test/perf.sh
+```
+
+## Legacy recovery
+
+For isolated broken legacy integration tests:
+
+**Canonical order:**
+```bash
+just legacy-recovery
+scripts/test/legacy_recovery.sh
+scripts/test/legacy_recovery.ps1
+```
+
+The legacy forest is isolated in `tests_legacy/` and is not part of default platform gate.
+It is a manual recovery surface after API drift repair, not a migration-readiness signal.
+
+## Current structure truth
 
 ```
 /ENGENE_ROOT
-  TEST.exe / ENGENE_SDK.exe / ENGENE_Game.exe / ENGENE_Headless.exe
-  README_FIRST_RUN.md / SDK_QUICKSTART.md / GAME_QUICKSTART.md
-
-  /src              — engine, SDK, and game source code
-  /tests            — integration test suite
-  /benches          — performance benchmarks
-  /docs/canonical   — current authoritative documents
-  /docs/archive     — historical reports and notes
-  /game             — game assets, world data, saves
-  /dist/release     — packaged release executables
+  /apps                 # future package-owned runtime shells
+  /crates               # workspace engine/game/sdk crates
+  /src                  # current root package code + migration shell
+  /tests                # integration / contract / certification tests
+  /benches              # performance benchmarks
+  /docs/canonical       # authoritative current-state docs
+  /.github/workflows    # CI
+  /scripts/test         # ergonomic lane entrypoints
 ```
 
-## Version Info
+## Canonical truth docs
 
-Every executable supports `--version`:
+- `docs/canonical/CURRENT_BRANCH_STATE.md`
+- `docs/canonical/ENTRYPOINT_TRUTH.md`
+- `docs/canonical/RUNTIME_ROLE_MATRIX.md`
+- `docs/canonical/TEST_LANE_MAP.md`
+- `docs/canonical/PLATFORM_AUDIT.md`
+- `docs/canonical/PHYSICS_CORE_BOUNDARY.md`
+- `docs/canonical/PHYSICS_BOOTSTRAP_CONTRACT.md`
 
+## Fast engine verification
+
+1. `just smoke`
+2. `cargo smoke`
+3. `scripts/test/smoke.sh`
+4. `scripts/test/smoke.ps1`
+
+Smoke targets:
+- `engine_contracts`
+- `production_candidate`
+- `entrypoint_and_operator_truth`
+- `ci_surface_contracts`
+
+## Platform contracts
+
+1. `just contracts`
+2. `cargo contracts`
+3. `scripts/test/contracts.sh`
+4. `scripts/test/contracts.ps1`
+
+Contracts targets:
+- `physics_core_boundary_contracts`
+- `physics_bootstrap_contracts`
+- `runtime_phase_contracts`
+- `spatial_dirty_contracts`
+
+## Legacy recovery
+
+1. `just legacy-recovery`
+2. `scripts/test/legacy_recovery.sh`
+3. `scripts/test/legacy_recovery.ps1`
+
+## Narrow platform gate
+
+Current green gate is intentionally narrow and excludes legacy domain suites from default path.
+
+Smoke lane and contracts lane together are the current platform signal:
+```bash
+cargo test --test entrypoint_and_operator_truth
+cargo test --test ci_surface_contracts
+cargo test --test physics_core_boundary_contracts
+cargo test --test physics_bootstrap_contracts
+cargo test --test runtime_phase_contracts
+cargo test --test spatial_dirty_contracts
 ```
-ENGENE_Game.exe --version
+
+Migration is not finished while root shell ownership is still active as canonical launch path.
+Current state is finish-ready for migration handoff, with root constrained to thin compatibility shell duties.
+
+## Version info
+
+```bash
+cargo run --bin engene_game -- --version
 ```
 
-This prints engine version, git hash, build profile, feature flags, and schema versions.
+## Warning
 
-## Further Reading
-
-- [SDK_QUICKSTART.md](SDK_QUICKSTART.md) — how to use the editor
-- [GAME_QUICKSTART.md](GAME_QUICKSTART.md) — how to play and test
+The workspace already declares `apps/*`, but the active cargo entrypoints are still the root-package bins.
+Until package-level launch ownership is complete, documentation must describe **current execution truth**, not intended end state.

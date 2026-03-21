@@ -1,0 +1,32 @@
+[package]
+name = "engene-legacy-tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# This is an archived historical package - dependencies kept for reference only
+# engene = { path = "../../" }  # Would point to root, but package is archived
+
+[[test]]
+name = "world_streaming"
+path = "world_streaming.rs"
+
+[[test]]
+name = "physics_body_combat"
+path = "physics_body_combat.rs"
+
+[[test]]
+name = "content_pipeline"
+path = "content_pipeline.rs"
+
+[[test]]
+name = "persistence_full"
+path = "persistence_full.rs"
+
+[[test]]
+name = "runtime_systems"
+path = "runtime_systems.rs"
+
+[[test]]
+name = "gameplay_and_ai"
+path = "gameplay_and_ai.rs"

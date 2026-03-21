@@ -23,7 +23,10 @@ fn quality_governor_pressure_response() {
     for _ in 0..20 {
         governor.update(50_000);
     }
-    assert!(governor.pressure_level != PressureLevel::Normal || governor.max_dirty_surface_uploads() < 16);
+    assert!(
+        governor.pressure_level != PressureLevel::Normal
+            || governor.max_dirty_surface_uploads() < 16
+    );
 }
 
 #[test]
@@ -31,7 +34,7 @@ fn runtime_config_default_profile() {
     use engene::core::runtime_config::{RuntimeConfig, RuntimeProfile};
 
     let config = RuntimeConfig::default();
-    assert_eq!(config.profile, RuntimeProfile::VerticalSlice);
+    assert_eq!(config.profile, RuntimeProfile::Game);
 }
 
 #[test]

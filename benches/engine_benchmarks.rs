@@ -1,6 +1,6 @@
+use rand::Rng;
 use std::hint::black_box;
 use std::time::Instant;
-use rand::Rng;
 
 fn bench_command_buffer_throughput() {
     use engene::core::commands::CommandBuffer;
@@ -46,13 +46,15 @@ fn bench_worker_pool_fanout() {
     let start = Instant::now();
 
     let results: Vec<u64> = (0..task_count)
-        .map(|_i| pool.execute(move || {
-            let mut sum = 0u64;
-            for j in 0..10_000 {
-                sum += black_box(j);
-            }
-            sum
-        }))
+        .map(|_i| {
+            pool.execute(move || {
+                let mut sum = 0u64;
+                for j in 0..10_000 {
+                    sum += black_box(j);
+                }
+                sum
+            })
+        })
         .collect();
 
     let elapsed = start.elapsed();
@@ -94,9 +96,17 @@ fn bench_prefab_registry_lookup() {
     for i in 0..500 {
         registry.register(PrefabDescriptor {
             name: format!("prefab_{}", i),
-            base: if i > 0 { Some(format!("prefab_{}", i - 1)) } else { None },
+            base: if i > 0 {
+                Some(format!("prefab_{}", i - 1))
+            } else {
+                None
+            },
             spec_variant: None,
-            root: PrefabEntity { name: Some(format!("Entity_{}", i)), components: vec![], children: vec![] },
+            root: PrefabEntity {
+                name: Some(format!("Entity_{}", i)),
+                components: vec![],
+                children: vec![],
+            },
             tags: vec![],
         });
     }
@@ -116,8 +126,8 @@ fn bench_prefab_registry_lookup() {
 }
 
 fn bench_io_budget_streamer() {
+    use engene::world::chunk_package::{BundleKind, StreamPriority};
     use engene::world::io_budget::*;
-    use engene::world::chunk_package::{StreamPriority, BundleKind};
     use engene::world::streaming::ChunkCoord;
 
     let budget = IoBudget::default();
@@ -126,8 +136,16 @@ fn bench_io_budget_streamer() {
     for i in 0..200 {
         streamer.enqueue(StreamRequest {
             coord: ChunkCoord { x: i, z: 0 },
-            bundle_kind: if i % 3 == 0 { BundleKind::Collision } else { BundleKind::Vegetation },
-            priority: if i % 3 == 0 { StreamPriority::Critical } else { StreamPriority::Cosmetic },
+            bundle_kind: if i % 3 == 0 {
+                BundleKind::Collision
+            } else {
+                BundleKind::Vegetation
+            },
+            priority: if i % 3 == 0 {
+                StreamPriority::Critical
+            } else {
+                StreamPriority::Cosmetic
+            },
             size_bytes: 50_000,
             compressed_bytes: 25_000,
             distance_sq: (i * i) as f32,
@@ -143,8 +161,7 @@ fn bench_io_budget_streamer() {
     let elapsed = start.elapsed();
     println!(
         "[BudgetedStreamer] 60 frames processed in {:.2?}, {} bundles loaded",
-        elapsed,
-        total_loaded
+        elapsed, total_loaded
     );
 }
 
@@ -154,29 +171,53 @@ fn bench_world_tick_100_entities() {
     let mut ecs = Ecs::new();
     for i in 0..100u64 {
         let (entity, _pid) = ecs.spawn_new();
-        ecs.transforms.insert(entity, Transform {
-            x: (i as f32) * 20.0,
-            y: (i as f32) * 20.0,
-            cell_x: 0,
-            cell_y: 0,
-        });
+        ecs.transforms.insert(
+            entity,
+            Transform {
+                x: (i as f32) * 20.0,
+                y: (i as f32) * 20.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(entity, EntityKind::Npc);
-        ecs.personal_needs.insert(entity, PersonalNeeds::default_npc());
-        ecs.npc_economies.insert(entity, NpcEconomy {
-            money: 500.0,
-            monthly_required: 100.0,
-            job: Job::ArtifactHunter,
-            desperation: 0.0,
-        });
-        ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+        ecs.personal_needs
+            .insert(entity, PersonalNeeds::default_npc());
+        ecs.npc_economies.insert(
+            entity,
+            NpcEconomy {
+                money: 500.0,
+                monthly_required: 100.0,
+                job: Job::ArtifactHunter,
+                desperation: 0.0,
+            },
+        );
+        ecs.sim_levels.insert(
+            entity,
+            SimLevel {
+                level: SimulationLevel::L0,
+            },
+        );
     }
 
     let player_x = 1000.0;
     let player_y = 1000.0;
     let start = Instant::now();
     let iterations = 1000;
-    for _ in 0..iterations {
-        engene::simulation::activation::update_simulation_levels(&mut ecs, player_x, player_y);
+    let mut deferred_queue = engine_runtime::simulation_core::DeferredTransitionQueue::with_policy(
+        engine_runtime::simulation_core::DeferredTransitionPolicy::default(),
+    );
+    let mut transition_batch = Vec::with_capacity(deferred_queue.policy().max_queue_capacity);
+    for i in 0..iterations {
+        let _ = engene::simulation::activation::update_simulation_levels(
+            &mut ecs,
+            player_x,
+            player_y,
+            i as u64,
+            i as u64,
+            &mut deferred_queue,
+            &mut transition_batch,
+        );
     }
     let elapsed = start.elapsed();
     println!(
@@ -189,33 +230,51 @@ fn bench_world_tick_100_entities() {
 
 fn bench_ai_batch_50_npcs() {
     use engene::core::ecs::Ecs;
-    use engene::world::components::*;
     use engene::game::ai::decision;
     use engene::game::ai::emotions::Emotions;
     use engene::game::ai::memory::Memory;
+    use engene::world::components::*;
 
     let mut ecs = Ecs::new();
     let mut rng = rand::thread_rng();
     for i in 0..50u64 {
         let (entity, _pid) = ecs.spawn_new();
-        ecs.transforms.insert(entity, Transform {
-            x: (i as f32) * 30.0,
-            y: (i as f32) * 30.0,
-            cell_x: 0,
-            cell_y: 0,
-        });
+        ecs.transforms.insert(
+            entity,
+            Transform {
+                x: (i as f32) * 30.0,
+                y: (i as f32) * 30.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(entity, EntityKind::Npc);
-        ecs.npc_traits.insert(entity, NpcTraits {
-            bravery: rng.gen(), aggressiveness: rng.gen(), work_ethic: rng.gen(),
-            curiosity: rng.gen(), honesty: rng.gen(), sociality: rng.gen(),
-            autonomy: rng.gen(), materialism: rng.gen(), risk_tolerance: rng.gen(),
-            stress_resistance: rng.gen(),
-        });
-        ecs.personal_needs.insert(entity, PersonalNeeds::default_npc());
+        ecs.npc_traits.insert(
+            entity,
+            NpcTraits {
+                bravery: rng.gen(),
+                aggressiveness: rng.gen(),
+                work_ethic: rng.gen(),
+                curiosity: rng.gen(),
+                honesty: rng.gen(),
+                sociality: rng.gen(),
+                autonomy: rng.gen(),
+                materialism: rng.gen(),
+                risk_tolerance: rng.gen(),
+                stress_resistance: rng.gen(),
+            },
+        );
+        ecs.personal_needs
+            .insert(entity, PersonalNeeds::default_npc());
         ecs.ai_states.insert(entity, AiState::Idle);
         ecs.emotions.insert(entity, Emotions::new());
         ecs.memories.insert(entity, Memory::new());
-        ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+        ecs.sim_levels.insert(
+            entity,
+            SimLevel {
+                level: SimulationLevel::L0,
+            },
+        );
     }
 
     let start = Instant::now();
@@ -224,15 +283,33 @@ fn bench_ai_batch_50_npcs() {
         for &entity in &ecs.alive.clone() {
             if let Some(EntityKind::Npc) = ecs.kinds.get(&entity) {
                 let traits = ecs.npc_traits.get(&entity).cloned().unwrap_or(NpcTraits {
-                    bravery: 0.5, aggressiveness: 0.5, work_ethic: 0.5, curiosity: 0.5,
-                    honesty: 0.5, sociality: 0.5, autonomy: 0.5, materialism: 0.5,
-                    risk_tolerance: 0.5, stress_resistance: 0.5,
+                    bravery: 0.5,
+                    aggressiveness: 0.5,
+                    work_ethic: 0.5,
+                    curiosity: 0.5,
+                    honesty: 0.5,
+                    sociality: 0.5,
+                    autonomy: 0.5,
+                    materialism: 0.5,
+                    risk_tolerance: 0.5,
+                    stress_resistance: 0.5,
                 });
-                let needs = ecs.personal_needs.get(&entity).cloned().unwrap_or(PersonalNeeds::default_npc());
+                let needs = ecs
+                    .personal_needs
+                    .get(&entity)
+                    .cloned()
+                    .unwrap_or(PersonalNeeds::default_npc());
                 let social = ecs.social_needs.get(&entity).cloned().unwrap_or_default();
-                let economy = ecs.npc_economies.get(&entity).cloned().unwrap_or(NpcEconomy {
-                    money: 100.0, monthly_required: 50.0, job: Job::Guard, desperation: 0.0,
-                });
+                let economy = ecs
+                    .npc_economies
+                    .get(&entity)
+                    .cloned()
+                    .unwrap_or(NpcEconomy {
+                        money: 100.0,
+                        monthly_required: 50.0,
+                        job: Job::Guard,
+                        desperation: 0.0,
+                    });
                 let _goal = decision::decide_npc(&traits, &needs, &social, &economy);
             }
         }
@@ -248,9 +325,9 @@ fn bench_ai_batch_50_npcs() {
 
 fn bench_chunk_save_load_roundtrip() {
     use engene::core::ecs::Ecs;
+    use engene::world::chunk_persistence::ChunkPersistenceService;
     use engene::world::components::*;
     use engene::world::streaming::ChunkCoord;
-    use engene::world::chunk_persistence::ChunkPersistenceService;
 
     let test_dir = std::env::temp_dir().join("engene_bench_chunks");
     let _ = std::fs::remove_dir_all(&test_dir);
@@ -259,25 +336,44 @@ fn bench_chunk_save_load_roundtrip() {
     let coord = ChunkCoord { x: 0, z: 0 };
     for i in 0..20u64 {
         let (entity, _pid) = ecs.spawn_new();
-        ecs.transforms.insert(entity, Transform {
-            x: (i as f32) * 40.0,
-            y: (i as f32) * 40.0,
-            cell_x: 0,
-            cell_y: 0,
-        });
+        ecs.transforms.insert(
+            entity,
+            Transform {
+                x: (i as f32) * 40.0,
+                y: (i as f32) * 40.0,
+                cell_x: 0,
+                cell_y: 0,
+            },
+        );
         ecs.kinds.insert(entity, EntityKind::Npc);
-        ecs.personal_needs.insert(entity, PersonalNeeds::default_npc());
-        ecs.npc_economies.insert(entity, NpcEconomy {
-            money: 300.0,
-            monthly_required: 80.0,
-            job: Job::Guard,
-            desperation: 0.1,
-        });
-        ecs.inventories.insert(entity, Inventory { items: vec![
-            Item { name: "Medkit".into(), value: 50.0 },
-        ]});
-        ecs.equipment.insert(entity, EquipmentSlots::default_stalker());
-        ecs.sim_levels.insert(entity, SimLevel { level: SimulationLevel::L0 });
+        ecs.personal_needs
+            .insert(entity, PersonalNeeds::default_npc());
+        ecs.npc_economies.insert(
+            entity,
+            NpcEconomy {
+                money: 300.0,
+                monthly_required: 80.0,
+                job: Job::Guard,
+                desperation: 0.1,
+            },
+        );
+        ecs.inventories.insert(
+            entity,
+            Inventory {
+                items: vec![Item {
+                    name: "Medkit".into(),
+                    value: 50.0,
+                }],
+            },
+        );
+        ecs.equipment
+            .insert(entity, EquipmentSlots::default_stalker());
+        ecs.sim_levels.insert(
+            entity,
+            SimLevel {
+                level: SimulationLevel::L0,
+            },
+        );
     }
 
     let mut persistence = ChunkPersistenceService::new(test_dir.to_str().unwrap());
@@ -311,11 +407,7 @@ fn bench_frustum_cull_1000_instances() {
     let frustum = Frustum::from_view_projection(&vp);
 
     let positions: Vec<glam::Vec3> = (0..1000)
-        .map(|i| glam::Vec3::new(
-            (i % 32) as f32 * 32.0,
-            0.0,
-            (i / 32) as f32 * 32.0,
-        ))
+        .map(|i| glam::Vec3::new((i % 32) as f32 * 32.0, 0.0, (i / 32) as f32 * 32.0))
         .collect();
 
     let start = Instant::now();

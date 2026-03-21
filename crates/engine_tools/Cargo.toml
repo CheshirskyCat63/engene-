@@ -1,0 +1,9 @@
+[package]
+name = "engine_tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+engine_core = { path = "../engine_core" }
+engine_startup = { path = "../engine_startup" }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

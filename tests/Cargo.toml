@@ -1,0 +1,34 @@
+[package]
+name = "engene_tests"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+engine_runtime = { path = "../crates/engine_runtime" }
+sdk_app = { path = "../crates/sdk_app" }
+
+[[bin]]
+name = "runtime_phase_contracts"
+path = "runtime_phase_contracts.rs"
+
+[[bin]]
+name = "streaming_semantic_laws"
+path = "streaming_semantic_laws.rs"
+
+[[bin]]
+name = "streaming_resource_laws"
+path = "streaming_resource_laws.rs"
+
+[[bin]]
+name = "streaming_determinism_laws"
+path = "streaming_determinism_laws.rs"
+
+[[bin]]
+name = "streaming_implementation_shape"
+path = "streaming_implementation_shape.rs"
+
+[[bin]]
+name = "tick_deterministic_smoke"
+path = "tick_deterministic_smoke.rs"

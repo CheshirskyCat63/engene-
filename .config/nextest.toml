@@ -1,0 +1,20 @@
+# ENGENE Nextest Configuration
+# See: https://nexte.st/book/configuration.html
+
+[profile.default]
+# Fast local development profile
+fail-fast = false
+status-level = "pass"
+final-status-level = "fail"
+
+[profile.ci]
+# CI profile - stricter, faster feedback
+fail-fast = true
+status-level = "fail"
+final-status-level = "fail"
+# Parallelism for CI
+test-threads = "num-cpus"
+
+[profile.ci.junit]
+# JUnit output for CI reporting
+path = "junit.xml"

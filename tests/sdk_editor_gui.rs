@@ -97,12 +97,7 @@ fn console_register_command_and_execute() {
 fn console_register_command_increases_count() {
     let mut console = EngineConsole::new();
     let before = console.command_count();
-    console.register_command(
-        "newcmd",
-        "desc",
-        "usage",
-        Box::new(|_| String::new()),
-    );
+    console.register_command("newcmd", "desc", "usage", Box::new(|_| String::new()));
     assert_eq!(console.command_count(), before + 1);
 }
 
@@ -1465,4 +1460,3 @@ fn doctor_diagnostic_severity_error() {
     };
     assert!(matches!(d.severity, DiagnosticSeverity::Error));
 }
-

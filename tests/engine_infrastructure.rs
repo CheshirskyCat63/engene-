@@ -2,8 +2,8 @@
 
 #[test]
 fn chain_reaction_queue_depth_limit() {
-    use engene::physics::chain_reactions::{ChainReactionQueue, ChainEvent};
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::chain_reactions::{ChainEvent, ChainReactionQueue};
+    use engine_physics::damage_taxonomy::DamageClass;
 
     let mut queue = ChainReactionQueue::new();
     assert!(queue.is_empty());
@@ -38,8 +38,8 @@ fn chain_reaction_queue_depth_limit() {
 
 #[test]
 fn chain_reaction_drain_batch() {
-    use engene::physics::chain_reactions::{ChainReactionQueue, ChainEvent};
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::chain_reactions::{ChainEvent, ChainReactionQueue};
+    use engine_physics::damage_taxonomy::DamageClass;
 
     let mut queue = ChainReactionQueue::new();
     for i in 0..5 {
@@ -62,7 +62,7 @@ fn chain_reaction_drain_batch() {
 
 #[test]
 fn damage_class_instant_vs_cumulative() {
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::damage_taxonomy::DamageClass;
 
     assert!(DamageClass::Ballistic.is_instant());
     assert!(DamageClass::Explosive.is_instant());
@@ -76,7 +76,7 @@ fn damage_class_instant_vs_cumulative() {
 
 #[test]
 fn damage_capability_bitflags() {
-    use engene::physics::damage_taxonomy::DamageCapability;
+    use engine_physics::damage_capability::DamageCapability;
 
     let cap = DamageCapability::SURFACE | DamageCapability::THERMAL;
     assert!(cap.contains(DamageCapability::SURFACE));
@@ -88,7 +88,7 @@ fn damage_capability_bitflags() {
 
 #[test]
 fn cloth_sim_creation_and_step() {
-    use engene::physics::cloth::ClothSim;
+    use engine_physics::cloth::ClothSim;
 
     let mut cloth = ClothSim::new(0, 4, 4, [0.0, 5.0, 0.0], 1.0);
     assert_eq!(cloth.particles.len(), 16);
@@ -99,7 +99,10 @@ fn cloth_sim_creation_and_step() {
 
     let initial_y = cloth.particles[15].pos[1];
     cloth.step(1.0 / 60.0, 4);
-    assert!(cloth.particles[15].pos[1] < initial_y, "gravity should pull particles down");
+    assert!(
+        cloth.particles[15].pos[1] < initial_y,
+        "gravity should pull particles down"
+    );
 
     let flat = cloth.positions_flat();
     assert_eq!(flat.len(), 48);
@@ -107,7 +110,7 @@ fn cloth_sim_creation_and_step() {
 
 #[test]
 fn cloth_world_manages_multiple() {
-    use engene::physics::cloth::ClothWorld;
+    use engine_physics::cloth::ClothWorld;
 
     let mut world = ClothWorld::new();
     let id1 = world.add_cloth(3, 3, [0.0, 5.0, 0.0], 1.0);
@@ -235,7 +238,10 @@ fn world_graph_neighbors() {
 
     let graph = WorldGraph::build_default();
     let village_neighbors = graph.neighbors(0);
-    assert!(village_neighbors.len() >= 3, "village should connect to 3 locations");
+    assert!(
+        village_neighbors.len() >= 3,
+        "village should connect to 3 locations"
+    );
 }
 
 // ===== Navigation: RVO Avoidance =====
@@ -264,9 +270,10 @@ fn rvo_system_collision_avoidance() {
 
     let v1 = rvo.get_velocity(1).unwrap();
     let v2 = rvo.get_velocity(2).unwrap();
-    assert!(v1[1].abs() > 0.01 || v2[1].abs() > 0.01 ||
-            v1[0] < 1.0 || v2[0] > -1.0,
-            "agents should adjust to avoid collision");
+    assert!(
+        v1[1].abs() > 0.01 || v2[1].abs() > 0.01 || v1[0] < 1.0 || v2[0] > -1.0,
+        "agents should adjust to avoid collision"
+    );
 }
 
 // ===== Navigation: NavDirtyTracker =====
@@ -293,7 +300,10 @@ fn nav_dirty_tracker_area_marking() {
 
     let mut tracker = NavDirtyTracker::new();
     tracker.mark_area_dirty(glam::Vec3::new(100.0, 0.0, 100.0), 20.0, 10.0);
-    assert!(tracker.pending_count() >= 9, "area should dirty multiple cells");
+    assert!(
+        tracker.pending_count() >= 9,
+        "area should dirty multiple cells"
+    );
 }
 
 #[test]
@@ -360,7 +370,10 @@ fn input_state_mouse_capture() {
 
     let mut input = InputState::new();
     input.accumulate_mouse(10.0, 20.0);
-    assert_eq!(input.mouse_dx, 0.0, "uncaptured mouse should not accumulate");
+    assert_eq!(
+        input.mouse_dx, 0.0,
+        "uncaptured mouse should not accumulate"
+    );
 
     input.mouse_captured = true;
     input.accumulate_mouse(10.0, 20.0);
@@ -377,16 +390,30 @@ fn input_state_mouse_capture() {
 #[cfg(feature = "networking")]
 #[test]
 fn interpolation_buffer_snapshots() {
-    use engene::network::interpolation::InterpolationBuffer;
     use engene::memory::component_delta::ComponentDelta;
+    use engene::network::interpolation::InterpolationBuffer;
 
     let mut buf = InterpolationBuffer::new();
     assert_eq!(buf.snapshot_count(), 0);
     assert_eq!(buf.latest_tick(), 0);
 
-    buf.push_snapshot(1, ComponentDelta { component_type_id: 0, entity_ids: vec![1], data: vec![0] });
+    buf.push_snapshot(
+        1,
+        ComponentDelta {
+            component_type_id: 0,
+            entity_ids: vec![1],
+            data: vec![0],
+        },
+    );
     buf.advance(0.016);
-    buf.push_snapshot(2, ComponentDelta { component_type_id: 0, entity_ids: vec![1], data: vec![0] });
+    buf.push_snapshot(
+        2,
+        ComponentDelta {
+            component_type_id: 0,
+            entity_ids: vec![1],
+            data: vec![0],
+        },
+    );
 
     assert_eq!(buf.snapshot_count(), 2);
     assert_eq!(buf.latest_tick(), 2);
@@ -395,15 +422,22 @@ fn interpolation_buffer_snapshots() {
 #[cfg(feature = "networking")]
 #[test]
 fn interpolation_factor_range() {
-    use engene::network::interpolation::InterpolationBuffer;
     use engene::memory::component_delta::ComponentDelta;
+    use engene::network::interpolation::InterpolationBuffer;
 
     let mut buf = InterpolationBuffer::new();
     let factor = buf.interpolation_factor();
     assert!((factor - 1.0).abs() < 0.01, "no snapshots => 1.0");
 
     for tick in 0..4 {
-        buf.push_snapshot(tick, ComponentDelta { component_type_id: 0, entity_ids: vec![], data: vec![] });
+        buf.push_snapshot(
+            tick,
+            ComponentDelta {
+                component_type_id: 0,
+                entity_ids: vec![],
+                data: vec![],
+            },
+        );
         buf.advance(0.016);
     }
 
@@ -485,8 +519,8 @@ fn terrain_mask_store_apply_and_decay() {
 
 #[test]
 fn surface_state_store_basic_operations() {
-    use engene::world::surface_state::SurfaceStateStore;
     use engene::physics::damage_pipeline::response_aggregator::SurfaceMaskType;
+    use engene::world::surface_state::SurfaceStateStore;
 
     let mut store = SurfaceStateStore::new();
     assert_eq!(store.active_count(), 0);
@@ -502,8 +536,8 @@ fn surface_state_store_basic_operations() {
 
 #[test]
 fn terrain_deformation_submit_and_process() {
-    use engene::world::terrain_deformation::TerrainDeformationSystem;
     use engene::world::terrain_damage::CraterStamp;
+    use engene::world::terrain_deformation::TerrainDeformationSystem;
 
     let mut sys = TerrainDeformationSystem::new();
     assert_eq!(sys.patch_count(), 0);
