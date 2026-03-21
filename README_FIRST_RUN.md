@@ -1,6 +1,6 @@
 # ENGENE — First Run Guide
 
-ENGENE currently exposes three real cargo entrypoints from the root package.
+ENGENE currently exposes three real cargo entrypoints from the workspace.
 
 | Product | Canonical command | Purpose |
 |---|---|---|
@@ -76,7 +76,7 @@ It is a manual recovery surface after API drift repair, not a migration-readines
 /ENGENE_ROOT
   /apps                 # future package-owned runtime shells
   /crates               # workspace engine/game/sdk crates
-  /src                  # current root package code + migration shell
+  /src                  # migration shell (no root package)
   /tests                # integration / contract / certification tests
   /benches              # performance benchmarks
   /docs/canonical       # authoritative current-state docs
@@ -140,8 +140,7 @@ cargo test --test runtime_phase_contracts
 cargo test --test spatial_dirty_contracts
 ```
 
-Migration is not finished while root shell ownership is still active as canonical launch path.
-Current state is finish-ready for migration handoff, with root constrained to thin compatibility shell duties.
+Migration is complete. Package-level ownership is active.
 
 ## Version info
 
