@@ -34,12 +34,12 @@
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - Clean separation: phase spine in lib.rs, assembly in internal module
 - Role cleanup completed: no assembly logic inline in public API
-- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/ (physically deleted)
+- **REMOVED**: async_services, job_graph, phase_runner, jobs/, streaming/
 - **KEPT**: perf/ (test consumers), wiring/ (test consumers)
 
 **World Data Owner:** `engine_world`  
 - Data-only layer: coords, chunk, world_state, terrain
-- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial (physically deleted)
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
 - **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 
 **Composition Owner:** `game_framework`
