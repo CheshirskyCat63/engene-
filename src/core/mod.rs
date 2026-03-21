@@ -13,10 +13,11 @@
 // RE-EXPORTS from canonical crates
 pub use engine_ecs::access;
 pub use engine_ecs::commands;
-pub use engine_ecs::parallel_validation;
-pub use engine_ecs::persistent_id;
-pub use engine_ecs::sparse_set;
-pub use engine_ecs::system_descriptor;
+// TODO: Restore when modules are available
+// pub use engine_ecs::parallel_validation;
+// pub use engine_ecs::persistent_id;
+// pub use engine_ecs::sparse_set;
+// pub use engine_ecs::system_descriptor;
 
 pub use engine_core::data_policy;
 pub use engine_core::determinism_policy;

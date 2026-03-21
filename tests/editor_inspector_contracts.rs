@@ -446,13 +446,7 @@ mod component_editing_tests {
     }
 }
 
-// Mock implementations
-#[derive(Debug)]
-struct Transform {
-    position: [f32; 3],
-    rotation: [f32; 3],
-    scale: [f32; 3],
-}
+use engene::world::components::Transform;
 
 #[derive(Debug)]
 struct Velocity {

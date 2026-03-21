@@ -329,17 +329,8 @@ mod query_composition_tests {
     }
 }
 
-// Mock components for testing
-#[derive(Default, Clone)]
-struct Transform {
-    position: Vec3,
-}
 
-impl Transform {
-    fn new(x: f32, y: f32, z: f32) -> Self {
-        Self { position: Vec3::new(x, y, z) }
-    }
-}
+use engene::world::components::Transform;
 
 #[derive(Clone)]
 struct Velocity {

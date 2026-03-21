@@ -283,11 +283,7 @@ mod ownership_boundary_tests {
     }
 }
 
-// Mock types for testing
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Transform {
-    position: (f32, f32, f32),
-}
+use engene::world::components::Transform;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Velocity {
