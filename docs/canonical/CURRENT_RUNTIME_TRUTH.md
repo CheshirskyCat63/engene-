@@ -31,7 +31,8 @@ If a claim in any other doc contradicts this file, **this file wins**.
 |---------|--------|
 | `cargo run --bin engene_game` | deprecated, compatibility only |
 | `cargo run --bin engene_sdk` | deprecated, compatibility only |
-| `cargo run --bin engene_tools` | deprecated, compatibility only |
+
+**Note:** `engene_headless` and `engene_tools` bins no longer exist. Use `cargo run -p engene_run` for headless runtime.
 
 ### Apps (canonical structure)
 

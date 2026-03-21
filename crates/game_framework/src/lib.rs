@@ -130,14 +130,14 @@ pub fn run_headless_from_env_args() {
                 view_distance_chunks: 4, // Smaller view for headless
                 pending_unload_count: 2,
                 residency_budget: 8,
-                known_loaded_chunks: Vec::new(), // Start empty, build resident set
+                known_loaded_chunks: Vec::new(), // Stateless per-tick - TODO: persistent resident set
             }
         );
         
         // Additional phases will be added here in canonical order
-        // Phase 3: Spatial phase
-        // Phase 4: Audio phase
-        // Phase 5: Persistence phase
+        // Phase 3: Persistence phase
+        // Phase 4: Spatial phase
+        // Phase 5: Audio phase
         // Phase 6: Editor phase  
         // Phase 7: Render phase
     }
