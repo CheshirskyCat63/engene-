@@ -112,6 +112,9 @@ pub fn run_headless_from_env_args() {
 
     let mut engine = EngineRuntimeAssembly::kernel_headless();
     let sim_dt = 1.0 / 20.0_f32;
+    
+    // Stateful resident set for streaming (owner between ticks)
+    let mut resident_chunks: Vec<[i32; 2]> = Vec::new();
 
     for tick in 0..ticks {
         // ========================================================================
@@ -122,17 +125,26 @@ pub fn run_headless_from_env_args() {
         // Phase 1: Tick phase
         let _tick_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
         
-        // Phase 2: Streaming phase  
-        let _streaming_result = engine_runtime::phase::run_streaming(
+        // Phase 2: Streaming phase (stateful)
+        let streaming_output = engine_runtime::phase::run_streaming(
             engine_runtime::phase::StreamingInput {
                 tick,
                 player_position: Some([0.0, 0.0, 0.0]), // Headless with anchor at origin
                 view_distance_chunks: 4, // Smaller view for headless
                 pending_unload_count: 2,
                 residency_budget: 8,
-                known_loaded_chunks: Vec::new(), // Stateless per-tick - TODO: persistent resident set
+                known_loaded_chunks: resident_chunks.clone(), // Pass current resident set
             }
         );
+        
+        // Update resident set based on streaming decisions
+        resident_chunks.clear();
+        resident_chunks.extend(streaming_output.chunks_to_load);
+        
+        // Remove unloaded chunks from resident set
+        for chunk_to_unload in &streaming_output.chunks_to_unload {
+            resident_chunks.retain(|&chunk| chunk != *chunk_to_unload);
+        }
         
         // Additional phases will be added here in canonical order
         // Phase 3: Persistence phase
@@ -150,9 +162,4 @@ pub fn run_headless_from_env_args() {
         ecs_tick,
         alive_count
     );
-}
-
-// TODO: Implement proper game runner
-mod game_runner {
-    pub struct GameApp;
 }
