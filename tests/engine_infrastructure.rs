@@ -2,8 +2,8 @@
 
 #[test]
 fn chain_reaction_queue_depth_limit() {
-    use engene::physics::chain_reactions::{ChainEvent, ChainReactionQueue};
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::chain_reactions::{ChainEvent, ChainReactionQueue};
+    use engine_physics::damage_taxonomy::DamageClass;
 
     let mut queue = ChainReactionQueue::new();
     assert!(queue.is_empty());
@@ -38,8 +38,8 @@ fn chain_reaction_queue_depth_limit() {
 
 #[test]
 fn chain_reaction_drain_batch() {
-    use engene::physics::chain_reactions::{ChainEvent, ChainReactionQueue};
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::chain_reactions::{ChainEvent, ChainReactionQueue};
+    use engine_physics::damage_taxonomy::DamageClass;
 
     let mut queue = ChainReactionQueue::new();
     for i in 0..5 {
@@ -62,7 +62,7 @@ fn chain_reaction_drain_batch() {
 
 #[test]
 fn damage_class_instant_vs_cumulative() {
-    use engene::physics::damage_taxonomy::DamageClass;
+    use engine_physics::damage_taxonomy::DamageClass;
 
     assert!(DamageClass::Ballistic.is_instant());
     assert!(DamageClass::Explosive.is_instant());
@@ -76,7 +76,7 @@ fn damage_class_instant_vs_cumulative() {
 
 #[test]
 fn damage_capability_bitflags() {
-    use engene::physics::damage_taxonomy::DamageCapability;
+    use engine_physics::damage_capability::DamageCapability;
 
     let cap = DamageCapability::SURFACE | DamageCapability::THERMAL;
     assert!(cap.contains(DamageCapability::SURFACE));
@@ -88,7 +88,7 @@ fn damage_capability_bitflags() {
 
 #[test]
 fn cloth_sim_creation_and_step() {
-    use engene::physics::cloth::ClothSim;
+    use engine_physics::cloth::ClothSim;
 
     let mut cloth = ClothSim::new(0, 4, 4, [0.0, 5.0, 0.0], 1.0);
     assert_eq!(cloth.particles.len(), 16);
@@ -110,7 +110,7 @@ fn cloth_sim_creation_and_step() {
 
 #[test]
 fn cloth_world_manages_multiple() {
-    use engene::physics::cloth::ClothWorld;
+    use engine_physics::cloth::ClothWorld;
 
     let mut world = ClothWorld::new();
     let id1 = world.add_cloth(3, 3, [0.0, 5.0, 0.0], 1.0);
