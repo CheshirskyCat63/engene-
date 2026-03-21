@@ -73,7 +73,7 @@
 1. **engine_render fix campaign** - Resolve dependency issues (egui, pollster, image)
 2. **engine_audio fix campaign** - Resolve missing internal modules  
 3. **sdk_app migration** - Remove legacy imports, migrate to engine_* crates
-4. **CI normalization** - Create core/extended/broken lanes
+4. **CI normalization** - Finalize narrow/core/extended/broken lane separation
 
 ## Core Readiness Achieved ✅
 
@@ -105,4 +105,4 @@ cargo check -p engine_render -p engine_audio
 
 ---
 
-**Status:** Core engine spine is stable and role-clean. Render/audio need separate dependency fix campaign before reintegration.
+**Status:** Core engine spine is stable and role-clean. Render/audio remain outside the clean core path until separate dependency fix campaigns complete.
