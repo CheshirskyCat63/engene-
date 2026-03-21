@@ -12,3 +12,11 @@ sdk_app = { path = "../crates/sdk_app" }
 [[bin]]
 name = "runtime_phase_contracts"
 path = "runtime_phase_contracts.rs"
+
+[[bin]]
+name = "streaming_behavior"
+path = "streaming_behavior.rs"
+
+[[bin]]
+name = "tick_behavior"
+path = "tick_behavior.rs"
