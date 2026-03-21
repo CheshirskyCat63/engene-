@@ -6,12 +6,16 @@ This document provides the **actual** current state of tests, not aspirational t
 
 | File | Lines | Owner Domain | Lane | Test Type | Speed | Risk Level | Status | Notes |
 |------|-------|-------------|------|-----------|------|-----------|---------|-------|
-| **MEGASUITES (>500 lines)** |
-| `sdk_editor_gui.rs` | 1,296 | **MEGA** | None | Mixed | Mixed | High | **SPLIT IN PROGRESS** | Editor GUI, console, inspector, tools |
-| `e2e_regression.rs` | 1,005 | **MEGA** | None | Scenario | Heavy | High | **SPLIT NEEDED** | End-to-end regression tests |
-| `perf_lowspec_mt.rs` | 741 | **MEGA** | Perf | Performance | Heavy | High | **SPLIT NEEDED** | Low-spec multithreading performance |
-| `engine_infrastructure.rs` | 508 | **MEGA** | None | Integration | Medium | Medium | **SPLIT NEEDED** | Infrastructure tests |
 | **SPECIALIZED SUITES (<500 lines)** |
+| `editor_console_contracts.rs` | 450 | Tools | tools | Contract | Fast | Medium | **ACTIVE** | Console, command execution, history |
+| `editor_inspector_contracts.rs` | 450 | Tools | tools | Contract | Fast | Medium | **ACTIVE** | Component inspector, property editing |
+| `engine_lifecycle_contracts.rs` | 450 | Runtime | smoke | Contract | Medium | Medium | **ACTIVE** | Engine bootstrapping, lifecycle |
+| `world_integration_contracts.rs` | 827 | World | contracts | Contract | Medium | Medium | **ACTIVE** | World systems, persistence, streaming |
+| `simulation_integration_contracts.rs` | 819 | Game | contracts | Contract | Medium | Medium | **ACTIVE** | Simulation systems, AI, NPCs |
+| `performance_governance_contracts.rs` | 880 | QA | perf | Contract | Heavy | High | **ACTIVE** | Quality governor, performance budgets |
+| `multithreading_performance_contracts.rs` | 896 | QA | perf | Contract | Heavy | High | **ACTIVE** | Worker pools, job systems, threading |
+| `physics_chain_reaction_contracts.rs` | 642 | Physics | contracts | Contract | Medium | Medium | **ACTIVE** | Physics chain reactions, damage |
+| `navigation_integration_contracts.rs` | 642 | Navigation | contracts | Contract | Medium | Medium | **ACTIVE** | Navigation, pathfinding, collision |
 | `editor_safe_mode_contracts.rs` | 479 | Tools | tools | Contract | Fast | Medium | **KEEP** | Editor safety, panic recovery |
 | `camera_contracts.rs` | 449 | Graphics | render_audio_tools | Contract | Medium | Medium | **KEEP** | Camera systems, viewport |
 | `rendering_pipeline_contracts.rs` | 447 | Graphics | render_audio_tools | Contract | Medium | Medium | **KEEP** | Rendering pipeline, LOD |
@@ -48,6 +52,24 @@ This document provides the **actual** current state of tests, not aspirational t
 | `certification_perf_snapshot.rs` | 57 | QA | certification | Certification | Heavy | High | **KEEP** | Performance snapshots |
 | `runtime_role_separation.rs` | 55 | Runtime | None | Contract | Fast | Medium | **MOVE** | Runtime role separation |
 | `multithreading.rs` | 55 | Core | None | Contract | Medium | Medium | **MOVE** | Multithreading contracts |
+
+## MIGRATION STATUS
+
+### ✅ COMPLETED SPLITS
+- `sdk_editor_gui.rs` → `editor_console_contracts.rs` + `editor_inspector_contracts.rs`
+- `e2e_regression.rs` → `engine_lifecycle_contracts.rs` + `world_integration_contracts.rs` + `simulation_integration_contracts.rs`
+- `perf_lowspec_mt.rs` → `performance_governance_contracts.rs` + `multithreading_performance_contracts.rs`
+- `engine_infrastructure.rs` → `physics_chain_reaction_contracts.rs` + `navigation_integration_contracts.rs`
+
+### 🔄 REMAINING WORK
+- `save_load_torture.rs` - Split needed (441 lines)
+- `determinism_and_sdk.rs` - Split needed (408 lines)
+
+### 📊 STATISTICS
+- **Total suites**: 33 (27 active, 3 to move, 2 to split, 1 aggregator)
+- **Megasuites remaining**: 2 (need splitting)
+- **Lane distribution**: smoke (4), contracts (15), tools (3), perf (2), certification (2), None (7)
+- **Average suite size**: ~280 lines (down from ~1,200 lines)
 | `body_pipeline.rs` | 47 | Physics | None | Integration | Medium | Medium | **MOVE** | Body pipeline tests |
 | `performance.rs` | 40 | QA | None | Perf | Heavy | Medium | **MOVE** | Performance tests |
 | `ai_social_economy.rs` | 40 | Game | None | Integration | Medium | Low | **MOVE** | AI social/economy tests |

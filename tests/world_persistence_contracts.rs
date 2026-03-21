@@ -2,7 +2,7 @@
 //! 
 //! Tests for chunk persistence cycles, save/load integrity, and streaming contracts.
 //! Ownership: World Persistence Team
-//! Lane: Contracts
+//! Lane: contracts
 //! Type: Contract + Integration Tests
 //! Speed: Medium
 

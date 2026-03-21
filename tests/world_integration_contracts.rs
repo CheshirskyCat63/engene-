@@ -585,26 +585,13 @@ mod world_persistence_tests {
     }
 }
 
-// Mock implementations
-impl WorldGrid {
-    fn generate() -> Self {
-        Self {
-            cells: (0..100).map(|i| WorldCell {
-                biome: engene::world::biomes::Biome::Forest,
-                resources: vec![],
-            }).collect(),
-            width: 10,
-            height: 10,
-        }
-    }
-}
-
+// Mock implementations for types not yet available in engine_world
 impl Heightmap {
     fn from_world_grid(grid: &WorldGrid) -> Self {
         Self {
-            heights: vec![0.0; grid.width * grid.height],
-            width: grid.width,
-            height: grid.height,
+            heights: vec![0.0; grid.cells.len()],
+            width: (grid.cells.len() as f32).sqrt() as usize,
+            height: (grid.cells.len() as f32).sqrt() as usize,
         }
     }
     
@@ -628,16 +615,6 @@ impl Heightmap {
         let ix = (x as usize).min(self.width - 1);
         let iz = (z as usize).min(self.height - 1);
         self.heights[iz * self.width + ix]
-    }
-}
-
-impl ChunkCoord {
-    fn new(x: i32, z: i32) -> Self {
-        Self { x, z }
-    }
-    
-    fn to_world_position(&self, chunk_size: f32) -> [f32; 3] {
-        [self.x as f32 * chunk_size, 0.0, self.z as f32 * chunk_size]
     }
 }
 
@@ -749,27 +726,4 @@ impl ChunkPersistenceService {
     }
 }
 
-struct WorldGrid {
-    cells: Vec<WorldCell>,
-    width: usize,
-    height: usize,
-}
-
-struct WorldCell {
-    biome: engene::world::biomes::Biome,
-    resources: Vec<()>,
-}
-
-struct Heightmap {
-    heights: Vec<f32>,
-    width: usize,
-    height: usize,
-}
-
-struct WorldStreamer {
-    loaded_chunks: std::collections::HashSet<ChunkCoord>,
-}
-
-struct ChunkPersistenceService {
-    chunks: std::collections::HashMap<ChunkCoord, Vec<u8>>,
-}
+use engene::world::{WorldGrid, ChunkCoord};
