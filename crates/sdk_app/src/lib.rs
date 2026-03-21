@@ -1,5 +1,25 @@
 //! SDK role owner crate.
 //! This crate is transitioning to own SDK runtime and editor startup.
+//!
+//! ## Ownership
+//! - Editor shell: sdk_app::editor
+//! - Inspector: sdk_app::editor
+//! - Dashboard: sdk_app::editor
+//! - Doctor: sdk_app::editor
+//!
+//! ## What belongs here (sdk_app)
+//! - Editor UI state and surfaces
+//! - Inspector mutation paths
+//! - Dashboard updates
+//! - Tooling-only commands
+//!
+//! ## What does NOT belong here
+//! - Simulation truth
+//! - World mutation
+//! - Phase ordering logic
+//! - Render implementation
+
+pub mod editor;
 
 pub mod api {
     pub const CRATE: &str = "sdk_app";

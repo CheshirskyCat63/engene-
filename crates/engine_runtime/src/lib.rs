@@ -1,3 +1,4 @@
+pub mod phase;
 pub mod simulation_core;
 pub mod minimal_runtime_test;
 
