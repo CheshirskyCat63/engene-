@@ -53,22 +53,20 @@ impl Default for TickPhase {
 impl PhaseTrait for TickPhase {
     fn execute(&self, ctx: &PhaseContext) -> PhaseResult {
         // ========================================================================
-        // REAL TICK LOGIC: This is the operational tick extraction
+        // TICK PHASE: First phase in canonical order
+        // This is the operational tick entrypoint - replaces old orchestration
         // ========================================================================
         
-        // Track tick timing
         let tick_start = std::time::Instant::now();
         let tick = ctx.tick;
         let dt = ctx.delta_seconds;
         
-        // TODO: When proper ECS is wired:
-        // - Query all entities with Velocity component
-        // - Apply velocity to position: pos += vel * dt
-        // - Step physics world
-        // - Process AI decisions
-        // - Dispatch events for state changes
+        // Operational tick work:
+        // - Track tick progression
+        // - Emit timing metrics
+        // - (Full ECS integration pending: velocity apply, physics step, AI decisions)
         
-        // For now: log tick progression (operational marker)
+        // Log tick progression every 1000 ticks
         if tick % 1000 == 0 {
             tracing::debug!(
                 target: "tick",

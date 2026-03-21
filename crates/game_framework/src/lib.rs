@@ -115,13 +115,19 @@ pub fn run_headless_from_env_args() {
 
     for tick in 0..ticks {
         // ========================================================================
-        // THIN CALLER: Call new phase entrypoint from engine_runtime
-        // This is the first extraction - tick phase in engine_runtime::phase
-        // Old path remains for now, this demonstrates ownership transfer
+        // TEMPORARY DOUBLE-RUN: Transitional debt
+        // NEW: engine_runtime::phase::tick::run_tick() - new phase owner
+        // OLD: engine.tick() - old orchestration path
+        // 
+        // This duplication is TEMPORARY. After tick extraction is complete,
+        // old path will be removed and only run_tick() will remain.
+        // See: docs/canonical/CURRENT_RUNTIME_TRUTH.md
         // ========================================================================
+        
+        // NEW: Call new phase entrypoint (engine_runtime owns tick now)
         let _phase_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
         
-        // Old path continues for now
+        // OLD: Legacy path - will be deprecated after full extraction
         engine.tick(sim_dt);
     }
 
