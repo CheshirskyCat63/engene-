@@ -1,7 +1,7 @@
 # ENGENE Workspace Status
 
 **Current HEAD:** engene-2.0-transition  
-**Last Updated:** 2026-03-21 (role cleanup completed)
+**Last Updated:** 2026-03-21 (engine_runtime role cleanup completed)
 
 ## Stable Crates (✅ Compile Clean)
 
@@ -9,7 +9,7 @@
 |-------|--------|-------|
 | engine_core | ✅ Compiles | Core primitives, determinism, failure taxonomy |
 | engine_ecs | ✅ Compiles | Entity lifecycle, component storage, system contracts |
-| engine_runtime | ✅ Compiles | Phase execution spine (clean role) |
+| engine_runtime | ✅ Compiles | Phase execution spine (clean role, assembly separated) |
 | engine_world | ✅ Compiles | World data contracts (data-only) |
 | engine_startup | ✅ Compiles | Startup contracts, panic hooks |
 | game_framework | ✅ Compiles | Game composition, headless runtime |
@@ -33,6 +33,7 @@
 **Phase Execution Owner:** `engine_runtime`
 - Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
 - Clean separation: phase spine in lib.rs, assembly in internal module
+- Role cleanup completed: no assembly logic inline in public API
 
 **World Data Owner:** `engine_world`  
 - Data-only layer: coords, chunk, world_state, terrain

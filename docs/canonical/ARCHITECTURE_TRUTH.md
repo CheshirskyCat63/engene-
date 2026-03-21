@@ -73,4 +73,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: Physical cleanup completed - engine_world, engine_runtime cleaned; engine_render partially cleaned
+**Last updated**: engine_runtime role cleanup completed - assembly separated from phase spine
