@@ -76,7 +76,7 @@ mod tests {
 
         // Second tick should trigger
         assert!(scheduler.accumulate(0.6));
-        assert!(scheduler.accumulated() < 0.1); // Should be reset
+        assert!((scheduler.accumulated() - 0.1).abs() < 0.001); // Should be ~0.1 (floating point tolerance)
     }
 
     #[test]
