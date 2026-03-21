@@ -114,3 +114,53 @@ fn tick_is_first_phase() {
     let phases = Phase::all();
     assert_eq!(phases.first(), Some(&Phase::Tick));
 }
+
+/// STREAMING EXTRACTION: Streaming phase has public entrypoint
+#[test]
+fn streaming_phase_has_public_entrypoint() {
+    use engine_runtime::phase::streaming::{run_streaming, StreamingInput};
+    
+    let input = StreamingInput {
+        tick: 0,
+        player_position: Some([0.0, 0.0, 0.0]),
+        view_distance_chunks: 4,
+        pending_unload_count: 0,
+        residency_budget: 16,
+    };
+    
+    let output = run_streaming(input);
+    
+    // Verify output has expected structure
+    assert!(output.load_decisions > 0 || output.unload_decisions == 0);
+    assert!(!output.duration_ms.is_nan());
+}
+
+/// STREAMING EXTRACTION: Streaming is second phase in canonical order
+#[test]
+fn streaming_is_second_phase() {
+    use engine_runtime::phase::Phase;
+    
+    let phases = Phase::all();
+    assert_eq!(phases.get(1), Some(&Phase::Streaming));
+}
+
+/// STREAMING EXTRACTION: Streaming respects residency budget
+#[test]
+fn streaming_respects_residency_budget() {
+    use engine_runtime::phase::streaming::{run_streaming, StreamingInput};
+    
+    // Small budget should limit load decisions
+    let input = StreamingInput {
+        tick: 0,
+        player_position: Some([0.0, 0.0, 0.0]),
+        view_distance_chunks: 10, // Would be 100+ chunks without budget
+        pending_unload_count: 0,
+        residency_budget: 4,      // Very small budget
+    };
+    
+    let output = run_streaming(input);
+    
+    // Should respect budget
+    assert!(output.load_decisions <= 4);
+    assert!(output.budget_saturation);
+}

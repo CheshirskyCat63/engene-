@@ -32,7 +32,7 @@ pub mod editor;
 pub mod render;
 
 pub use tick::TickPhase;
-pub use streaming::StreamingPhase;
+pub use streaming::{StreamingPhase, run_streaming, StreamingInput, StreamingOutput};
 pub use persistence::PersistencePhase;
 pub use spatial::SpatialPhase;
 pub use audio::AudioPhase;

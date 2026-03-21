@@ -125,7 +125,18 @@ pub fn run_headless_from_env_args() {
         // ========================================================================
         
         // NEW: Call new phase entrypoint (engine_runtime owns tick now)
-        let _phase_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
+        let _tick_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
+        
+        // NEW: Streaming phase (second phase in canonical order)
+        let _streaming_result = engine_runtime::phase::run_streaming(
+            engine_runtime::phase::StreamingInput {
+                tick,
+                player_position: None, // Headless - no player
+                view_distance_chunks: 8,
+                pending_unload_count: 0,
+                residency_budget: 16,
+            }
+        );
         
         // OLD: Legacy path - will be deprecated after full extraction
         engine.tick(sim_dt);

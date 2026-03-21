@@ -16,6 +16,7 @@ pub use phase::{
     validate_phase_order, run_all_phases,
 };
 pub use phase::tick::run_tick;
+pub use phase::streaming::{run_streaming, StreamingInput, StreamingOutput};
 
 // Re-export systems for transitional access from root
 pub use simulation_core::systems::{EngineSystem, FixedTickContext, Scheduler, WorldTickSystem};
