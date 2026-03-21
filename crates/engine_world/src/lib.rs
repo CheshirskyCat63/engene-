@@ -9,7 +9,8 @@
 //! - Biome and terrain generation
 //! - Spatial indexing and queries
 //! - Persistence interfaces
-//! - Streaming state management
+//!
+//! NOTE: Streaming moved to engine_runtime::phase::streaming
 
 // Core world modules
 pub mod coords;
@@ -17,12 +18,8 @@ pub mod chunk;
 pub mod world_state;
 pub mod terrain;
 
-// Streaming subsystem
-pub mod streaming;
-
 // Re-exports for public API
 pub use coords::*;
 pub use chunk::*;
 pub use world_state::*;
 pub use terrain::*;
-pub use streaming::*;

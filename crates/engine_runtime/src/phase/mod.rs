@@ -38,8 +38,7 @@ mod streaming_test;
 
 pub use tick::TickPhase;
 pub use streaming::{StreamingPhase, run_streaming, StreamingInput, StreamingOutput};
-pub use streaming_enhanced::{StreamingEnhancedPhase, run_streaming_enhanced, StreamingEnhancedInput};
-pub use persistence_enhanced::{PersistenceEnhancedPhase, run_persistence_enhanced, PersistenceEnhancedInput};
+pub use persistence::{PersistencePhase, run_persistence, PersistenceInput, PersistenceOutput};
 pub use spatial::SpatialPhase;
 pub use audio::AudioPhase;
 pub use editor::EditorPhase;

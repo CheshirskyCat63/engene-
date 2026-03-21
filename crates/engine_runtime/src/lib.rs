@@ -41,6 +41,7 @@ pub use phase::{
 };
 pub use phase::tick::run_tick;
 pub use phase::streaming::{run_streaming, StreamingInput, StreamingOutput};
+pub use phase::persistence::{run_persistence, PersistenceInput, PersistenceOutput};
 pub use phase_runner::PhaseRunner;
 pub use simulation_core::{SimulationOrchestrator, SimulationPolicyProfile, TransitionExecutionContext, TransitionMetricsSnapshot};
 pub use phase::{Phase, PhaseContext, PhaseResult, PhaseTrait};
