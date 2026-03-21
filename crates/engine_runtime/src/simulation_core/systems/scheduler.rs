@@ -6,48 +6,57 @@
 
 /// Scheduler for fixed-interval system execution.
 ///
-/// Accumulates delta time and returns true when the interval threshold is reached.
+/// Accumulates delta time and returns due ticks when interval threshold is reached.
 pub struct Scheduler {
     accumulated: f32,
     interval: f32,
+    due_ticks: u32,
 }
 
 impl Scheduler {
-    /// Creates a new scheduler with the specified interval in seconds.
+    /// Creates a new scheduler with specified interval in seconds.
     pub fn new(interval_seconds: f32) -> Self {
         Self {
             accumulated: 0.0,
             interval: interval_seconds,
+            due_ticks: 0,
         }
     }
 
-    /// Returns the interval in seconds.
+    /// Returns interval in seconds.
     pub fn interval(&self) -> f32 {
         self.interval
     }
 
-    /// Returns the current accumulated time.
+    /// Returns current accumulated time.
     pub fn accumulated(&self) -> f32 {
         self.accumulated
     }
 
-    /// Accumulates delta time. Returns true when interval threshold is reached.
-    ///
-    /// When true is returned, the accumulator is reduced by one interval,
-    /// allowing for consistent tick timing.
-    pub fn accumulate(&mut self, delta: f32) -> bool {
-        self.accumulated += delta;
-        if self.accumulated >= self.interval {
-            self.accumulated -= self.interval;
-            true
-        } else {
-            false
-        }
+    /// Returns number of due ticks.
+    pub fn due_ticks(&self) -> u32 {
+        self.due_ticks
     }
 
-    /// Resets the accumulator to zero.
+    /// Accumulates delta time. Returns due ticks when interval threshold is reached.
+    ///
+    /// When due ticks are returned, accumulator is reduced by one interval,
+    /// allowing for consistent tick timing.
+    pub fn accumulate(&mut self, delta: f32) -> u32 {
+        self.accumulated += delta;
+        let mut due = 0;
+        while self.accumulated >= self.interval {
+            self.accumulated -= self.interval;
+            due += 1;
+            self.due_ticks += 1;
+        }
+        due
+    }
+
+    /// Resets accumulator to zero.
     pub fn reset(&mut self) {
         self.accumulated = 0.0;
+        self.due_ticks = 0;
     }
 
     /// Sets a new interval.
@@ -71,12 +80,12 @@ mod tests {
         let mut scheduler = Scheduler::new(1.0);
 
         // First tick should not trigger
-        assert!(!scheduler.accumulate(0.5));
+        assert_eq!(scheduler.accumulate(0.5), 0);
         assert_eq!(scheduler.accumulated(), 0.5);
 
         // Second tick should trigger
-        assert!(scheduler.accumulate(0.6));
-        assert!((scheduler.accumulated() - 0.1).abs() < 0.001); // Should be ~0.1 (floating point tolerance)
+        assert_eq!(scheduler.accumulate(0.6), 1);
+        assert_eq!(scheduler.due_ticks(), 1);
     }
 
     #[test]

@@ -36,4 +36,13 @@ impl EngineRuntime {
             system.fixed_tick(_ctx);
         }
     }
+    
+    pub fn add_system(&mut self, system: Box<dyn EngineSystem>) {
+        self.systems.push(system);
+    }
+    
+    pub fn due_ticks(&self) -> u32 {
+        // For now, return 0 until we have proper scheduler integration
+        0
+    }
 }
