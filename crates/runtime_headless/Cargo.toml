@@ -1,0 +1,9 @@
+[package]
+name = "runtime_headless"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+engine_runtime = { path = "../engine_runtime" }
+engine_startup = { path = "../engine_startup" }
+tracing-subscriber = "0.2"

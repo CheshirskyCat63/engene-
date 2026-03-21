@@ -47,8 +47,7 @@ pub fn run_from_env_args() {
     BuildManifest::ensure_data_dirs();
     manifest.write_manifest_json();
     
-    // Current state: editor mode pending phase extraction
     println!("[sdk] NOTE: Editor mode pending phase extraction");
-    println!("[sdk] For headless: headless owner = engene_run until refactor complete");
+    println!("[sdk] For headless: use cargo run -p engene_run");
     println!("\n=== SESSION ENDED ===");
 }

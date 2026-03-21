@@ -198,12 +198,9 @@ mod gates {
         // This test ensures apps only use canonical crates for launch
 
         let expected_app_launches = [
-            ("engene_game", "game_framework::run_from_env_args"),
+            ("engene_game", "runtime_headless::run_headless_from_env_args"),
             ("engene_sdk", "sdk_app::run_from_env_args"),
-            (
-                "engene_headless",
-                "game_framework::run_headless_from_env_args",
-            ),
+            ("engene_run", "runtime_headless::run_headless_from_env_args"),
         ];
 
         let mut violations = Vec::new();

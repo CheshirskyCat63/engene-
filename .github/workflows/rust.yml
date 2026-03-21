@@ -29,6 +29,7 @@ jobs:
         cargo check -p engine_runtime
         cargo check -p game_framework
         cargo check -p sdk_app
+        cargo check -p engene_game
         cargo check -p engene_sdk
         cargo check -p engene_run
 

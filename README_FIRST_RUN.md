@@ -4,7 +4,7 @@ ENGENE currently exposes three real cargo entrypoints from the workspace.
 
 | Product | Canonical command | Purpose |
 |---|---|---|
-| **ENGENE Game** | `cargo run -p engene_game` | deprecated stub (use engene_run) |
+| **ENGENE Game** | `cargo run -p engene_game` | game launcher (headless mode, game window pending) |
 | **ENGENE SDK** | `cargo run -p engene_sdk` | editor / workstation / debugging shell (apps/engene_sdk) |
 | **ENGENE Headless** | `cargo run -p engene_run -- --ticks 1200` | simulation / CI / non-visual validation (apps/engene_run) |
 
@@ -18,7 +18,7 @@ Do not present it as a first-run entrypoint until it exists in Cargo again.
 ### Canonical launch paths
 
 ```bash
-# cargo run -p engene_game  # deprecated
+cargo run -p engene_game
 cargo run -p engene_sdk
 cargo run -p engene_run -- --ticks 1200
 ```

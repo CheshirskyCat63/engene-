@@ -2,7 +2,7 @@
 
 ## Status label
 
-**Post-root removal. Pure workspace established. Canonical architecture achieved.**
+**Post-root removal. Pure workspace established. Role drift resolved.**
 
 ## Current package truth
 
@@ -13,34 +13,20 @@
 ## Current entrypoint truth
 
 | Runtime role | Binary entrypoint | First called crate | Current runner body location | Canonical owner | Status |
-|---|---|---|---|---|
-| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | deprecated stub |
+|---|---|---|---|---|---|
+| Game | `cargo run -p engene_game` | `runtime_headless` | `crates/runtime_headless/src/lib.rs` | `runtime_headless` | headless mode (game window pending) |
 | SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | app entrypoint |
-| Headless | `cargo run -p engene_run -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
+| Headless | `cargo run -p engene_run -- --ticks 1200` | `runtime_headless` | `crates/runtime_headless/src/lib.rs` | `runtime_headless` | app entrypoint |
 
 ## Current architecture truth
 
-- Root is now pure workspace root (no package).
+- Root is pure workspace root (no package).
+- Headless runtime ownership is `runtime_headless` (not `game_framework`).
+- `game_framework` is reserved for future game-specific launch paths.
 - SDK and Headless apps are canonical launch truth.
-- Game entrypoint is deprecated stub.
-- Legacy archived in archive/tests_legacy_pre_2024/ (separate package with historical dependencies).
-- Role crates have canonical ownership structure.
-- CI reflects current architecture.
-- Workspace is valid and functional.
-- Engine core compiles successfully.
-- Role crates have canonical ownership structure.
-- Legacy properly isolated.
-- SDK and Headless apps are canonical entrypoints.
-
-## Explicit current truths
-
-- Root package removal is complete.
-- Workspace is valid and functional.
-- Engine core compiles successfully.
-- Role crates have canonical ownership structure.
-- Legacy properly isolated.
-- SDK and Headless apps are canonical entrypoints.
-- CI reflects current architecture.
+- Game runs in headless mode; game window path pending.
+- Legacy archived in archive/tests_legacy_pre_2024/.
+- CI has narrow_check gate before broad jobs.
 
 ## Rule
 
