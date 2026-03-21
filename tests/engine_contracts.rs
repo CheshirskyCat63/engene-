@@ -22,9 +22,13 @@ mod aggregated_contracts {
     pub use ecs_performance_contracts::*;
     pub use camera_contracts::*;
     pub use rendering_pipeline_contracts::*;
-    pub use player_controller_contracts::*;
-    pub use player_inventory_contracts::*;
-    pub use player_save_contracts::*;
+    pub use editor_console_contracts::*;
+    pub use editor_inspector_contracts::*;
+    pub use engine_lifecycle_contracts::*;
+    pub use world_integration_contracts::*;
+    pub use simulation_integration_contracts::*;
+    pub use performance_governance_contracts::*;
+    pub use multithreading_performance_contracts::*;
     
     // Re-export critical tests for smoke lane
     pub use core_command_and_access_contracts::command_buffer_tests::command_buffer_spawn_and_despawn;
