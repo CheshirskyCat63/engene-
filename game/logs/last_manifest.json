@@ -1,19 +1,7 @@
-(
-    engine_version: "0.1.0",
-    build_timestamp: "1773425274",
-    git_hash: None,
-    profile: "release",
-    feature_flags: [
-        "ai",
-        "audio",
-        "debug_ui",
-        "default",
-        "engine_core",
-        "full",
-        "physics",
-        "render",
-    ],
-    schema_version_save: 1,
-    schema_version_chunk: 1,
-    schema_version_entity: 1,
-)
+{
+  "version": "0.1.0",
+  "build_time": "2026-03-21T03:48:19.080766+00:00",
+  "git_commit": null,
+  "features": [],
+  "dependencies": {}
+}

@@ -115,32 +115,31 @@ pub fn run_headless_from_env_args() {
 
     for tick in 0..ticks {
         // ========================================================================
-        // TEMPORARY DOUBLE-RUN: Transitional debt
-        // NEW: engine_runtime::phase::tick::run_tick() - new phase owner
-        // OLD: engine.tick() - old orchestration path
-        // 
-        // This duplication is TEMPORARY. After tick extraction is complete,
-        // old path will be removed and only run_tick() will remain.
-        // See: docs/canonical/CURRENT_RUNTIME_TRUTH.md
+        // PHASE EXECUTION: Canonical order
+        // engine_runtime now owns all phase execution
         // ========================================================================
         
-        // NEW: Call new phase entrypoint (engine_runtime owns tick now)
+        // Phase 1: Tick phase
         let _tick_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
         
-        // NEW: Streaming phase (second phase in canonical order)
+        // Phase 2: Streaming phase  
         let _streaming_result = engine_runtime::phase::run_streaming(
             engine_runtime::phase::StreamingInput {
                 tick,
-                player_position: None, // Headless - no player
-                view_distance_chunks: 8,
-                pending_unload_count: 0,
-                residency_budget: 16,
-                known_loaded_chunks: Vec::new(),
+                player_position: Some([0.0, 0.0, 0.0]), // Headless with anchor at origin
+                view_distance_chunks: 4, // Smaller view for headless
+                pending_unload_count: 2,
+                residency_budget: 8,
+                known_loaded_chunks: Vec::new(), // Start empty, build resident set
             }
         );
         
-        // OLD: Legacy path - will be deprecated after full extraction
-        engine.tick(sim_dt);
+        // Additional phases will be added here in canonical order
+        // Phase 3: Spatial phase
+        // Phase 4: Audio phase
+        // Phase 5: Persistence phase
+        // Phase 6: Editor phase  
+        // Phase 7: Render phase
     }
 
     let ecs_tick = engine.ecs().tick;
