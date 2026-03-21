@@ -8,7 +8,7 @@ There must be one canonical description of how ENGENE starts in the current bran
 
 | Runtime role | Binary entrypoint | First called crate | Current runner body location | Canonical owner | Status |
 |---|---|---|---|---|---|
-| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
+| Game | `cargo run -p engene_game` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | deprecated stub |
 | SDK | `cargo run -p engene_sdk` | `sdk_app` | `crates/sdk_app/src/lib.rs` | `sdk_app` | app entrypoint |
 | Headless | `cargo run -p engene_run -- --ticks 1200` | `game_framework` | `crates/game_framework/src/lib.rs` | `game_framework` | app entrypoint |
 

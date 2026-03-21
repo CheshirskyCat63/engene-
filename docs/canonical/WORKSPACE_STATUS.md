@@ -1,7 +1,7 @@
 # ENGENE Workspace Status
 
-**Tracked Branch:** cleanup/core-physical-delete
-**Last Updated:** 2026-03-21 (engine_core physical residue removed - 21 dead files deleted)
+**Tracked Branch:** engene-2.0-transition
+**Last Updated:** 2026-03-21 (entrypoint truth synchronized with workspace reality)
 
 ## Stable Crates (✅ Compile Clean)
 
@@ -82,8 +82,8 @@
 - ✅ engine_ecs: Mechanics-only, unchanged
 - ✅ engine_runtime: Clean phase spine + separated assembly
 - ✅ game_framework: Uses assembly path, stateful streaming loop
-- ✅ All core crates compile clean in current core path
-- ✅ Core truth documentation synchronized with current cleanup state
+- ✅ All core crates compile clean
+- ✅ Entrypoint documentation synchronized with workspace apps
 
 ## Architecture Laws Enforced
 
