@@ -1,3 +1,4 @@
 fn main() {
-    game_framework::run_from_env_args();
+    println!("engene_game: Game launcher is deprecated");
+    println!("Use: cargo run -p engene_run for headless runtime");
 }
