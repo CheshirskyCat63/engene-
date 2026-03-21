@@ -4,7 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-engene = { path = ".." }
+# This is an archived historical package - dependencies kept for reference only
+# engene = { path = "../../" }  # Would point to root, but package is archived
 
 [[test]]
 name = "world_streaming"

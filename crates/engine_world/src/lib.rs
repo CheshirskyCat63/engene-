@@ -14,6 +14,9 @@ pub mod api {
     pub const CRATE: &str = "engine_world";
 }
 
+// Re-export streaming owner for runtime integration
+pub use streaming_owner::{StreamingOwner, StreamingConfig, StreamingUpdateResult, ChunkResidency};
+
 // COMPILE SCAFFOLD ONLY - NOT REAL WORLD
 pub mod cell {
     /// Basic cell data for compilation scaffolding

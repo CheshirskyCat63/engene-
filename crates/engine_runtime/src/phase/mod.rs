@@ -25,7 +25,8 @@
 
 pub mod tick;
 pub mod streaming;
-pub mod persistence;
+pub mod streaming_enhanced;
+pub mod persistence_enhanced;
 pub mod spatial;
 pub mod audio;
 pub mod editor;
@@ -37,7 +38,8 @@ mod streaming_test;
 
 pub use tick::TickPhase;
 pub use streaming::{StreamingPhase, run_streaming, StreamingInput, StreamingOutput};
-pub use persistence::PersistencePhase;
+pub use streaming_enhanced::{StreamingEnhancedPhase, run_streaming_enhanced, StreamingEnhancedInput};
+pub use persistence_enhanced::{PersistenceEnhancedPhase, run_persistence_enhanced, PersistenceEnhancedInput};
 pub use spatial::SpatialPhase;
 pub use audio::AudioPhase;
 pub use editor::EditorPhase;

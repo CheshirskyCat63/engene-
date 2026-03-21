@@ -41,7 +41,11 @@ pub use phase::{
 };
 pub use phase::tick::run_tick;
 pub use phase::streaming::{run_streaming, StreamingInput, StreamingOutput};
-
-// Re-export systems for transitional access from root
+pub use phase_runner::PhaseRunner;
+pub use simulation_core::{SimulationOrchestrator, SimulationPolicyProfile, TransitionExecutionContext, TransitionMetricsSnapshot};
+pub use phase::{Phase, PhaseContext, PhaseResult, PhaseTrait};
+pub use performance_law::{
+    PerformanceLaw, PerformanceLawEnforcer, PerformanceSummary, PerformanceGrade,
+    StreamingPerformanceBudget, PersistencePerformanceBudget, RenderPerformanceBudget,
+};
 pub use simulation_core::systems::{EngineSystem, FixedTickContext, Scheduler, WorldTickSystem};
-

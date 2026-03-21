@@ -14,6 +14,7 @@
 pub mod authored_sets;
 pub mod authoring;
 pub mod biome;
+pub mod biome;
 pub mod cell;
 pub mod chunk_package;
 pub mod chunk_persistence;

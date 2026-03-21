@@ -9,7 +9,7 @@ Write-Host "=== ENGENE Build Release ===" -ForegroundColor Cyan
 Write-Host "Profile: $Profile"
 Write-Host ""
 
-$targets = @("engene_game", "engene_sdk", "engene_headless")
+$targets = @("engene_game", "engene_sdk", "engene_run")
 
 foreach ($bin in $targets) {
     Write-Host "Building $bin ($Profile)..." -ForegroundColor Yellow
