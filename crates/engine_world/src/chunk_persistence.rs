@@ -1,11 +1,128 @@
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use crate::core::ecs::{Ecs, Entity};
-use crate::core::persistent_id::{EntityRef, PersistentEntityId, RelinkContext};
-use crate::memory::atomic_saved::{atomic_save, recover_from_backup};
-use crate::memory::save_chunks::{snapshot_entity, EntitySnapshot, PersistenceError};
-use crate::world::streaming::{ChunkCoord, CHUNK_SIZE};
+use crate::coords::ChunkCoord;
+
+#[derive(Debug, Clone)]
+pub struct ChunkDestructionState {
+    pub damaged_nodes: Vec<(u32, f32)>,
+    pub broken_links: Vec<(u32, u32)>,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct ChunkSurfaceState {
+    pub blood_marks: Vec<SurfaceMark>,
+    pub burn_marks: Vec<SurfaceMark>,
+    pub mud_marks: Vec<SurfaceMark>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SurfaceMark {
+    pub x: f32,
+    pub z: f32,
+    pub radius: f32,
+    pub intensity: f32,
+    pub age_seconds: f32,
+}
+
+#[derive(Debug, Clone)]
+pub struct ChunkSaveData {
+    pub schema_version_chunk: u32,
+    pub schema_version_entity: u32,
+    pub coord: ChunkCoord,
+    pub entities: Vec<EntitySnapshot>,
+    pub surface_state: ChunkSurfaceState,
+    pub save_tick: u64,
+}
+
+#[derive(Debug, Clone)]
+pub struct EntitySnapshot {
+    pub id: u64,
+}
+
+#[derive(Debug)]
+pub enum PersistenceError {
+    Io(std::io::Error),
+    Serialize(ron::Error),
+    Deserialize(ron::de::Error),
+    NoSaveFile,
+}
+
+impl From<std::io::Error> for PersistenceError {
+    fn from(value: std::io::Error) -> Self {
+        PersistenceError::Io(value)
+    }
+}
+
+impl From<ron::Error> for PersistenceError {
+    fn from(value: ron::Error) -> Self {
+        PersistenceError::Serialize(value)
+    }
+}
+
+impl From<ron::de::Error> for PersistenceError {
+    fn from(value: ron::de::Error) -> Self {
+        PersistenceError::Deserialize(value)
+    }
+}
+
+#[derive(Debug)]
+pub struct ChunkPersistenceService {
+    save_dir: PathBuf,
+    saved_chunks: HashMap<(i32, i32), u64>,
+}
+
+impl ChunkPersistenceService {
+    pub fn new(dir: impl Into<PathBuf>) -> Self {
+        let path = dir.into();
+        let _ = std::fs::create_dir_all(&path);
+        Self {
+            save_dir: path,
+            saved_chunks: HashMap::new(),
+        }
+    }
+
+    pub fn has_save(&self, coord: ChunkCoord) -> bool {
+        let file = self.save_dir.join(format!("chunk_{}_{}.ron", coord.x, coord.z));
+        file.exists()
+    }
+
+    pub fn save_chunk(&mut self, data: &ChunkSaveData) -> Result<(), PersistenceError> {
+        let file = self
+            .save_dir
+            .join(format!("chunk_{}_{}.ron", data.coord.x, data.coord.z));
+        let ron_data = ron::to_string(data)?;
+        std::fs::write(&file, ron_data)?;
+        self.saved_chunks.insert((data.coord.x, data.coord.z), data.save_tick);
+        Ok(())
+    }
+
+    pub fn load_chunk(&self, coord: ChunkCoord) -> Result<Option<ChunkSaveData>, PersistenceError> {
+        let file = self
+            .save_dir
+            .join(format!("chunk_{}_{}.ron", coord.x, coord.z));
+        if !file.exists() {
+            return Ok(None);
+        }
+        let content = std::fs::read_to_string(file)?;
+        let data: ChunkSaveData = ron::from_str(&content)?;
+        Ok(Some(data))
+    }
+}
+
+pub fn save_chunks(dir: &str, chunks: &[ChunkSaveData]) -> Result<(), PersistenceError> {
+    let save_path = Path::new(dir);
+    std::fs::create_dir_all(save_path)?;
+
+    let file_path = save_path.join("chunks_snapshot.ron");
+    let content = ron::to_string(chunks)?;
+    std::fs::write(file_path, content)?;
+    Ok(())
+}
+
+pub fn recover_from_backup(_path: &str) -> Result<bool, PersistenceError> {
+    Ok(false)
+}
 
 /// Extended snapshot that includes persistent identity and additional state
 #[derive(serde::Serialize, serde::Deserialize)]

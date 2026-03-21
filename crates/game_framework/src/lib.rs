@@ -50,56 +50,30 @@ pub fn run_headless_from_env_args() {
         // Phase 1: Tick phase
         let _tick_result = engine_runtime::phase::tick::run_tick(tick, sim_dt);
         
-        // Phase 2: Streaming phase (stateful) - ENHANCED
-        let streaming_config = engine_world::StreamingConfig::default();
-        let mut streaming_owner = engine_world::StreamingOwner::new(streaming_config.clone());
-        
-        // Initialize with some chunks
-        streaming_owner.force_load_chunk(engine_world::streaming_owner::ChunkCoord { x: 0, z: 0 });
-        streaming_owner.force_load_chunk(engine_world::streaming_owner::ChunkCoord { x: 1, z: 0 });
-        streaming_owner.force_load_chunk(engine_world::streaming_owner::ChunkCoord { x: 2, z: 0 });
-        
-        let mut resident_chunks: Vec<[i32; 2]> = streaming_owner.get_loaded_chunks()
-            .into_iter()
-            .map(|coord| [coord.x, coord.z])
-            .collect();
-        
-        let persistence_input = engine_runtime::phase::persistence_enhanced::PersistenceEnhancedInput::from_context(
-            tick,
-            streaming_owner,
-            "test_saves".to_string(),
-            1,
-        );
-        
-        let _persistence_result = engine_runtime::phase::run_persistence_enhanced(persistence_input);
-        
-        let streaming_output = engine_runtime::phase::run_streaming_enhanced(
-            engine_runtime::phase::streaming_enhanced::StreamingEnhancedInput {
+        // Phase 2: Streaming phase (using engine_runtime)
+        let _streaming_result = engine_runtime::phase::run_streaming(
+            engine_runtime::phase::StreamingInput {
                 tick,
-                player_position: Some([0.0, 0.0, 0.0]), // Headless with anchor at origin
-                view_distance_chunks: 4, // Smaller view for headless
-                pending_unload_count: 2,
-                residency_budget: 8,
-                known_loaded_chunks: resident_chunks.clone(), // Pass current resident set
-                streaming_config: streaming_config,
+                player_position: Some([0.0, 0.0, 0.0]),
+                view_distance_chunks: 4,
+                pending_unload_count: 0,
+                residency_budget: 16,
+                known_loaded_chunks: Vec::new(),
             }
         );
         
-        // Update resident set based on streaming decisions
-        // Remove unloaded chunks first
-        for chunk_to_unload in &streaming_output.chunks_to_unload {
-            resident_chunks.retain(|&chunk| chunk != *chunk_to_unload);
-        }
-        
-        // Then add newly loaded chunks (avoid duplicates)
-        for chunk_to_load in &streaming_output.chunks_to_load {
-            if !resident_chunks.contains(chunk_to_load) {
-                resident_chunks.push(*chunk_to_load);
-            }
-        }
-        
-        // Additional phases will be added here in canonical order
         // Phase 3: Persistence phase
+        let _persistence_result = engine_runtime::phase::run_persistence(
+            engine_runtime::phase::PersistenceInput {
+                tick,
+                completed_loads: Vec::new(),
+                completed_unloads: Vec::new(),
+                dirty_chunk_count: 0,
+                save_enabled: true,
+            }
+        );
+        
+        // Phase 4-7: Additional phases will be added here in canonical order
         // Phase 4: Spatial phase
         // Phase 5: Audio phase
         // Phase 6: Editor phase  

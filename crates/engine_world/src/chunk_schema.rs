@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::world::biome::Biome;
-use crate::world::streaming::ChunkCoord;
+use crate::biome::Biome;
+use crate::coords::ChunkCoord;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct ChunkMetadata {

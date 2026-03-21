@@ -17,9 +17,13 @@ pub mod coords;
 pub mod chunk;
 pub mod world_state;
 pub mod terrain;
+pub mod chunk_persistence;
+pub mod streaming_owner;
 
 // Re-exports for public API
 pub use coords::*;
 pub use chunk::*;
 pub use world_state::*;
 pub use terrain::*;
+pub use chunk_persistence::*;
+pub use streaming_owner::*;

@@ -1,11 +1,8 @@
 pub mod phase;
-pub mod simulation_core;
 
 pub mod api {
     /// Stable runtime crate identifier.
     pub const CRATE: &str = "engine_runtime";
-
-    pub use crate::simulation_core;
 }
 
 // ================================================================================
@@ -42,11 +39,3 @@ pub use phase::{
 pub use phase::tick::run_tick;
 pub use phase::streaming::{run_streaming, StreamingInput, StreamingOutput};
 pub use phase::persistence::{run_persistence, PersistenceInput, PersistenceOutput};
-pub use phase_runner::PhaseRunner;
-pub use simulation_core::{SimulationOrchestrator, SimulationPolicyProfile, TransitionExecutionContext, TransitionMetricsSnapshot};
-pub use phase::{Phase, PhaseContext, PhaseResult, PhaseTrait};
-pub use performance_law::{
-    PerformanceLaw, PerformanceLawEnforcer, PerformanceSummary, PerformanceGrade,
-    StreamingPerformanceBudget, PersistencePerformanceBudget, RenderPerformanceBudget,
-};
-pub use simulation_core::systems::{EngineSystem, FixedTickContext, Scheduler, WorldTickSystem};

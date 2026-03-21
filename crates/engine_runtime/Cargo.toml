@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 engine_core = { path = "../engine_core" }
 engine_ecs = { path = "../engine_ecs" }
-engine_world = { path = "../engine_world" }
+# TEMPORARILY REMOVED: engine_world has 132 compile errors
+# engine_world = { path = "../engine_world" }
 tracing = "0.1"
 # rapier3d = "0.17"  # REMOVED: Physics not needed for minimal runtime

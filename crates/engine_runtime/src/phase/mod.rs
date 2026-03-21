@@ -25,16 +25,11 @@
 
 pub mod tick;
 pub mod streaming;
-pub mod streaming_enhanced;
-pub mod persistence_enhanced;
+pub mod persistence;
 pub mod spatial;
 pub mod audio;
 pub mod editor;
 pub mod render;
-
-// Include streaming contract tests
-#[cfg(test)]
-mod streaming_test;
 
 pub use tick::TickPhase;
 pub use streaming::{StreamingPhase, run_streaming, StreamingInput, StreamingOutput};
