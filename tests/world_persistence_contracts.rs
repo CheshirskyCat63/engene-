@@ -8,8 +8,8 @@
 
 #[cfg(test)]
 mod chunk_persistence_tests {
-    use engene::world::chunk_persistence::{ChunkPersistenceService, ChunkCoord};
-    use engene::world::chunk_schema::ChunkSchema;
+    use engine_world::chunk_persistence::{ChunkPersistenceService, ChunkCoord};
+    use engine_world::chunk_schema::ChunkSchema;
     use std::collections::HashMap;
     use tempfile::TempDir;
 
@@ -45,7 +45,7 @@ mod chunk_persistence_tests {
         
         // Verify persistence state
         let entity_state = unloaded_chunk.get_entity_state(entity_id);
-        assert_eq!(entity_state.status, engene::world::chunk_schema::EntityStatus::Unloaded);
+        assert_eq!(entity_state.status, engine_world::chunk_schema::EntityStatus::Unloaded);
     }
 
     #[test]
@@ -174,8 +174,8 @@ mod chunk_persistence_tests {
 
 #[cfg(test)]
 mod relink_report_tests {
-    use engene::world::relink_report::{RelinkReport, RelinkStatus};
-    use engene::world::chunk_persistence::{ChunkPersistenceService, ChunkCoord};
+    use engine_world::relink_report::{RelinkReport, RelinkStatus};
+    use engine_world::chunk_persistence::{ChunkPersistenceService, ChunkCoord};
     use tempfile::TempDir;
 
     #[test]
@@ -185,7 +185,7 @@ mod relink_report_tests {
         
         // Create chunk with entities
         let coord = ChunkCoord::new(0, 0, 0);
-        let mut chunk = engene::world::chunk_schema::ChunkSchema::new(coord);
+        let mut chunk = engine_world::chunk_schema::ChunkSchema::new(coord);
         
         // Add entities
         chunk.add_entity(3001u64);
@@ -246,7 +246,7 @@ mod relink_report_tests {
         let broken_link = &report.broken_links()[0];
         assert_eq!(broken_link.entity_id, 4001u64);
         assert_eq!(broken_link.parent_id, Some(9999u64));
-        assert_eq!(broken_link.reason, engene::world::relink_report::BrokenLinkReason::ParentNotFound);
+        assert_eq!(broken_link.reason, engine_world::relink_report::BrokenLinkReason::ParentNotFound);
     }
 
     #[test]
@@ -255,7 +255,7 @@ mod relink_report_tests {
         let persistence = ChunkPersistenceService::new(temp_dir.path());
         
         let coord = ChunkCoord::new(0, 0, 0);
-        let mut chunk = engene::world::chunk_schema::ChunkSchema::new(coord);
+        let mut chunk = engine_world::chunk_schema::ChunkSchema::new(coord);
         
         // Create circular dependency
         chunk.add_entity(5001u64);
@@ -288,8 +288,8 @@ mod relink_report_tests {
 
 #[cfg(test)]
 mod streaming_contract_tests {
-    use engene::world::streaming::{WorldStreamer, StreamingRegion};
-    use engene::world::chunk_persistence::ChunkCoord;
+    use engine_world::streaming::{WorldStreamer, StreamingRegion};
+    use engine_world::chunk_persistence::ChunkCoord;
     use tempfile::TempDir;
 
     #[test]

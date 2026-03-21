@@ -8,12 +8,12 @@
 
 #[cfg(test)]
 mod world_integration_tests {
-    use engene::world::world::WorldGrid;
-    use engene::world::streaming::{ChunkCoord, WorldStreamer};
-    use engene::world::chunk_persistence::ChunkPersistenceService;
-    use engene::world::heightmap::Heightmap;
-    use engene::world::components::{Transform, EntityKind};
-    use engene::core::ecs::Ecs;
+    use engine_world::world::WorldGrid;
+    use engine_world::streaming::{ChunkCoord, WorldStreamer};
+    use engine_world::chunk_persistence::ChunkPersistenceService;
+    use engine_world::heightmap::Heightmap;
+    use engine_world::components::{Transform, EntityKind};
+    use engine_ecs::ecs::Ecs;
 
     #[test]
     fn e2e_world_grid_generation() {
@@ -411,10 +411,10 @@ mod world_integration_tests {
 
 #[cfg(test)]
 mod world_persistence_tests {
-    use engene::world::chunk_persistence::ChunkPersistenceService;
-    use engene::world::streaming::ChunkCoord;
-    use engene::core::ecs::Ecs;
-    use engene::world::components::{Transform, EntityKind};
+    use engine_world::chunk_persistence::ChunkPersistenceService;
+    use engine_world::streaming::ChunkCoord;
+    use engine_ecs::ecs::Ecs;
+    use engine_world::components::{Transform, EntityKind};
 
     #[test]
     fn e2e_world_save_load_roundtrip() {
