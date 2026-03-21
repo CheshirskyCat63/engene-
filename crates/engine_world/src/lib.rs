@@ -1,71 +1,63 @@
-//! Engine World - COMPILE SCAFFOLD
+//! Engine World - Truth Layer
+//!
+//! OWNER: engine_world
+//! PURPOSE: World state, spatial indexing, and terrain generation
+//! STATUS: Production truth layer
 //! 
-//! This is a temporary stub for engine path compilation.
-//! NOT A REAL WORLD IMPLEMENTATION.
-//! 
-//! Purpose: Allow engine_core + engine_ecs + engine_runtime to compile
-//! Status: Placeholder until real world layer is designed
-//! 
-//! DO NOT USE FOR PRODUCTION WORLD LOGIC
-//! DO NOT CONSIDER THIS "MINIMUM TRUTH"
-//! THIS IS A COMPILE-TIME PLACEHOLDER
+//! This crate provides the canonical world layer including:
+//! - World coordinates and chunk systems
+//! - Biome and terrain generation
+//! - Spatial indexing and queries
+//! - Persistence interfaces
+//! - Streaming state management
 
-pub mod api {
-    pub const CRATE: &str = "engine_world";
-}
+use std::collections::HashMap;
 
 // Re-export streaming owner for runtime integration
 pub use streaming_owner::{StreamingOwner, StreamingConfig, StreamingUpdateResult, ChunkResidency};
 
-// COMPILE SCAFFOLD ONLY - NOT REAL WORLD
-pub mod cell {
-    /// Basic cell data for compilation scaffolding
-    #[derive(Debug, Clone, Copy)]
-    pub struct Cell {
-        pub position: (i32, i32),
-        pub biome_id: u8,
-    }
-    
-    pub const CELL_SIZE: f32 = 1.0;
-    pub const GRID_SIZE: usize = 100;
-}
+// Core world modules
+pub mod coords;
+pub mod chunk;
+pub mod biome;
+pub mod heightmap;
+pub mod world_state;
 
-pub mod world {
-    use super::cell::Cell;
-    
-    /// Minimal world grid for compilation scaffolding
-    #[derive(Debug)]
-    pub struct WorldGrid {
-        pub cells: Vec<Cell>,
-    }
-    
-    impl Default for WorldGrid {
-        fn default() -> Self {
-            Self::new()
-        }
-    }
-    
-    impl WorldGrid {
-        pub fn new() -> Self {
-            Self { cells: Vec::new() }
-        }
-        
-        pub fn generate() -> Self {
-            let mut world = Self::new();
-            // Generate placeholder cells for compilation
-            for x in 0..10 {
-                for y in 0..10 {
-                    world.cells.push(Cell {
-                        position: (x, y),
-                        biome_id: 0, // Uniform biome - NOT REAL WORLD LOGIC
-                    });
-                }
-            }
-            world
-        }
-    }
-}
+// Spatial systems
+pub mod hierarchical_spatial;
+pub mod spatial_index;
 
-// Re-exports for engine compilation
-pub use cell::{Cell, CELL_SIZE, GRID_SIZE};
-pub use world::WorldGrid;
+// Persistence systems
+pub mod chunk_persistence;
+pub mod chunk_schema;
+
+// Terrain systems
+pub mod terrain;
+pub mod terrain_masks;
+
+// Component systems
+pub mod components;
+
+// Resource management
+pub mod resources;
+
+// Surface and material systems
+pub mod surface_db;
+pub mod material_bridge;
+
+// Re-exports for public API
+pub use coords::*;
+pub use chunk::*;
+pub use biome::*;
+pub use heightmap::*;
+pub use world_state::*;
+pub use hierarchical_spatial::*;
+pub use spatial_index::*;
+pub use chunk_persistence::*;
+pub use chunk_schema::*;
+pub use terrain::*;
+pub use terrain_masks::*;
+pub use components::*;
+pub use resources::*;
+pub use surface_db::*;
+pub use material_bridge::*;
