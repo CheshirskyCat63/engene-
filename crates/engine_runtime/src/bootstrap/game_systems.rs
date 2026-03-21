@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use engine_core::plugin::EngineBuilder;
-use crate::runtime::wiring::animation::AnimationIntegrationSystem;
-use crate::runtime::wiring::integration::{
+use crate::wiring::animation::AnimationIntegrationSystem;
+use crate::wiring::integration::{
     AiDecisionWireSystem, AnimationWireSystem, BallisticsTickSystem, DamageDispatchSystem,
     DestructionTickSystem, GoreWireSystem, NavDirtyTickSystem, OcclusionWireSystem,
     TerrainDeformationTickSystem,
 };
-use crate::runtime::wiring::world_tick::WorldTickSystem;
+use crate::wiring::world_tick::WorldTickSystem;
 use engine_simulation::simulation::SimulationSystem;
 use engine_world::heightmap::Heightmap;
 use engine_world::world::WorldGrid;

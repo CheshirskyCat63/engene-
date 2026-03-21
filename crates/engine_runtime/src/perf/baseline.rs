@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 use std::time::Instant;
 
-use crate::runtime::bootstrap::GameRuntimeAssembly;
+use crate::bootstrap::GameRuntimeAssembly;
 
 const SIM_DT: f32 = 1.0 / 20.0;
 

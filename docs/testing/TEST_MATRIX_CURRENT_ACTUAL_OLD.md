@@ -10,7 +10,7 @@ This document provides the **actual** current state of tests, not aspirational t
 | `editor_console_contracts.rs` | 450 | Tools | tools | Contract | Fast | Medium | **ACTIVE** | Console, command execution, history |
 | `editor_inspector_contracts.rs` | 450 | Tools | tools | Contract | Fast | Medium | **ACTIVE** | Component inspector, property editing |
 | `engine_lifecycle_contracts.rs` | 450 | Runtime | smoke | Contract | Medium | Medium | **ACTIVE** | Engine bootstrapping, lifecycle |
-| `world_integration_contracts.rs` | 730 | World | contracts | Contract | Medium | Medium | **ACTIVE** | World systems, persistence, streaming |
+| `world_integration_contracts.rs` | 827 | World | contracts | Contract | Medium | Medium | **ACTIVE** | World systems, persistence, streaming |
 | `simulation_integration_contracts.rs` | 819 | Game | contracts | Contract | Medium | Medium | **ACTIVE** | Simulation systems, AI, NPCs |
 | `performance_governance_contracts.rs` | 880 | QA | perf | Contract | Heavy | High | **ACTIVE** | Quality governor, performance budgets |
 | `multithreading_performance_contracts.rs` | 896 | QA | perf | Contract | Heavy | High | **ACTIVE** | Worker pools, job systems, threading |

@@ -1,7 +1,7 @@
-pub use crate::runtime::bootstrap::ToolsRuntimeAssembly;
+pub use crate::bootstrap::ToolsRuntimeAssembly;
 
 use engine_core::plugin::EngineBuilder;
-use crate::runtime::bootstrap::common::{finalize_builder, insert_runtime_core};
+use crate::bootstrap::common::{finalize_builder, insert_runtime_core};
 
 impl ToolsRuntimeAssembly {
     /// Minimal runtime for tools/test harnesses.

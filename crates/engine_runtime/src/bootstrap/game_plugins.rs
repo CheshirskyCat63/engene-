@@ -13,7 +13,7 @@ use engine_game::weapons_plugin::WeaponsPlugin;
 use engine_navigation::cover_map::CoverMap;
 use engine_world::heightmap::Heightmap;
 
-use crate::runtime::bootstrap::common::{insert_explicit_game_config, GAME_CONFIG_DIR};
+use crate::bootstrap::common::{insert_explicit_game_config, GAME_CONFIG_DIR};
 
 fn load_tactics_or_panic(config_dir: &str) -> HashMap<String, TacticProfile> {
     load_config::<ConfigEnvelope<HashMap<String, TacticProfile>>>(&format!(

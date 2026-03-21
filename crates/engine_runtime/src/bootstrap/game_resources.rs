@@ -5,7 +5,7 @@ use engine_core::material_truth::MaterialTruthService;
 use engine_core::plugin::EngineBuilder;
 use engine_navigation::dynamic_nav_update::NavDirtyTracker;
 use engine_navigation::hpa_star::HpaGraph;
-use crate::runtime::bootstrap::common::insert_runtime_core;
+use crate::bootstrap::common::insert_runtime_core;
 use engine_world::fields::{AnomalyForceType, AnomalyZone, WorldFields};
 use engine_world::heightmap::Heightmap;
 use engine_world::hierarchical_spatial::HierarchicalSpatialIndex;
