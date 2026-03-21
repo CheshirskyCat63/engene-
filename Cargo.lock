@@ -883,9 +883,11 @@ dependencies = [
 name = "engine_world"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "engine_core",
  "glam 0.30.10",
  "rand 0.8.5",
+ "ron",
  "serde",
  "tracing",
 ]

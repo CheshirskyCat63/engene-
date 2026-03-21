@@ -1,16 +1,18 @@
 //! Streaming contracts and interfaces
 //!
-//! Defines contracts for streaming operations and state management.
+//! OWNER: engine_world::streaming::contracts
+//! PURPOSE: Streaming operation contracts and error types
 
 use crate::coords::ChunkCoord;
 use crate::chunk::{ChunkInfo, ChunkState};
 
 /// Streaming operation result
 #[derive(Debug, Clone)]
-pub enum StreamingOperation {
-    LoadChunk(ChunkCoord),
-    UnloadChunk(ChunkCoord),
-    UpdateChunk(ChunkCoord),
+pub enum StreamingUpdateResult {
+    Success,
+    BudgetExceeded,
+    NetworkError,
+    SerializationError,
 }
 
 /// Streaming budget state
@@ -40,8 +42,8 @@ pub trait StreamingState {
 }
 
 /// Streaming operation contract
-pub trait StreamingOperation {
-    fn execute(&self, state: &mut dyn StreamingState) -> Result<(), StreamingError>;
+pub trait StreamingExecutor {
+    fn execute(&self, state: &mut dyn StreamingState) -> Result<(), StreamingUpdateResult>;
     fn get_cost(&self) -> StreamingCost;
 }
 
@@ -51,14 +53,4 @@ pub struct StreamingCost {
     pub memory_mb: usize,
     pub bandwidth_mb: f32,
     pub time_ms: f32,
-}
-
-/// Streaming errors
-#[derive(Debug, Clone)]
-pub enum StreamingError {
-    OutOfMemory,
-    BudgetExceeded,
-    InvalidChunk,
-    NetworkError,
-    SerializationError,
 }

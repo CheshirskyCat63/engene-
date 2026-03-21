@@ -3,6 +3,8 @@
 //! Provides world state tracking and management systems.
 
 use std::collections::HashMap;
+use crate::coords::ChunkCoord;
+use crate::chunk::ChunkInfo;
 
 /// World state container
 #[derive(Debug, Clone)]
@@ -23,7 +25,7 @@ impl WorldState {
     
     pub fn add_chunk(&mut self, chunk: ChunkInfo) {
         let key = (chunk.coord.x, chunk.coord.z);
-        self.chunks.insert(key, chunk);
+        self.chunks.insert(key, chunk.clone());
         self.entity_count += chunk.entity_count as u64;
     }
     

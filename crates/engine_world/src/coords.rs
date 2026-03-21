@@ -2,10 +2,10 @@
 //!
 //! Provides coordinate systems for world positioning and chunk management.
 
-use std::collections::HashMap;
+use serde::{Deserialize, Serialize};
 
 /// World coordinate in chunk space
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ChunkCoord {
     pub x: i32,
     pub z: i32,
@@ -23,7 +23,7 @@ impl ChunkCoord {
     }
     
     pub fn distance(&self, other: &ChunkCoord) -> f32 {
-        self.distance_sq(other).sqrt() as f32
+        (self.distance_sq(other) as f32).sqrt()
     }
     
     pub fn manhattan_distance(&self, other: &ChunkCoord) -> i32 {

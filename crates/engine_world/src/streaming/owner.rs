@@ -1,19 +1,34 @@
-//! Streaming Owner - Complete world streaming management.
+//! Streaming Owner - Chunk residency management
 //!
-//! OWNER: engine_world::streaming
-//! This module provides complete streaming ownership including:
-//! - Chunk residency management
-//! - Load/unload orchestration  
-//! - Resource budget enforcement
-//! - State persistence integration
+//! OWNER: engine_world::streaming::owner
+//! PURPOSE: Complete streaming ownership system
 
 use std::collections::{HashMap, HashSet};
 use crate::coords::ChunkCoord;
 use crate::chunk::{ChunkInfo, ChunkState};
-use serde::{Deserialize, Serialize};
 
-/// Streaming state for a chunk
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// Streaming configuration
+#[derive(Debug, Clone)]
+pub struct StreamingConfig {
+    pub max_loaded_chunks: usize,
+    pub load_distance: i32,
+    pub unload_distance: i32,
+    pub max_operations_per_tick: usize,
+}
+
+impl Default for StreamingConfig {
+    fn default() -> Self {
+        Self {
+            max_loaded_chunks: 100,
+            load_distance: 32,
+            unload_distance: 64,
+            max_operations_per_tick: 10,
+        }
+    }
+}
+
+/// Chunk residency state
+#[derive(Debug, Clone)]
 pub struct ChunkResidency {
     pub coord: ChunkCoord,
     pub state: ChunkState,
@@ -32,71 +47,23 @@ impl ChunkResidency {
             entity_count: 0,
         }
     }
-    
-    pub fn is_loaded(&self) -> bool {
-        matches!(self.state, ChunkState::Loaded)
-    }
-    
-    pub fn is_loading(&self) -> bool {
-        matches!(self.state, ChunkState::Loading)
-    }
-    
-    pub fn mark_loading(&mut self, tick: u64) {
-        self.state = ChunkState::Loading;
-        self.last_access_tick = tick;
-    }
-    
-    pub fn mark_loaded(&mut self, entity_count: u32) {
-        self.state = ChunkState::Loaded;
-        self.entity_count = entity_count;
-    }
-}
-
-/// Streaming configuration
-#[derive(Debug, Clone)]
-pub struct StreamingConfig {
-    pub max_loaded_chunks: usize,
-    pub load_distance: i32,
-    pub unload_distance: i32,
-    pub budget_per_tick: usize,
-}
-
-impl Default for StreamingConfig {
-    fn default() -> Self {
-        Self {
-            max_loaded_chunks: 100,
-            load_distance: 4,
-            unload_distance: 8,
-            budget_per_tick: 4,
-        }
-    }
 }
 
 /// Streaming update result
 #[derive(Debug, Clone)]
-pub struct StreamingUpdateResult {
-    pub loaded_chunks: Vec<ChunkCoord>,
-    pub unloaded_chunks: Vec<ChunkCoord>,
-    pub operations_performed: usize,
+pub enum StreamingUpdateResult {
+    Success,
+    BudgetExceeded,
+    NetworkError,
+    SerializationError,
 }
 
-impl StreamingUpdateResult {
-    pub fn new() -> Self {
-        Self {
-            loaded_chunks: Vec::new(),
-            unloaded_chunks: Vec::new(),
-            operations_performed: 0,
-        }
-    }
-}
-
-/// Streaming owner - manages chunk loading and unloading
-#[derive(Debug)]
+/// Streaming Owner - manages chunk loading and unloading
+#[derive(Debug, Clone)]
 pub struct StreamingOwner {
     config: StreamingConfig,
     chunks: HashMap<(i32, i32), ChunkResidency>,
     loaded_chunks: HashSet<(i32, i32)>,
-    current_tick: u64,
 }
 
 impl StreamingOwner {
@@ -105,80 +72,91 @@ impl StreamingOwner {
             config,
             chunks: HashMap::new(),
             loaded_chunks: HashSet::new(),
-            current_tick: 0,
         }
     }
     
-    pub fn update(&mut self, player_coord: ChunkCoord) -> StreamingUpdateResult {
-        self.current_tick += 1;
-        let mut result = StreamingUpdateResult::new();
+    pub fn update(&mut self, player_pos: ChunkCoord) -> StreamingUpdateResult {
+        // Generate chunks to load/unload based on player position
+        let chunks_to_load = self.get_chunks_to_load(player_pos);
+        let chunks_to_unload = self.get_chunks_to_unload(player_pos);
         
-        // Determine chunks to load
-        let chunks_to_load = self.get_chunks_to_load(player_coord);
-        let chunks_to_unload = self.get_chunks_to_unload(player_coord);
-        
-        // Load chunks
-        for coord in chunks_to_load {
-            if let Some(residency) = self.chunks.get_mut(&(coord.x, coord.z)) {
-                if !residency.is_loaded() {
-                    residency.mark_loading(self.current_tick);
-                    result.loaded_chunks.push(coord);
-                    result.operations_performed += 1;
-                }
-            }
+        // Check budget
+        let total_operations = chunks_to_load.len() + chunks_to_unload.len();
+        if total_operations > self.config.max_operations_per_tick {
+            return StreamingUpdateResult::BudgetExceeded;
         }
         
-        // Unload chunks
+        // Process unload operations
         for coord in chunks_to_unload {
-            if let Some(residency) = self.chunks.get_mut(&(coord.x, coord.z)) {
-                if residency.is_loaded() {
-                    residency.state = ChunkState::Unloaded;
-                    self.loaded_chunks.remove(&(coord.x, coord.z));
-                    result.unloaded_chunks.push(coord);
-                    result.operations_performed += 1;
+            self.unload_chunk(&coord);
+        }
+        
+        // Process load operations
+        for coord in chunks_to_load {
+            self.load_chunk(coord);
+        }
+        
+        StreamingUpdateResult::Success
+    }
+    
+    fn get_chunks_to_load(&self, player_pos: ChunkCoord) -> Vec<ChunkCoord> {
+        let mut chunks = Vec::new();
+        let load_distance_sq = self.config.load_distance * self.config.load_distance;
+        
+        for x in -1..=1 {
+            for z in -1..=1 {
+                let coord = ChunkCoord::new(
+                    player_pos.x + x,
+                    player_pos.z + z,
+                );
+                if coord.distance_sq(&player_pos) <= load_distance_sq {
+                    chunks.push(coord);
                 }
             }
         }
         
-        result
+        chunks
     }
     
-    fn get_chunks_to_load(&self, player_coord: ChunkCoord) -> Vec<ChunkCoord> {
-        let mut chunks_to_load = Vec::new();
+    fn get_chunks_to_unload(&self, player_pos: ChunkCoord) -> Vec<ChunkCoord> {
+        let mut chunks = Vec::new();
+        let unload_distance_sq = self.config.unload_distance * self.config.unload_distance;
         
-        for x in (player_coord.x - self.config.load_distance)..=(player_coord.x + self.config.load_distance) {
-            for z in (player_coord.z - self.config.load_distance)..=(player_coord.z + self.config.load_distance) {
-                let coord = ChunkCoord::new(x, z);
-                if !self.loaded_chunks.contains(&(coord.x, coord.z)) {
-                    chunks_to_load.push(coord);
-                }
+        for (coord, _) in &self.loaded_chunks {
+            if coord.distance_sq(&player_pos) > unload_distance_sq {
+                chunks.push(coord);
             }
         }
         
-        chunks_to_load
-    }
-    
-    fn get_chunks_to_unload(&self, player_coord: ChunkCoord) -> Vec<ChunkCoord> {
-        let mut chunks_to_unload = Vec::new();
-        
-        for (&(x, z), residency) in &self.chunks {
-            if residency.is_loaded() {
-                let coord = ChunkCoord::new(x, z);
-                let distance = coord.manhattan_distance(&player_coord);
-                if distance > self.config.unload_distance {
-                    chunks_to_unload.push(coord);
-                }
+        // Remove chunks that would be outside max loaded chunks
+        while self.loaded_chunks.len() > self.config.max_loaded_chunks {
+            if let Some(furthest) = chunks.pop() {
+                self.loaded_chunks.remove(furthest);
             }
         }
         
-        chunks_to_unload
+        chunks
     }
     
-    pub fn get_loaded_chunks(&self) -> &HashSet<(i32, i32)> {
-        &self.loaded_chunks
+    fn load_chunk(&mut self, coord: ChunkCoord) {
+        let key = (coord.x, coord.z);
+        let residency = ChunkResidency::new(coord);
+        self.chunks.insert((coord.x, coord.z), residency);
+        self.loaded_chunks.insert((coord.x, coord.z));
     }
     
-    pub fn get_chunk_residency(&self, coord: &ChunkCoord) -> Option<&ChunkResidency> {
-        self.chunks.get(&(coord.x, coord.z))
+    fn unload_chunk(&mut self, coord: &ChunkCoord) {
+        let key = (coord.x, coord.z);
+        self.chunks.remove(&key);
+        self.loaded_chunks.remove(&key);
+    }
+    
+    pub fn get_chunk_state(&self, coord: &ChunkCoord) -> Option<&ChunkState> {
+        let key = (coord.x, coord.z);
+        self.chunks.get(&key).map(|r| &r.state)
+    }
+    
+    pub fn get_loaded_chunks(&self) -> Vec<ChunkCoord> {
+        self.loaded_chunks.iter().map(|&(x, z)| ChunkCoord::new(x, z)).collect()
     }
 }

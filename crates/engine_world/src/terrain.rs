@@ -48,7 +48,8 @@ impl TerrainMask {
     pub const GRASS: u32 = 0x00000004;
     pub const STONE: u32 = 0x00000008;
     pub const SAND: u32 = 0x00000010;
-    
+    pub const SNOW: u32 = 0x00000020;
+
     pub fn new(bits: u32) -> Self {
         Self { bits }
     }

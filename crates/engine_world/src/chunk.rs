@@ -22,7 +22,6 @@ pub struct ChunkInfo {
     pub coord: ChunkCoord,
     pub state: ChunkState,
     pub entity_count: u32,
-    pub last_access_tick: u64,
 }
 
 impl ChunkInfo {
@@ -31,7 +30,6 @@ impl ChunkInfo {
             coord,
             state: ChunkState::Unloaded,
             entity_count: 0,
-            last_access_tick: 0,
         }
     }
     

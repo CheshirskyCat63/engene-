@@ -1,6 +1,7 @@
 //! Streaming subsystem
 //!
-//! Provides chunk streaming, loading, and unloading systems.
+//! OWNER: engine_world::streaming
+//! PURPOSE: Chunk streaming and residency management
 
 pub mod owner;
 pub mod contracts;
