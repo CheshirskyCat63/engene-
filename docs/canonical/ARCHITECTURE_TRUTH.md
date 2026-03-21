@@ -14,7 +14,9 @@
 **Canonical owner**: `engine_world` (DATA LAYER ONLY)
 
 - **CANONICAL**: coords, chunk, world_state, terrain
+- **REMOVED**: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
 - **QUARANTINE** (not exported): chunk_persistence, streaming_owner, ai_*, authored_*, etc.
+- **KEPT TEMP**: heightmap (test consumers), material_truth (engine_core consumers)
 - These modules exist but are NOT public API - checking for hidden consumers
 
 ## Role/Composition Crates
@@ -23,15 +25,38 @@
 |-------|------|--------|
 | `game_framework` | Game composition | ✅ Compiles |
 | `sdk_app` | Editor composition | ✅ Compiles |
-| `engine_runtime` | Phase execution | ✅ Compiles |
-| `engine_world` | World data | ✅ Compiles (data-only) |
+| `engine_runtime` | Phase execution | ✅ Compiles (cleaned) |
+| `engine_world` | World data | ✅ Compiles (data-only, cleaned) |
 | `engine_core` | Core primitives | ✅ Compiles |
 | `engine_ecs` | ECS | ✅ Compiles |
 | `engine_startup` | Startup | ✅ Compiles |
 | `engine_tools` | Tooling | ✅ Compiles |
 | `engine_content` | Content | ✅ Compiles |
-| `engine_render` | Render | ❌ 137 errors (existing) |
+| `engine_render` | Render | ❌ 137 errors (existing deps issue) |
 | `engine_audio` | Audio | ❌ 17 errors (existing) |
+
+## Runtime Surface (CLEANED)
+
+**engine_runtime canonical exports:**
+- Phase execution contract (tick, streaming, persistence, spatial, audio, editor, render)
+- PhaseContext, PhaseResult, PhaseTrait
+- EngineRuntimeAssembly (minimal stub)
+- REMOVED: async_services, job_graph, phase_runner, jobs/, streaming/
+- KEPT: perf/ (test consumers), wiring/ (test consumers)
+
+## World Surface (CLEANED)
+
+**engine_world canonical exports:**
+- coords, chunk, world_state, terrain
+- REMOVED: population, material_bridge, terrain_truth, spatial_index, hierarchical_spatial
+- KEPT TEMP: heightmap (test consumers), material_truth (engine_core consumers)
+
+## Render Surface (NARROWED)
+
+**engine_render canonical exports:**
+- renderer, render_system, camera, mesh, lighting, pbr, shadow, shader_loader, sky
+- REMOVED: gpu_culling, gpu_jobs, ibl, lod, particles, postprocess, quality, render_validation, skinning, skybox, surface_state_render, vegetation_semantics, visibility
+- KEPT TEMP: destruction_occlusion (active consumers), gore_mesh (active consumers)
 
 ## Removed/Forbidden (VERIFIED)
 
@@ -48,4 +73,4 @@ tick → streaming (with known_loaded_chunks) → persistence (with completed_lo
 
 ---
 
-**Last updated**: After narrow public surface cleanup - world/data/runtime spine verified
+**Last updated**: After safe file cleanup - engine_world, engine_runtime, engine_render residue removed
